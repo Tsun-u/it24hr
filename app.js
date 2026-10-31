@@ -12,7 +12,7 @@
   ];
   // 存檔備份：面板（匯出、匯入、Google 雲端）是各遊戲共用的 savebox.js；外面的按鈕用字，emoji 在各平台長得不一樣
   SaveBox.init({ game: 'it24hr', keys: C.SAVE_KEYS, clientId: location.origin === C.CLOUD_ORIGIN ? C.GOOGLE_CLIENT_ID : null });
-  const saveBoxButton = () => { const b = SaveBox.button(); b.textContent = '存檔備份'; b.className = 'save-open'; return b; };
+  const saveBoxButton = () => { const b = SaveBox.button(); b.textContent = ''; b.append(Icons.el('save', 'ico-sm'), '存檔備份'); b.className = 'save-open'; return b; };
   // 致敬 fab24hr：名字可以不打，空著就用預設名
   const DEFAULT_NAME = '無名氏';
   // 職稱不影響今天會發生的事（104 上一堆不同職稱都在做一樣的事），結算卡會挑一個當隔壁同事
@@ -90,7 +90,8 @@
     const form = app.querySelector('form'); const titleSelect = app.querySelector('[name=title]'); let salt = 0;
     const last = loadPlayer();
     if (last) {
-      form.name.value = last.name; form.gender.value = last.gender; salt = last.avatarSalt || 0;
+      form.name.value = last.name === DEFAULT_NAME ? '' : last.name;   // 沒填名字的人欄位留空，提示才看得到
+      form.gender.value = last.gender; salt = last.avatarSalt || 0;
       if (TITLES.includes(last.title)) titleSelect.value = last.title;
     }
     // 副標跟著職稱走：選什麼就是「○○的一天」

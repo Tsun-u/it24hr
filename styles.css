@@ -366,7 +366,7 @@ body { line-height: 1.5; }
 .badge input, .badge select { font: inherit; padding: 8px; border: 1px solid #c9c2b5; border-radius: 6px; }
 .badge .muted { margin: 0; font-size: 12px; }
 .credit { margin: 4px 0 0; font-size: 12px; color: var(--muted); text-align: center; } .credit a { color: var(--accent); }
-.save-open { min-height: 32px; padding: 4px 8px; border: 0; background: none; color: var(--accent); font: inherit; font-size: 13px; text-decoration: underline; cursor: pointer; }
+.save-open { display: inline-flex; align-items: center; min-height: 32px; padding: 4px 8px; border: 0; background: none; color: var(--accent); font: inherit; font-size: 13px; text-decoration: underline; cursor: pointer; }
 .mode-badge .save-open { margin: 2px 0 0 -8px; }
 .side-foot { display: flex; flex-wrap: wrap; justify-content: center; align-items: center; gap: 4px 12px; }
 .foot-link { display: inline-flex; align-items: center; min-height: 32px; padding: 4px 8px; font-size: 13px; }
@@ -696,7 +696,8 @@ body { line-height: 1.5; }
 
 /* ── 手機 ── */
 @media (max-width: 720px) {
-  .side-foot .save-open, .foot-link { min-height: 44px; }
+  .side-foot { gap: 4px; }
+  .side-foot .save-open, .foot-link { min-height: 44px; padding: 4px; }
   /* 雙螢幕上下排：外接螢幕在上、筆電在下，公務手機和平板放筆電右邊；桌面那排放不下就換行，不撐寬頁面 */
   .desk { grid-template-rows: 1fr auto; }
   .screen.monitor { top: 0; bottom: auto; left: 0; right: 0; width: auto; height: 56%; }
