@@ -210,7 +210,7 @@
       win.body.replaceChildren(node);
     }
     // 視窗開關才重建工作列。focus 只走 syncTabs：手指按下視窗就會 focus，
-    // 按下的當下冒出新按鈕，iOS WebKit 可能當成這一下是要展開內容而不送 click
+    // 按下的當下重建按鈕，iOS WebKit 就不送 click，視窗裡的東西會全部點不動
     renderTaskbar() {
       if (!this.taskbar) return;
       const slot = this.taskbar.querySelector('.task-windows'); slot.replaceChildren();
@@ -222,6 +222,7 @@
         b.addEventListener('click', () => w.minimized ? this.restore(w.id) : this.focus(w.id));
         slot.append(b); w.tab = b;
       }
+      slot.scrollLeft = slot.scrollWidth;   // 新分頁排在最後，放不下時捲到看得到它
       this.syncTabs();
     }
     syncTabs() {
