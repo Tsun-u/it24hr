@@ -26,7 +26,8 @@ C.MS_PER_GAME_MIN = C.DAY_REAL_MS / C.DAY_GAME_MIN;   // 1 遊戲分鐘 = 1 秒
 C.SHARE_URL = 'https://tsun-u.github.io/it24hr/';
 // 存檔備份帶走的 localStorage：沒列到的 key 還原時會默默少一塊，測試會比對程式實際用到的
 C.SAVE_KEYS = ['it24hr.save', 'it24hr.sound', 'it24hr.meetingHintSeen', 'it24hr.visitorHintSeen'];
-// Google 雲端備份：跟其他遊戲共用同一個 OAuth client（登記的是 https://tsun-u.github.io，其他網域按了只會失敗）
+// Google 雲端備份：跟其他遊戲共用同一個 OAuth client，只有登記過的網域才顯示雲端按鈕（其他網域按了會跳 Google 的 origin_mismatch 錯誤頁）
+C.CLOUD_ORIGIN = 'https://tsun-u.github.io';
 C.GOOGLE_CLIENT_ID = '674654433726-tq25dneafbu0pm39pq6kl2kpdmgmnh3f.apps.googleusercontent.com';
 
 if (typeof module !== 'undefined') module.exports = { C };

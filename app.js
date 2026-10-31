@@ -11,7 +11,7 @@
     { label: '下班 ・ 茶几', cls: 'bg-night' },
   ];
   // 存檔備份：面板（匯出、匯入、Google 雲端）是各遊戲共用的 savebox.js；外面的按鈕用字，emoji 在各平台長得不一樣
-  SaveBox.init({ game: 'it24hr', keys: C.SAVE_KEYS, clientId: C.GOOGLE_CLIENT_ID });
+  SaveBox.init({ game: 'it24hr', keys: C.SAVE_KEYS, clientId: location.origin === C.CLOUD_ORIGIN ? C.GOOGLE_CLIENT_ID : null });
   const saveBoxButton = () => { const b = SaveBox.button(); b.textContent = '存檔備份'; b.className = 'save-open'; return b; };
   // 致敬 fab24hr：名字可以不打，空著就用預設名
   const DEFAULT_NAME = '無名氏';
