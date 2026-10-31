@@ -161,8 +161,12 @@
     return out;
   }
 
-  // LIME 泡泡本身就是對話：選項和台詞整句包著「」時，泡泡裡拿掉引號和後面多的句號；句子中間引用的話照舊
-  const chatText = (text) => { const m = /^「([^「」]*)」。?$/.exec(text); return m ? m[1] : text; };
+  // LIME 泡泡本身就是對話：選項和台詞整句包著「」時，泡泡裡拿掉引號，句號留著，引號裡外都有標點才收成一個；句子中間引用的話照舊
+  const chatText = (text) => {
+    const m = /^「([^「」]*)」(。?)$/.exec(text);
+    if (!m) return text;
+    return /[。？！…～]$/.test(m[1]) ? m[1] : m[1] + m[2];
+  };
 
   // 做完一件事在卡上留的筆記（像 Redmine note，記錄人是玩家自己）：把選了什麼用人話寫下來
   function summarize(question, answers, result) {
