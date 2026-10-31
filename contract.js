@@ -35,6 +35,9 @@ C.HTTP_NOTE = [
 ].join('\n');
 // 結算卡分享的網址
 C.SHARE_URL = 'https://tsun-u.github.io/it24hr/';
+// 首頁底部的連結
+C.REPO_URL = 'https://github.com/Tsun-u/it24hr';
+C.DONATE_URL = 'https://portaly.cc/atone0331/support';
 // 存檔備份帶走的 localStorage：沒列到的 key 還原時會默默少一塊，測試會比對程式實際用到的
 C.SAVE_KEYS = ['it24hr.save', 'it24hr.player', 'it24hr.sound', 'it24hr.meetingHintSeen', 'it24hr.visitorHintSeen'];
 // Google 雲端備份：跟其他遊戲共用同一個 OAuth client，只有登記過的網域才顯示雲端按鈕（其他網域按了會跳 Google 的 origin_mismatch 錯誤頁）

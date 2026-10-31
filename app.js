@@ -76,13 +76,16 @@
           <p class="tagline">每個人都遞給你被標記為「Priority」的工作，因此沒有任何一件事能被真正優先處理。</p>
           <div class="side-links"><span class="hb-slot"></span></div>
           <p class="credit">靈感來自 <a href="https://fab24hr.com/" target="_blank" rel="noopener">fab24hr</a>（晶圓廠打工人的一天）</p>
-          <p class="credit save-slot"></p>
+          <p class="credit side-foot">
+            <a class="foot-link" href="${C.REPO_URL}" target="_blank" rel="noopener" title="在 GitHub 查看原始碼">${Icons.html('github', 'ico-sm')}GitHub</a>
+            <a class="foot-link" href="${C.DONATE_URL}" target="_blank" rel="noopener">${Icons.html('heart', 'ico-sm')}Donate</a>
+          </p>
         </aside>
         </div>
       </section>`;
     startCarousel(app.querySelector('.bg-carousel'));
     app.querySelector('.hb-slot').replaceWith(...learnButtons('hb-open'));
-    app.querySelector('.save-slot').append(saveBoxButton());   // 換新裝置的玩家第一眼只看得到這頁
+    app.querySelector('.side-foot').prepend(saveBoxButton());   // 換新裝置的玩家第一眼只看得到這頁
     // 上次填的識別證帶回來；職稱清單改過的話，舊職稱選不到，留預設值
     const form = app.querySelector('form'); const titleSelect = app.querySelector('[name=title]'); let salt = 0;
     const last = loadPlayer();

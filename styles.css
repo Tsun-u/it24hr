@@ -368,6 +368,8 @@ body { line-height: 1.5; }
 .credit { margin: 4px 0 0; font-size: 12px; color: var(--muted); text-align: center; } .credit a { color: var(--accent); }
 .save-open { min-height: 32px; padding: 4px 8px; border: 0; background: none; color: var(--accent); font: inherit; font-size: 13px; text-decoration: underline; cursor: pointer; }
 .mode-badge .save-open { margin: 2px 0 0 -8px; }
+.side-foot { display: flex; flex-wrap: wrap; justify-content: center; align-items: center; gap: 4px 12px; }
+.foot-link { display: inline-flex; align-items: center; min-height: 32px; padding: 4px 8px; font-size: 13px; }
 /* 結算卡：背景是拿掉電腦的桌面（bg-<mode>）；手機單欄、PC 兩欄約 60vw */
 .report-screen { grid-template-rows: auto auto; align-content: center; gap: 14px; background-color: #d9d3c3; }
 .report { width: min(92vw, 380px); background: var(--paper); color: var(--ink); border-radius: 12px; padding: 26px; display: grid; gap: 22px; box-shadow: 0 20px 40px rgba(0,0,0,.45); }
@@ -694,6 +696,7 @@ body { line-height: 1.5; }
 
 /* ── 手機 ── */
 @media (max-width: 720px) {
+  .side-foot .save-open, .foot-link { min-height: 44px; }
   /* 雙螢幕上下排：外接螢幕在上、筆電在下，公務手機和平板放筆電右邊；桌面那排放不下就換行，不撐寬頁面 */
   .desk { grid-template-rows: 1fr auto; }
   .screen.monitor { top: 0; bottom: auto; left: 0; right: 0; width: auto; height: 56%; }
