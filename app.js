@@ -10,6 +10,9 @@
     { label: 'speedrun ・ AI 生的', cls: 'bg-speedrun' },
     { label: '下班 ・ 茶几', cls: 'bg-night' },
   ];
+  // 存檔備份：面板（匯出、匯入、Google 雲端）是各遊戲共用的 savebox.js；外面的按鈕用字，emoji 在各平台長得不一樣
+  SaveBox.init({ game: 'it24hr', keys: C.SAVE_KEYS, clientId: C.GOOGLE_CLIENT_ID });
+  const saveBoxButton = () => { const b = SaveBox.button(); b.textContent = '存檔備份'; b.className = 'save-open'; return b; };
   // 致敬 fab24hr：名字可以不打，空著就用預設名
   const DEFAULT_NAME = '無名氏';
   // 職稱不影響今天會發生的事（104 上一堆不同職稱都在做一樣的事），結算卡會挑一個當隔壁同事
@@ -73,11 +76,13 @@
           <p class="tagline">每個人都遞給你被標記為「Priority」的工作，因此沒有任何一件事能被真正優先處理。</p>
           <div class="side-links"><span class="hb-slot"></span></div>
           <p class="credit">靈感來自 <a href="https://fab24hr.com/" target="_blank" rel="noopener">fab24hr</a>（晶圓廠打工人的一天）</p>
+          <p class="credit save-slot"></p>
         </aside>
         </div>
       </section>`;
     startCarousel(app.querySelector('.bg-carousel'));
     app.querySelector('.hb-slot').replaceWith(...learnButtons('hb-open'));
+    app.querySelector('.save-slot').append(saveBoxButton());   // 換新裝置的玩家第一眼只看得到這頁
     // 副標跟著職稱走：選什麼就是「○○的一天」
     const titleSelect = app.querySelector('[name=title]'); const sub = app.querySelector('.title p.sub');
     const syncSub = () => { sub.textContent = `${titleSelect.value}的一天`; };
@@ -113,7 +118,7 @@
     // 簡易版識別證，四顆鈕是員工手冊的索引標籤，夾在識別證旁邊（白字壓在輪播圖上看不清楚）
     const face = el('canvas'); face.setAttribute('aria-label', '識別證頭像');
     Avatar.draw(face, { name: player.name, gender: player.gender, salt: player.avatarSalt || 0 }, 3);
-    const who = el('div', 'mode-badge-who'); who.append(el('h2', '', '選一種玩法'), el('p', '', `${player.name}・${player.title}`));
+    const who = el('div', 'mode-badge-who'); who.append(el('h2', '', '選一種玩法'), el('p', '', `${player.name}・${player.title}`), saveBoxButton());
     const card = el('div', 'mode-badge'); card.append(face, who);
     const tabs = el('nav', 'mode-tabs'); tabs.setAttribute('aria-label', '查資料'); tabs.append(...learnButtons('index-tab'));
     const pass = el('div', 'mode-pass'); pass.append(card, tabs);

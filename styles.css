@@ -356,6 +356,8 @@ body { line-height: 1.5; }
 .badge input, .badge select { font: inherit; padding: 8px; border: 1px solid #c9c2b5; border-radius: 6px; }
 .badge .muted { margin: 0; font-size: 12px; }
 .credit { margin: 4px 0 0; font-size: 12px; color: var(--muted); text-align: center; } .credit a { color: var(--accent); }
+.save-open { min-height: 32px; padding: 4px 8px; border: 0; background: none; color: var(--accent); font: inherit; font-size: 13px; text-decoration: underline; cursor: pointer; }
+.mode-badge .save-open { margin: 2px 0 0 -8px; }
 /* 結算卡：背景是拿掉電腦的桌面（bg-<mode>）；手機單欄、PC 兩欄約 60vw */
 .report-screen { grid-template-rows: auto auto; align-content: center; gap: 14px; background-color: #d9d3c3; }
 .report { width: min(92vw, 380px); background: var(--paper); color: var(--ink); border-radius: 12px; padding: 26px; display: grid; gap: 22px; box-shadow: 0 20px 40px rgba(0,0,0,.45); }
