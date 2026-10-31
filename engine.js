@@ -331,7 +331,7 @@
     // LIME 上沒寫回話的，對方至少回一張貼圖（回了沒反應很奇怪）。
     // 群組裡好幾個人可以接著回：replies 的一格寫成一串 [{ who, text }]，照順序每兩分鐘一則；沒寫 who 的是發訊息的人
     replyTo(docId, answers) {
-      const doc = this.docs.find(d => d.id === docId); if (!doc || !doc.reply || doc.replied) return null;
+      const doc = this.docs.find(d => d.id === docId); if (!doc || !doc.reply || doc.replied || !Works.replyAnswered(doc.reply, answers)) return null;
       const result = Works.grade(doc.reply, answers);
       const item = doc.reply.items[0] || {};
       // 選（已讀）就是已讀不回：回訊息的鈕收起來，對方沒反應，也不算回了一則

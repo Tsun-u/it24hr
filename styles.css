@@ -18,7 +18,7 @@ body { line-height: 1.5; }
 .btn.danger { background: #fff; border-color: var(--priority); color: var(--priority); }
 
 /* ── 辦公桌 ── */
-.desk { height: 100vh; display: grid; grid-template-rows: 1fr 150px; background: linear-gradient(180deg, var(--wood-2), var(--wood)); }
+.desk { height: 100vh; height: 100dvh; display: grid; grid-template-rows: 1fr 150px; background: linear-gradient(180deg, var(--wood-2), var(--wood)); }
 .desk[data-mode="legacy"] .screens-bg { background: url(assets/bg/legacy_wall.svg) center bottom / cover no-repeat; image-rendering: pixelated; }
 .desk[data-mode="legacy"] .surface { background: url(assets/bg/legacy_wood.svg) center / 100% 100% no-repeat; image-rendering: pixelated; }
 .desk[data-mode="hybrid"] .screens-bg { background: url(assets/bg/hybrid_wall.png) center bottom / cover no-repeat; image-rendering: pixelated; }
@@ -73,7 +73,10 @@ body { line-height: 1.5; }
 .win-title .icon { margin-right: 6px; vertical-align: -2px; }
 .task-win.is-min { opacity: .6; }
 .task-win.is-active { border-color: var(--os-fg); }
-.task-windows { display: flex; gap: 6px; }
+.task-windows { display: flex; flex: 1; min-width: 0; gap: 6px; }
+.task-win { flex: 1 1 0; min-width: 0; max-width: max-content; }   /* 塞不下時長的分頁平分寬度，短的維持原樣 */
+.task-win .icon { flex: none; }
+.task-title { overflow: hidden; white-space: nowrap; text-overflow: ellipsis; }
 
 /* ── 視窗 ── */
 .win { position: absolute; display: flex; flex-direction: column; background: var(--os-win); color: var(--os-fg); border: 1px solid var(--os-border); border-radius: 8px; box-shadow: 0 8px 24px var(--os-shadow); overflow: hidden; min-width: 240px; min-height: 120px; }
@@ -698,7 +701,9 @@ body { line-height: 1.5; }
   .win { border-radius: 0; min-width: 0; }   /* 位置大小由 windows.js 對齊到所在的螢幕 */
   .win-resize { display: none; }
   .order-grip { width: 36px; height: 40px; }   /* 手指拖得到 */
-  .board { grid-template-columns: repeat(3, 1fr); grid-auto-rows: minmax(100px, auto); }
+  .board { grid-template-columns: repeat(3, minmax(0, 1fr)); grid-auto-rows: auto; height: auto; min-height: 100%; }   /* 列跟著卡片長高，放不下就整個看板捲 */
+  .reply-form .quiz-intro { display: none; }   /* 視窗矮，選項和送出優先 */
+  .reply-form .quiz-foot { position: sticky; bottom: 0; padding-top: 6px; background: var(--os-win); }
   .card-meta { grid-template-columns: auto 1fr; }
   .device { width: 60px; height: 84px; } .device.tablet { width: 84px; height: 70px; }
   .note { width: 60px; height: 60px; font-size: 20px; }

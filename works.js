@@ -496,6 +496,8 @@
   const label = (id) => LABELS[id] || id;
 
   const intro = (work, question) => (question && question.intro) || INTROS[work] || '';
+  // 回訊息：每一題都選了才送得出去（單選要有選項、多選至少勾一個）
+  const replyAnswered = (question, answers) => question.items.every((item, i) => { const a = answers[i]; return a != null && (!Array.isArray(a) || a.length > 0); });
   // 選項顯示的順序（正解都放在第一個）：劇本照寫，畫面上照種子打散；選項的值還是原本的編號，評分不受影響。
   // 同一個種子永遠同一個順序（重新打開同一題不會亂跳）；keepOrder 是有大小順序的選項（估時），不打散
   function displayOrder(n, seed, keepOrder = false) {
@@ -505,7 +507,7 @@
     return order;
   }
 
-  const api = { grade, deployBefore, functionsToFill, testDrives, givenOptions, summarize, testStyle, deviceTestOptions, label, intro, aiAnswers, aiRoll, applyNotes, firstAsks, applyAsk, aiSpots, fixNotes, fixDrops, reviseAnswers, displayOrder, pickedIn, hiddenOptions, visibleItem, activeFunction, LABELS, INTROS, MENU, LOW_BATTERY };
+  const api = { grade, replyAnswered, deployBefore, functionsToFill, testDrives, givenOptions, summarize, testStyle, deviceTestOptions, label, intro, aiAnswers, aiRoll, applyNotes, firstAsks, applyAsk, aiSpots, fixNotes, fixDrops, reviseAnswers, displayOrder, pickedIn, hiddenOptions, visibleItem, activeFunction, LABELS, INTROS, MENU, LOW_BATTERY };
   if (typeof module !== 'undefined') module.exports = api;
   else root.Works = api;
 })(typeof window !== 'undefined' ? window : globalThis);

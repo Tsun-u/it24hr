@@ -137,6 +137,7 @@
       this.layer.append(el);
       this.fitIntoScreen(win);
       this.snapToScreen(win);
+      this.renderTaskbar();
       this.focus(id);
       el.addEventListener('pointerdown', () => this.focus(id));
       el.querySelector('.win-min').addEventListener('click', (e) => { e.stopPropagation(); this.minimize(id); });
@@ -186,17 +187,17 @@
       if (win.parked && !this.screenRects()[win.parked.screen]) { win.parked = null; this.fitIntoScreen(win); }
       win.el.style.zIndex = ++this.z;
       for (const w of this.windows.values()) w.el.classList.toggle('active', w === win);
-      this.renderTaskbar();
+      this.syncTabs();
     }
     minimize(id) {
       const win = this.windows.get(id); if (!win) return;
       win.minimized = true; win.el.classList.add('minimized');
-      this.renderTaskbar();
+      this.syncTabs();
     }
     restore(id) {
       const win = this.windows.get(id); if (!win) return;
       win.minimized = false; win.el.classList.remove('minimized');
-      this.renderTaskbar(); this.focus(id);
+      this.focus(id);
     }
     close(id) {
       const win = this.windows.get(id); if (!win) return;
@@ -208,16 +209,26 @@
       const win = this.windows.get(id); if (!win) return;
       win.body.replaceChildren(node);
     }
+    // 視窗開關才重建工作列。focus 只走 syncTabs：手指按下視窗就會 focus，
+    // 按下的當下冒出新按鈕，iOS WebKit 可能當成這一下是要展開內容而不送 click
     renderTaskbar() {
       if (!this.taskbar) return;
       const slot = this.taskbar.querySelector('.task-windows'); slot.replaceChildren();
       for (const w of this.windows.values()) {
         const b = document.createElement('button');
-        b.className = `task-win ${w.minimized ? 'is-min' : ''} ${w.el.classList.contains('active') ? 'is-active' : ''}`;
+        b.className = 'task-win'; b.title = w.title;
         if (w.icon && root.Icons) b.append(root.Icons.el(w.icon));
-        b.append(document.createTextNode(w.title));
+        const label = document.createElement('span'); label.className = 'task-title'; label.textContent = w.title; b.append(label);
         b.addEventListener('click', () => w.minimized ? this.restore(w.id) : this.focus(w.id));
-        slot.append(b);
+        slot.append(b); w.tab = b;
+      }
+      this.syncTabs();
+    }
+    syncTabs() {
+      for (const w of this.windows.values()) {
+        if (!w.tab) continue;
+        w.tab.classList.toggle('is-min', w.minimized);
+        w.tab.classList.toggle('is-active', w.el.classList.contains('active'));
       }
     }
   }

@@ -629,12 +629,14 @@
   // 在 LINE／信箱裡回一則訊息：小視窗、一題、回了就記在那則訊息上
   function openReply(desk, engine, doc) {
     const id = `reply:${doc.id}`; const q = doc.reply;
-    const wrap = h('div', 'quiz'); wrap.append(h('p', 'quiz-intro', Works.intro('reply', q)));
+    const wrap = h('div', 'quiz reply-form'); wrap.append(h('p', 'quiz-intro', Works.intro('reply', q)));
     const answers = q.items.map(() => undefined);
     q.items.forEach((item, i) => wrap.append(itemNode(item, i, answers, 'reply', null, `${engine.shuffleSeed}:reply:${doc.id}`)));
-    const send = h('button', 'btn primary', '送出'); const foot = h('div', 'quiz-foot'); foot.append(send); wrap.append(foot);
+    const send = h('button', 'btn primary', '送出'); send.disabled = true;
+    const foot = h('div', 'quiz-foot'); foot.append(send); wrap.append(foot);
+    wrap.addEventListener('change', () => { send.disabled = !Works.replyAnswered(q, answers); });
     send.addEventListener('click', () => {
-      const result = engine.replyTo(doc.id, answers.map(a => a === undefined ? null : a)); if (!result) return;
+      if (!engine.replyTo(doc.id, answers)) return;
       desk.wm.close(id); desk.refreshDocs();
     });
     desk.wm.open({ id, title: `回訊息 — ${doc.group || doc.from}`, icon: doc.origin === 'line' ? 'message-circle' : 'mail', x: 260, y: 120, w: 440, h: 300, cls: 'win-work', content: wrap });

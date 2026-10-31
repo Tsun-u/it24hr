@@ -520,6 +520,21 @@ test('回訊息掛在訊息上：回了記在那則訊息、不是卡', () => {
   const r = e.replyTo('m1', [0]); assert.strictEqual(r.score, 1); assert.strictEqual(doc.replied.text, '你回：a。');
   assert.strictEqual(e.replyTo('m1', [1]), null);   // 回過就不能再回
 });
+test('回訊息沒選就不算回：回訊息的鈕留著、也不算回了一則', () => {
+  const single = { items: [{ text: '你回：', options: ['a', 'b'], answer: 0 }] };
+  const multi = { items: [{ text: '哪幾句寫錯了？', type: 'multi', options: ['a', 'b', 'c'], answer: [0, 1] }] };
+  const e = new Engine({ ...mini(), cards: [], sources: [
+    { id: 'm1', kind: 'mail', at: 1, from: '小潘', title: '借問', text: 'q', module: null, reply: single },
+    { id: 'm2', kind: 'mail', at: 1, from: '小潘', title: '借問二', text: 'q', module: null, reply: multi },
+  ] });
+  e.tick(min(2));
+  for (const blank of [[null], [undefined], []]) assert.strictEqual(e.replyTo('m1', blank), null);
+  for (const blank of [[[]], [null]]) assert.strictEqual(e.replyTo('m2', blank), null);
+  assert.ok(e.docs.every(d => !d.replied));
+  assert.strictEqual(e.stats.replies || 0, 0);
+  assert.ok(e.replyTo('m1', [1])); assert.ok(e.replyTo('m2', [[0]]));
+  assert.ok(e.docs.every(d => d.replied));
+});
 
 test('QC：沒用實機測被翻出實機才看得到的問題，阿姿原本的話後面多問一句', () => {
   const s = mini(); s.cards[0].deviceBugs = [{ text: '老手機沒辦法上傳照片' }];
