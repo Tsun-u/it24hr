@@ -83,12 +83,19 @@
     startCarousel(app.querySelector('.bg-carousel'));
     app.querySelector('.hb-slot').replaceWith(...learnButtons('hb-open'));
     app.querySelector('.save-slot').append(saveBoxButton());   // 換新裝置的玩家第一眼只看得到這頁
+    // 上次填的識別證帶回來；職稱清單改過的話，舊職稱選不到，留預設值
+    const form = app.querySelector('form'); const titleSelect = app.querySelector('[name=title]'); let salt = 0;
+    const last = loadPlayer();
+    if (last) {
+      form.name.value = last.name; form.gender.value = last.gender; salt = last.avatarSalt || 0;
+      if (TITLES.includes(last.title)) titleSelect.value = last.title;
+    }
     // 副標跟著職稱走：選什麼就是「○○的一天」
-    const titleSelect = app.querySelector('[name=title]'); const sub = app.querySelector('.title p.sub');
+    const sub = app.querySelector('.title p.sub');
     const syncSub = () => { sub.textContent = `${titleSelect.value}的一天`; };
     titleSelect.addEventListener('change', syncSub); syncSub();
     // 頭像：名字和性別當種子，換一張就加鹽
-    const form = app.querySelector('form'); const canvas = app.querySelector('canvas.avatar'); let salt = 0;
+    const canvas = app.querySelector('canvas.avatar');
     const drawAvatar = () => Avatar.draw(canvas, { name: form.name.value.trim() || DEFAULT_NAME, gender: form.gender.value, salt });
     form.name.addEventListener('input', drawAvatar); form.addEventListener('change', (e) => { if (e.target.name === 'gender') drawAvatar(); });
     app.querySelector('.reroll').addEventListener('click', () => { salt++; drawAvatar(); });
@@ -96,7 +103,8 @@
     form.addEventListener('submit', (ev) => {
       ev.preventDefault();
       const f = new FormData(ev.target);
-      modes({ name: f.get('name').trim() || DEFAULT_NAME, gender: f.get('gender'), title: f.get('title'), avatarSalt: salt });
+      const player = { name: f.get('name').trim() || DEFAULT_NAME, gender: f.get('gender'), title: f.get('title'), avatarSalt: salt };
+      writePlayer(player); modes(player);
     });
   }
 
@@ -176,6 +184,10 @@
   function loadSave() { try { const s = JSON.parse(localStorage.getItem(SAVE_KEY)); return s && s.player && s.day ? s : null; } catch { return null; } }
   function writeSave(save) { try { localStorage.setItem(SAVE_KEY, JSON.stringify(save)); } catch { /* 無痕視窗或空間滿了：就不存 */ } }
   function clearSave() { try { localStorage.removeItem(SAVE_KEY); } catch { /* 同上 */ } }
+  // 識別證另外存：存檔要做完第一天才有，清掉新人訓練的存檔也不該連識別證一起清；還沒有這個 key 的舊玩家從存檔帶
+  const PLAYER_KEY = 'it24hr.player';
+  function loadPlayer() { try { return JSON.parse(localStorage.getItem(PLAYER_KEY)) || (loadSave() || {}).player || null; } catch { return null; } }
+  function writePlayer(player) { try { localStorage.setItem(PLAYER_KEY, JSON.stringify(player)); } catch { /* 同上 */ } }
   // 那一天開始時帶的東西：存檔每天都留一份（starts），做完的天才能重玩；只有 carry 的舊存檔只有下一天的
   function carryFor(save, day) { return (save.starts && save.starts[day]) || (save.day === day ? save.carry : null); }
   // 照存檔開始那一天：劇本照 carry 產，昨天沒結案的卡（carry.board）放回看板
