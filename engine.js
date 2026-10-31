@@ -1231,13 +1231,13 @@
       }
       return lines;
     }
-    // 估時沒有對錯：有估時的卡列你估的、實際（卡片第一筆紀錄到最後一次交 QC，跨夜也算）、主管看兩者差多少的一句，
+    // 估時沒有對錯：有估時的卡列你估的、實際（卡片第一筆紀錄到最後一次交 QC，不交 QC 的卡算到結案，跨夜也算）、主管看兩者差多少的一句，
     // 再附劇本寫的參考：這張卡在現實中純手工、有 AI 幫忙大約多久（item.real）。還沒完成的沒有實際，主管也不評
     estimates() {
       return this.board.cards.filter(k => k.estimate != null && this.subtask(k, 'estimate')).map(k => {
         const item = this.subtask(k, 'estimate').question.items[0];
         const submitted = k.events.filter(ev => ev.kind === 'submit').at(-1);
-        const spent = k.closedAt == null || !submitted ? null : submitted.at - k.timeline().find(r => r.at != null).at;
+        const spent = k.closedAt == null ? null : (submitted ? submitted.at : k.closedAt) - k.timeline().find(r => r.at != null).at;
         return { card: `#${k.no} ${k.title}`, yours: `${k.estimate} 小時`, real: item.real || null,
           actual: spent == null ? '還沒完成' : Verdict.duration(spent),
           boss: spent == null ? null : Verdict.estimateComment(k.estimate, spent) };

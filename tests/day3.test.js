@@ -53,6 +53,17 @@ test('欄位鎖到文件來才開：志豪的 AD 信 12:00 到之前 loginWith �
   assert.ok(!e.fieldLocked(field));
 });
 
+test('估時的實際：不交 QC 的卡算到結案，結算卡不會寫還沒完成，主管照樣評', () => {
+  const e = startDay3(); tickTo(e, C.DAY_START_MIN + 91);
+  const poc = e.board.get('poc'), row = () => e.estimates().find(r => r.card.includes(poc.title));
+  assert.ok(e.doWork('poc', 'estimate', [8]));
+  assert.strictEqual(row().actual, '還沒完成', '還沒部署');
+  for (const id of SUBS) e.board.get(id).status = 'archived';
+  assert.ok(e.doWork('poc', 'deploy', [[0, 1, 2, 3]]));
+  assert.strictEqual(row().actual, require('../verdict.js').duration(poc.closedAt - poc.timeline().find(r => r.at != null).at));
+  assert.ok(row().boss, '主管看得到實際，就有評語');
+});
+
 test('母議題：三張子議題沒驗過不能部署；驗過後部署完直接進已完成，通知發到 POC 群組，之後進度詢問不再來', () => {
   const e = startDay3();
   tickTo(e, C.DAY_START_MIN + 91);
