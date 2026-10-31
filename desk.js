@@ -580,7 +580,7 @@
       this.hintEl.classList.remove('folded');
       const fold = h('button', 'hint-fold', '收起');   // 手機上便條壓在筆電螢幕上，可以收成一行
       fold.addEventListener('click', () => { fold.textContent = this.hintEl.classList.toggle('folded') ? '展開' : '收起'; });
-      if (hint.pause !== false) { const done = h('button', 'hint-done', '已完成'); done.addEventListener('click', () => this.engine.completeHint()); this.hintEl.append(done); }
+      if (hint.pause !== false) { const pass = h('button', 'hint-pass', '略過此提示'); pass.addEventListener('click', () => this.engine.passHint()); this.hintEl.append(pass); }
       this.hintEl.append(fold);
       this.hintEl.classList.remove('pop'); void this.hintEl.offsetWidth; this.hintEl.classList.add('pop');   // 新提示：抖一下
     }

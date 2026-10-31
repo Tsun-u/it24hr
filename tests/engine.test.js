@@ -32,12 +32,12 @@ test('提示出現時時鐘暫停，玩家做了提示要的事才繼續', () =>
   e.tick(min(1)); assert.strictEqual(e.clock.minute, m + 1);
 });
 
-test('提示叫你按某個工作：按鈕一按、視窗開出來時鐘就走，提示留到做完', () => {
+test('提示叫你按某個工作：打開之後時鐘停到做完，提示也留到做完', () => {
   const s = mini(); s.hints = [{ after: 'card:arrived:a', text: '按需求討論', until: 'work:done:a:doc_spec' }];
   const e = new Engine(s); e.tick(min(1));
   const m = e.clock.minute; e.tick(5000); assert.strictEqual(e.clock.minute, m);
   e.openWork('a', 'doc_spec');
-  e.tick(min(2)); assert.strictEqual(e.clock.minute, m + 2); assert.strictEqual(e.hint.text, '按需求討論');
+  e.tick(min(2)); assert.strictEqual(e.clock.minute, m); assert.strictEqual(e.hint.text, '按需求討論');
   e.openCard('a'); e.doWork('a', 'doc_spec', [1]); assert.strictEqual(e.hint, null);
 });
 

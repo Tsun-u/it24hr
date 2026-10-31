@@ -233,21 +233,29 @@ test('第一天沒照提示走時間照走，提示要的事做不到也不會�
   away.emit('board:opened'); assert.ok(!frozen(away), '恢復之後看看板不會又停住');
 });
 
-test('第二天的提示照舊：打開工作時間就走，AI 和 QC 才等得到', () => {
+test('第二天也停到做完；交給 AI 時間照走，AI 才跑得完', () => {
   const { DAY2 } = (() => { const d = require('../day2.js'); return { DAY2: d.make ? d : d.DAY2 }; })();
   const e = new Engine(DAY2.make());
   for (let i = 0; i < 400 && !(e.hint && /交給 AI 試試/.test(e.hint.text)); i++) { if (e.hint) e.dismissHint(); e.tick(1000); }
   assert.ok(e.hint); e.clock.pause('hint');
-  e.openWork(e.script.mainCard, 'read_req'); assert.ok(!frozen(e));
+  e.openWork(e.script.mainCard, 'read_req'); assert.ok(frozen(e), '打開提示要的工作不走時間');
+  assert.ok(e.delegate(e.script.mainCard, 'read_req')); assert.ok(!frozen(e), '交給 AI 就恢復');
 });
 
-test('提示上的「已完成」：這句算過關、時間恢復，工作沒有真的做，後面照舊', () => {
+test('提示掛著時下班，時間不會被留住', () => {
+  const { DAY2 } = (() => { const d = require('../day2.js'); return { DAY2: d.make ? d : d.DAY2 }; })();
+  const e = new Engine(DAY2.make());
+  e.clock.pause('hint'); e.leave();
+  assert.ok(!e.clock.pauses.has('hint'));
+});
+
+test('提示上的「略過此提示」：這句算過關、時間恢復，工作沒有真的做，後面照舊', () => {
   const e = new Engine(day1); atHint(e, /整理需求/);
-  e.completeHint();
+  e.passHint();
   assert.match(e.hint.text, /需求討論/, '下一句照它的條件出來');
   assert.ok(!e.board.get('asset_crud').done('read_req'), '那件工作沒有被標成做完');
   assert.ok(frozen(e), '下一句有自己的暫停');
-  e.hint.until = 'never'; e.hintQueue.length = 0; e.completeHint();
+  e.hint.until = 'never'; e.hintQueue.length = 0; e.passHint();
   assert.strictEqual(e.hint, null); assert.ok(!frozen(e), '後面沒有提示了，時間繼續');
 });
 
