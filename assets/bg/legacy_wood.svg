@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 192 15" shape-rendering="crispEdges" preserveAspectRatio="none">
+  <!-- legacy 的桌面：淺色木紋，手刻。 -->
+  <rect width="192" height="15" fill="#c9a06a"/>
+  <rect y="0" width="192" height="1" fill="#e2bf8a"/>
+  <rect y="1" width="192" height="1" fill="#8d6a3f"/>
+  <rect x="0" y="4" width="40" height="1" fill="#b98f5b"/><rect x="60" y="6" width="70" height="1" fill="#b98f5b"/>
+  <rect x="150" y="4" width="42" height="1" fill="#b98f5b"/><rect x="20" y="9" width="90" height="1" fill="#bd9460"/>
+  <rect x="130" y="11" width="60" height="1" fill="#bd9460"/><rect x="0" y="12" width="70" height="1" fill="#b98f5b"/>
+  <rect x="96" y="3" width="14" height="1" fill="#d4ad78"/><rect x="40" y="13" width="30" height="1" fill="#d4ad78"/>
+</svg>
