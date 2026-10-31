@@ -702,6 +702,12 @@ body { line-height: 1.5; }
   .win-resize { display: none; }
   .order-grip { width: 36px; height: 40px; }   /* 手指拖得到 */
   .board { grid-template-columns: repeat(3, minmax(0, 1fr)); grid-auto-rows: auto; height: auto; min-height: 100%; }   /* 列跟著卡片長高，放不下就整個看板捲 */
+  .taskbar { height: 44px; }   /* 跟分頁一樣高，視窗才不會被分頁蓋住 */
+  .devtools { bottom: 44px; }
+  .shortcuts { bottom: 50px; }
+  .os-day { white-space: nowrap; }
+  .desk.down .screen.monitor .os-top .os-day { font-size: 0; }   /* 頂欄放不下兩段，502 時只留這句 */
+  .desk.down .screen.monitor .os-top .os-day::after { content: '⚠ 內網 502'; font-size: 13px; }
   .notif { max-width: calc(100% - 24px); }
   .notif span { max-width: 100%; }
   .reply-form .quiz-intro { display: none; }   /* 視窗矮，選項和送出優先 */
