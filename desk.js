@@ -17,6 +17,7 @@
   const withIcon = (node, name, text) => { node.append(Icons.el(name, 'ico-sm'), document.createTextNode(text)); return node; };
   const MODULES = { inventory: '資產盤點', users: '人員', reports: '報表' };
   // Tearlol 的欄名：從左到右是卡在誰手上——SA 區、IT 區、QC 區、完成
+  const PHONE_WIDTH = matchMedia('(max-width: 720px)');
   const STATUS_ZH = { new: '新需求', rejected_to_sa: '退回 SA', open: 'IT 處理中', to_qc: '交 QC', returned: '退回 IT', archived: '已完成' };
   const BOARD_ORDER = ['new', 'rejected_to_sa', 'open', 'returned', 'to_qc', 'archived'];
   const WALL_CLOCK_HAND = { legacy: '#1f2328', hybrid: '#464a56' };   // 牆上時鐘的指針色，照各自底圖原本畫的
@@ -94,7 +95,7 @@
     renderPapers() {
       const pile = this.root.querySelector('.papers'); pile.replaceChildren();
       for (const paper of this.engine.papers) {
-        const b = h('button', `paper ${paper.origin}`); b.append(Icons.el(paper.origin === 'self' ? 'sticky-note' : 'file-text')); b.title = paper.title;
+        const b = h('button', `paper ${paper.origin}`); b.append(paper.label ? h('span', 'paper-label', paper.label) : Icons.el(paper.origin === 'self' ? 'sticky-note' : 'file-text')); b.title = paper.title;
         b.addEventListener('click', () => this.readPaper(paper));
         pile.append(b);
       }
@@ -993,7 +994,7 @@
       const btn = (item) => {
         // 交件了不標在卡上：要自己去終端機看。同一件可以叫它跑好幾份（各扣額度）
         const running = ((card.ai && card.ai[item.id]) || []).filter(j => ['running', 'asking'].includes(j.status)).length;
-        const b = h('button', `op ${card.done(item.id) ? 'done' : ''}`, (item.label || Works.label(item.id)) + (card.done(item.id) ? ' ✓' : '') + (running ? `（AI 做事中${running > 1 ? ` ×${running}` : ''}）` : ''));
+        const b = h('button', `op ${card.done(item.id) ? 'done' : ''}`, ((PHONE_WIDTH.matches && item.short) || item.label || Works.label(item.id)) + (card.done(item.id) ? ' ✓' : '') + (running ? `（AI 做事中${running > 1 ? ` ×${running}` : ''}）` : ''));
         b.addEventListener('click', () => this.onOpenWork(card, item.id));
         // 部署有門檻的卡（POC 母議題要等三張子議題驗過）：門沒開就反灰，滑上去寫原因
         if (item.id === 'deploy' && card.deployGate && !card.deployGate(e)) { b.disabled = true; b.title = card.gateText || '還不能部署'; return b; }

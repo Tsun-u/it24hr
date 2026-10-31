@@ -37,7 +37,7 @@
   // 驗收文件也是文件；開發分測試程式、程式本體；檢閱程式碼分前端、後端（第三天才有）；手動測試獨立一顆
   const MENU = [
     { id: 'read_req' }, { id: 'discuss' }, { id: 'estimate' }, { id: 'ui_design' },
-    { id: 'docs', label: '文件', children: [{ id: 'doc_plan' }, { id: 'doc_spec' }, { id: 'doc_accept' }] },
+    { id: 'docs', label: '文件', children: [{ id: 'doc_plan', short: '計畫' }, { id: 'doc_spec', short: '規格' }, { id: 'doc_accept', short: '驗收' }] },   // short：手機版的按鈕字，上層已經寫了文件
     { id: 'dev', label: '開發', children: [{ id: 'test', label: '測試程式' }, { id: 'code', label: '程式本體' }] },
     { id: 'reviews', label: '檢閱程式碼', children: [{ id: 'review_front', label: '前端' }, { id: 'review_back', label: '後端' }] },
     { id: 'manual_test' },

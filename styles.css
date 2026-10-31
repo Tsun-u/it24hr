@@ -132,7 +132,7 @@ body { line-height: 1.5; }
 .op.has-menu { background: var(--os-bar); }
 .has-menu::after { content: ' ▸'; }
 .has-menu[aria-expanded="true"]::after { content: ' ▾'; }
-.op-group { display: inline-flex; gap: 6px; align-items: center; }
+.op-group { display: inline-flex; gap: 6px; align-items: center; margin-right: 8px; }
 .op-sub { display: inline-flex; gap: 6px; padding: 4px 6px; border: 1px solid var(--os-border); border-radius: 8px; background: var(--os-bar); }
 .op-sub[hidden], .hint[hidden], .leave[hidden] { display: none; }
 .card-foot { display: flex; justify-content: flex-end; gap: 8px; padding-top: 8px; border-top: 1px solid var(--os-border); }
@@ -254,9 +254,11 @@ body { line-height: 1.5; }
 .papers { display: flex; gap: 8px; }
 .paper { width: 72px; height: 72px; border: 0; background: #fff; box-shadow: 2px 3px 6px rgba(0,0,0,.4); font-size: 26px; transform: rotate(2deg); cursor: pointer; }
 .paper.self { background: #fff5a6; transform: rotate(-3deg); }
+.paper-label { display: block; font: 700 14px/1 var(--mono); color: #8a6d00; }
 .paper-view { position: fixed; inset: 0; z-index: 60; display: grid; place-items: center; background: rgba(0,0,0,.45); }
 .paper-view .sheet { width: min(420px, 90vw); background: #fff; color: #1f2328; padding: 24px; box-shadow: 0 12px 40px rgba(0,0,0,.5); transform: rotate(-1deg); font-size: 15px; line-height: 1.6; }
 .paper-view.self .sheet { background: #fff5a6; color: #4a3a00; }
+.paper-view .sheet p { white-space: pre-line; }
 .paper-view .sheet h3 { margin: 0 0 10px; font-size: 16px; }
 .paper-view .sheet p { margin: 0; white-space: pre-wrap; }
 .sheet-actions { display: flex; gap: 10px; justify-content: flex-end; margin-top: 18px; }
@@ -718,6 +720,11 @@ body { line-height: 1.5; }
   .desk.down .screen.monitor .os-top .os-day { font-size: 0; }   /* 頂欄放不下兩段，502 時只留這句 */
   .desk.down .screen.monitor .os-top .os-day::after { content: '⚠ 內網 502'; font-size: 13px; }
   .notif { max-width: calc(100% - 24px); }
+  .papers { gap: 4px; }
+  .paper { width: 44px; height: 44px; }   /* 兩張便條要跟暫停鈕排在同一排，排不下螢幕會被擠矮 */
+  .coffee { padding: 10px; }
+  .paper .icon { width: 24px; height: 24px; }
+  .paper-label { font-size: 11px; }
   .notif span { max-width: 100%; }
   .reply-form .quiz-intro { display: none; }   /* 視窗矮，選項和送出優先 */
   .reply-form .quiz-foot { position: sticky; bottom: 0; padding-top: 6px; background: var(--os-win); }

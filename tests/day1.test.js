@@ -263,3 +263,13 @@ test('第一句提示還在時開看板找卡，時間也不走', () => {
   const e = new Engine(day1); atHint(e, /打開 Tearlol/);
   e.emit('board:opened'); assert.ok(frozen(e));
 });
+
+test('桌上多一張 HTTP 對照表：三天都在，看了不算看過原本那張便條', () => {
+  const e = new Engine(day1);
+  const note = e.papers.find(p => p.id === 'http_note');
+  assert.ok(note && /502/.test(note.text) && /404/.test(note.text)); assert.strictEqual(note.origin, 'self');
+  e.readPaper('http_note'); assert.strictEqual(e.noteOpened, false, '結算卡的便條只算原本那張');
+  e.openNote(); assert.strictEqual(e.noteOpened, true);
+  const { DAY2 } = (() => { const d = require('../day2.js'); return { DAY2: d.make ? d : d.DAY2 }; })();
+  assert.ok(new Engine(DAY2.make()).papers.some(p => p.id === 'http_note'));
+});

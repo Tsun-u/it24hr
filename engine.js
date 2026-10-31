@@ -107,8 +107,10 @@
       this.ai = script.ai ? { left: script.ai.quota, max: script.ai.quota, notes: { ...(script.ai.notes || {}) },
         stats: { delegated: 0, unreviewed: 0, reviewed: 0, revised: 0, asked: 0, models: {} } } : null;
       // 自己早上寫的便條也是桌上的一張紙
-      if (script.unlabeled && script.unlabeled.note)
+      if (script.unlabeled && script.unlabeled.note) {
         this.papers.push({ id: 'note', title: '便條', from: '自己', module: null, text: script.unlabeled.note, sentences: [], subtasks: [], origin: 'self' });
+        this.papers.push({ id: 'http_note', title: 'HTTP 對照表', label: 'HTTP', from: '自己', module: null, text: C.HTTP_NOTE, sentences: [], subtasks: [], origin: 'self' });
+      }
       if (carried) this.restore(carried);
       this.schedule();
     }
@@ -239,7 +241,7 @@
     // 拿起桌上的紙來看；自己的便條看過會記在結算卡
     readPaper(id) {
       const paper = this.papers.find(p => p.id === id); if (!paper) return;
-      if (paper.origin === 'self') { this.noteOpened = true; this.emit('note:opened'); }
+      if (paper.id === 'note') { this.noteOpened = true; this.emit('note:opened'); }
       this.emit('paper:read', paper);
     }
     digitize(paperId) {
