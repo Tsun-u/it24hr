@@ -137,7 +137,18 @@
     return cv;
   }
 
-  // 三天總結算圖：頂端遊戲名、紙卡上頭像名字、三天各一格（哪一天・時代、印章、總評）、最底下印章接成的一串
+  // 總結算圖每天一句同事評語：三天盡量不同人、不同句（評語第一句永遠是 SA，直接取會同一個人講三次）
+  function dayQuotes(days) {
+    const who = new Set(), said = new Set();
+    return days.map((d) => {
+      const peers = d.peers || [];
+      const pick = peers.find(p => !who.has(p.who) && !said.has(p.text)) || peers.find(p => !said.has(p.text)) || peers[0] || null;
+      if (pick) { who.add(pick.who); said.add(pick.text); }
+      return pick;
+    });
+  }
+
+  // 三天總結算圖：頂端遊戲名、紙卡上頭像名字、三天各一格（哪一天・時代、印章、總評、一句同事評語）、最底下印章接成的一串
   function summaryCard({ summary, player }) {
     const cv = document.createElement('canvas'); cv.width = W; cv.height = H;
     const g = cv.getContext('2d');
@@ -165,16 +176,30 @@
     g.textBaseline = 'alphabetic'; font(54, 800); g.fillStyle = INK; g.fillText(player.name, ix + face.width + 32, y + 80);
     font(34); g.fillStyle = MUTED; g.fillText(player.title || '', ix + face.width + 32, y + 134);
     y += face.height + 56;
-    for (const d of summary.days) {
+    // 每天一格的高度先算好：評語兩行放不下就收成一行，格子之間的空白平分剩下的
+    const quotes = dayQuotes(summary.days), STAMP_H = 180, bottom = cBottom - 170;
+    const layout = (quoteRows) => summary.days.map((d, i) => {
+      font(38, 700); const lines = wrap(d.line, iw, 2);
+      font(30, 600); const quote = quotes[i] ? wrap(quotes[i].text, iw, quoteRows) : [];
+      return { d, lines, quote, peer: quotes[i], h: STAMP_H + lines.length * 52 + (quote.length ? quote.length * 42 + 40 : 0) };
+    });
+    const total = (rows) => rows.reduce((sum, r) => sum + r.h, 0);
+    let rows = layout(2); if (y + total(rows) > bottom) rows = layout(1);
+    const gap = Math.max(12, Math.min(56, (bottom - y - total(rows)) / rows.length));
+    for (const { d, lines, quote, peer } of rows) {
       font(30, 600, MONO); g.fillStyle = MUTED; g.fillText(`${d.day}・${d.mode}`, ix, y);
       font(64, 800, MONO); const sw = g.measureText(d.stamp).width + 56;
       g.save(); g.translate(ix + 4, y + 36); g.rotate(-4 * Math.PI / 180);
       g.strokeStyle = RED; g.lineWidth = 5; rrect(0, 0, sw, 96, 12); g.stroke(); g.lineWidth = 2; rrect(9, 9, sw - 18, 78, 8); g.stroke();
       g.fillStyle = RED; g.textBaseline = 'middle'; g.fillText(d.stamp, 28, 51); g.restore();
-      g.textBaseline = 'alphabetic'; y += 196;
+      g.textBaseline = 'alphabetic'; y += STAMP_H;
       font(38, 700); g.fillStyle = INK;
-      for (const l of wrap(d.line, iw, 2)) { g.fillText(l, ix, y); y += 52; }
-      y += 72;
+      for (const l of lines) { g.fillText(l, ix, y); y += 52; }
+      if (quote.length) {
+        font(30, 600); for (const l of quote) { g.fillText(l, ix, y); y += 42; }
+        font(26); g.fillStyle = MUTED; g.textAlign = 'right'; g.fillText(`—— ${peer.who}`, ix + iw, y - 4); g.textAlign = 'left'; y += 40;
+      }
+      y += gap;
     }
     font(36, 800, MONO); g.fillStyle = INK; g.textAlign = 'center';
     for (const l of wrap(summary.chain, iw, 2)) { g.fillText(l, W / 2, Math.max(y, cBottom - 120)); y += 48; }
@@ -246,6 +271,6 @@
     inner.append(img, tip, row); box.append(inner); document.body.append(box); close.focus();
   }
 
-  const api = { text, url, card, image, buttons };
+  const api = { text, url, card, image, buttons, dayQuotes };
   if (isNode) module.exports = api; else root.Share = api;
 })(typeof window !== 'undefined' ? window : globalThis);
