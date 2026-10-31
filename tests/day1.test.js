@@ -209,3 +209,49 @@ test('阿賢問過怡君才直接開給你：內文第一句寫明；退回 SA �
   assert.match(card.comments.at(-1).text, /阿賢說得很清楚.*直接找阿賢/);
   assert.ok(e.docs.some(d => d.origin === 'line' && d.from === 'SA 怡君' && /直接找阿賢/.test(d.text)));
 });
+
+// 第一天每件工作都是第一次碰到：照提示做時，時鐘停到按完成
+const atHint = (e, text) => { for (let i = 0; i < 400 && !(e.hint && text.test(e.hint.text)); i++) { if (e.hint) e.follow(e.hint); else e.tick(C.TICK_MS || 1000); } assert.match(e.hint.text, text); };
+const frozen = (e) => { const m = e.clock.minute; e.tick(60000); return e.clock.minute === m; };
+
+test('第一天照提示做：找卡、打開工作都不走時間，做完才換下一句', () => {
+  const e = new Engine(day1); atHint(e, /整理需求/);
+  assert.ok(frozen(e), '提示出來時鐘停著');
+  e.emit('board:opened'); assert.ok(frozen(e), '打開看板找卡不算動作');
+  e.openCard('asset_crud'); assert.ok(frozen(e), '打開卡片不算動作');
+  e.openWork('asset_crud', 'read_req'); assert.ok(frozen(e), '打開提示要的工作，做完之前時鐘都停著');
+  e.follow(e.hint); assert.match(e.hint.text, /需求討論/); assert.ok(frozen(e), '做完換下一句，時鐘繼續停');
+  atHint(e, /拉到它上面/); assert.ok(frozen(e), '要插電的提示也停著');
+  atHint(e, /手動測試/); assert.ok(frozen(e), '插上電之後下一句也停著');
+});
+
+test('第一天沒照提示走時間照走，提示要的事做不到也不會卡死', () => {
+  const other = new Engine(day1); atHint(other, /整理需求/);
+  other.openWork('asset_crud', 'estimate'); assert.ok(!frozen(other), '開別的工作時間照走');
+  const away = new Engine(day1); atHint(away, /整理需求/);
+  away.emit('card:to_sa', away.board.get('asset_crud')); assert.ok(!frozen(away), '做了別的事時間照走，SA 的 90 分鐘才過得完');
+  away.emit('board:opened'); assert.ok(!frozen(away), '恢復之後看看板不會又停住');
+});
+
+test('第二天的提示照舊：打開工作時間就走，AI 和 QC 才等得到', () => {
+  const { DAY2 } = (() => { const d = require('../day2.js'); return { DAY2: d.make ? d : d.DAY2 }; })();
+  const e = new Engine(DAY2.make());
+  for (let i = 0; i < 400 && !(e.hint && /交給 AI 試試/.test(e.hint.text)); i++) { if (e.hint) e.dismissHint(); e.tick(1000); }
+  assert.ok(e.hint); e.clock.pause('hint');
+  e.openWork(e.script.mainCard, 'read_req'); assert.ok(!frozen(e));
+});
+
+test('提示上的「已完成」：這句算過關、時間恢復，工作沒有真的做，後面照舊', () => {
+  const e = new Engine(day1); atHint(e, /整理需求/);
+  e.completeHint();
+  assert.match(e.hint.text, /需求討論/, '下一句照它的條件出來');
+  assert.ok(!e.board.get('asset_crud').done('read_req'), '那件工作沒有被標成做完');
+  assert.ok(frozen(e), '下一句有自己的暫停');
+  e.hint.until = 'never'; e.hintQueue.length = 0; e.completeHint();
+  assert.strictEqual(e.hint, null); assert.ok(!frozen(e), '後面沒有提示了，時間繼續');
+});
+
+test('第一句提示還在時開看板找卡，時間也不走', () => {
+  const e = new Engine(day1); atHint(e, /打開 Tearlol/);
+  e.emit('board:opened'); assert.ok(frozen(e));
+});

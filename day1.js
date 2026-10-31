@@ -313,6 +313,7 @@
 
   const day1 = {
     name: '第一天：Legacy', mode: 'legacy', mainCard: 'asset_crud',
+    holdHints: true,   // 第一次碰到的工作，照提示做時時鐘停到按完成
     issueBase: 120,   // 看板已經開到 #120，阿賢的卡是 #121；每個時代的起始號不同，編號在講公司的年紀
     cards: [main],
     sources: [boss, colleague, ...team],

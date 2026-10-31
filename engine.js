@@ -384,6 +384,7 @@
 
     // ── 提示 ──
     // 提示出現時時鐘暫停，玩家做了任何動作就恢復；提示本身留著，直到做了它要的事（until）。
+    // 劇本 holdHints（第一天，每件工作都是第一次碰到）：照提示找卡、打開那件工作不算動作，時鐘停到做完（holdsHintPause）。
     // until 可以是一串（例如「交給 AI」或「自己做完」都算）；skipOn：還排在隊伍裡、這件事就發生了的話，這個提示不用出了
     // （例如「等 AI 交件」那幾個提示，玩家自己做掉了就跳過，提示鏈才不會卡住）；skipIf(engine)：輪到它時已經成立就跳過
     // 事件裡的 * 是「不管哪張卡」（work:opened:*:deploy），提示要接任何一張卡的同一件工作時用
@@ -391,7 +392,7 @@
     checkHints(event) {
       if (this.hint && [].concat(this.hint.until).includes(event)) {
         this.hint = null; this.clock.resume('hint'); this.emit('hint:cleared');
-      } else if (this.hint && PLAYER_EVENTS.some(p => event.startsWith(p))) {
+      } else if (this.hint && PLAYER_EVENTS.some(p => event.startsWith(p)) && !this.holdsHintPause(event)) {
         this.clock.resume('hint');
       }
       while (!this.hint && this.hintQueue.length && this.skipHint(this.hintQueue[0], event)) this.hintQueue.shift();
@@ -401,6 +402,18 @@
         this.emit('hint', this.hint);
       }
     }
+    // 只有提示要玩家做某件工作時才撐住；做了別的事（開別的工作、交 QC、轉給 SA）照舊恢復，提示要的事做不到時才不會卡死
+    holdsHintPause(event) {
+      if (!this.script.holdHints) return false;
+      if (event.startsWith('work:done:*:')) return true;   // 做完的最後一個事件，下一句提示這時已經出來了，不能把它剛停的時鐘放開
+      const wanted = [].concat(this.hint.until).filter(e => /^(work:done|card:opened):/.test(e));
+      if (!wanted.length) return false;
+      if (event === 'work:opened' || event.startsWith('work:opened:*:')) return true;
+      if (event.startsWith('work:opened:')) return wanted.includes(event.replace('work:opened', 'work:done'));
+      return event.startsWith('card:opened') || event.startsWith('board:opened');
+    }
+    // 提示上的「已完成」：這句當作過關、時鐘恢復，只推進提示鏈，那件工作沒有真的做；下一句照它自己的條件出現
+    completeHint() { if (this.hint) this.checkHints([].concat(this.hint.until)[0]); }
     dismissHint() { this.clock.resume('hint'); }
     // 玩家按了某個工作的按鈕、視窗開出來了：這就算動作，提示暫停的時鐘從這裡恢復（不用等做完）
     openWork(cardId, work) { this.emit('work:opened', { cardId, work }); this.emit(`work:opened:${cardId}:${work}`, { cardId, work }); this.emit(`work:opened:*:${work}`, { cardId, work }); }
