@@ -973,7 +973,7 @@
       const old = ops.querySelector('.model-pick'); if (old) old.remove();
       const box = h('div', 'model-pick');
       const who = anchor.querySelector('.op:not(.op-ai)');
-      box.append(h('span', 'muted', `${who ? who.textContent.replace(' ▸', '').replace(' ✓', '') : ''}交給哪個模型？`));
+      box.append(h('span', 'muted', `${who ? who.textContent.replace(' ✓', '') : ''}交給哪個模型？`));
       for (const [name, m] of Object.entries(this.engine.script.ai.models)) {
         const b = h('button', 'op', `${m.label}　${m.turnaround[0]}～${m.turnaround[1]} 分鐘・${m.cost} 格`);
         b.addEventListener('click', (ev) => { ev.stopPropagation(); box.remove(); onPick(name); });
@@ -1009,10 +1009,15 @@
         if (!item.children) { if (has(item.id)) row.append(btn(item)); continue; }
         const children = item.children.filter(c => has(c.id)); if (!children.length) continue;
         const group = h('span', 'op-group');
-        const toggle = h('button', 'op has-menu', `${item.label} ▸`);
+        const toggle = h('button', 'op has-menu', item.label); toggle.setAttribute('aria-expanded', 'false');
         const sub = h('span', 'op-sub'); sub.hidden = true;
         for (const c of children) sub.append(btn(c));
-        toggle.addEventListener('click', () => { const open = sub.hidden; for (const s of row.querySelectorAll('.op-sub')) s.hidden = true; sub.hidden = !open; });
+        toggle.addEventListener('click', () => {
+          const open = sub.hidden;
+          for (const s of row.querySelectorAll('.op-sub')) s.hidden = true;
+          for (const t of row.querySelectorAll('.has-menu')) t.setAttribute('aria-expanded', 'false');
+          sub.hidden = !open; toggle.setAttribute('aria-expanded', String(open));
+        });
         group.append(toggle);
         // speedrun 的主按鈕可以整組交給 AI：依序跑、時間打七折、額度少 1 格，做過的跳過
         if (e.ai && e.aiPicksModel() && children.some(c => e.delegable(card, c.id))) {

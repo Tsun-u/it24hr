@@ -129,6 +129,8 @@ body { line-height: 1.5; }
 .op { border: 1px solid var(--os-border); background: var(--os-win); color: var(--os-fg); border-radius: 6px; padding: 5px 10px; font-size: 13px; }
 .op.done { border-color: var(--ok); color: var(--ok); }
 .op.has-menu { background: var(--os-bar); }
+.has-menu::after { content: ' ▸'; }
+.has-menu[aria-expanded="true"]::after { content: ' ▾'; }
 .op-group { display: inline-flex; gap: 6px; align-items: center; }
 .op-sub { display: inline-flex; gap: 6px; padding: 4px 6px; border: 1px solid var(--os-border); border-radius: 8px; background: var(--os-bar); }
 .op-sub[hidden], .hint[hidden], .leave[hidden] { display: none; }
