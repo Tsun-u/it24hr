@@ -46,6 +46,7 @@ body { line-height: 1.5; }
 .desktop[data-theme="dark"], .laptop-screen[data-theme="dark"], .win-layer[data-theme="dark"] { --os-bg: #14171d; --os-fg: #e6e8ee; --os-bar: #1e222a; --os-win: #1b1f26; --os-win-bar: #242932; --os-border: #343a46; --os-muted: #9aa3b2; --os-shadow: rgba(0,0,0,.6);
   --chat-bg: #283012; --chat-them: #363c46;   /* 深色：暗的萊姆綠底、深灰泡泡 */
   background: radial-gradient(1200px 600px at 70% 30%, #1d222c, var(--os-bg)); }
+.desk.on-break .screens-bg, .desk.on-break .screens-bg *, .desk.on-break .surface > :not(.coffee), .desk.on-break .surface > :not(.coffee) * { pointer-events: none; }   /* 暫停時不能做事，只能按暫停鈕回來 */
 .desktop.paused::after { content: '暫停中'; position: absolute; inset: 0; display: grid; place-items: center; font-size: 28px; letter-spacing: .3em; color: var(--os-fg); background: color-mix(in srgb, var(--os-bg) 55%, transparent); pointer-events: none; z-index: 32; }   /* 蓋過視窗層、工作列和通知（≤30），但在舉手、手動測試預覽這些彈出畫面（≥34）底下 */
 .os-top { position: absolute; top: 0; left: 0; right: 0; height: 26px; display: flex; align-items: center; gap: 12px; padding: 0 10px; background: var(--os-bar); font-size: 13px; z-index: 5; }
 .os-clock { font-family: var(--mono); font-weight: 600; }

@@ -524,6 +524,7 @@
       this.root.querySelector('.leave').hidden = !e.canLeave();
       this.root.querySelector('.coffee').classList.toggle('on', e.paused);
       this.desktop.classList.toggle('paused', e.paused);
+      this.root.querySelector('.desk').classList.toggle('on-break', e.paused);
       this.drawWallClock();
       // 彈幕跟著遊戲時鐘走：時鐘停（暫停、舉手、看術語、會議中翻手冊）彈幕就停；會議結束後天空空了才收會議室
       if (this.meetingRoom) {
