@@ -368,6 +368,10 @@ body { line-height: 1.5; }
 .credit { margin: 4px 0 0; font-size: 12px; color: var(--muted); text-align: center; } .credit a { color: var(--accent); }
 .save-open { display: inline-flex; align-items: center; min-height: 32px; padding: 4px 8px; border: 0; background: none; color: var(--accent); font: inherit; font-size: 13px; text-decoration: underline; cursor: pointer; }
 .mode-badge .save-open { margin: 2px 0 0 -8px; }
+/* 存檔備份面板：savebox.js 是各遊戲共用的，樣式寫在行內，所以這裡要 !important；字放 ::after，按下去圖示換成 ⏳、✅ 時才不會被蓋掉 */
+div:has(> button[aria-label="匯出存檔"]) { grid-template-columns: repeat(2, 96px) !important; }
+div:has(> button[aria-label="匯出存檔"]) > button { width: 96px !important; height: 76px !important; }
+div:has(> button[aria-label="匯出存檔"]) > button::after { content: attr(aria-label); display: block; margin-top: 4px; font-size: 13px; line-height: 1.2; }
 .side-foot { display: flex; flex-wrap: wrap; justify-content: center; align-items: center; gap: 4px 12px; }
 .foot-link { display: inline-flex; align-items: center; min-height: 32px; padding: 4px 8px; font-size: 13px; }
 /* 結算卡：背景是拿掉電腦的桌面（bg-<mode>）；手機單欄、PC 兩欄約 60vw */
