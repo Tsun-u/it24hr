@@ -270,6 +270,8 @@
     const model = Screen.model({ ...card, screen: { ...(card.screen || {}), campaign: true, defects: Object.fromEntries(q.defects.map(d => [d, null])) }, history: [{ work: 'code', result: { toFill: [], bugs: [] } }] });
     const board = h('div', 'spot-devices');
     const names = { pc: 'PC', tablet: '開發平板', phone: '開發手機' };
+    const reasons = h('div', 'spot-reasons');   // 原因選單放在裝置外：手機畫面太窄，塞進去會擋住要看的東西，三台也會各跳一份
+    let active = null;
     const redraw = () => {
       board.replaceChildren();
       for (const device of q.devices) {
@@ -277,15 +279,18 @@
         const page = Screen.render(model, device);
         for (const node of page.querySelectorAll('[data-region]')) {
           const key = node.dataset.region;
-          if (state.marks.has(key)) { node.classList.add('spot-hit'); reasonMenu(q, key, state, node, redraw); }
-          node.addEventListener('click', (ev) => { ev.stopPropagation(); if (state.marks.has(key)) return; state.marks.set(key, null); redraw(); });
+          if (state.marks.has(key)) { node.classList.add('spot-hit'); node.classList.toggle('spot-pending', !state.marks.get(key)); node.classList.toggle('spot-active', key === active); }
+          node.addEventListener('click', (ev) => { ev.stopPropagation(); if (!state.marks.has(key)) state.marks.set(key, null); active = key; redraw(); });
         }
         frame.append(page, h('div', 'spot-name', names[device] || device)); board.append(frame);
       }
+      reasons.replaceChildren();
+      reasons.hidden = !state.marks.has(active);
+      if (state.marks.has(active)) { reasons.append(h('p', 'spot-reasons-title', '這一塊的問題是：')); reasonMenu(q, active, state, reasons, redraw); }
     };
     redraw();
     const { foot, hintBox } = reviewFoot(engine, card, work, q, state, wrap, close, opts, { redraw });
-    wrap.append(board, hintBox, foot);
+    wrap.append(board, reasons, hintBox, foot);
     return wrap;
   }
   // 後端「讀 diff 標行」：檔名、行號、+／-、紅減綠加；點行亮起、選原因；LGTM 什麼都不標直接交

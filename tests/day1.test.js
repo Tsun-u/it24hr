@@ -273,3 +273,11 @@ test('桌上多一張 HTTP 對照表：三天都在，看了不算看過原本�
   const { DAY2 } = (() => { const d = require('../day2.js'); return { DAY2: d.make ? d : d.DAY2 }; })();
   assert.ok(new Engine(DAY2.make()).papers.some(p => p.id === 'http_note'));
 });
+
+test('自己開卡時需求單位是提需求的人：需求討論和通知都找對方，不是玩家自己', () => {
+  const e = new Engine(day1); e.tick(C.MS_PER_GAME_MIN * 100); e.talkTo('boss');
+  const card = e.openCardFrom('boss', { type: 'feature', module: 'inventory', assignee: 'me', sentences: [0, 1], attach: true });
+  assert.strictEqual(card.from, e.player.name); assert.strictEqual(card.requester, '老闆');
+  const fixed = e.openFixedCard({ id: 'fixed', title: '同一件事' }, e.player.name, '財務 美玲');
+  assert.strictEqual(fixed.requester, '財務 美玲');
+});

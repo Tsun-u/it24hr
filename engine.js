@@ -252,7 +252,7 @@
     // 開卡：指派 SA 就是把需求轉回去，卡晚點以 SA 開好的樣子回來；指派自己就照草稿開，填得好不好記在 card.draft
     openCardFrom(docId, draft) {
       const doc = this.docs.find(d => d.id === docId); if (!doc || doc.carded || !doc.sentences.length || !this.online()) return null;   // 沒需求句的訊息開不了卡
-      if (doc.cardSpec) return this.openFixedCard(doc.cardSpec, draft.assignee === 'sa' ? SA : this.player.name);
+      if (doc.cardSpec) return this.openFixedCard(doc.cardSpec, draft.assignee === 'sa' ? SA : this.player.name, doc.from);
       doc.carded = true;
       if (draft.assignee === 'sa') {
         this.stats.forwardedToSA++; this.emit('doc:forwarded', doc);
@@ -275,7 +275,7 @@
       if (grade.missing.length === 3) this.stats.emptyDrafts++;
       this.stats.selfOpened++;
       const card = this.board.add(makeCard({
-        id: `${doc.id}:card`, title: doc.title, from: this.player.name, assignee: this.player.name,
+        id: `${doc.id}:card`, title: doc.title, from: this.player.name, assignee: this.player.name, requester: doc.from,   // 卡是玩家開的，需求討論和通知找原本提需求的人
         body: draft.attach ? doc.text : '', subtasks: subtasksFor(draft.type, doc),
         type: draft.type, parent: draft.parent || null, relatedTo: doc.relatedTo, screen: doc.screen, reviewSays: doc.reviewSays, onNoBackup: doc.onNoBackup,
       }), this.clock.minute);
@@ -297,10 +297,10 @@
       if (!quiet) { this.saHandsOver(card); this.emit('card:ready', card); this.emit(`card:ready:${card.id}`, card); }
     }
     // 好幾則訊息講同一件事、不管誰開都是同一張固定的卡（cardSpec）：開了之後其他那幾則也算開過了
-    openFixedCard(cardSpec, from) {
+    openFixedCard(cardSpec, from, requester = cardSpec.requester) {
       if (this.board.get(cardSpec.id)) return null;
       for (const d of this.docs) if (d.cardSpec && d.cardSpec.id === cardSpec.id) d.carded = true;
-      const card = this.board.add(makeCard({ ...cardSpec, from, assignee: this.player.name }), this.clock.minute);
+      const card = this.board.add(makeCard({ ...cardSpec, from, assignee: this.player.name, requester: cardSpec.requester || requester }), this.clock.minute);
       if (from === SA) this.saHandsOver(card);
       this.emit('card:arrived', card); this.emit(`card:arrived:${card.id}`, card);
       return card;
