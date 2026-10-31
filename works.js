@@ -161,6 +161,9 @@
     return out;
   }
 
+  // LIME 泡泡本身就是對話：選項和台詞整句包著「」時，泡泡裡拿掉引號和後面多的句號；句子中間引用的話照舊
+  const chatText = (text) => { const m = /^「([^「」]*)」。?$/.exec(text); return m ? m[1] : text; };
+
   // 做完一件事在卡上留的筆記（像 Redmine note，記錄人是玩家自己）：把選了什麼用人話寫下來
   function summarize(question, answers, result) {
     if (question.kind === 'manual') return result && result.nullException ? '手動測試：對著空氣測了一下。' : `手動測試：${(result && result.version) || '沒做任何操作'}。`;
@@ -507,7 +510,7 @@
     return order;
   }
 
-  const api = { grade, replyAnswered, deployBefore, functionsToFill, testDrives, givenOptions, summarize, testStyle, deviceTestOptions, label, intro, aiAnswers, aiRoll, applyNotes, firstAsks, applyAsk, aiSpots, fixNotes, fixDrops, reviseAnswers, displayOrder, pickedIn, hiddenOptions, visibleItem, activeFunction, LABELS, INTROS, MENU, LOW_BATTERY };
+  const api = { grade, replyAnswered, chatText, deployBefore, functionsToFill, testDrives, givenOptions, summarize, testStyle, deviceTestOptions, label, intro, aiAnswers, aiRoll, applyNotes, firstAsks, applyAsk, aiSpots, fixNotes, fixDrops, reviseAnswers, displayOrder, pickedIn, hiddenOptions, visibleItem, activeFunction, LABELS, INTROS, MENU, LOW_BATTERY };
   if (typeof module !== 'undefined') module.exports = api;
   else root.Works = api;
 })(typeof window !== 'undefined' ? window : globalThis);

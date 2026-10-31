@@ -767,13 +767,13 @@
         for (const entry of this.engine.chatLog(msgs.filter(x => chatOf(x) === from))) {
           if (entry.mine) {
             const mine = h('p', 'me');
-            if (entry.quote) { const q = h('span', 'chat-quote'); q.append(h('b', '', entry.quote.from), h('span', '', entry.quote.text)); mine.append(q); }
-            mine.append(entry.mine); log.append(mine); continue;
+            if (entry.quote) { const q = h('span', 'chat-quote'); q.append(h('b', '', entry.quote.from), h('span', '', Works.chatText(entry.quote.text))); mine.append(q); }
+            mine.append(Works.chatText(entry.mine)); log.append(mine); continue;
           }
           const m = entry.msg;
           if (m.group && m.kind !== 'sent') log.append(h('span', 'chat-who', m.from));
           if (m.kind === 'sticker') { const s = h('p', 'them sticker'); s.innerHTML = Stickers.html(m.sticker); log.append(s); continue; }
-          log.append(h('p', m.kind === 'sent' ? 'me' : 'them', m.text));
+          log.append(h('p', m.kind === 'sent' ? 'me' : 'them', Works.chatText(m.text)));
           const row = h('div', 'chat-actions');
           if (m.kind === 'source_request' && !m.carded) {
             const give = h('button', 'btn small primary', '把原文轉給她'); give.addEventListener('click', () => { this.engine.attachSource(m.cardId); m.carded = true; this.refreshDocs(); });

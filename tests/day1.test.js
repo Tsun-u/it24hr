@@ -281,3 +281,12 @@ test('自己開卡時需求單位是提需求的人：需求討論和通知都�
   const fixed = e.openFixedCard({ id: 'fixed', title: '同一件事' }, e.player.name, '財務 美玲');
   assert.strictEqual(fixed.requester, '財務 美玲');
 });
+
+test('LIME 泡泡拿掉整句外面的引號，句子中間引用的話不動', () => {
+  const { chatText } = require('../works.js');
+  assert.strictEqual(chatText('「老闆看到會很開心」。'), '老闆看到會很開心');
+  assert.strictEqual(chatText('「那就別刪了。」'), '那就別刪了。');
+  assert.strictEqual(chatText('AI 幫我整理的會議記錄，把老闆開的玩笑也記成需求了。'), 'AI 幫我整理的會議記錄，把老闆開的玩笑也記成需求了。');
+  assert.strictEqual(chatText('老闆說「好」，主任說「不行」。'), '老闆說「好」，主任說「不行」。');
+  assert.strictEqual(chatText('「好」和「不好」'), '「好」和「不好」');
+});
