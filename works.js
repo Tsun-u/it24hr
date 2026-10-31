@@ -105,17 +105,17 @@
   }
   // 排序題寫了 item.before（[[先, 後], …]，只列真的有先後關係的兩步）：挑對步驟照多選算一半，先後關係排對幾條算另一半，
   // 兩步都有排、而且先的在前面，那條才算排對（開發計畫：匯出和手機版誰先都行，資料表一定在功能前面）。
-  // 沒寫 before 的排序題全對才給分（部署）
+  // 沒有先後條件的排序題全對才給分
   function orderRatio(item, answer, hidden) {
-    if (!item.before) return same(answer, item.answer) ? 1 : 0;
+    if (!item.before || !item.before.length) return same(answer, item.answer) ? 1 : 0;
     const at = (step) => answer.indexOf(step);
     const kept = item.before.filter(([first, then]) => at(first) >= 0 && at(then) >= 0 && at(first) < at(then)).length;
     return (pickedRatio(item, answer, hidden) + kept / item.before.length) / 2;
   }
 
-  // 部署題的先後關係由 roles 推：備份要在動到線上的步驟（替換、資料轉換）之前、上傳在替換之前、
-  // 驗證在替換和轉換之後；備份排在上傳前或上傳後都對（上傳是傳到新資料夾，線上還沒動）
-  const DEPLOY_ORDER = [['backup', 'replace'], ['backup', 'migrate'], ['upload', 'replace'], ['replace', 'smoke'], ['migrate', 'smoke']];
+  // 部署題的先後關係由 roles 推：備份要在動到線上的步驟（替換、資料轉換、匯入資料）之前、上傳在替換和匯入之前、
+  // 驗證在這些步驟之後；備份排在上傳前或上傳後都對（上傳是傳到新資料夾，線上還沒動）
+  const DEPLOY_ORDER = [['backup', 'replace'], ['backup', 'migrate'], ['backup', 'seed'], ['upload', 'replace'], ['upload', 'seed'], ['replace', 'smoke'], ['migrate', 'smoke'], ['seed', 'smoke']];
   function deployBefore(roles) {
     return DEPLOY_ORDER.filter(([first, then]) => first in roles && then in roles).map(([first, then]) => [roles[first], roles[then]]);
   }

@@ -487,3 +487,24 @@ test('提示鏈：整天不碰 AI 的玩家，自己做完程式就接到手動�
   for (const ev of ['card:arrived:poc', 'work:done', 'work:done:poc_bot:code']) e.emit(ev);
   assert.deepStrictEqual(seen, ['POC ', '手動測試']);
 });
+
+test('每一張部署題都算得出分數：正解滿分，備份和上傳對調也算對，亂排不會出現 NaN', () => {
+  const Day1 = require('../day1.js'), Day2 = require('../day2.js');
+  const scripts = [Day1.DAY1 || Day1, (Day2.DAY2 || Day2).make(), DAY3.make({ notes: {} })];
+  const questions = [];
+  for (const s of scripts) for (const c of [...(s.cards || []), ...(s.sources || []), ...(s.sources || []).map(x => x.cardSpec || {})]) for (const st of c.subtasks || []) if (st.question && st.question.roles) questions.push({ id: c.id, q: st.question });
+  assert.ok(questions.some(x => x.id === 'poc'), '有掃到 POC 那張');
+  for (const { id, q } of questions) {
+    const item = q.items[0], { backup, upload } = q.roles;
+    assert.strictEqual(Works.grade(q, [item.answer]).score, 1, `${id} 正解要滿分`);
+    const swapped = item.answer.map(i => (i === backup ? upload : i === upload ? backup : i));
+    if (!(q.roles.replace === undefined && q.roles.seed === undefined)) assert.strictEqual(Works.grade(q, [swapped]).score, 1, `${id} 備份在上傳前後都對`);
+    for (const order of [[], [...item.answer].reverse(), item.options.map((_, i) => i), item.ai ? item.ai.pick : []]) assert.ok(Number.isFinite(Works.grade(q, [order]).score), `${id} 的 ${order} 要算得出分數`);
+  }
+});
+
+test('排序題的 before 是空的時候照全對才給分，不會除以零', () => {
+  const q = { items: [{ text: '步驟', type: 'order', options: ['甲', '乙'], answer: [0, 1], before: [] }] };
+  assert.strictEqual(Works.grade(q, [[0, 1]]).score, 1);
+  assert.strictEqual(Works.grade(q, [[1, 0]]).score, 0);
+});
