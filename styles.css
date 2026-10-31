@@ -301,6 +301,7 @@ body { line-height: 1.5; }
 .leave.sleep[hidden] { display: none; }
 /* 提示便條：紅圖釘釘在左上角，新提示出現時整張抖一下 */
 .hint { position: absolute; right: 24px; bottom: 100%; margin-bottom: -8px; max-width: 360px; background: #fff5a6; color: #4a3a00; padding: 14px 16px 14px 18px; border-radius: 4px; box-shadow: 2px 4px 10px rgba(0,0,0,.4); transform: rotate(1.5deg); font-size: 15px; font-weight: 600; line-height: 1.55; z-index: 20; }
+.hint-fold { display: none; }
 .hint.soft { background: #e8f0ff; color: #1f2d4d; font-weight: 500; }
 .hint::before { content: ''; position: absolute; left: -6px; top: -10px; width: 18px; height: 18px; border-radius: 50%; background: radial-gradient(circle at 35% 35%, #ff8a80, #d32f2f 60%, #8e1a1a); box-shadow: 1px 2px 4px rgba(0,0,0,.45); z-index: 2; }
 .hint::after { content: ''; position: absolute; left: 2px; top: 6px; width: 2px; height: 14px; background: linear-gradient(#9e9e9e, #424242); transform: rotate(-20deg); transform-origin: top; z-index: 1; }
@@ -696,7 +697,9 @@ body { line-height: 1.5; }
   .device.tablet { right: 24px; bottom: calc(100% + 8px); }
   .device.phone { right: 36px; bottom: calc(100% + 86px); }
   .surface { flex-wrap: wrap; align-content: center; gap: 8px; min-height: 120px; padding: 8px 10px; }
-  .hint { left: 10px; right: 108px; max-width: none; }   /* 不蓋到筆電右邊的手機和平板 */
+  .hint { left: 10px; right: 108px; max-width: none; padding-right: 58px; }   /* 不蓋到筆電右邊的手機和平板 */
+  .hint-fold { display: block; position: absolute; top: 0; right: 0; width: 54px; height: 40px; padding: 0; border: 0; background: none; color: inherit; font: inherit; font-size: 13px; text-decoration: underline; cursor: pointer; }
+  .hint.folded { height: 40px; margin-bottom: -24px; padding-block: 8px; overflow: hidden; white-space: nowrap; text-overflow: ellipsis; box-sizing: border-box; }
   .os-theme, .os-sound, .shortcut, .task-win, .win-btns button, .coffee, .leave { min-height: 44px; min-width: 44px; }
   .win { border-radius: 0; min-width: 0; }   /* 位置大小由 windows.js 對齊到所在的螢幕 */
   .win-resize { display: none; }

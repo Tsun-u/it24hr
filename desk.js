@@ -577,6 +577,10 @@
     showHint(hint) {
       this.hintEl.hidden = false; this.hintEl.textContent = hint.text; this.hintEl.classList.toggle('soft', hint.pause === false);
       Handbook.mark(this.hintEl);
+      this.hintEl.classList.remove('folded');
+      const fold = h('button', 'hint-fold', '收起');   // 手機上便條壓在筆電螢幕上，可以收成一行
+      fold.addEventListener('click', () => { fold.textContent = this.hintEl.classList.toggle('folded') ? '展開' : '收起'; });
+      this.hintEl.append(fold);
       this.hintEl.classList.remove('pop'); void this.hintEl.offsetWidth; this.hintEl.classList.add('pop');   // 新提示：抖一下
     }
     hideHint() { this.hintEl.hidden = true; }
@@ -763,7 +767,7 @@
           } else {
             if (m.reply && !m.replied) { const reply = h('button', 'btn small', '回訊息'); reply.addEventListener('click', () => Quiz.openReply(this, this.engine, m)); row.append(reply); }
             if (!m.carded && m.sentences && m.sentences.length) { const open = h('button', 'btn small primary', '開卡'); open.addEventListener('click', this.company(() => this.openNewCard(m))); row.append(open); }
-            if (m.cardId && m.kind !== 'sent' && this.engine.board.get(m.cardId)) { const go = h('button', 'btn small', '打開卡片'); go.addEventListener('click', this.company(() => this.openCardAtFoot(m.cardId))); row.append(go); }
+            if (m.cardId && m.kind !== 'sent' && this.engine.board.get(m.cardId)) { const go = h('button', 'btn small', '打開卡片'); go.addEventListener('click', this.company(() => this.openCardFromChat(m.cardId))); row.append(go); }
           }
           if (row.children.length) log.append(row);
         }
@@ -883,10 +887,11 @@
       const n = [...this.wm.windows.keys()].filter(k => k.startsWith('card:')).length;
       this.wm.open({ id: `card:${id}`, title: `#${card.no} ${card.title}`, icon: 'square-kanban', x: 120 + n * 24, y: 70 + n * 24, w: 640, h: 520, cls: 'win-card', content: this.cardNode(card) });
     }
-    // 從訊息打開卡片：捲到底，接下來要按的鈕（通知需求單位、交 QC）都在卡片最下面
-    openCardAtFoot(id) {
+    // 從訊息打開卡片：已完成的卡下一步是最下面的「通知需求單位」，捲到那裡；其他卡照平常從頭看
+    openCardFromChat(id) {
       this.openCard(id);
-      const win = this.wm.get(`card:${id}`); if (win) win.body.scrollTop = win.body.scrollHeight;
+      const win = this.wm.get(`card:${id}`);
+      if (win && this.engine.board.get(id).status === 'archived') win.body.scrollTop = win.body.scrollHeight;
     }
     refreshCard(id) { if (this.wm.exists(`card:${id}`)) this.wm.setContent(`card:${id}`, this.cardNode(this.engine.board.get(id))); }
     cardNode(card) {
