@@ -275,6 +275,7 @@
       sound.addEventListener('click', () => { Sound.setMuted(!Sound.muted); showSound(); });
       showSound();
       this.root.querySelector('.coffee').addEventListener('click', () => this.togglePause());
+      this.guardPausedWindows();
       this.root.querySelector('.leave').addEventListener('click', () => e.leave());
       this.root.querySelector('.visitor-talk').addEventListener('click', () => this.talkToVisitor());
       this.dragDevices();
@@ -574,6 +575,16 @@
       hand((h + mm / 60) / 12 * Math.PI * 2, 3); hand(mm / 60 * Math.PI * 2, 4);
     }
     togglePause() { this.engine.paused ? this.engine.resume() : this.engine.pause(); }
+    // 暫停時視窗可以捲動閱讀，但不能操作。按鈕以外還有拖曳的照片、排序握把，所以在捕獲階段一起攔，不逐一列舉；
+    // pointerdown 不取消預設動作，捲軸和選字才用得了。監聽掛在每次開桌都重建的 .win-layer，不留前一天的引擎
+    guardPausedWindows() {
+      const layer = this.root.querySelector('.win-layer');
+      const inPausedWindow = (ev) => this.engine.paused && ev.target.closest('.win-body');
+      layer.addEventListener('pointerdown', (ev) => { if (inPausedWindow(ev)) ev.stopPropagation(); }, true);
+      for (const type of ['click', 'dragstart']) {
+        layer.addEventListener(type, (ev) => { if (inPausedWindow(ev)) { ev.preventDefault(); ev.stopPropagation(); } }, true);
+      }
+    }
 
     // ── 提示 ──
     showHint(hint) {

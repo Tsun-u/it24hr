@@ -47,6 +47,8 @@ body { line-height: 1.5; }
   --chat-bg: #283012; --chat-them: #363c46;   /* 深色：暗的萊姆綠底、深灰泡泡 */
   background: radial-gradient(1200px 600px at 70% 30%, #1d222c, var(--os-bg)); }
 .desk.on-break .screens-bg, .desk.on-break .screens-bg *, .desk.on-break .surface > :not(.coffee), .desk.on-break .surface > :not(.coffee) * { pointer-events: none; }   /* 暫停時不能做事，只能按暫停鈕回來 */
+.desk.on-break .win-body, .desk.on-break .win-body * { pointer-events: auto; cursor: default; }   /* 開著的視窗還能捲動閱讀，操作由 desk.js 的 guardPausedWindows 攔下 */
+.desk.on-break .win-body :is(input, select, textarea) { pointer-events: none; }   /* 欄位按下去就取得焦點，等 click 才攔就來不及了 */
 .desktop.paused::after { content: '暫停中'; position: absolute; inset: 0; display: grid; place-items: center; font-size: 28px; letter-spacing: .3em; color: var(--os-fg); background: color-mix(in srgb, var(--os-bg) 55%, transparent); pointer-events: none; z-index: 32; }   /* 蓋過視窗層、工作列和通知（≤30），但在舉手、手動測試預覽這些彈出畫面（≥34）底下 */
 .os-top { position: absolute; top: 0; left: 0; right: 0; height: 26px; display: flex; align-items: center; gap: 12px; padding: 0 10px; background: var(--os-bar); font-size: 13px; z-index: 5; }
 .os-clock { font-family: var(--mono); font-weight: 600; }
