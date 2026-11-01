@@ -33,12 +33,8 @@
   const handbookButton = (cls) => ghostButton(cls, '新人手冊', () => Handbook.openOverlay());
   // IT 圖鑑（職稱地圖）跟手冊並排放
   const atlasButton = (cls) => ghostButton(cls, 'IT 圖鑑', () => Atlas.openOverlay());
-  // 認識軟體工程、CSIE 課程是坐下來慢慢讀的長篇，開新分頁；認識軟體工程還在寫
-  const seButton = (cls) => {
-    const b = ghostButton(cls, '認識軟體工程', () => {}); b.disabled = true;
-    const note = document.createElement('small'); note.textContent = '籌備中'; b.append(note);
-    return b;
-  };
+  // 認識軟體工程、CSIE 課程是坐下來慢慢讀的長篇，開新分頁
+  const seButton = (cls) => ghostButton(cls, '認識軟體工程', () => window.open('se.html', '_blank', 'noopener'));
   const csieButton = (cls) => ghostButton(cls, 'CSIE 課程', () => window.open('csie.html', '_blank', 'noopener'));
   // 首頁四顆鈕，照順序
   const learnButtons = (cls) => [atlasButton(cls), seButton(cls), handbookButton(cls), csieButton(cls)];
