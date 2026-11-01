@@ -2,23 +2,23 @@
 // 跟新人手冊（術語辭典）是兩件事：手冊解釋遊戲裡出現的詞，圖鑑介紹 IT 領域的分工；職稱在手冊有詞條的，用 term 連過去。
 (function (root) {
   const TABS = [
-    { id: 'software', icon: 'code', name: '軟體研發與工程', en: 'Software / RD', jobs: [
+    { id: 'software', icon: 'code', name: '軟體研發與工程', en: 'Software / RD', art: 'assets/atlas/software.webp', alt: '手繪插圖：前端工程師看著跑版的手機畫面說「手機版跑掉了」，隔著桌子的後端工程師站在機櫃旁說「API 我沒動喔」', jobs: [
       { title: '前端工程師', desc: '負責網頁的使用者介面與互動體驗：HTML（HyperText Markup Language，超文件標示語言）、CSS（Cascading Style Sheets，階層式樣式表）、JavaScript。', term: 'dev_layers' },
       { title: '後端工程師', desc: '負責伺服器、資料庫邏輯與 API（Application Programming Interface，應用程式介面）開發（Java、Python、PHP、Ruby）。', term: 'dev_layers' },
       { title: '全端工程師', desc: '兼顧前後端開發。', term: 'dev_layers' },
       { title: 'App 工程師（iOS／Android）', desc: '開發 Apple iOS 或 Android 等行動裝置的應用程式（App：Application）。' },
     ] },
-    { id: 'hardware', icon: 'cpu', name: '硬體與底層技術', en: 'Hardware / Embedded', jobs: [
+    { id: 'hardware', icon: 'cpu', name: '硬體與底層技術', en: 'Hardware / Embedded', art: 'assets/atlas/hardware.webp', alt: '手繪插圖：硬體工程師焊著電路板說「是韌體的問題」，韌體工程師對著筆電說「是硬體的問題」，兩人中間擺著示波器', jobs: [
       { title: '硬體工程師', desc: '電路設計、PCB（Printed Circuit Board，印刷電路板）Layout 與電子元件研發。' },
       { title: '韌體工程師（Firmware）', desc: '寫入硬體晶片中的底層控制程式（C／C++／Assembly）。' },
       { title: '嵌入式系統工程師', desc: '結合硬體與微控制器的系統開發。' },
     ] },
-    { id: 'data', icon: 'database', name: '資料與 AI 領域', en: 'Data / AI', jobs: [
+    { id: 'data', icon: 'database', name: '資料與 AI 領域', en: 'Data / AI', art: 'assets/atlas/data.webp', alt: '手繪插圖：資料工程師把一箱箱原始資料倒進漏斗整理成長條圖，一邊說「這批資料好髒」；演算法工程師站在畫著下滑曲線的黑板前說「準確率又掉了」', jobs: [
       { title: '資料工程師', desc: '建立與維護巨量資料的收集、前處理與保存（Hadoop、Spark、SQL）。SQL（Structured Query Language，結構化查詢語言）。' },
       { title: '演算法工程師', desc: '運用統計學與機器學習建立預測模型（Python、TensorFlow）。' },
       { title: 'AI 顧問', desc: '大致瞭解大多數能用來實作人工智慧（AI，Artificial Intelligence）的技術（包括但不限於數學統計、機器學習、資料探勘、最佳化方法等）的專家，能根據需求給予解決方案或研發方向，通常會和上述兩者合作，以及軟體研發的 IT 合作。' },
     ] },
-    { id: 'ops', icon: 'shield', name: '維運、安全與支援', en: 'Ops & Security', jobs: [
+    { id: 'ops', icon: 'shield', name: '維運、安全與支援', en: 'Ops & Security', art: 'assets/atlas/ops.webp', alt: '手繪插圖：工程師站在機櫃旁說「自動部署完成」，一面盾牌彈開小蟲子，MIS 站在梯子上修天花板的線路，同事抱著筆電求助「我的帳號登不進去」', jobs: [
       { title: 'DevOps／雲端工程師', desc: '負責 CI/CD（Continuous Integration／Continuous Delivery，持續整合／持續交付）自動化部署、Docker／K8s（Kubernetes）容器化與雲端架構管理，例如 AWS（Amazon Web Services）、GCP（Google Cloud Platform）、Azure。', term: 'devops' },
       { title: '網路安全工程師／資安工程師', desc: '系統漏洞檢測、防火牆設定與防範駭客入侵。', term: 'security' },
       { title: 'IT 技術支援（IT Support／MIS）', desc: '企業內部軟硬體故障排除、帳號管理與日常維運；台灣職缺常寫「MIS 工程師」「資訊管理人員」。IT（Information Technology，資訊科技）、MIS（Management Information System，資訊管理系統）。', term: 'mis' },
@@ -57,7 +57,9 @@
         item.append(h('dt', '', job.title), dd);
         list.append(item);
       }
-      page.append(list);
+      const art = h('img', 'atlas-art');
+      Object.assign(art, { src: tab.art, alt: tab.alt, width: 1040, height: 462, loading: 'lazy' });
+      page.append(art, list);
       return page;
     });
     const show = (id) => {

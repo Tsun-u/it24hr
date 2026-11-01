@@ -1011,6 +1011,7 @@ a.csie-course:hover { border-color: var(--accent); }
 .atlas-tab small { font-size: 11px; color: var(--os-muted, var(--muted)); }
 .atlas-tab.on { background: rgba(37, 99, 235, .12); border-color: var(--accent); }
 .atlas-page[hidden] { display: none; }
+.atlas-art { display: block; width: 100%; height: auto; margin-bottom: 8px; border-radius: 8px; }
 .atlas-notes { margin-top: 16px; padding-top: 10px; border-top: 1px solid var(--os-border, #d8cfbd); font-size: 13px; color: var(--os-muted, var(--muted)); }
 .atlas-notes p { margin: 0 0 6px; }
 .btn.ghost.hb-open { color: var(--muted); border-color: #d8d0c1; }

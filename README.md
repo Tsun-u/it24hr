@@ -62,6 +62,6 @@ node --test "tests/**/*.test.js"   # 純邏輯測試
 
 ## 授權
 
-本專案以 MIT 授權釋出（見 `LICENSE`）。介面圖示來自 [Lucide](https://lucide.dev)（ISC，見 `LICENSES/lucide.txt`），手繪風圖解用 [Rough.js](https://roughjs.com/)（MIT，見 `LICENSES/roughjs.txt`）。
+本專案以 MIT 授權釋出（見 `LICENSE`）。介面圖示來自 [Lucide](https://lucide.dev)（ISC，見 `LICENSES/lucide.txt`），手繪風圖解用 [Rough.js](https://roughjs.com/)（MIT，見 `LICENSES/roughjs.txt`）。IT 圖鑑的插圖用 [statechart-art](https://github.com/kevintngo/statechart-art) 的畫筆與紙張繪製（MIT，見 `LICENSES/statechart-art.txt`），圖上的中文是[芫荽](https://github.com/ButTaiwan/iansui)字型（OFL）。
 
 遊戲裡的公司、人物和軟體（LIME、Tearlol、Claire Code……）都是虛構的，如有雷同，純屬職場共通的苦難。
