@@ -212,11 +212,11 @@
       const view = reportView(engine, report); const save = nextSave(engine, view); writeSave(save);
       // 第三天的隔天是結業早會，不是下一天的辦公桌
       const tomorrow = save.day === 'done' ? () => showGraduation(save) : () => playDay(save);
-      showReport(view, [{ text: '再過一次', onClick: badge }, { text: '隔天', cls: 'primary', onClick: tomorrow }]);
+      showReport(view, [{ text: '回選玩法', onClick: () => modes(player) }, { text: '隔天', cls: 'primary', onClick: tomorrow }]);
     });
-    // bad end：照樣出結算卡，上面一條 BAD END 和原因；那一天沒過，不存檔、只能重來
+    // bad end：照樣出結算卡，上面一條 BAD END 和原因；那一天沒過，不存檔，可以重來這一天或回選玩法
     engine.on('bad_end', ({ reason, report }) => {
-      stop(); showReport({ ...reportView(engine, report), badEnd: reason }, [{ text: '重來這一天', cls: 'primary', onClick: () => start(player, script, carried) }]);
+      stop(); showReport({ ...reportView(engine, report), badEnd: reason }, [{ text: '回選玩法', onClick: () => modes(player) }, { text: '重來這一天', cls: 'primary', onClick: () => start(player, script, carried) }]);
     });
     engine.on('home:menu', () => HomeMenu.open(app, engine));   // 離開公司：先選吃的、要不要帶公司筆電，再進茶几
     // 還沒做的那一天只有開場的公司早會，開完就是待續
