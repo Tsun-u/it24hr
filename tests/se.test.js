@@ -5,13 +5,14 @@ const SE = require('../se-content.js');
 const field = (blocks, label) => blocks.find(b => b.t === 'field' && b.label === label);
 const allText = JSON.stringify(SE);
 
-test('開場：從生活情境帶出問題、說清楚看完會懂什麼，每題都連到有答案的那一站', () => {
+test('開場：從生活情境帶出問題、說清楚看完會懂什麼，每題都有簡短說明和詳細內容在第幾站', () => {
   assert.match(SE.hero[0].text, /兩週？$/);
   const opening = JSON.stringify(SE.hero);
   assert.match(opening, /巷口那間常去的手搖飲/);
   assert.match(opening, /走完一遍，你會知道/);
-  const hooks = SE.hero.find(b => b.t === 'list').items.map(item => /\(#s(\d+)\)$/.exec(item)[1]).map(Number);
-  assert.deepStrictEqual(hooks, [8, 9, 2, 10]);
+  const hooks = SE.hero.filter(b => b.t === 'field');
+  hooks.forEach(hook => assert.match(hook.label, /？$/));
+  assert.deepStrictEqual(hooks.map(hook => Number(/後面的第 (\d+) 站/.exec(hook.text)[1])), [8, 9, 2, 10]);
   assert.match(JSON.stringify(SE.walk.stations[7].blocks), /連按兩次付款/);
   assert.match(JSON.stringify(SE.walk.stations[8].blocks), /第 40 筆/);
   assert.match(JSON.stringify(SE.walk.stations[1].blocks), /在地限定品項/);

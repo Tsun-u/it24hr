@@ -960,10 +960,10 @@ a.csie-course:hover { border-color: var(--accent); }
 .se-hero h2 { margin: 10px 0 8px; font-size: 30px; line-height: 1.35; word-break: keep-all; } .se-hero p { margin: 8px 0; } .se-hero svg { display: block; margin: 12px auto; }
 .se-outro { margin: 32px 0 20px; padding: 14px 16px; border-left: 4px solid var(--warn); }
 .se-outro p { margin: 0; }
-.se-hero ul { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; margin: 10px 0; padding: 0; list-style: none; } .se-hero li { display: grid; }
-.se-hook { padding: 12px 14px; border: 1px solid #d8cfbd; border-radius: 10px; background: #fffdf8; color: inherit; font: inherit; font-weight: 700; line-height: 1.5; text-align: left; cursor: pointer; }
-.se-hook:hover { border-color: var(--accent); color: var(--accent); }
-.se-flow { scroll-margin-top: 110px; }
+.se-hook { margin: 8px 0; border: 1px solid #d8cfbd; border-radius: 10px; background: #fffdf8; }
+.se-hook summary { padding: 12px 14px; font-weight: 700; line-height: 1.5; cursor: pointer; }
+.se-hook summary:hover { color: var(--accent); }
+.se-hero .se-hook p { margin: 0; padding: 0 14px 12px; }
 .se-nav { position: sticky; top: 56px; z-index: 1; display: flex; gap: 6px; margin: 14px 0 0; padding: 8px 0; overflow-x: auto; background: var(--paper); }
 .se-nav a { flex: none; padding: 4px 12px; border: 1px solid #d8cfbd; border-radius: 999px; color: inherit; font-size: 14px; text-decoration: none; }
 .se-nav a:hover { border-color: var(--accent); color: var(--accent); }
@@ -999,7 +999,7 @@ a.csie-course:hover { border-color: var(--accent); }
 .se-sheet-body { padding: 12px 14px 16px; overflow: auto; line-height: 1.7; } .se-sheet-body p { margin: 8px 0 0; } .se-sheet-body svg { display: block; margin: 0 auto; }
 .se-sheet-body .cr-pre { white-space: pre-wrap; overflow-wrap: anywhere; font-size: 14px; }
 @media (max-width: 699px) {
-  .se-hero h2 { font-size: 24px; } .se-hero ul { grid-template-columns: minmax(0, 1fr); } .se-nav { top: 50px; }
+  .se-hero h2 { font-size: 24px; } .se-nav { top: 50px; }
   .se-station, .se-model { padding-left: 12px; padding-right: 12px; }
   .se-table table { font-size: 14px; }
 }

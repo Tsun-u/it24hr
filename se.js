@@ -32,7 +32,6 @@
     for (const part of text.split(INLINE)) {
       const link = /^\[([^\]]+)\]\(([^)]+)\)$/.exec(part);
       if (link && link[2].startsWith('#t')) frag.append(templateLink(link[1], link[2].slice(1)));
-      else if (link && link[2].startsWith('#s')) frag.append(stationLink(link[1], Number(link[2].slice(2))));
       else if (link) { const a = h('a', '', link[1]); a.href = link[2]; a.target = '_blank'; a.rel = 'noopener'; frag.append(a); }
       else if (part.startsWith('**')) frag.append(h('strong', '', part.slice(2, -2)));
       else if (part.startsWith('`')) frag.append(h('code', '', part.slice(1, -1)));
@@ -83,6 +82,12 @@
     }
   }
   const blocksNode = (blocks) => blocks.map(blockNode);
+  // 開場的問題：點開在原地顯示簡短說明
+  function hookNode({ label, text }) {
+    const item = h('details', 'se-hook');
+    item.append(h('summary', '', label), withInline('p', '', text));
+    return item;
+  }
 
   // ── 小範本：浮動視窗 ──
   const dialog = h('dialog', 'se-dialog');
@@ -102,13 +107,6 @@
   function templateLink(label, id) {
     const b = h('button', 'se-tpl', label); b.type = 'button';
     b.addEventListener('click', () => openTemplate(id));
-    return b;
-  }
-  // 開場的問題：點了跳到答案在的那一站
-  let openStation = () => {};
-  function stationLink(label, no) {
-    const b = h('button', 'se-hook', label); b.type = 'button';
-    b.addEventListener('click', () => openStation(no));
     return b;
   }
 
@@ -318,7 +316,6 @@
       if (scroll) panel.scrollIntoView({ block: 'start' });
     };
     NARROW.addEventListener('change', () => show(selected));
-    openStation = (no) => { show(no); flow.scrollIntoView({ block: 'start' }); };
     show(1);
     wrap.append(flow, panel);
     return wrap;
@@ -371,7 +368,7 @@
     for (const [id, name] of CHAPTERS) { const a = h('a', '', name); a.href = `#${id}`; nav.append(a); }
     const [title, ...lead] = SE.hero;
     const hero = h('header', 'se-hero');
-    hero.append(h('h2', '', title.text), drawBusyClerk(), ...blocksNode(lead));
+    hero.append(h('h2', '', title.text), drawBusyClerk(), ...lead.map((block) => (block.t === 'field' ? hookNode(block) : blockNode(block))));
     const outro = h('div', 'se-outro');
     outro.append(...blocksNode(SE.summary));
     main.append(hero, nav,
