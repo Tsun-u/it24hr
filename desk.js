@@ -884,7 +884,7 @@
         const col = h('div', `col col-${status}`); col.append(h('h3', '', `${STATUS_ZH[status]} ${cols[status].length ? cols[status].length : ''}`));
         for (const card of cols[status]) {
           const k = h('button', `kcard ${e.board.canOperate(card) ? '' : 'readonly'}`);
-          const meta = h('span', 'kmeta', `${card.assignee}${card.pending ? '（需求分析中）' : ''}${card.parent ? ` ・ ↖ ${e.board.label(card.parent)}` : ''}`);
+          const meta = h('span', 'kmeta', `${card.assignee}${card.pending ? '（需求分析中）' : card.nextRound ? '（排進下一版）' : ''}${card.parent ? ` ・ ↖ ${e.board.label(card.parent)}` : ''}`);
           if (card.comments.length) meta.append(' ・ ', Icons.el('message-circle', 'ico-xs'), String(card.comments.length));
           k.append(h('span', 'tag', card.tag), h('span', 'ktitle', `#${card.no} ${card.title}`), meta);
           k.addEventListener('click', () => this.openCard(card.id));
@@ -975,6 +975,7 @@
         // 自己的卡但交出去了：講卡現在在誰那邊
         const away = { to_qc: '交給 QC 了，阿姿驗完會回你。', rejected_to_sa: '退回給怡君了，現在在她那邊。' };
         const note = card.pending ? '怡君還在分析需求，等她寫好會變成你的。'
+          : card.nextRound ? '怡君排進下一版了，這輪不用動。'
           : card.assignee === e.player.name && away[card.status] ? away[card.status] : '這是別人的卡，只能看。';
         wrap.append(h('p', 'muted readonly-note', note));
       }

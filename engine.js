@@ -849,13 +849,26 @@
       const subs = this.board.cards.filter(c => c.parent === parent.id && c.status === 'archived');
       // 廢話沒刪完的 Novel 文件交給了客戶（例如資安問卷）：卡的 wordyFires 寫志豪會怎麼說
       const wordyLines = (c) => Object.entries(c.wordyFires || {}).filter(([work]) => c.wordy[work]).map(([, text]) => text);
-      const lines = [...new Set(subs.flatMap(c => [...this.firedLines(c), ...wordyLines(c)]))];
+      const linesOf = (c) => [...this.firedLines(c), ...wordyLines(c)];
+      const lines = [...new Set(subs.flatMap(linesOf))];
       const who = parent.trialBy || parent.requester;
       const say = (id, text) => this.addDoc({ id: `${parent.id}:trial:${id}`, title: parent.notifyGroup, from: who, group: parent.notifyGroup, module: null, origin: 'line', kind: 'chat', cardId: parent.id, text, sentences: [], subtasks: [] });
       if (parent.trialHello) this.clock.at(this.clock.minute + 10, () => say('hello', parent.trialHello));   // 先登進去說一聲，問題接在後面
       this.stats.trialFound ??= 0;   // 有試用過才上結算卡
       lines.forEach((text, n) => this.clock.at(this.clock.minute + 15 + 3 * n, () => { say(n, text); this.stats.trialFound++; }));
+      if (lines.length) this.clock.at(this.clock.minute + 15 + 3 * lines.length + 5, () => this.openFeedbackCard(parent, subs.filter(c => linesOf(c).length), lines));
       return lines;
+    }
+    // 上線的卡算結案、不重開：客戶的回饋由怡君開成一張新卡，舊卡掛成參考文件，排進下一版
+    openFeedbackCard(parent, sources, lines) {
+      const card = this.board.add(makeCard({
+        id: `${parent.id}:feedback`, title: `${parent.title}：客戶回饋`, type: 'bug', from: SA, assignee: SA, requester: parent.trialBy || parent.requester, nextRound: true,
+        body: lines.map(line => `・${line}`).join('\n'), attachments: [parent, ...sources].map(c => `參考文件：#${c.no} ${c.title}`),
+      }), this.clock.minute);
+      this.emit('card:arrived', card); this.emit(`card:arrived:${card.id}`, card);
+      this.addDoc({ id: `${card.id}:said`, title: SA, from: SA, module: null, origin: 'line', kind: 'chat', cardId: card.id,
+        text: `客戶的回饋我開成新卡了（#${card.no}），舊卡掛在附件當參考。排進下一版，這輪不用動。`, sentences: [], subtasks: [] });
+      return card;
     }
     downMinutes(card) { return (card.downMinutes || 0) + (card.down != null ? this.clock.minute - card.down : 0); }
     // 部署在終端機上長什麼樣（legacy：指令自己打）。照玩家排的順序一步一行指令＋輸出；before 是 AI 中斷前做過的步驟（不再印）。

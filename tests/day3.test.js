@@ -170,6 +170,26 @@ test('筆記發作時群組裡的那句：母議題通知群組後志豪試用�
   assert.strictEqual(trial[0].from, DAY3.IT); assert.strictEqual(trial[0].group, DAY3.POC);
   assert.match(trial[0].text, /你們公司的網域/); assert.match(trial[1].text, /忘記密碼/);
   assert.ok(e.report().tally.some(t => t.text === '客戶試用時抓到的問題：2 個'), '結算卡記客戶抓到幾個');
+
+  // 上線就算結案：回饋由怡君開成新卡，舊卡掛成參考文件，排進下一版
+  assert.strictEqual(e.board.get('poc:feedback'), undefined, '回饋講完才開卡');
+  tickTo(e, start + 30);
+  const feedback = e.board.get('poc:feedback');
+  assert.strictEqual(feedback.assignee, 'SA 怡君');
+  assert.ok(feedback.nextRound, '排進下一版，玩家這輪不用動');
+  assert.strictEqual(feedback.subtasks.length, 0);
+  assert.match(feedback.body, /你們公司的網域[\s\S]*忘記密碼/);
+  assert.deepStrictEqual(feedback.attachments, [`參考文件：#${poc.no} ${poc.title}`, `參考文件：#${login.no} ${login.title}`]);
+  assert.strictEqual(poc.status, 'archived', '舊卡維持結案');
+  assert.match(e.docs.find(d => d.id === 'poc:feedback:said').text, new RegExp(`#${feedback.no}`), '怡君跟玩家說一聲');
+  assert.doesNotThrow(() => { e.report(); e.carryOver(); }, '結算、換天都不受影響');
+});
+
+test('客戶試用沒抓到問題就不開回饋卡', () => {
+  const e = startDay3(); tickTo(e, C.DAY_START_MIN + 91);
+  assert.deepStrictEqual(e.customerTrial(e.board.get('poc')), []);
+  tickTo(e, e.clock.minute + 60);
+  assert.strictEqual(e.board.get('poc:feedback'), undefined);
 });
 
 test('半夜事件 (c)：群組裡答應「今天給」、QA 機器人沒結案，22:15 佩珊來討；回保守的那句就不會', () => {
