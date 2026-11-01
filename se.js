@@ -63,7 +63,7 @@
     return wrap;
   }
   function fieldNode(block) {
-    const wrap = h('div', `se-field${block.label === '新人訓練裡' ? ' se-game' : ''}`);
+    const wrap = h('div', `se-field${block.label === '遊戲內的新人訓練對應劇情' ? ' se-game' : ''}`);
     wrap.append(h('h4', 'se-label', block.label));
     if (block.text) wrap.append(withInline('p', '', block.text));
     if (block.quote) { const q = h('blockquote', 'se-manifesto'); for (const line of block.quote) q.append(h('p', '', line)); wrap.append(q); }

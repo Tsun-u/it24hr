@@ -31,7 +31,7 @@ test('12 站照順序，每站都有產出、做什麼、誰負責、例子和�
   SE.walk.stations.forEach((s, i) => {
     assert.strictEqual(s.no, i + 1);
     assert.ok(s.short && s.title);
-    for (const label of ['這一站可能的產出', '這一站做什麼', '誰負責', '手搖飲裡發生什麼', '新人訓練裡']) assert.ok(field(s.blocks, label), `第 ${s.no} 站少了 ${label}`);
+    for (const label of ['這一站可能的產出', '這一站做什麼', '誰負責', '手搖飲需求案裡發生什麼', '遊戲內的新人訓練對應劇情']) assert.ok(field(s.blocks, label), `第 ${s.no} 站少了 ${label}`);
     assert.strictEqual(s.blocks[0].label, '這一站可能的產出', '產出排在最前面');
   });
   assert.match(SE.walk.closing.text, /^走到這裡/);
