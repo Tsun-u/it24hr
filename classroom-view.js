@@ -15,6 +15,22 @@
   function section(title, ...children) { const sec = h('section', 'cr-sec'); sec.append(h('h4', '', title), ...children); return sec; }
   const ul = (arr) => { const l = h('ul'); for (const t of arr) l.append(h('li', '', t)); return l; };
 
+  // 常見誤解：一條一張小卡，上面是誤解、下面是正解
+  function trapsNode(traps) {
+    const line = (kind, icon, label, text) => {
+      const p = h('p', `cr-trap-line ${kind}`);
+      p.append(root.Icons.el(icon, 'cr-trap-icon'), h('span', 'cr-sr', label), h('span', '', text));
+      return p;
+    };
+    const list = h('div', 'cr-traps');
+    for (const { wrong, right } of traps) {
+      const item = h('div', 'cr-trap');
+      item.append(line('wrong', 'circle-x', '誤解：', wrong), line('right', 'circle-check', '正解：', right));
+      list.append(item);
+    }
+    return list;
+  }
+
   // 分格靜態圖：照劇本的操作重播，每一步一格，格子下面寫操作
   function framesNode(id, page) {
     const row = h('div', 'cr-frames');
@@ -83,7 +99,7 @@
       section('核心觀念', ...page.concept.map(t => h('p', '', t))),
       section('怎麼算', ...page.howto.map(howtoNode)),
       section('自己按按看', sandboxNode(page)),
-      section('常見誤解', ul(page.traps)),
+      section('常見誤解', trapsNode(page.traps)),
       section('總表', overviewNode()),
       section('總結', h('p', 'cr-hook', page.summary)),
     ];
@@ -105,7 +121,7 @@
       section('核心觀念', ...page.concept.map(t => h('p', '', t))),
       ...(gameSec ? [gameSec] : []),
       section('自己按按看', sandboxNode(page), ...(page.classic ? [page.classic.node(kit)] : [])),
-      section('常見誤解', ul(page.traps)),
+      section('常見誤解', trapsNode(page.traps)),
       section('實作', codeNode(page.code)),
       section('時間複雜度', table, h('p', 'cr-hint', 'O(1)、O(n) 是什麼意思、怎麼算，見附錄「時間複雜度」。')),
       section('總結', h('p', 'cr-hook', page.summary)),

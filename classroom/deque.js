@@ -21,12 +21,12 @@
     complexity: [['pushFront 前面放', 'O(1)'], ['pushBack 後面放', 'O(1)'], ['popFront 前面拿', 'O(1)'], ['popBack 後面拿', 'O(1)'], ['看最前面／最後面', 'O(1)'], ['找某個值在不在裡面', 'O(n)']],
     // 常見誤解：教學怪物教案的 Common Trap，寫成「很多人以為…——其實…」
     traps: [
-      '「deque 就是 dequeue 少打一個 u」——不是。deque 是 Double-Ended Queue 的縮寫、唸「deck」，指的是這個資料結構；dequeue 是佇列「叫號」那個動作。差一個字母，一個是東西、一個是動作。',
-      '「從前面放進去的，也會排到最後面」——不對，pushFront 放的就在最前面，下一次 popFront 拿到的就是它。連續從前面放 1、2、3，從前面數過來是 3、2、1：只用前端的話，它就是一個堆疊。',
-      '「Python 的 deque 拿東西就用 pop()」——其實 pop() 拿的是右邊（後端），從左邊（前端）拿要用 popleft()；放也一樣，append() 放右邊、appendleft() 放左邊。拿來當佇列卻寫成 pop()，不會報錯，只是佇列默默變成了堆疊。',
-      '「JavaScript 陣列的 unshift／shift 跟 push／pop 一樣快」——其實 push／pop 動的是尾巴，O(1)；unshift／shift 動的是開頭，後面每一格都得挪一個位置，是 O(n)。資料少看不出來，筆數一多就慢；兩頭都要快，就照下面「自己刻」的寫。',
-      '「Deque 一定是用鏈結串列做的」——其實環狀陣列也行，下面「自己刻」就是。Java 的 ArrayDeque 是環狀陣列，Python 的 deque 是一段段小陣列用雙向鏈結串起來。Deque 說的是「兩頭都能進出」這個規則，不是東西怎麼存。',
-      '「front 往前退一格，寫 (front − 1) % n 就好」——其實只有 Python 會得到 n − 1；C++、Java、JavaScript 的 % 會保留負號，(0 − 1) % 6 是 −1，索引直接超出範圍（JavaScript 還不報錯，默默存進一個叫 -1 的屬性）。寫成 (front − 1 + n) % n，四種語言都對。',
+      { wrong: 'deque 就是 dequeue 少打一個 u', right: '不是。deque 是 Double-Ended Queue 的縮寫、唸「deck」，指的是這個資料結構；dequeue 是佇列「叫號」那個動作。差一個字母，一個是東西、一個是動作。' },
+      { wrong: '從前面放進去的，也會排到最後面', right: 'pushFront 放的就在最前面，下一次 popFront 拿到的就是它。連續從前面放 1、2、3，從前面數過來是 3、2、1：只用前端的話，它就是一個堆疊。' },
+      { wrong: 'Python 的 deque 拿東西就用 pop()', right: 'pop() 拿的是右邊（後端），從左邊（前端）拿要用 popleft()；放也一樣，append() 放右邊、appendleft() 放左邊。拿來當佇列卻寫成 pop()，不會報錯，只是佇列默默變成了堆疊。' },
+      { wrong: 'JavaScript 陣列的 unshift／shift 跟 push／pop 一樣快', right: 'push／pop 動的是尾巴，O(1)；unshift／shift 動的是開頭，後面每一格都得挪一個位置，是 O(n)。資料少看不出來，筆數一多就慢；兩頭都要快，就照下面「自己刻」的寫。' },
+      { wrong: 'Deque 一定是用鏈結串列做的', right: '環狀陣列也行，下面「自己刻」就是。Java 的 ArrayDeque 是環狀陣列，Python 的 deque 是一段段小陣列用雙向鏈結串起來。Deque 說的是「兩頭都能進出」這個規則，不是東西怎麼存。' },
+      { wrong: 'front 往前退一格，寫 (front − 1) % n 就好', right: '只有 Python 會得到 n − 1；C++、Java、JavaScript 的 % 會保留負號，(0 − 1) % 6 是 −1，索引直接超出範圍（JavaScript 還不報錯，默默存進一個叫 -1 的屬性）。寫成 (front − 1 + n) % n，四種語言都對。' },
     ],
     code: {
       python: {

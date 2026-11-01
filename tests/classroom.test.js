@@ -12,6 +12,13 @@ test('目錄：登記的頁都在目錄裡；結算卡每個印章都對得到�
   assert.strictEqual(CR.pageForStamp('不存在的印章', V.NAMES), null);
 });
 
+test('常見誤解：每條都分成誤解和正解，誤解不帶引號', () => {
+  for (const [id, p] of Object.entries(CR.PAGES)) for (const t of p.traps) {
+    assert.ok(t.wrong && t.right, `${id} 有一條少了誤解或正解`);
+    assert.ok(!/^「.*」$/.test(t.wrong), `${id}：${t.wrong}`);
+  }
+});
+
 // 一般的講義頁十段；觀念頁（附錄 Big-O）沒有實作和自己的複雜度表，換成「怎麼算」
 const LESSON = ['analogy', 'frames', 'uses', 'concept', 'traps', 'code', 'complexity', 'summary', 'sandbox'];
 const REFERENCE = ['analogy', 'frames', 'uses', 'concept', 'howto', 'traps', 'summary', 'sandbox'];

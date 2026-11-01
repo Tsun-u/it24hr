@@ -22,13 +22,13 @@
     complexity: [['檢查是不是 null', 'O(1)'], ['建立空的堆疊 new Stack()', 'O(1)'], ['push 放進', 'O(1)']],
     // 常見誤解：教學怪物教案的 Common Trap，寫成「很多人以為…——其實…」
     traps: [
-      '「null 就是空的」——不一樣。空的堆疊有盒子、只是裡面沒東西，可以 push、可以問它空了沒；null 是連盒子都沒有，連「空了沒」都問不了，一問就出錯。',
-      '「null、0、空字串都代表『沒有』，所以一樣」——0 是一個數字、"" 是一個長度 0 的字串，它們都是真的存在的值；null 是根本沒有值。表單的年齡填 0 跟沒填是兩回事。偏偏在 if 判斷裡，這三個在 JavaScript 和 Python 都算「假」，寫 if (!age) 會把填 0 的人當成沒填；要分清楚就明寫 age === null（Python 寫 age is None）。',
-      '「宣告了變數，它就自動是 null」——不一定。Java 物件型別的欄位（field）沒給值預設是 null，但區域變數沒給值就拿來用會編譯錯誤；JavaScript 寫 let s; 得到的是 undefined；Python 沒給過值的名字根本不存在，一用就 NameError；C++ 沒初始化的區域指標裡是一個亂七八糟的位址，不是 nullptr，比 null 更危險。',
-      '「JavaScript 的 undefined 跟 null 一樣」——不一樣。undefined 是「還沒給值」（宣告了沒給值、物件沒有那個屬性、函式沒有 return），null 是程式刻意放進去的「沒有」。null == undefined 是 true，但 null === undefined 是 false；typeof null 還會得到 "object"，這是 JavaScript 早年留下來的 bug。',
-      '「Python 判斷 None 用 == 就好」——要寫 x is None。== 會呼叫物件自己定義的比較方法（__eq__），有些類別會給出意想不到的結果（NumPy 陣列跟 None 用 == 比，得到的是一整排 True／False）；None 整個程式只有一個，用 is 直接比「是不是同一個」最準，PEP 8 也這樣規定。',
-      '「C++ 的 nullptr、NULL、0 都一樣」——NULL 通常是代表整數 0 的巨集（macro）。同時有 f(int) 和 f(char*) 兩個多載（overload）時，f(NULL) 可能跑去呼叫 f(int)，也可能編譯器直接說呼叫不明確（ambiguous）；nullptr（C++11 起）有自己的型別 std::nullptr_t，只會被當成指標，f(nullptr) 一定呼叫 f(char*)。新的 C++ 程式一律寫 nullptr。',
-      '「對 null 呼叫方法，頂多回傳 null」——沒那麼客氣。Java 丟 NullPointerException、JavaScript 丟 TypeError、Python 丟 AttributeError，C++ 是未定義行為（undefined behavior），常常直接當掉。JavaScript 的 s?.push(1) 會安靜地回傳 undefined，那是用 ?.（optional chaining）刻意要求「是 null 就跳過」，不是預設行為。',
+      { wrong: 'null 就是空的', right: '不一樣。空的堆疊有盒子、只是裡面沒東西，可以 push、可以問它空了沒；null 是連盒子都沒有，連「空了沒」都問不了，一問就出錯。' },
+      { wrong: 'null、0、空字串都代表『沒有』，所以一樣', right: '0 是一個數字、"" 是一個長度 0 的字串，它們都是真的存在的值；null 是根本沒有值。表單的年齡填 0 跟沒填是兩回事。偏偏在 if 判斷裡，這三個在 JavaScript 和 Python 都算「假」，寫 if (!age) 會把填 0 的人當成沒填；要分清楚就明寫 age === null（Python 寫 age is None）。' },
+      { wrong: '宣告了變數，它就自動是 null', right: '不一定。Java 物件型別的欄位（field）沒給值預設是 null，但區域變數沒給值就拿來用會編譯錯誤；JavaScript 寫 let s; 得到的是 undefined；Python 沒給過值的名字根本不存在，一用就 NameError；C++ 沒初始化的區域指標裡是一個亂七八糟的位址，不是 nullptr，比 null 更危險。' },
+      { wrong: 'JavaScript 的 undefined 跟 null 一樣', right: '不一樣。undefined 是「還沒給值」（宣告了沒給值、物件沒有那個屬性、函式沒有 return），null 是程式刻意放進去的「沒有」。null == undefined 是 true，但 null === undefined 是 false；typeof null 還會得到 "object"，這是 JavaScript 早年留下來的 bug。' },
+      { wrong: 'Python 判斷 None 用 == 就好', right: '要寫 x is None。== 會呼叫物件自己定義的比較方法（__eq__），有些類別會給出意想不到的結果（NumPy 陣列跟 None 用 == 比，得到的是一整排 True／False）；None 整個程式只有一個，用 is 直接比「是不是同一個」最準，PEP 8 也這樣規定。' },
+      { wrong: 'C++ 的 nullptr、NULL、0 都一樣', right: 'NULL 通常是代表整數 0 的巨集（macro）。同時有 f(int) 和 f(char*) 兩個多載（overload）時，f(NULL) 可能跑去呼叫 f(int)，也可能編譯器直接說呼叫不明確（ambiguous）；nullptr（C++11 起）有自己的型別 std::nullptr_t，只會被當成指標，f(nullptr) 一定呼叫 f(char*)。新的 C++ 程式一律寫 nullptr。' },
+      { wrong: '對 null 呼叫方法，頂多回傳 null', right: '沒那麼客氣。Java 丟 NullPointerException、JavaScript 丟 TypeError、Python 丟 AttributeError，C++ 是未定義行為（undefined behavior），常常直接當掉。JavaScript 的 s?.push(1) 會安靜地回傳 undefined，那是用 ?.（optional chaining）刻意要求「是 null 就跳過」，不是預設行為。' },
     ],
     code: {
       python: {

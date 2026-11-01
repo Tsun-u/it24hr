@@ -26,12 +26,12 @@
     ],
     // 常見誤解：教學怪物教案的 Common Trap，寫成「很多人以為…——其實…」
     traps: [
-      '「鏈結串列也能像陣列一樣，直接跳到第 k 個」——其實不行。節點散在記憶體各處，沒有編號能算出位置，只能從 head 照著指標一個一個數過去，越後面越久（O(n)）。',
-      '「鏈結串列插入一定是 O(1)」——其實要「已經站在那個位置」才是。插到頭是 O(1)；要插到第 k 個，得先從 head 走過去，光走路就是 O(n)。只記 head、沒有尾指標（tail）的話，接到最後面也要走完全程。',
-      '「插入時要改兩個指標，先改哪個都一樣」——其實順序反了，後面整串就不見了。把 node 插在 A 後面，要先寫 node.next = A.next，再寫 A.next = node；先改 A.next 的話，原本接在 A 後面的那一串就再也找不到了。',
-      '「刪掉一個節點，只要把前一個接到下一個就好」——其實刪的是第一個時沒有「前一個」，要改的是 head；刪的是最後一個時，前一個要改成指向 null，有尾指標的話也要跟著改。這兩個邊界最常漏掉。',
-      '「空的時候刪頭也沒關係」——其實 head 是 null 時還去拿 head.next，Python、Java、JavaScript 會直接報錯（AttributeError、NullPointerException、TypeError），C++ 對 nullptr 取值是未定義行為，常常直接當掉。刪之前先檢查 head 是不是 null。',
-      '「Python 的 list、JavaScript 的 Array 就是鏈結串列」——其實它們都是會自動變長的陣列。這兩種語言沒有內建鏈結串列，考試要自己刻；Java 有 LinkedList（雙向），C++ 有 std::list（雙向）和 std::forward_list（單向）。',
+      { wrong: '鏈結串列也能像陣列一樣，直接跳到第 k 個', right: '不行。節點散在記憶體各處，沒有編號能算出位置，只能從 head 照著指標一個一個數過去，越後面越久（O(n)）。' },
+      { wrong: '鏈結串列插入一定是 O(1)', right: '要「已經站在那個位置」才是。插到頭是 O(1)；要插到第 k 個，得先從 head 走過去，光走路就是 O(n)。只記 head、沒有尾指標（tail）的話，接到最後面也要走完全程。' },
+      { wrong: '插入時要改兩個指標，先改哪個都一樣', right: '順序反了，後面整串就不見了。把 node 插在 A 後面，要先寫 node.next = A.next，再寫 A.next = node；先改 A.next 的話，原本接在 A 後面的那一串就再也找不到了。' },
+      { wrong: '刪掉一個節點，只要把前一個接到下一個就好', right: '刪的是第一個時沒有「前一個」，要改的是 head；刪的是最後一個時，前一個要改成指向 null，有尾指標的話也要跟著改。這兩個邊界最常漏掉。' },
+      { wrong: '空的時候刪頭也沒關係', right: 'head 是 null 時還去拿 head.next，Python、Java、JavaScript 會直接報錯（AttributeError、NullPointerException、TypeError），C++ 對 nullptr 取值是未定義行為，常常直接當掉。刪之前先檢查 head 是不是 null。' },
+      { wrong: 'Python 的 list、JavaScript 的 Array 就是鏈結串列', right: '它們都是會自動變長的陣列。這兩種語言沒有內建鏈結串列，考試要自己刻；Java 有 LinkedList（雙向），C++ 有 std::list（雙向）和 std::forward_list（單向）。' },
     ],
     code: {
       python: {
