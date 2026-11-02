@@ -3,7 +3,7 @@
   const SE = root.SE_CONTENT;
   const SVG = 'http://www.w3.org/2000/svg';
   const INK = '#1f2328', FILL = '#9cc3f5', NEW = '#ffd166', PLAIN = '#fffdf8';
-  const CHAPTERS = [['sdlc', 'SDLC'], ['walk', '一起走一次'], ['models', '開發模型'], ['ai', 'AI 開發'], ['chat', '最後聊一題']];
+  const CHAPTERS = [['walk', '一起走一次'], ['sdlc', 'SDLC'], ['models', '開發模型'], ['ai', 'AI 開發'], ['chat', '最後聊一題']];
   const NARROW = root.matchMedia('(max-width: 699px)');
 
   const h = (tag, cls, text) => { const el = document.createElement(tag); if (cls) el.className = cls; if (text !== undefined) el.textContent = text; return el; };
@@ -372,8 +372,8 @@
     const outro = h('div', 'se-outro');
     outro.append(...blocksNode(SE.summary));
     main.append(hero, nav,
-      section('sdlc', SE.sdlc.title, ...blocksNode(SE.sdlc.blocks)),
       section('walk', SE.walk.title, ...blocksNode(SE.walk.lead), ...blocksNode(SE.walk.setting), walkNode()),
+      section('sdlc', SE.sdlc.title, ...blocksNode(SE.sdlc.blocks)),
       section('models', SE.models.title, ...blocksNode(SE.models.lead), ...modelsNode()),
       section('ai', SE.ai.title, ...aiNode()),
       section('chat', SE.question.title, ...blocksNode(SE.question.lead), questionNode()),

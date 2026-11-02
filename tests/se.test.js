@@ -27,6 +27,13 @@ test('結尾回到開場的巷口和兩週，第 12 站也接得上那個折扣'
   assert.match(JSON.stringify(SE.walk.stations[11].blocks), /新折扣/);
 });
 
+test('先走一次再認識 SDLC：走一次的開頭介紹 12 站，SDLC 回頭替走過的路命名', () => {
+  assert.match(SE.walk.title, /^一、一起走一次/);
+  assert.strictEqual(SE.sdlc.title, '二、認識 SDLC');
+  assert.match(SE.walk.lead[0].text, /拆成 12 站/);
+  assert.match(SE.sdlc.blocks[0].text, /^我們剛剛走的這一趟/);
+});
+
 test('12 站照順序，每站都有產出、做什麼、誰負責、例子和新人訓練的對照', () => {
   assert.strictEqual(SE.walk.stations.length, 12);
   SE.walk.stations.forEach((s, i) => {
