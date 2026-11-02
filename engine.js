@@ -59,6 +59,7 @@
     saChecks: src.saChecks || null,     // 怡君開成卡之後，退回 SA 的勾選題（跟著卡走）
     onNoBackup: src.onNoBackup || null, // 這張卡部署沒備份會出的事（資料遺失事件）
     cardSpec: src.cardSpec || null,     // 不管誰開都是同一張固定的卡（好幾則訊息講同一件事）
+    chore: src.chore || null,           // 正式上班：這則是哪件雜事（開卡時卡掛上它）
     reviewSays: src.reviewSays || null, // 檢閱程式碼的評語（跟著卡走）
     saInstant: !!src.saInstant,         // 轉給怡君秒過（她丟給她的 Claire），不等 90 分鐘
     saVerbatim: !!src.saVerbatim,       // 怡君的 Claire 把原文原封不動搬上卡：噪音句的 function 也得填
@@ -99,7 +100,10 @@
       this.visitor = null;           // 站在桌邊的人（老闆）
       this.papers = [];              // 桌上的紙
       this.docs = [];                // 電腦裡的文件（含信、LINE）
-      this.stats = { forwardedToSA: 0, emptyDrafts: 0, selfOpened: 0 };
+      this.stats = { forwardedToSA: 0, emptyDrafts: 0, selfOpened: 0, trips: 0 };
+      // 正式上班的雜事：進度跟卡分開存，可以不開卡直接做；卡結案了雜事照樣在（例如信箱清太少，下午又滿）
+      this.chores = Object.fromEntries((script.chores || []).map(c => [c.id, { ...c, stage: 'new', flags: {}, log: [] }]));
+      this.place = 'desk';           // 人在哪裡：desk，或劇本 seats 的 id（到同事座位）
       this.plugged = new Set();      // 插著充電線的裝置
       this.inUse = new Set();        // 拿起來實機測試中的裝置
       this.drainCarry = {};          // 還不到 1% 的耗電，累積到滿 1 才扣
@@ -280,6 +284,7 @@
         type: draft.type, parent: draft.parent || null, relatedTo: doc.relatedTo, screen: doc.screen, reviewSays: doc.reviewSays, onNoBackup: doc.onNoBackup,
       }), this.clock.minute);
       card.draft = { ...draft, ...grade }; card.docId = doc.id;
+      if (doc.chore) card.chore = doc.chore;   // 正式上班的雜事卡：卡上看得到雜事的進度、可以自己結案
       // 來源其實是某張既有卡的追加需求、卻開成獨立的卡：SA 會在卡上提醒一句（不擋，只是提醒）
       if (doc.relatedTo && card.parent !== doc.relatedTo && this.board.get(doc.relatedTo)) {
         card.nag('SA 怡君', `這跟 ${this.board.label(doc.relatedTo)} 不是同一件事嗎？掛在那張底下吧。`, this.clock.minute);
@@ -1270,11 +1275,40 @@
           boss: spent == null ? null : Verdict.estimateComment(k.estimate, spent) };
       });
     }
+    // ── 正式上班：雜事與走動 ──
+    choreSet(id, patch, note) {
+      const chore = this.chores[id]; if (!chore) return null;
+      Object.assign(chore, patch);
+      if (note) chore.log.push({ at: this.clock.minute, text: note });
+      this.emit('chore:changed', chore);
+      return chore;
+    }
+    // 走到同事座位要時間，去程、回程各算一趟
+    walk(seatId) {
+      if (this.place !== 'desk' || !(this.script.seats || {})[seatId]) return false;
+      this.clock.spend(C.WALK_MIN); this.stats.trips++;
+      this.place = seatId; this.emit('place:changed', this.place);
+      return true;
+    }
+    goBack() {
+      if (this.place === 'desk') return false;
+      this.clock.spend(C.WALK_MIN); this.stats.trips++;
+      this.place = 'desk'; this.emit('place:changed', this.place);
+      return true;
+    }
+    // 雜事卡沒有 QC，什麼時候算結案玩家自己決定
+    closeCard(cardId) {
+      const card = this.board.get(cardId); if (!card || card.status === 'archived') return null;
+      card.archive(this.clock.minute); this.emit('card:closed', card);
+      return card;
+    }
+
     // ── 下班 ──
-    canLeave() { return !this.ended && !this.home && this.clock.minute >= C.OFF_WORK_MIN; }
+    canLeave() { return !this.ended && !this.home && this.place === 'desk' && this.clock.minute >= C.OFF_WORK_MIN; }
     // 離開公司就是進茶几：劇本寫了 home 的天先停在下班選單，隔天 08:00 才結算；沒寫的天照舊直接結算
     leave({ forced = false } = {}) {
       if (this.ended || this.home) return null;
+      if (this.place !== 'desk') { this.place = 'desk'; this.emit('place:changed', this.place); }   // 被趕下班時人在同事座位：先回到自己座位
       this.clock.resume('hint');   // 人都走了，提示不用再留住時間
       if (!this.script.home) return this.finish(this.report({ forced }));
       this.home = { phase: 'menu', leftAt: this.clock.minute, forced, menu: Home.menuFor(this.clock.minute) };
@@ -1448,6 +1482,7 @@
         if (byWork.size) works.push({ card: `#${card.no} ${card.title}`, items: [...byWork.values()] });
       }
       const testStyle = main ? Works.testStyle(main.history) : '';
+      const fromScript = this.script.report ? this.script.report(this) : {};   // 劇本自己多的行（正式上班每一關不一樣）
       const report = Verdict.report({
         player: this.player, verdict: Verdict.classify(this.log), handled: this.submitted, skippedDocs, works, estimates: this.estimates(),
         unlabeled: { note: this.noteOpened, charged: this.devices.tablet > Works.LOW_BATTERY }, leftAt: this.home ? hhmm(this.home.leftAt) : this.clock.label(),
@@ -1461,12 +1496,14 @@
           ...(this.ai ? this.aiTally().map(text => ({ text, group: 'AI 同事' })) : []),   // 結算卡上預設摺起來
           ...this.reviewTally(),
           ...(this.home && this.home.phase !== 'menu' ? this.homeTally() : []),
+          ...(fromScript.extra || []),
         ],
         traits: [
           ...(main ? [{ title: '測試', text: testStyle }] : []),
           ...this.reviewTraits(),
           ...(this.parallelUniverse() ? this.script.parallel.traits : []),
           ...(this.home && this.home.phase !== 'menu' ? this.homeTraits() : []),
+          ...(fromScript.traits || []),
         ],
         peers: [
           ...(main ? Verdict.peerReviews(main, {
@@ -1476,6 +1513,7 @@
           ...this.reviewPeers(),
           ...this.userReview(),
           ...(forced ? [{ who: '警衛', text: '「還不回家？要鎖門了。」' }] : []),
+          ...(fromScript.peers || []),
         ],
       });
       return report;

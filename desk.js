@@ -19,6 +19,7 @@
   // Tearlol 的欄名：從左到右是卡在誰手上——SA 區、IT 區、QC 區、完成
   const PHONE_WIDTH = matchMedia('(max-width: 720px)');
   const STATUS_ZH = { new: '新需求', rejected_to_sa: '退回 SA', open: 'IT 處理中', to_qc: '交 QC', returned: '退回 IT', archived: '已完成' };
+  const CHORE_STAGE = { new: '還沒動', doing: '處理中', done: '做完了' };   // 正式上班的雜事做到哪
   const BOARD_ORDER = ['new', 'rejected_to_sa', 'open', 'returned', 'to_qc', 'archived'];
   const WALL_CLOCK_HAND = { legacy: '#1f2328', hybrid: '#464a56' };   // 牆上時鐘的指針色，照各自底圖原本畫的
   const h = (tag, cls, text) => { const el = document.createElement(tag); if (cls) el.className = cls; if (text !== undefined) el.textContent = text; return el; };
@@ -276,7 +277,9 @@
       showSound();
       this.root.querySelector('.coffee').addEventListener('click', () => this.togglePause());
       this.guardPausedWindows();
-      this.root.querySelector('.leave').addEventListener('click', () => e.leave());
+      // 「下班」那顆在同事座位時是「回座位」（劇本：回座位的鈕放在下班鈕的位置）
+      this.root.querySelector('.leave').addEventListener('click', () => (e.place === 'desk' ? e.leave() : this.backToDesk()));
+      e.on('place:changed', (place) => (place === 'desk' ? this.leaveSeat() : this.enterSeat(place)));
       this.root.querySelector('.visitor-talk').addEventListener('click', () => this.talkToVisitor());
       this.dragDevices();
       e.on('visitor:arrived', (src) => this.showVisitor(src));
@@ -523,7 +526,9 @@
       const label = e.clock.label();
       for (const c of this.root.querySelectorAll('.os-clock')) c.textContent = label;
       this.root.querySelector('.private-time').textContent = label;
-      this.root.querySelector('.leave').hidden = !e.canLeave();
+      const leave = this.root.querySelector('.leave'); const away = e.place !== 'desk';
+      leave.hidden = !(away || e.canLeave());
+      const word = away ? '回座位' : '下班'; if (leave.textContent !== word) leave.textContent = word;
       this.root.querySelector('.coffee').classList.toggle('on', e.paused);
       this.desktop.classList.toggle('paused', e.paused);
       this.root.querySelector('.desk').classList.toggle('on-break', e.paused);
@@ -537,6 +542,61 @@
       if (e.ai && e.clock.minute !== this.terminalMinute) { this.terminalMinute = e.clock.minute; if (this.aiJobs('running').length) this.refreshTerminal(); }
       if (e.home && e.home.phase === 'table') this.tickFun();
     }
+    // ── 到同事座位（正式上班）：跟會議室一樣疊一層、可以來回。先黑畫面再換場景（engine 發 place:changed 才換），走路的時間 engine 已經算了 ──
+    seatOf(who) { const seats = this.engine.script.seats || {}; return Object.keys(seats).find(id => seats[id].who === who) || null; }
+    // 黑畫面那幾秒時鐘停住：走一趟就是 engine 算的 C.WALK_MIN 分鐘
+    walkTo(seatId) {
+      const seat = (this.engine.script.seats || {})[seatId]; if (!seat || this.engine.place !== 'desk') return;
+      this.engine.clock.pause('walk'); this.trip(`走到${seat.title}。`, () => this.engine.clock.resume('walk'));
+      this.engine.walk(seatId);
+    }
+    backToDesk() {
+      if (this.engine.place === 'desk') return;
+      this.engine.clock.pause('walk'); this.trip('走回座位。', () => this.engine.clock.resume('walk'));
+      this.engine.goBack();
+    }
+    // 同事的桌邊：他的螢幕（桌布、捷徑）、桌上的東西、在那邊能做的事。人在這裡只帶得到公務手機，自己的螢幕和視窗都看不到（回座位原樣都在）
+    enterSeat(seatId) {
+      const seat = this.engine.script.seats[seatId];
+      this.root.querySelector('.desk').classList.add('at-seat');
+      const room = h('div', 'seat-room'); room.dataset.wallpaper = seat.wallpaper || 'plain';
+      const monitor = h('div', 'seat-monitor'); const icons = h('div', 'seat-shortcuts');
+      for (const name of seat.shortcuts || []) icons.append(withIcon(h('span', 'seat-shortcut'), 'file-text', name));
+      monitor.append(icons);
+      const props = h('ul', 'seat-props'); for (const p of seat.props || []) props.append(h('li', '', p));
+      const acts = h('div', 'seat-actions');
+      for (const a of seat.actions || []) {
+        const b = h('button', 'btn', a.label);
+        if (a.bench) b.addEventListener('click', () => BenchLoader.open({ host: this.root, engine: this.engine, scene: a.bench }));
+        acts.append(b);
+      }
+      room.append(h('h2', 'seat-title', seat.title), monitor, props, acts);
+      this.root.querySelector('.screens-bg').prepend(room);
+      const phone = withIcon(h('button', 'btn seat-phone'), 'smartphone', '公務手機');
+      phone.addEventListener('click', () => (this.phonePanel ? this.closePhone() : this.openPhone('line')));
+      this.root.querySelector('.surface').append(phone);
+      this.seatRoom = room; this.seatPhone = phone;
+    }
+    leaveSeat() {
+      if (!this.seatRoom) return;
+      this.seatRoom.remove(); this.seatRoom = null;
+      this.seatPhone.remove(); this.seatPhone = null;
+      this.closePhone();
+      this.root.querySelector('.desk').classList.remove('at-seat');
+    }
+    // 公務手機：只看得到 LIME 和信箱（回訊息、開卡要用電腦，回座位再做）
+    openPhone(kind) {
+      this.closePhone();
+      const panel = h('div', 'phone-panel'); const tabs = h('div', 'phone-tabs'); const body = h('div', 'phone-body');
+      for (const [k, label] of [['line', 'LIME'], ['mail', '信箱']]) {
+        const t = h('button', `btn small${k === kind ? ' primary' : ''}`, label); t.addEventListener('click', () => this.openPhone(k)); tabs.append(t);
+      }
+      const close = h('button', 'btn small', '收起來'); close.addEventListener('click', () => this.closePhone()); tabs.append(close);
+      body.append(this.docsNode(kind, this.docsSelected[kind]));
+      panel.append(tabs, body); this.root.querySelector('.screens-bg').append(panel);   // 放在螢幕區，不蓋到桌面上的「回座位」
+      this.phonePanel = panel; this.phoneKind = kind;
+    }
+    closePhone() { if (this.phonePanel) { this.phonePanel.remove(); this.phonePanel = null; } }
     // 離開桌子一趟（例如去行銷部拍照）：整頁黑掉、一行旁白，過一下回來
     trip(text, done) {
       const shade = h('div', 'trip-screen'); shade.append(h('p', '', text || '你離開了座位一陣子。'));
@@ -750,7 +810,10 @@
       if (selected !== undefined && this.wm.exists(id)) this.wm.setContent(id, this.docsNode(kind, selected));
       this.wm.open({ id, title, icon, x, y: 50, w: 640, h: 420, cls: `win-docs win-${kind}`, content: this.docsNode(kind, selected) });
     }
-    refreshDocs() { for (const kind of Object.keys(DOC_APPS)) if (this.wm.exists(`docs:${kind}`)) this.wm.setContent(`docs:${kind}`, this.docsNode(kind, this.docsSelected[kind])); }
+    refreshDocs() {
+      for (const kind of Object.keys(DOC_APPS)) if (this.wm.exists(`docs:${kind}`)) this.wm.setContent(`docs:${kind}`, this.docsNode(kind, this.docsSelected[kind]));
+      if (this.phonePanel) this.openPhone(this.phoneKind);   // 公務手機開著：新訊息進來也看得到
+    }
     // LINE 長得像 LINE：左邊聯絡人、右邊對話泡泡（對方灰色靠左、你回的藍色靠右），跟需求討論結束那頁同一套。
     // 群組（m.group）是一個聯絡人，裡面別人的訊息上面寫是誰說的
     lineNode(selectedFrom) {
@@ -762,7 +825,12 @@
       const show = (from) => {
         this.docsSelected.line = from;
         for (const b of list.children) b.classList.toggle('active', b.dataset.from === from);
-        const log = h('div', 'discuss-log'); pane.replaceChildren(h('h3', '', from), log);
+        const log = h('div', 'discuss-log');
+        // 對方有座位（正式上班）：標題旁邊「走過去」
+        const head = h('div', 'chat-head'); head.append(h('h3', '', from));
+        const seatId = this.seatOf(from);
+        if (seatId && this.engine.place === 'desk') { const go = h('button', 'btn small', '走過去'); go.addEventListener('click', () => this.walkTo(seatId)); head.append(go); }
+        pane.replaceChildren(head, log);
         // 照時間排（engine.chatLog）：晚回的話排在回的時候，不黏在被回的那則下面；回訊息的鈕留在原本那則下面
         for (const entry of this.engine.chatLog(msgs.filter(x => chatOf(x) === from))) {
           if (entry.mine) {
@@ -775,7 +843,8 @@
           if (m.kind === 'sticker') { const s = h('p', 'them sticker'); s.innerHTML = Stickers.html(m.sticker); log.append(s); continue; }
           log.append(h('p', m.kind === 'sent' ? 'me' : 'them', Works.chatText(m.text)));
           const row = h('div', 'chat-actions');
-          if (m.kind === 'source_request' && !m.carded) {
+          if (this.engine.place !== 'desk') { /* 人在同事座位只帶著公務手機：看得到訊息，回訊息、開卡回座位再做 */ }
+          else if (m.kind === 'source_request' && !m.carded) {
             const give = h('button', 'btn small primary', '把原文轉給她'); give.addEventListener('click', () => { this.engine.attachSource(m.cardId); m.carded = true; this.refreshDocs(); });
             row.append(give);
           } else {
@@ -853,7 +922,8 @@
       form.append(field('母議題', parent));
       const mod = h('select'); mod.name = 'module'; mod.append(new Option('—', '')); for (const [k, v] of Object.entries(MODULES)) mod.append(new Option(v, k));
       form.append(field('影響範圍', mod));
-      form.append(field('指派', radios('assignee', [['me', `自己（${e.player.name}）`], ['sa', 'SA 怡君']])));
+      // 正式上班沒有 SA 幫你整理雜事，只能指派給自己
+      form.append(field('指派', radios('assignee', [['me', `自己（${e.player.name}）`], ...(e.script.kind === 'sandbox' ? [] : [['sa', 'SA 怡君']])])));
       const pri = h('input'); pri.value = 'Priority'; pri.disabled = true; pri.className = 'priority-locked';
       form.append(field('優先度', pri));
       const body = h('fieldset', 'nc-body'); body.append(h('legend', '', '內文：勾該進卡的句子'));
@@ -949,7 +1019,8 @@
       }
       wrap.append(act);
 
-      if (mine) {
+      if (card.chore) wrap.append(this.choreNode(card));
+      else if (mine) {
         wrap.append(this.opsNode(card));
         const foot = h('div', 'card-foot');
         const no = h('button', 'btn danger', '需求不明，退回 SA'); no.addEventListener('click', () => this.onOpenWork(card, 'reject'));
@@ -980,6 +1051,19 @@
         wrap.append(h('p', 'muted readonly-note', note));
       }
       return wrap;
+    }
+    // 正式上班的雜事卡：沒有工作鏈、沒有 QC，卡上只看得到雜事做到哪；什麼時候結案玩家自己決定
+    choreNode(card) {
+      const chore = this.engine.chores[card.chore];
+      const foot = h('div', 'card-foot chore-foot');
+      foot.append(h('span', 'muted', `雜事：${chore.title}（${CHORE_STAGE[chore.stage] || chore.stage}）`));
+      if (card.status === 'archived') foot.append(h('span', 'muted', '已結案'));
+      else {
+        const close = h('button', 'btn primary', '結案');
+        close.addEventListener('click', () => { this.engine.closeCard(card.id); this.refreshBoard(); this.refreshCard(card.id); });
+        foot.append(close);
+      }
+      return foot;
     }
     // speedrun 交給 AI 時挑模型（Verse 快但錯多、Essay 中間、Novel 慢又吃兩格）
     // 選單展開在「你可以做的事」最底下一排（浮在按鈕旁邊會被卡片視窗的捲動範圍切掉）；再按一次 AI 或按別的地方就收起來

@@ -185,6 +185,8 @@ body { line-height: 1.5; }
 .docs.line .discuss-log .sticker { background: transparent; padding: 0; }
 .docs.line .chat-who { align-self: flex-start; margin: 4px 0 -4px 4px; font-size: 12px; color: var(--os-muted); }   /* 群組裡是誰說的 */.sticker-art { display: block; width: 96px; height: 96px; }
 .docs.line .doc-pane h3 { margin: 0 0 8px; }
+.docs.line .chat-head { display: flex; align-items: center; justify-content: space-between; gap: 8px; }   /* 對方有座位時旁邊多一顆「走過去」 */
+.docs.line .chat-head h3 { margin-bottom: 8px; }
 .docs.line .discuss-log { overflow: auto; flex: 1; margin: 0; }
 .docs.line .discuss-log p { white-space: pre-wrap; }
 .chat-actions { align-self: flex-end; display: flex; gap: 6px; }
@@ -544,6 +546,45 @@ div:has(> button[aria-label="匯出存檔"]) > button::after { content: attr(ari
 .report-shot .mock { position: absolute; left: 0; top: 0; width: 960px; transform-origin: 0 0; pointer-events: none; }
 .report-shot-label { margin-top: 6px; font-size: 12px; color: var(--muted); }
 
+/* ── 到同事座位（正式上班）：蓋在自己螢幕的位置上，自己的螢幕和視窗藏起來（回座位原樣都在）。
+   同事的螢幕畫他的桌布和捷徑，桌上的東西先用文字小牌 ── */
+.desk.at-seat .screens { visibility: hidden; }
+.seat-room { position: absolute; inset: 0; z-index: 3; display: grid; grid-template-columns: minmax(0, 1fr) auto; grid-template-rows: auto minmax(0, 1fr) auto; gap: 12px; padding: 16px 24px; background: linear-gradient(180deg, #d9d2c3, #c7bea9); color: #2b2f36; }
+.seat-title { grid-column: 1 / -1; margin: 0; font-size: 18px; }
+.seat-monitor { grid-column: 1; grid-row: 2; justify-self: start; height: 100%; max-width: 100%; aspect-ratio: 16 / 10; min-height: 0; overflow: hidden; padding: 12px; border: 10px solid var(--bezel); border-bottom-width: 22px; border-radius: 12px 12px 4px 4px; background: #1e293b; box-shadow: 0 10px 30px rgba(0,0,0,.35); }
+.seat-room[data-wallpaper="sportscar"] .seat-monitor { background: linear-gradient(160deg, #0f172a 0 52%, #b91c1c 52% 60%, #0f172a 60% 64%, #b91c1c 64% 67%, #0f172a 67%); }   /* 跑車桌布：兩道紅色斜線 */
+.seat-shortcuts { display: flex; flex-flow: column wrap; align-content: flex-start; gap: 12px; height: 100%; }
+.seat-shortcut { display: inline-flex; flex-direction: column; align-items: center; gap: 4px; width: 96px; font-size: 12px; color: #fff; text-align: center; text-shadow: 0 1px 2px rgba(0,0,0,.7); }
+.seat-actions { grid-column: 2; grid-row: 2; display: flex; flex-direction: column; gap: 8px; }
+.seat-props { grid-column: 1 / -1; display: flex; flex-wrap: wrap; gap: 8px; margin: 0; padding: 0; list-style: none; }
+.seat-props li { padding: 4px 10px; border: 1px solid #cdbfa6; border-radius: 6px; background: #f6f1e7; font-size: 13px; }
+.btn.seat-phone { display: inline-flex; align-items: center; gap: 6px; }
+/* 公務手機：只看 LIME 和信箱，浮在桌面右下 */
+.phone-panel { position: absolute; right: 24px; bottom: 12px; z-index: 20; display: flex; flex-direction: column; width: min(440px, calc(100% - 32px)); height: calc(100% - 24px); overflow: hidden; border: 10px solid #1f2328; border-radius: 22px; background: #f6f1e7; box-shadow: 0 10px 30px rgba(0,0,0,.4); }
+.phone-tabs { display: flex; gap: 6px; padding: 8px; background: #1f2328; }
+.phone-tabs .btn:last-child { margin-left: auto; }
+.phone-body { flex: 1; min-height: 0; overflow: auto; }
+.phone-body > .docs { height: 100%; grid-template-columns: minmax(0, 1fr); grid-template-rows: auto minmax(0, 1fr); padding: 8px; box-sizing: border-box; }   /* 手機：聯絡人一排在上、對話在下 */
+.phone-body .doc-list { flex-direction: row; flex-wrap: wrap; border-right: 0; border-bottom: 1px solid var(--os-border); padding: 0 0 6px; }
+@media (max-width: 700px) {
+  .seat-room { grid-template-columns: minmax(0, 1fr); grid-template-rows: auto minmax(0, 1fr) auto auto; padding: 10px 12px; }
+  .seat-monitor { width: 100%; height: auto; align-self: start; }
+  .seat-actions { grid-column: 1; grid-row: 3; flex-direction: row; flex-wrap: wrap; }
+  .phone-panel { right: 8px; left: 8px; width: auto; }
+}
+
+/* ── 3D 工作台（bench-loader.js）：蓋住整張辦公桌；載入中畫面第一幀畫好才淡出 ── */
+.bench-panel { position: fixed; inset: 12px; z-index: 60; display: flex; flex-direction: column; gap: 8px; padding: 10px; border: 2px solid #2b2f36; border-radius: 10px; background: #f6f1e7; color: #2b2f36; }
+.bench-stage { position: relative; flex: 1; min-height: 0; overflow: hidden; border: 2px solid #2b2f36; border-radius: 8px; background: #e9e1d2; touch-action: none; }
+.bench-stage canvas { display: block; }
+.bench-loading { position: absolute; inset: 0; z-index: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 12px; background: #e9e1d2; color: #6b6457; font-size: 15px; transition: opacity .2s ease-in; }
+.bench-loading.done { opacity: 0; pointer-events: none; }
+.bench-spinner { width: 28px; height: 28px; border: 3px solid #cdbfa6; border-top-color: #2563eb; border-radius: 50%; animation: bench-spin .8s linear infinite; }
+@keyframes bench-spin { to { transform: rotate(360deg); } }
+@media (prefers-reduced-motion: reduce) { .bench-spinner { animation: none; } }
+.bench-bar { display: flex; align-items: center; gap: 10px; }
+.bench-msg { flex: 1; min-height: 1.5em; margin: 0; font-size: 15px; line-height: 1.5; }
+
 /* ── 會議模式：外接螢幕收起，筆電跟桌上一樣大、移到正中間；會議室鋪滿背景（被筆電擋到沒關係），
    彈幕疊在筆電上面、只飛在筆電上緣以上那一條（擋住背景沒關係，不要擋住彈幕） ── */
 .desk.in-meeting .screen.monitor { display: none; }
@@ -860,6 +901,13 @@ div:has(> button[aria-label="匯出存檔"]) > button::after { content: attr(ari
 .mode-actions .btn { flex: 1 1 auto; padding: 11px 14px; font-size: 16px; white-space: nowrap; }
 .mode-actions .btn.primary { flex-grow: 2; font-weight: 700; }
 .mode-actions .btn:disabled { opacity: 1; color: var(--muted); background: #ece6da; border-color: #d8d0c1; }
+/* 正式上班：抽到的關卡一行字在上、鈕在下；全部開過之後一關一行直接選 */
+.mode-actions:has(.mode-drawn), .mode-actions:has(.mode-level) { flex-wrap: wrap; }
+.mode-drawn { flex: 1 0 100%; margin: 0; font-size: 15px; font-weight: 600; }
+.mode-level { flex: 1 0 100%; display: flex; align-items: center; gap: 8px; }
+.mode-level-name { flex: 1 1 auto; font-size: 15px; font-weight: 600; }
+.mode-actions .mode-level .btn { flex: 0 0 auto; }
+.mode-level .mode-done { padding: 2px 8px; border: 0; background: transparent; text-decoration: underline; text-underline-offset: 3px; cursor: pointer; font-size: 13px; }
 .btn.mode-clear { justify-self: end; padding: 0; border: 0; background: none; font-size: 12px; color: var(--muted); text-decoration: underline; }
 @media (min-width: 900px) { .mode-cols { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); } }
 
@@ -886,6 +934,17 @@ div:has(> button[aria-label="匯出存檔"]) > button::after { content: attr(ari
 .hb-panel { width: min(720px, 100%); max-height: min(88vh, 900px); display: flex; flex-direction: column; background: var(--paper); color: var(--ink); border-radius: 8px; box-shadow: 0 10px 30px rgba(0,0,0,.35); }
 .hb-head { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 10px 16px; border-bottom: 1px solid #d8cfbd; }
 .hb-head h2 { margin: 0; font-size: 18px; }
+/* 工作日誌：五個分頁（CLAIRE.md、成就、三個時代），一列一個成就或一關 */
+.journal-tabs { display: flex; flex-wrap: wrap; gap: 6px; padding: 10px 16px 0; border-bottom: 1px solid #d8cfbd; }
+.journal-tab { padding: 8px 12px; border: 1px solid #d8cfbd; border-bottom: 0; border-radius: 6px 6px 0 0; background: #ece6da; color: var(--ink); font-size: 14px; cursor: pointer; }
+.journal-tab[aria-selected="true"] { background: var(--paper); font-weight: 700; margin-bottom: -1px; }
+.journal-body { overflow: auto; padding: 12px 16px 16px; }
+.journal-page h3 { margin: 0; font-size: 16px; }
+.journal-notes { margin: 8px 0 0; padding-left: 20px; line-height: 1.7; }
+.journal-row { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 10px 0; border-bottom: 1px dashed #d8cfbd; }
+.journal-words { display: flex; flex-direction: column; gap: 2px; min-width: 0; }
+.journal-where { flex: 0 0 auto; font-size: 12px; color: var(--muted); }
+.journal-row.unplayed b { font-size: 20px; color: var(--muted); }
 .hb-panel .handbook { flex: 1; min-height: 0; overflow-y: auto; padding: 12px 16px 20px; }
 .hb-panel .changelog { flex: 1; min-height: 0; overflow-y: auto; padding: 12px 16px 20px; }
 .cl-command { margin: 0 0 12px; color: var(--muted); font-family: var(--mono); font-size: 13px; }

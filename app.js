@@ -164,15 +164,47 @@
     if (save) train.append(btn('mode-clear', '清掉新人訓練的存檔', () => { clearSave(); modes(player); }));
     const trainCol = el('section', 'mode-col');
     trainCol.append(el('h3', 'mode-group', '新人訓練'), train);
+    // 工作日誌：新人訓練結業後才有（CLAIRE.md、拿過的成就、正式上班每一關最後一次的結算卡）。正式上班還在做，跟著 ?office 一起開
+    if (save && save.graduated && OFFICE_OPEN) {
+      const journal = el('article', 'mode-card mode-journal');
+      journal.append(el('h4', '', '工作日誌'), el('p', 'mode-desc', 'CLAIRE.md、拿過的成就，還有正式上班每一關最後一次的結算卡。'));
+      const open = () => Journal.open({
+        training: save, office: loadOffice(), levelIds: Sandbox.ids(), levelName: (id) => Sandbox.make(id, 'legacy').name,
+        claire: loadClaire() || (save.starts && save.starts.day3 && save.starts.day3.notes) || {},   // 還沒存過全域那份的舊存檔：第二天帶到第三天的筆記
+      }, (view) => showReport(view, [{ text: '回選玩法', cls: 'primary', onClick: () => modes(player) }]));
+      const actions = el('div', 'mode-actions'); actions.append(btn('', '打開', open));
+      journal.append(actions); trainCol.append(journal);
+    }
 
-    // 沙盒（玩家看到的叫「正式上班」）：新人訓練結業才開放；劇本還在寫，開放了也先是準備中
+    // 沙盒（玩家看到的叫「正式上班」）：每一欄是一個時代。按「上班」抽一關；抽到玩過的可以跳過再抽；全部開過之後不抽、直接選
     const sandboxCol = el('section', 'mode-col');
     sandboxCol.append(el('h3', 'mode-group', '正式上班'));
+    const office = loadOffice();
+    const backToModes = [{ text: '回選玩法', cls: 'primary', onClick: () => modes(player) }];
     for (const m of MODES) {
       const card = el('article', 'mode-card');
       card.append(el('h4', 'mono', m.title), el('p', 'mode-desc', m.desc));
-      const r = el('div', 'mode-actions'); r.append(btn('', save && save.graduated ? '準備中' : '完成新人訓練後開放')); card.append(r);
-      sandboxCol.append(card);
+      const r = el('div', 'mode-actions');
+      const levelName = (id) => Sandbox.make(id, m.id).name;
+      const go = (id) => start(player, Sandbox.make(id, m.id));
+      const lastReport = (id) => { const last = Sandbox.last(office, id, m.id); return last ? btn('mode-done', '上次的結算卡', () => showReport(last.view, backToModes)) : null; };
+      // 抽到一關：寫在卡上，可以上班；玩過的可以跳過（skip 累積這次跳過的，不會再抽到）
+      const showDrawn = (skip) => {
+        const id = Sandbox.draw(skip);
+        r.replaceChildren();
+        if (!id) { r.append(el('p', 'mode-drawn', '能跳的都跳過了。'), btn('', '重抽', () => showDrawn([]))); return; }
+        r.append(el('p', 'mode-drawn', `今天抽到：${levelName(id)}`), btn('primary', '上班', () => go(id)));
+        if (Sandbox.opened(office).includes(id)) r.append(btn('', '跳過，換一關', () => showDrawn([...skip, id])));
+      };
+      if (!OFFICE_OPEN) r.append(btn('', save && save.graduated ? '準備中' : '完成新人訓練後開放'));
+      else if (Sandbox.allOpened(office)) {
+        for (const id of Sandbox.ids()) {
+          const row = el('div', 'mode-level'); row.append(el('span', 'mode-level-name', levelName(id)));
+          const last = lastReport(id); if (last) row.append(last);
+          row.append(btn('primary', '上班', () => go(id))); r.append(row);
+        }
+      } else r.append(btn('primary', '上班', () => showDrawn([])));
+      card.append(r); sandboxCol.append(card);
     }
     cols.append(trainCol, sandboxCol);
     screen.append(bg, head, cols); app.append(screen);
@@ -189,6 +221,16 @@
   const PLAYER_KEY = 'it24hr.player';
   function loadPlayer() { try { return JSON.parse(localStorage.getItem(PLAYER_KEY)) || (loadSave() || {}).player || null; } catch { return null; } }
   function writePlayer(player) { try { localStorage.setItem(PLAYER_KEY, JSON.stringify(player)); } catch { /* 同上 */ } }
+  // 正式上班另外存（每一關、每個時代最後一張結算卡），不碰新人訓練的存檔
+  const OFFICE_KEY = 'it24hr.office';
+  function loadOffice() { try { return JSON.parse(localStorage.getItem(OFFICE_KEY)); } catch { return null; } }
+  function writeOffice(save) { try { localStorage.setItem(OFFICE_KEY, JSON.stringify(save)); } catch { /* 同上 */ } }
+  // CLAIRE.md 全域一份：每天下班結算時，有 AI 的那天就寫進去（工作日誌看得到目前的樣子）
+  const CLAIRE_KEY = 'it24hr.claire';
+  function loadClaire() { try { return JSON.parse(localStorage.getItem(CLAIRE_KEY)); } catch { return null; } }
+  function writeClaire(notes) { try { localStorage.setItem(CLAIRE_KEY, JSON.stringify(notes)); } catch { /* 同上 */ } }
+  // 正式上班還在做：網址帶 ?office 才開放（開發用的入口）
+  const OFFICE_OPEN = new URLSearchParams(location.search).has('office');
   // 那一天開始時帶的東西：存檔每天都留一份（starts），做完的天才能重玩；只有 carry 的舊存檔只有下一天的
   function carryFor(save, day) { return (save.starts && save.starts[day]) || (save.day === day ? save.carry : null); }
   // 照存檔開始那一天：劇本照 carry 產，昨天沒結案的卡（carry.board）放回看板
@@ -206,7 +248,16 @@
     // 一天結束就存檔（連同這張結算卡）：之後從選玩法畫面接著玩下一天，或按「做完了」再看一次
     engine.on('day:end', (report) => {
       stop();
-      const view = reportView(engine, report); const save = nextSave(engine, view); writeSave(save);
+      const view = reportView(engine, report);
+      if (engine.ai) writeClaire(engine.ai.notes);
+      if (script.kind === 'sandbox') {   // 正式上班：記這一關、這個時代的結算卡；隔天就是再上一天班
+        const now = new Date(); const pad = (n) => String(n).padStart(2, '0');
+        const today = `${now.getFullYear()}-${pad(now.getMonth() + 1)}-${pad(now.getDate())}`;   // 玩家自己的日期（toISOString 是 UTC，台灣早上八點前會差一天）
+        writeOffice(Sandbox.record(loadOffice(), script.level, script.mode, view, today));
+        showReport(view, [{ text: '回選玩法', onClick: () => modes(player) }, { text: '再上一天班', cls: 'primary', onClick: () => start(player, Sandbox.make(script.level, script.mode)) }]);
+        return;
+      }
+      const save = nextSave(engine, view); writeSave(save);
       // 第三天的隔天是結業早會，不是下一天的辦公桌
       const tomorrow = save.day === 'done' ? () => showGraduation(save) : () => playDay(save);
       showReport(view, [{ text: '回選玩法', onClick: () => modes(player) }, { text: '隔天', cls: 'primary', onClick: tomorrow }]);
@@ -217,7 +268,7 @@
     });
     engine.on('home:menu', () => HomeMenu.open(app, engine));   // 離開公司：先選吃的、要不要帶公司筆電，再進茶几
     // 還沒做的那一天只有開場的公司早會，開完就是待續
-    if (!script.mainCard) engine.on('meeting:end', () => setTimeout(() => { stop(); showToBeContinued(engine.flags); }, 1500));
+    if (!script.mainCard && script.kind !== 'sandbox') engine.on('meeting:end',() => setTimeout(() => { stop(); showToBeContinued(engine.flags); }, 1500));
     last = performance.now();
     const loop = (t) => { engine.tick(t - last); last = t; desk.tick(); raf = requestAnimationFrame(loop); };
     raf = requestAnimationFrame(loop);

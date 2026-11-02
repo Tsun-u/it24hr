@@ -75,10 +75,9 @@ AI服務額度有上限，請各位同仁依照工作類型選擇合適的AI模�
   ];
 
   // ── 精銳三人產線──
-  const TEAM_OK = ['「哈哈」', '「拜託不要」'];
   const team = [
-    DAY1.teamSay(5, 'team3_qc_ai', 'QC 阿姿', '我的電腦也被裝了 Claire Desktop……它會幫我寫測試案例嗎？', TEAM_OK, ['我也不知道', '😂']),
-    DAY1.teamSay(6, 'team3_sa_pages', SA, '我昨天試了，我的 Claire 一張卡可以寫三頁。', TEAM_OK, ['對吧', '阿姿：拜託不要。']),
+    DAY1.teamSay(5, 'team3_qc_ai', 'QC 阿姿', '我的電腦也被裝了 Claire Desktop……它會幫我寫測試案例嗎？', ['「他寫得好嗎？」', '「拜託不要」'], ['我也不知道', '😂']),
+    DAY1.teamSay(6, 'team3_sa_pages', SA, '我昨天試了，我的 Claire 一張卡可以寫三頁。', ['「Claire真的很能幹」', '「以後都交給他了」'], ['對吧', '阿姿：拜託不要。']),
     DAY1.teamSay(95, 'team3_sa_cards', SA, 'POC 的卡開好了，六張……不對，先四張，客戶還會再加。', ['「收到」', '「六張？」'], ['辛苦了', '先四張啦，剩下的客戶會自己加']),
     DAY1.teamSay(395, 'team3_sa_more', SA, '志豪又加一張。我開始懷疑 POC 是什麼的縮寫。', ['「Proof Of Customer」', '「加油」'], ['……有道理', '你也是']),
     DAY1.teamSay(530, 'team3_qc_cases', 'QC 阿姿', '今天 Claire 幫我寫了 40 個測試案例，我刪了 31 個。', ['「剩下 9 個好用嗎」', '「辛苦了」'], ['好用，所以我才刪 31 個', '你也是']),

@@ -8,6 +8,8 @@
 <link rel="icon" href="assets/favicon-32.png" sizes="32x32" type="image/png">
 <link rel="apple-touch-icon" href="assets/apple-touch-icon.png">
 <link rel="stylesheet" href="styles.css">
+<!-- 3D 工作台（bench-view.js）要用的 three.js：要用時才用 import() 載入 -->
+<script type="importmap">{ "imports": { "three": "./vendor/three/three.module.js", "three/addons/": "./vendor/three/addons/" } }</script>
 </head>
 <body>
 <main id="app"></main>
@@ -21,6 +23,8 @@
 <script src="screen.js"></script>
 <script src="home.js"></script>
 <script src="engine.js"></script>
+<script src="sandbox.js"></script>
+<script src="sandbox-blur.js"></script>
 <script src="day1.js"></script>
 <script src="day2.js"></script>
 <script src="day3.js"></script>
@@ -34,11 +38,13 @@
 <script src="atlas.js"></script>
 <script src="classroom.js"></script>
 <script src="homemenu.js"></script>
+<script src="bench-loader.js"></script>
 <script src="desk.js"></script>
 <script src="quiz.js"></script>
 <script src="savebox.js"></script>
 <script src="changelog-data.js"></script>
 <script src="changelog.js"></script>
+<script src="journal.js"></script>
 <script src="app.js"></script>
 </body>
 </html>
