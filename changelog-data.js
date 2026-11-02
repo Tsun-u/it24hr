@@ -2,6 +2,11 @@
 (function (root) {
   const CHANGELOG = [
   {
+    "hash": "b1c9ac6",
+    "date": "2026-11-03",
+    "subject": "第三天群組訊息換了新的回覆選項；正式上班開始施工（還沒開放）"
+  },
+  {
     "hash": "9c77854",
     "date": "2026-11-02",
     "subject": "加上網站圖示"
