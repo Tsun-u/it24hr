@@ -342,6 +342,9 @@ body { line-height: 1.5; }
 /* 一列最多兩顆（手機三顆擠到字換行）；單數的最後一顆自己一整列 */
 .side-links { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); grid-auto-rows: 1fr; gap: 8px; }   /* 四顆鈕一樣高（籌備中那顆字比較長） */
 .side-links small { display: block; font-size: 11px; }   /* 還沒做好的那顆：「籌備中」另起一行 */
+.whats-new { position: relative; width: 100%; min-height: 44px; margin-top: 14px; padding: 8px 10px 6px; border: 1px dashed #cdbfa6; border-radius: 6px; background: none; color: var(--muted); font-size: 13px; line-height: 1.4; cursor: pointer; }
+.whats-new::before { content: 'New'; position: absolute; top: -9px; left: 10px; padding: 0 6px; background: var(--paper); color: var(--accent); font-size: 12px; font-weight: 700; line-height: 16px; }
+.whats-new b { color: var(--accent); font-family: var(--mono); font-weight: 600; }
 @media (min-width: 720px) {
   .badge-cols { width: min(92vw, 660px); grid-template-columns: 1fr 1fr; align-items: stretch; }
   .badge-cols .badge { border-top: 0; }
@@ -884,6 +887,16 @@ div:has(> button[aria-label="匯出存檔"]) > button::after { content: attr(ari
 .hb-head { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 10px 16px; border-bottom: 1px solid #d8cfbd; }
 .hb-head h2 { margin: 0; font-size: 18px; }
 .hb-panel .handbook { flex: 1; min-height: 0; overflow-y: auto; padding: 12px 16px 20px; }
+.hb-panel .changelog { flex: 1; min-height: 0; overflow-y: auto; padding: 12px 16px 20px; }
+.cl-command { margin: 0 0 12px; color: var(--muted); font-family: var(--mono); font-size: 13px; }
+.cl-day { position: relative; padding-left: 20px; }
+.cl-day::before { content: ''; position: absolute; left: 4px; top: 4px; bottom: -14px; width: 2px; background: #d8cfbd; }   /* commit 線，接到下一天 */
+.cl-day:last-child::before { bottom: 12px; }
+.cl-day + .cl-day { margin-top: 14px; }
+.cl-day h3 { margin: 0 0 4px; font-family: var(--mono); font-size: 13px; font-weight: 600; color: var(--muted); }
+.cl-row { position: relative; display: flex; gap: 10px; margin: 0; padding: 3px 0; font-size: 14px; line-height: 1.5; }
+.cl-row::before { content: ''; position: absolute; left: -20px; top: 9px; width: 10px; height: 10px; border-radius: 50%; background: var(--accent); box-shadow: 0 0 0 2px var(--paper); }   /* 一個 commit 一個點 */
+.cl-hash { flex: none; color: var(--accent); font-family: var(--mono); font-size: 13px; line-height: 21px; }
 /* CSIE 課程頁（csie.html）：上面一條標頭，下面是課程目錄或整頁的小教室 */
 .csie-body { height: auto; background: var(--paper); }
 .csie-head { position: sticky; top: 0; z-index: 2; display: flex; align-items: center; gap: 14px; padding: 10px 20px; background: var(--paper); border-bottom: 1px solid #d8cfbd; }

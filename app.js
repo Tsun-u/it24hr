@@ -81,6 +81,7 @@
       </section>`;
     startCarousel(app.querySelector('.bg-carousel'));
     app.querySelector('.hb-slot').replaceWith(...learnButtons('hb-open'));
+    app.querySelector('.side-links').after(Changelog.latestButton());
     app.querySelector('.side-foot').prepend(saveBoxButton());   // 換新裝置的玩家第一眼只看得到這頁
     // 上次填的識別證帶回來；職稱清單改過的話，舊職稱選不到，留預設值
     const form = app.querySelector('form'); const titleSelect = app.querySelector('[name=title]'); let salt = 0;
