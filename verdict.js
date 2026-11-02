@@ -25,8 +25,8 @@
     const clock = `${String(Math.floor(m / 60)).padStart(2, '0')}:${String(m % 60).padStart(2, '0')}`;
     return day >= 0 ? clock : `${day === -1 ? '昨天' : `${-day} 天前`} ${clock}`;
   }
-  // 估時的參考：這張卡在現實中大約多久
-  const realLine = (real) => `現實中純手工大約 ${real.manual}，有 AI 幫忙大約 ${real.ai}`;
+  // 估時的參考：這張卡在現實中大約多久；claire 是把 Claire 自己加的規格也做完的工時
+  const realLine = (real) => `現實中純手工大約 ${real.manual}，有 AI 幫忙大約 ${real.ai}${real.claire ? `，加了 Claire 自主規格大約 ${real.claire}` : ''}`;
   // 主管看估時：估的比實際多超過 4 小時是摸魚、實際比估的多超過 4 小時是能力不足，其他算按時
   const ESTIMATE_GAP_HOURS = 4;
   function estimateComment(estimateHours, actualMin) {

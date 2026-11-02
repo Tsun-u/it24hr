@@ -1410,6 +1410,8 @@
       return this.reviewResults().map(({ card, work, r }) => ({ group: '檢閱程式碼',
         text: `#${card.no} ${work === 'review_front' ? '前端' : '後端'}：${r.skipped ? 'LGTM，什麼都沒標' : `抓到 ${r.hits.length}／${r.max}${r.half.length ? `（${r.half.length} 處原因不對）` : ''}${r.falses.length ? `，誤點 ${r.falses.length}` : ''}${r.hintsUsed ? `，提示 ${r.hintsUsed} 次` : ''}`}` }));
     }
+    // 平行宇宙（劇本 parallel）：成品跟需求對不上，客戶卻接受了
+    parallelUniverse() { const rule = this.script.parallel; return !!rule && rule.check(this); }
     reviewTraits() {
       const all = this.reviewResults(); if (!all.length) return [];
       const traits = [];
@@ -1463,6 +1465,7 @@
         traits: [
           ...(main ? [{ title: '測試', text: testStyle }] : []),
           ...this.reviewTraits(),
+          ...(this.parallelUniverse() ? this.script.parallel.traits : []),
           ...(this.home && this.home.phase !== 'menu' ? this.homeTraits() : []),
         ],
         peers: [

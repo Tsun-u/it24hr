@@ -311,7 +311,7 @@
     }
     if (e.script.mode === 'speedrun') {
       const reports = { ...(old.reports || {}), day3: view };
-      return { day: 'done', dayName: '結業', player: e.player, carry: null, starts: old.starts || {}, reports, graduated: true, summary: Verdict.summary(reports) };
+      return { day: 'done', dayName: '結業', player: e.player, carry: null, starts: old.starts || {}, reports, graduated: true, summary: Verdict.summary(reports), parallel: e.parallelUniverse() };
     }
     const carry = { notes: e.ai ? e.ai.notes : {}, board: e.carryOver() };   // AI 筆記和沒結案的卡帶到隔天
     return { day: 'day3', dayName: '第三天', player: e.player, carry, starts: { ...(old.starts || {}), day3: carry }, reports: { ...(old.reports || {}), day2: view }, ...kept };
@@ -319,6 +319,7 @@
   // 結業早會：外框畫面的風格，台詞一句一句出來（點一下就下一句，不點每 1.6 秒自己來），最後「新人訓練結束」
   function showGraduation(save) {
     const g = DAY3.GRADUATION;
+    const lines = save.parallel ? g.parallelLines : g.lines;
     const el = (tag, cls, text) => { const n = document.createElement(tag); if (cls) n.className = cls; if (text !== undefined) n.textContent = text; return n; };
     app.innerHTML = '';
     const screen = el('section', 'report-screen bg-speedrun grad-screen');
@@ -332,8 +333,8 @@
     let i = 0, timer = null;
     const next = () => {
       clearTimeout(timer);
-      if (i >= g.lines.length) { end.hidden = false; return; }
-      const l = g.lines[i++]; const row = el('p', 'grad-line');
+      if (i >= lines.length) { end.hidden = false; return; }
+      const l = lines[i++]; const row = el('p', 'grad-line');
       row.append(el('b', '', l.who), ...(l.aside ? [el('span', 'grad-aside', `（${l.aside}）`)] : []), el('span', '', `「${l.text}」`));
       list.append(row);
       timer = setTimeout(next, 1600);

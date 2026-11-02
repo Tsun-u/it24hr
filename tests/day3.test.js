@@ -528,3 +528,37 @@ test('排序題的 before 是空的時候照全對才給分，不會除以零', 
   assert.strictEqual(Works.grade(q, [[0, 1]]).score, 1);
   assert.strictEqual(Works.grade(q, [[1, 0]]).score, 0);
 });
+
+test('平行宇宙：三張主卡的計畫都排了 Claire 加的那一步，而且上了 POC', () => {
+  const steps = { poc_login: '導入 MFA 與生物辨識', poc_approve: '導入區塊鏈存證', poc_compliance: '申請 ISO 27001、SOC 2' };
+  const e = startDay3();
+  tickTo(e, C.DAY_START_MIN + 91);
+  const plan = (id) => e.board.get(id).subtasks.find(st => st.work === 'doc_plan').question.items[0];
+  for (const [id, text] of Object.entries(steps)) assert.ok(plan(id).options.includes(text), `${id} 的計畫要有「${text}」`);
+  const aiPlan = (id) => [Works.aiAnswers({ items: [plan(id)] }, { accuracy: 0, seed: id, notes: {}, picks: {}, done: [], covered: 'all' }).answers[0]];
+  for (const id of SUBS) e.board.get(id).picks = { doc_plan: aiPlan(id) };
+  assert.strictEqual(e.parallelUniverse(), false, '還沒上 POC 不算');
+  const poc = e.board.get('poc');
+  poc.history.push({ work: 'deploy' });
+  assert.strictEqual(e.parallelUniverse(), true);
+  const report = e.report({});
+  for (const title of ['神人', '成功製造需求']) assert.ok(report.traits.some(t => t.title === title), `結算卡的習慣與成就要有「${title}」`);
+  e.board.get('poc_approve').picks.doc_plan = [plan('poc_approve').answer];
+  assert.strictEqual(e.parallelUniverse(), false, '少一張就不算');
+  assert.ok(!e.report({}).traits.some(t => ['神人', '成功製造需求'].includes(t.title)));
+});
+
+test('結業早會有兩個版本：只有老闆和阿賢那兩句不同', () => {
+  const { lines, parallelLines } = DAY3.GRADUATION;
+  assert.strictEqual(parallelLines.length, lines.length);
+  assert.match(parallelLines[0].text, /資安控管系統和相關認證外包給我們/);
+  const differ = lines.map((l, i) => (l.text === parallelLines[i].text ? null : l.who)).filter(Boolean);
+  assert.deepStrictEqual(differ, ['老闆', '資產室 阿賢']);
+});
+
+test('估時的現實參考：第三天多一個加了 Claire 自主規格的工時，其他天不變', () => {
+  const Verdict = require('../verdict.js');
+  const line = Verdict.realLine({ manual: '2～3 個月', ai: '1 個月', claire: '1～2 年' });
+  assert.match(line, /加了 Claire 自主規格大約 1～2 年/);
+  assert.doesNotMatch(Verdict.realLine({ manual: '3 天', ai: '1 天' }), /Claire/);
+});

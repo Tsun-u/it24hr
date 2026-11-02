@@ -13,6 +13,12 @@
   // 母議題上過 POC 了沒：進度詢問、半夜事件、bad end 都看這個
   const pocLive = (e) => { const m = e.board.get('poc'); return !!(m && m.done('deploy')); };
   const notLive = (e) => !pocLive(e);
+  // 平行宇宙：三張主卡的開發計畫都排了 Claire 自己加的那一步（鍵是卡、值是計畫第一題的選項），而且上了 POC
+  const CLAIRE_STEPS = { poc_login: 6, poc_approve: 6, poc_compliance: 4 };
+  const parallelUniverse = (e) => pocLive(e) && Object.entries(CLAIRE_STEPS).every(([id, step]) => {
+    const plan = ((e.board.get(id) || {}).picks || {}).doc_plan;
+    return !!plan && [].concat(plan[0] ?? []).includes(step);
+  });
 
   // ── POC 群組（LIME 群組，成員：怡君、玩家、佩珊、志豪）──
   const pocSay = (at, id, from, text, extra = {}) => ({ kind: 'line', group: POC, at, id, title: POC, from, module: null, text, subtasks: [], ...extra });
@@ -88,7 +94,7 @@ AI服務額度有上限，請各位同仁依照工作類型選擇合適的AI模�
     body: `客戶：莎禾集團（員工約 5,000 人）。把盤點平台做成客戶版，先給莎禾的 PM 和 IT 看一個能登入、能盤點、能簽核的 POC。
 子議題各自做、各自上測試機、各自交 QC；三張核心的（登入、簽核、合規）驗過，這張才部署到 POC 環境。`,
     subtasks: [
-      { work: 'estimate', question: { items: [{ type: 'hours', free: true, text: '整個 POC（六張子議題、含客戶來回），你估：', real: { manual: '2～3 個月', ai: '1 個月' } }] } },
+      { work: 'estimate', question: { items: [{ type: 'hours', free: true, text: '整個 POC（六張子議題、含客戶來回），你估：', real: { manual: '2～3 個月', ai: '1 個月', claire: '1～2 年' } }] } },
       // 母議題的計畫＝挑該開的子議題、排順序：登入要等志豪的 AD 信，不是第一個
       { work: 'doc_plan', question: { items: [{ text: '子議題的順序（挑該做的，照順序排）', type: 'order',
         options: ['盤點與簽核', '登入與權限（等志豪的 AD 信）', '資安與合規', '壓測', '先把所有子議題一次交給 AI', '先寫產品簡介給客戶'],
@@ -655,6 +661,10 @@ AI服務額度有上限，請各位同仁依照工作類型選擇合適的AI模�
     return {
       name: '第三天：Speedrun', mode: 'speedrun', mainCard: 'poc',
       issueBase: (carry && carry.lastNo) || 127,
+      parallel: { check: parallelUniverse, traits: [
+        { title: '神人', text: '一天做完 MFA、區塊鏈和 ISO 認證' },
+        { title: '成功製造需求', text: 'Claire 自己加的都排進計畫，全部上了 POC' },
+      ] },
       // 三個模型自己挑；筆記帶第二天的來；整理需求交給 AI 正確率再 −15 個百分點
       // permission 是彩蛋：speedrun 的 Claire 是 Auto；部署照樣一步一步問，CLAIRE.md 有部署流程就照著做到底
       ai: { model: 'Essay 5', quota: 10, turnaround: [6, 12], accuracy: 0.75, permission: 'auto', readReqPenalty: 0.15, filler: NOVEL_FILLER,
@@ -843,20 +853,22 @@ AI服務額度有上限，請各位同仁依照工作類型選擇合適的AI模�
   };
   const chaos = [financeReport, panPr, bossBrochure, supportQuota, supportPage];
 
-  // ── 結業過場（順序：第三天結算卡 → 隔天早會 → 三天總結算）。bad end 只能重來，這場只有莎禾要簽的版本 ──
+  // ── 結業過場（順序：第三天結算卡 → 隔天早會 → 三天總結算）。bad end 只能重來，這場有莎禾要簽、平行宇宙兩個版本 ──
+  const graduationLines = (boss, assetRoom) => [
+    { who: '老闆', text: boss },
+    { who: 'SA／PM 怡君', text: '我先把合約的需求整理一下。' },
+    { who: 'SA／PM 怡君', text: '這次我自己讀。', aside: '看了你一眼' },
+    { who: '資產室 阿賢', text: assetRoom },
+    { who: 'IT 經理', text: '新人訓練就到這裡。明天開始，卡會一直來。' },   // 老闆不會管到這麼細，是 IT 經理會講的
+  ];
   const GRADUATION = {
     title: '隔天 09:00 公司早會',
-    lines: [
-      { who: '老闆', text: '莎禾那邊說要簽！三年約。' },
-      { who: 'SA／PM 怡君', text: '我先把合約的需求整理一下。' },
-      { who: 'SA／PM 怡君', text: '這次我自己讀。', aside: '看了你一眼' },
-      { who: '資產室 阿賢', text: '所以我們的盤點平台要賣錢了？' },
-      { who: 'IT 經理', text: '新人訓練就到這裡。明天開始，卡會一直來。' },   // 老闆不會管到這麼細，是 IT 經理會講的
-    ],
+    lines: graduationLines('莎禾那邊說要簽！三年約。', '所以我們的盤點平台要賣錢了？'),
+    parallelLines: graduationLines('莎禾說跟他們想的不太一樣，不過他們決定把資安控管系統和相關認證外包給我們了。', '所以我們的盤點平台呢？'),
     end: '新人訓練結束',
   };
 
-  const api = { make, POC, IT, pocLive, REVIEWS, CAMPAIGN_SCREEN, GRADUATION };
+  const api = { make, POC, IT, pocLive, parallelUniverse, REVIEWS, CAMPAIGN_SCREEN, GRADUATION };
   if (typeof module !== 'undefined') module.exports = api;
   else root.DAY3 = api;
 })(typeof window !== 'undefined' ? window : globalThis);
