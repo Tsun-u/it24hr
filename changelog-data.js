@@ -2,6 +2,11 @@
 (function (root) {
   const CHANGELOG = [
   {
+    "hash": "9c77854",
+    "date": "2026-11-02",
+    "subject": "加上網站圖示"
+  },
+  {
     "hash": "2d12b8b",
     "date": "2026-11-02",
     "subject": "首頁加上版號和更新履歷"
