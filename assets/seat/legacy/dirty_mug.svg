@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 28 21" width="28" height="21" shape-rendering="crispEdges">
+  <!-- legacy 的沒洗的咖啡杯：杯底剩咖啡、杯身咖啡漬、桌上的杯印 -->
+  <g transform="translate(0 1)">
+  <rect x="7" y="4" width="12" height="16" fill="#c0c0c0"/><rect x="8" y="5" width="10" height="14" fill="#fff"/>
+  <rect x="8" y="5" width="10" height="3" fill="#800000"/>
+  <rect x="9" y="9" width="1" height="2" fill="#808000"/><rect x="12" y="10" width="1" height="2" fill="#808000"/><rect x="15" y="9" width="1" height="3" fill="#808000"/>
+  <rect x="19" y="8" width="3" height="1" fill="#c0c0c0"/><rect x="21" y="9" width="1" height="4" fill="#c0c0c0"/><rect x="19" y="13" width="3" height="1" fill="#c0c0c0"/>
+  <rect x="1" y="17" width="4" height="1" fill="#808000"/><rect x="0" y="18" width="1" height="1" fill="#808000"/><rect x="5" y="18" width="1" height="1" fill="#808000"/><rect x="1" y="19" width="4" height="1" fill="#808000"/>
+  </g>
+</svg>

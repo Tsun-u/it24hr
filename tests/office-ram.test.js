@@ -74,6 +74,18 @@ test('報價單沒存就關機：記在雜事上', () => {
   const e = play(); e.walk('junjie');
   acts(e, { type: 'power' });
   assert.strictEqual(e.chores.ram.flags.lostExcel, true);
+  assert.strictEqual(e.chores.ram.flags.hardOff, true, '按住電源鈕是強制斷電');
+});
+
+test('結算卡成就：君傑的仇人、硬碟殺手、星爆16連擊照條件出現', () => {
+  const NEW = ['君傑的仇人', '硬碟殺手', '星爆16連擊'];
+  const titles = (setup) => { const e = play(); setup(e); return e.script.report(e).traits.map(t => t.title).filter(t => NEW.includes(t)); };
+  assert.deepStrictEqual(titles(() => {}), []);
+  assert.deepStrictEqual(titles(e => Object.assign(e.chores.ram.flags, { lostExcel: true, shown: { size: 12, text: '12 GB（單通道）' } })), ['君傑的仇人']);
+  assert.deepStrictEqual(titles(e => Object.assign(e.chores.ram.flags, { lostExcel: true, shown: { size: 12, text: '12 GB（雙通道）' } })), [], '雙通道不算');
+  assert.deepStrictEqual(titles(e => Object.assign(e.chores.ram.flags, { shown: { size: 12, text: '12 GB（單通道）' } })), [], '有存檔不算');
+  assert.deepStrictEqual(titles(e => { e.chores.ram.flags.hardOff = true; }), ['硬碟殺手']);
+  assert.deepStrictEqual(titles(e => { e.chores.toner.flags.starburst = true; }), ['星爆16連擊']);
 });
 
 test('電腦拆到一半離開：君傑每 10 分鐘催，30 分鐘自己把舊的拔下來；走回去看到「我幫你拆好了！」', () => {
@@ -150,4 +162,21 @@ test('機殼轉了幾圈跨好幾次開工作台累加，結算卡多一行', ()
   e.benchTurned('ram'); e.benchTurned('ram'); e.benchTurned('ram');
   assert.strictEqual(e.stats.turns, 3);
   assert.ok(e.script.report(e).extra.includes('機殼轉了 3 圈'));
+});
+
+test('下班之後走不到同事座位', () => {
+  const e = play(); tickTo(e, C.DAY_START_MIN + 9 * 60 + 1);
+  assert.ok(e.walk('junjie'), '上班時走得過去'); e.goBack();
+  tickTo(e, e.clock.minute + 5);
+  e.leave(); assert.ok(e.home, '已經下班');
+  assert.strictEqual(e.walk('junjie'), false);
+  assert.strictEqual(e.place, 'desk');
+});
+
+test('正式上班跟新人訓練一樣 21:00 強制下班（下班選單等你選晚餐），隔天 08:00 才結算', () => {
+  const e = play(); tickTo(e, 21 * 60 - 1);
+  assert.ok(!e.home, '20:59 還在公司');
+  tickTo(e, 21 * 60);
+  assert.ok(e.home && e.home.forced, '21:00 被趕下班');
+  assert.ok(!e.ended, '還沒結算');
 });

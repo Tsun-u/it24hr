@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 28 21" width="28" height="21" shape-rendering="crispEdges">
+  <!-- legacy 的高爾夫球：推桿練習墊上的一顆球 -->
+  <g transform="translate(0 2)">
+  <rect x="3" y="15" width="22" height="4" fill="#008000"/><rect x="19" y="16" width="3" height="2" fill="#000"/>
+  <rect x="10" y="8" width="5" height="1" fill="#fff"/><rect x="9" y="9" width="7" height="6" fill="#fff"/><rect x="10" y="15" width="5" height="1" fill="#c0c0c0"/>
+  <rect x="11" y="10" width="1" height="1" fill="#c0c0c0"/><rect x="13" y="11" width="1" height="1" fill="#c0c0c0"/>
+  <rect x="11" y="13" width="1" height="1" fill="#c0c0c0"/><rect x="14" y="13" width="1" height="1" fill="#c0c0c0"/>
+  </g>
+</svg>

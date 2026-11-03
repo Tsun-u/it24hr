@@ -256,10 +256,14 @@ a.btn { display: inline-block; color: inherit; text-decoration: none; }   /* 長
 .act-link { border: 0; background: transparent; color: var(--os-fg); font: inherit; padding: 0; cursor: pointer; text-align: left; text-decoration: underline dotted var(--os-muted); text-underline-offset: 3px; }
 .act-link:hover { color: var(--accent); }
 .doc-replied { margin: 0; padding: 8px 12px; border-radius: 10px; background: var(--accent); color: #fff; align-self: flex-end; font-size: 13px; }
-/* 窄視窗（開會時的筆電、手機）：清單疊在上面、內容在下面，兩邊各自捲 */
+/* 窄視窗（開會時的筆電、手機）：信箱、文件的清單疊在上面、內容在下面，兩邊各自捲（標題長，左右擠不下）。
+   LIME 照 LINE 電腦版維持左右兩欄，聯絡人欄變窄，對話用到整個視窗高度 */
 @container (max-width: 520px) {
   .docs { grid-template-columns: 1fr; grid-template-rows: minmax(0, 32%) minmax(0, 1fr); }
   .doc-list { border-right: 0; border-bottom: 1px solid var(--os-border); padding: 0 0 6px; }
+  .docs.line { grid-template-columns: minmax(96px, 34%) minmax(0, 1fr); grid-template-rows: minmax(0, 1fr); gap: 8px; }
+  .docs.line .doc-list { border-bottom: 0; border-right: 1px solid var(--os-border); padding: 0 6px 0 0; }
+  .docs.line .doc-item { padding: 6px; font-size: 12px; word-break: keep-all; overflow-wrap: anywhere; }   /* 名字斷在部門和人名中間的空白 */
 }
 .newcard { display: flex; flex-direction: column; gap: 10px; }
 .nc-row { display: grid; grid-template-columns: 72px 1fr; align-items: center; gap: 8px; font-size: 13px; }
@@ -338,8 +342,7 @@ a.btn { display: inline-block; color: inherit; text-decoration: none; }   /* 長
 .mode-tabs .btn.index-tab:nth-child(2) { --ink-fill: #ecebdc; }
 .mode-tabs .btn.index-tab:nth-child(3) { --ink-fill: #7cc6f2; }
 .mode-tabs .btn.index-tab:nth-child(4) { --ink-fill: #f7a8c9; }
-.hb-panel.inked, .home-box.inked, .box-panel.inked, .seat-props li.inked { --ink-fill: var(--paper); }
-.seat-props li.inked { --ink: #cdbfa6; }   /* 桌上的東西是標籤不是按鈕：淺棕色的線 */
+.hb-panel.inked, .home-box.inked, .box-panel.inked { --ink-fill: var(--paper); }
 .hb-panel.inked { box-sizing: border-box; padding: 4px; }   /* 內容的捲軸縮在框線內，不蓋到線 */
 .box-panel .btn.inked { padding: 5px 12px; }   /* 小字鈕套框後多留白，框線才不會貼字 */
 .hb-jump.inked, .atlas-tab.inked { --ink-fill: transparent; }
@@ -605,30 +608,63 @@ div:has(> button[aria-label="匯出存檔"]) > button::after { content: attr(ari
 .report-shot .mock { position: absolute; left: 0; top: 0; width: 960px; transform-origin: 0 0; pointer-events: none; }
 .report-shot-label { margin-top: 6px; font-size: 12px; color: var(--muted); }
 
-/* ── 到同事座位（正式上班）：蓋在自己螢幕的位置上，自己的螢幕和視窗藏起來（回座位原樣都在）。
-   同事的螢幕畫他的桌布和捷徑，桌上的東西先用文字小牌 ── */
+/* ── 到同事座位（正式上班）：換座位的氛圍。自己的螢幕和視窗藏起來（回座位原樣都在），牆和桌面沿用這個時代的底圖；
+   同事的螢幕站在桌面上、跟自己的螢幕同一個位置（speedrun 插圖上的鐘照樣藏在它後面），他的擺設是場景的一部分，擺在螢幕左邊的桌面上 ── */
 .desk.at-seat .screens { visibility: hidden; }
+/* 人在同事那邊只帶得到公務手機（變成一顆功能按鈕）：自己桌上的裝置、排插和線、便條都留在自己座位 */
+.desk.at-seat .surface > .device, .desk.at-seat .surface .strip, .desk.at-seat .surface .cables, .desk.at-seat .surface .papers { display: none; }
+/* 站在自己桌邊等的人，人在同事座位時看不到（等太久會照樣留紙條走，回座位看到紙條） */
+.desk.at-seat .surface .visitor { display: none; }
 /* 人在同事座位時自己的螢幕藏起來了，暫停的字和遮罩改蓋在座位畫面上（樣子跟電腦上那層一樣） */
 .desk.on-break .seat-room::after { content: '暫停中'; position: absolute; inset: 0; z-index: 5; display: grid; place-items: center; font-size: 28px; letter-spacing: .3em; color: #2b2f36; background: rgba(217, 210, 195, .6); pointer-events: none; }
-.seat-room { position: absolute; inset: 0; z-index: 3; display: grid; grid-template-columns: minmax(0, 1fr) auto; grid-template-rows: auto minmax(0, 1fr) auto; gap: 12px; padding: 16px 24px; background: linear-gradient(180deg, #d9d2c3, #c7bea9); color: #2b2f36; }
-.seat-title { grid-column: 1 / -1; margin: 0; font-size: 18px; }
-.seat-monitor { grid-column: 1; grid-row: 2; justify-self: start; height: 100%; max-width: 100%; aspect-ratio: 16 / 10; min-height: 0; overflow: hidden; padding: 12px; border: 10px solid var(--bezel); border-bottom-width: 22px; border-radius: 12px 12px 4px 4px; background: #1e293b; box-shadow: 0 10px 30px rgba(0,0,0,.35); }
+/* --edge：桌子後緣離畫面頂端多遠。照 speedrun 插圖（cover、對齊上緣，桌面從第 661／1080 列開始），三個時代對齊這條線 */
+.seat-room { --edge: min(.612 * max(56.25vw, 100dvh), 100% - 60px); position: absolute; inset: 0; z-index: 3; display: flex; flex-direction: column; align-items: flex-start; gap: 12px; padding: 16px 24px; box-sizing: border-box; color: #2b2f36; }
+/* legacy、hybrid 的桌緣往上加：從桌緣到座位畫面底部補一段同時代的木頭桌面（材質最上面兩列就是桌緣線），桌面那排藏掉自己的桌緣線接在後面 */
+.seat-desktop { position: absolute; left: 0; right: 0; top: var(--edge); bottom: 0; pointer-events: none; image-rendering: pixelated; }
+.seat-room[data-mode="legacy"] .seat-desktop { background: url(assets/bg/legacy_wood.svg) center / 100% 100% no-repeat; }
+.seat-room[data-mode="hybrid"] .seat-desktop { background: url(assets/bg/hybrid_wood.png) center / 100% 100% no-repeat; }
+.desk.at-seat[data-mode="legacy"] .surface, .desk.at-seat[data-mode="hybrid"] .surface { background-size: 100% calc(100% + 20px); background-position: center bottom; }
+/* 牆面左上那一欄：寬度留到螢幕左邊為止 */
+.seat-title, .seat-say, .seat-hand { max-width: calc(37% - 24px); }
+.seat-title { margin: 0; padding: 4px 12px; border-radius: 6px; background: rgba(246, 241, 231, .9); font-size: 18px; }   /* 座位名稱貼在牆上，任何牆色都讀得到 */
+/* 尺寸和位置照自己的外接螢幕（.screens 的邊界＋.screen.monitor 的 63%／96%），下框貼著桌面 */
+.seat-monitor { position: absolute; right: 18px; bottom: 0; width: calc((100% - 36px) * .63); aspect-ratio: 16 / 10; max-height: calc((100% - 14px) * .96); box-sizing: border-box;   /* 直式平板也是一台正常比例的螢幕，不拉成直條 */ overflow: hidden; padding: 12px; border: 10px solid var(--bezel); border-bottom-width: 22px; border-radius: 12px 12px 4px 4px; background: #1e293b; box-shadow: 0 10px 30px rgba(0,0,0,.35); }
 .seat-room[data-wallpaper="sportscar"] .seat-monitor { background: linear-gradient(160deg, #0f172a 0 52%, #b91c1c 52% 60%, #0f172a 60% 64%, #b91c1c 64% 67%, #0f172a 67%); }   /* 跑車桌布：兩道紅色斜線 */
 .seat-room[data-wallpaper="family"] .seat-monitor { background: radial-gradient(circle at 30% 62%, #f2c9a0 0 7%, transparent 7.5%), radial-gradient(circle at 46% 58%, #e8b48a 0 8%, transparent 8.5%), radial-gradient(circle at 62% 64%, #f2c9a0 0 6%, transparent 6.5%), linear-gradient(180deg, #9fd3f0 0 55%, #8cc87a 55%); }   /* 全家福桌布：藍天草地上三顆頭 */
+.seat-room[data-wallpaper="landscape"] .seat-monitor { background: linear-gradient(180deg, transparent 0 70%, #6a9fbf 70%, #4b7f9e 100%), radial-gradient(ellipse 26% 24% at 28% 72%, #4f7d58 0 98%, transparent 100%), radial-gradient(ellipse 34% 30% at 70% 74%, #3f6b4c 0 98%, transparent 100%), linear-gradient(180deg, #f3c98f 0 15%, #bcd6e4 50%); }   /* 山水桌布：黃昏的天、兩座山、山前的湖 */
 .seat-shortcuts { display: flex; flex-flow: column wrap; align-content: flex-start; gap: 12px; height: 100%; }
 .seat-shortcut { display: inline-flex; flex-direction: column; align-items: center; gap: 4px; width: 96px; font-size: 12px; color: #fff; text-align: center; text-shadow: 0 1px 2px rgba(0,0,0,.7); }
-.seat-actions { grid-column: 1 / -1; grid-row: 3; display: flex; flex-wrap: wrap; gap: 8px; }   /* 能做的事在螢幕正下方 */
-.seat-props { grid-column: 2; grid-row: 2; display: flex; flex-direction: column; align-items: flex-start; gap: 8px; margin: 0; padding: 0; list-style: none; }   /* 桌上的擺設在螢幕旁邊 */
-.seat-props li { padding: 4px 10px; border: 1px solid #cdbfa6; border-radius: 6px; background: #f6f1e7; font-size: 13px; }
+/* 在這個座位能做的事（開工作台、看她的手機或信箱）：放在他螢幕的正中央，走過來第一眼就看到 */
+.seat-actions { position: absolute; right: calc(18px + (100% - 36px) * .315); bottom: calc(min((100vw - 36px) * .39375, (100% - 14px) * .96) / 2); z-index: 1;   /* 螢幕高＝min(寬÷1.6, 原本的高)，取一半 */ transform: translate(50%, 50%); display: flex; flex-wrap: wrap; justify-content: center; gap: 12px; }
+.seat-actions .btn { padding: 14px 28px; font-size: 20px; font-weight: 700; white-space: nowrap; filter: drop-shadow(0 4px 8px rgba(0,0,0,.35)); }
+/* 他桌上的擺設：螢幕左邊那片桌面，底部貼著桌面、往螢幕靠，最後一件貼著螢幕（紙類可以貼在螢幕側邊）；是背景的一部分，沒有功能，不吃點擊 */
+.seat-props { position: absolute; left: 24px; bottom: 0; width: calc(37% - 4px); display: flex; align-items: flex-end; justify-content: flex-end; gap: 24px; margin: 0; padding: 0; list-style: none; pointer-events: none; }
+.seat-props li, .seat-scenery li { position: relative; flex: 0 1 168px; min-width: 0; display: flex; align-items: flex-end; font-size: 13px; }
+.seat-props .prop-img, .seat-scenery .prop-img { display: block; width: 100%; height: auto; max-height: 168px; object-fit: contain; object-position: center bottom; filter: drop-shadow(0 6px 5px rgba(0,0,0,.35)); }
+/* 像素圖（legacy、hybrid）照原圖格數放大六倍，每件比例一致；寬度不夠時一起等比縮 */
+.seat-room[data-mode="legacy"] li, .seat-room[data-mode="hybrid"] li { flex: 0 1 calc(var(--w, 28) * 6px); }
+.seat-room .prop-img.legacy, .seat-room .prop-img.hybrid { max-height: none; image-rendering: pixelated; }
+/* 靠牆站在桌子後面的東西（淑芬的印表機櫃）：螢幕左邊，下半截被桌子擋住 */
+.seat-scenery { position: absolute; left: 24px; bottom: calc(100% - var(--edge)); display: flex; align-items: flex-end; margin: 0; padding: 0; list-style: none; pointer-events: none; }
+/* 櫃子的下緣切在桌子後緣（--edge），看起來才是站在桌子後面；speedrun 再往上 3px，收在插圖桌緣那條深色邊線上（童童目測） */
+.seat-room[data-mode="speedrun"] .seat-scenery { bottom: calc(100% - var(--edge) + 3px); }
+.seat-scenery li { flex: none; width: 230px; }   /* 容器寬度跟著內容走，所以直接給寬度 */
+.seat-room[data-mode="legacy"] .seat-scenery li, .seat-room[data-mode="hybrid"] .seat-scenery li { width: calc(var(--w, 36) * 6px); }
+.seat-scenery .prop-img { max-height: 300px; }
+/* 放在東西上的按鈕：貼在那件東西的頂上 */
+.seat-room .on-thing { position: absolute; left: 50%; top: 0; z-index: 2; transform: translate(-50%, -60%); pointer-events: auto; padding: 10px 22px; font-size: 18px; font-weight: 700; white-space: nowrap; filter: drop-shadow(0 4px 8px rgba(0,0,0,.35)); }
 .btn.seat-phone { display: inline-flex; align-items: center; gap: 6px; }
+/* 在同事座位，公務手機跟暫停、回座位排成一組靠右 */
+.desk.at-seat .surface .seat-phone { margin-left: auto; }
+.desk.at-seat .surface .seat-phone + .coffee { margin-left: 0; }
 /* 同事在旁邊講的話、手上帶著的記憶體：沒內容就不佔位置 */
-.seat-say, .seat-hand { grid-column: 1 / -1; margin: 0; }
-.seat-say { justify-self: start; max-width: 100%; padding: 8px 14px; border-radius: 14px; background: #fff; box-shadow: 0 2px 6px rgba(0,0,0,.12); font-size: 15px; }
+.seat-say, .seat-hand { margin: 0; }
+.seat-say { padding: 8px 14px; border-radius: 14px; background: #fff; box-shadow: 0 2px 6px rgba(0,0,0,.12); font-size: 15px; }
 .seat-hand { font-size: 13px; color: #4b4436; }
 .seat-say:empty, .seat-hand:empty { display: none; }
 /* 自己座位的舊料箱：人在同事座位時收起來 */
 .btn.parts-box { display: inline-flex; align-items: center; gap: 6px; }
-.desk.at-seat .parts-box { display: none; }
+.desk.at-seat .parts-box, .desk.at-home .parts-box { display: none; }   /* 舊料箱留在公司自己的座位上 */
 .box-panel { position: absolute; left: 24px; bottom: 12px; z-index: 20; width: min(360px, calc(100% - 32px)); max-height: calc(100% - 24px); overflow: auto; padding: 12px 14px; border-radius: 12px; background: #f6f1e7; color: #2b2f36; box-shadow: 0 10px 30px rgba(0,0,0,.35); box-sizing: border-box; }
 .box-head { display: flex; align-items: center; justify-content: space-between; }
 .box-head h3 { margin: 0; font-size: 16px; }
@@ -643,7 +679,7 @@ div:has(> button[aria-label="匯出存檔"]) > button::after { content: attr(ari
 .box-label { font-family: var(--mono); font-size: 14px; }
 /* 公務手機：只看 LIME 和信箱，浮在桌面右下 */
 .phone-panel { position: absolute; right: 24px; bottom: 12px; z-index: 20; display: flex; flex-direction: column; width: min(440px, calc(100% - 32px)); height: calc(100% - 24px); overflow: hidden; border: 10px solid #1f2328; border-radius: 22px; background: #f6f1e7; box-shadow: 0 10px 30px rgba(0,0,0,.4);
-  --os-fg: #1f2328; --os-border: #c5ccd8; --os-muted: #4b5563; --chat-bg: #e6f19a; --chat-them: #ffffff; }   /* 手機在電腦外面，吃不到電腦的配色：LIME 用淺色那套 */
+  --os-fg: #1f2328; --os-border: #c5ccd8; --os-muted: #4b5563; --os-bar: #e2d9c6; --chat-bg: #e6f19a; --chat-them: #ffffff; }   /* 手機在電腦外面，吃不到電腦的配色：LIME 用淺色那套 */
 .phone-tabs { display: flex; gap: 6px; padding: 8px; background: #1f2328; }
 .phone-tabs .btn:last-child { margin-left: auto; }
 /* 公務手機的電話分頁（手機螢幕＝軟體樣子）：號碼一顆一顆、通話中最後幾句、語音選單的數字鍵、掛斷 */
@@ -670,14 +706,106 @@ div:has(> button[aria-label="匯出存檔"]) > button::after { content: attr(ari
 .phone-panel.dead .phone-body { background: #111; color: #9ca3af; display: grid; align-content: center; justify-items: center; gap: 6px; }
 .phone-dead { margin: 0; font-size: 18px; color: #e5e7eb; }
 .phone-dead-hint { margin: 0; font-size: 13px; }
-.phone-body > .docs { height: 100%; grid-template-columns: minmax(0, 1fr); grid-template-rows: auto minmax(0, 1fr); padding: 8px; box-sizing: border-box; }   /* 手機：聯絡人一排在上、對話在下 */
+.phone-body > .docs { height: 100%; grid-template-columns: minmax(0, 1fr); grid-template-rows: auto minmax(0, 1fr); padding: 8px; box-sizing: border-box; }   /* 手機的信箱：信件一排在上、內容在下 */
 .phone-body .doc-list { flex-direction: row; flex-wrap: wrap; border-right: 0; border-bottom: 1px solid var(--os-border); padding: 0 0 6px; }
+/* 手機的 LIME 跟電腦一樣左右兩欄：左邊聯絡人、右邊對話 */
+.phone-body > .docs.line { grid-template-columns: minmax(96px, 34%) minmax(0, 1fr); grid-template-rows: minmax(0, 1fr); gap: 8px; }
+.phone-body .docs.line .doc-list { flex-direction: column; flex-wrap: nowrap; border-bottom: 0; border-right: 1px solid var(--os-border); padding: 0 6px 0 0; }
+.phone-body .docs.line .doc-item { padding: 6px; word-break: keep-all; overflow-wrap: anywhere; }
+/* 桌邊訪客講完等你回話：回話鈕排在下一行 */
+.visitor:has(.visitor-replies) { flex-wrap: wrap; }
+.visitor-replies { flex-basis: 100%; display: flex; flex-wrap: wrap; justify-content: flex-end; gap: 8px; }
+/* 老闆娘的手機（她座位、或她站在桌邊時）：手機螢幕＝軟體樣子，照 iPhone 的 Wi-Fi 設定畫。放右下，不擋桌面捷徑和左下的訪客 */
+.wife-phone { position: absolute; right: 24px; bottom: 12px; z-index: 21; display: flex; flex-direction: column; width: min(340px, calc(100% - 32px)); height: calc(100% - 24px); max-height: 560px; overflow: hidden; border: 10px solid #d8c2b0; border-radius: 26px; background: #f2f2f7; color: #1c1c1e; box-shadow: 0 10px 30px rgba(0,0,0,.4); font-size: 15px; }
+.wp-bar { display: flex; align-items: center; justify-content: space-between; gap: 8px; padding: 8px 10px; background: #d8c2b0; }
+.wp-bar-btns { display: flex; gap: 6px; }
+.btn.wife-phone-desk { display: inline-flex; align-items: center; gap: 6px; }   /* 她站在桌邊時先放在你桌上的手機 */
+.wp-screen { flex: 1; min-height: 0; overflow: auto; padding: 10px 14px; }
+.wp-title { margin: 6px 0 12px; font-size: 24px; }
+.wp-list { overflow: hidden; border-radius: 10px; background: #fff; }
+.wp-row, .wp-item { display: flex; align-items: center; justify-content: space-between; gap: 8px; border-bottom: 1px solid #e5e5ea; }
+.wp-row:last-child, .wp-item:last-child { border-bottom: 0; }
+.wp-item { padding: 12px 14px; }
+.wp-join { flex: 1; display: flex; flex-direction: column; align-items: flex-start; gap: 2px; padding: 10px 14px; border: 0; background: none; color: inherit; font: inherit; text-align: left; cursor: pointer; }
+.wp-status { font-size: 12px; color: #d70015; }
+.wp-status.ok { color: #6d6d72; }
+.wp-status:empty { display: none; }
+.wp-info, .wp-back, .wp-link { border: 0; background: none; color: #007aff; font: inherit; cursor: pointer; }
+.wp-link { display: block; width: 100%; padding: 12px 14px; text-align: left; }
+.wp-info { padding: 0 14px; line-height: 0; }
+.wp-info .icon { width: 22px; height: 22px; }
+.wp-back { padding: 0; }
+.wp-mac { font-family: var(--mono); color: #6d6d72; }
+.wp-note { margin: 6px 14px; font-size: 12px; color: #6d6d72; }
+.wp-switch { appearance: none; position: relative; flex: none; width: 46px; height: 28px; margin: 0; border-radius: 14px; background: #e5e5ea; cursor: pointer; transition: background .15s; }
+.wp-switch::before { content: ''; position: absolute; top: 2px; left: 2px; width: 24px; height: 24px; border-radius: 50%; background: #fff; box-shadow: 0 1px 3px rgba(0,0,0,.3); transition: transform .15s; }
+.wp-switch:checked { background: #34c759; }
+.wp-switch:checked::before { transform: translateX(18px); }
+.wp-msg { margin: 0; padding: 8px 14px; border-top: 1px solid #d1d1d6; background: #fff; font-size: 13px; line-height: 1.5; white-space: pre-line; }
+.wp-msg:empty { display: none; }
+/* 窄螢幕：她站在桌邊時的對話框在左下，手機往上讓出位置，最下面那行訊息才不會被蓋住 */
+@media (max-width: 900px) { .wife-phone.beside { bottom: 100px; height: calc(100% - 112px); } }
+/* 美玲的 OutLuck（她座位、蓋在她的螢幕上）：信箱軟體的樣子，淺色 */
+.outluck { position: absolute; left: 24px; right: 24px; top: 56px; bottom: 12px; z-index: 21; max-width: 860px; display: flex; flex-direction: column; gap: 8px; padding: 0 0 10px; overflow: hidden; border: 1px solid #b7c4d6; border-radius: 8px; background: #fff; color: #1f2328; box-shadow: 0 10px 30px rgba(0,0,0,.35); font-size: 13px; }
+.ol-bar { display: flex; align-items: center; justify-content: space-between; padding: 8px 12px; background: #2f5d9b; color: #fff; }
+.ol-quota, .ol-folders, .ol-tools, .ol-picker, .ol-msg { margin: 0 12px; }
+.ol-quota { display: grid; gap: 4px; }
+.ol-meter { position: relative; height: 10px; border-radius: 5px; background: #e5e9f0; overflow: hidden; }
+.ol-fill { position: absolute; inset: 0 auto 0 0; background: #3b82f6; }
+.ol-meter.warn .ol-fill { background: #f59e0b; }
+.ol-meter.over .ol-fill { background: #dc2626; }
+.ol-safe { position: absolute; top: 0; bottom: 0; width: 2px; background: #1f2328; opacity: .55; }   /* 安全線 80% */
+.ol-folders, .ol-tools, .ol-picker { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; }
+.ol-picker:empty { display: none; }
+.ol-picker { padding: 8px; border-radius: 6px; background: #fff7e0; }
+.ol-archive-to { margin-left: auto; color: #4b5563; }
+.ol-list { flex: 1; min-height: 0; overflow: auto; margin: 0 12px; border: 1px solid #e5e9f0; border-radius: 6px; }
+.ol-table { width: 100%; border-collapse: collapse; }
+.ol-table th, .ol-table td { padding: 6px 8px; border-bottom: 1px solid #eef1f5; text-align: left; vertical-align: middle; }
+.ol-table th { position: sticky; top: 0; background: #f5f7fa; font-weight: 500; color: #4b5563; }
+.ol-table .ol-num { text-align: right; white-space: nowrap; }
+.ol-table .ol-date, .ol-table .ol-from { white-space: nowrap; }
+.ol-check { width: 28px; }
+.ol-sort { border: 0; background: none; padding: 0; color: inherit; font: inherit; cursor: pointer; text-decoration: underline dotted; text-underline-offset: 3px; }
+.ol-empty { color: #6b7280; text-align: center; }
+.ol-msg { min-height: 1.4em; color: #374151; white-space: pre-line; }
+/* 郵件管理頁（自己電腦，只能看） */
+.mailadmin { display: flex; flex-direction: column; gap: 8px; padding: 10px 12px; color: var(--os-fg); font-size: 13px; }
+.mailadmin-title { margin: 8px 0 0; font-size: 14px; }
+/* 自己電腦上的無線基地台管理頁 */
+.ap { display: flex; flex-direction: column; gap: 8px; height: 100%; padding: 10px 12px; box-sizing: border-box; color: var(--os-fg); font-size: 13px; }
+.ap-tabs { display: flex; flex-wrap: wrap; gap: 6px; }
+.ap-body { flex: 1; min-height: 0; overflow: auto; }
+.ap .mono { font-family: var(--mono); }
+.ap-table { width: 100%; border-collapse: collapse; }
+.ap-table th, .ap-table td { padding: 5px 6px; border-bottom: 1px solid var(--os-border); text-align: left; white-space: nowrap; }
+.ap-table th { color: var(--os-muted); font-weight: 500; }
+.ap-table tr.blocked td { color: var(--priority); }
+.ap-table tr.blocked td:last-child { color: inherit; }
+.ap-note { margin: 0 0 8px; color: var(--os-muted); }
+.ap-list { margin: 0; padding: 0; list-style: none; }
+.ap-list li { padding: 5px 0; border-bottom: 1px solid var(--os-border); }
+.ap-row { display: flex; align-items: center; justify-content: space-between; gap: 10px; padding: 10px 0; border-bottom: 1px solid var(--os-border); }
+.ap-msg { margin: 0; min-height: 1.5em; color: var(--os-muted); }
 @media (max-width: 700px) {
-  .seat-room { grid-template-columns: minmax(0, 1fr); grid-template-rows: auto minmax(0, 1fr) auto auto; padding: 10px 12px; }
-  .seat-monitor { width: 100%; height: auto; align-self: start; }
-  .seat-actions { grid-column: 1; grid-row: 3; }
-  .seat-props { grid-column: 1; grid-row: 4; flex-direction: row; flex-wrap: wrap; }
+  .seat-room { padding: 10px 12px; }
+  .seat-title, .seat-say, .seat-hand { max-width: 100%; }
+  .seat-actions .btn { padding: 12px 20px; font-size: 17px; }
+  /* 桌面那排放不下一列：AI 額度自己一列，公務手機、暫停、回座位排在下一列（回座位在最右，跟下班鈕同位置） */
+  .desk.at-seat .surface .ai-quota { order: -2; margin-left: auto; }
+  .desk.at-seat .surface::before { content: ''; order: -1; flex-basis: 100%; height: 0; }
+  .seat-room .on-thing { padding: 8px 14px; font-size: 15px; }
   .phone-panel { right: 8px; left: 8px; width: auto; }
+  .wife-phone { left: 8px; right: 8px; width: auto; }
+  .outluck { left: 8px; right: 8px; top: 8px; }
+  .ol-table .ol-from, .ol-table .ol-date { display: none; }   /* 手機寬度：寄件人、日期收起來，主旨和大小留著 */
+  .ol-archive-to { margin-left: 0; flex-basis: 100%; }
+  /* 基地台連線紀錄：一筆兩行，時間＋MAC 一行、結果一行，按鈕靠右 */
+  .ap-table thead { display: none; }
+  .ap-table tr { display: grid; grid-template-columns: auto minmax(0, 1fr) auto; column-gap: 8px; align-items: center; padding: 6px 0; border-bottom: 1px solid var(--os-border); }
+  .ap-table th, .ap-table td { padding: 1px 0; border-bottom: 0; }
+  .ap-table td:nth-child(3) { grid-column: 1 / 3; }
+  .ap-table td:nth-child(4) { grid-column: 3; grid-row: 1 / 3; }
   .box-panel { left: 8px; right: 8px; width: auto; }
 }
 
@@ -922,6 +1050,14 @@ div:has(> button[aria-label="匯出存檔"]) > button::after { content: attr(ari
 .terminal-text .t-bar { position: sticky; top: 0; display: flex; align-items: center; gap: 12px; padding: 2px 0 6px; background: #0d1117; }
 .terminal-text .t-mode { margin-left: auto; color: #a371f7; font-size: 12px; }   /* accept edits 紫、auto 黃，跟本尊一樣 */
 .terminal-text .t-mode.auto { color: #e3b341; }
+/* 問 Claire（能問問題的關卡）：回答不加粗（Novel、Pedia 一長串）；面板在終端機最底下，按鈕可以換行 */
+.terminal-text .t-claire { color: #f2cc60; }
+.terminal-text .claire-ask { display: block; white-space: normal; margin-top: 8px; padding-top: 6px; border-top: 1px dashed #30363d; }
+.terminal-text .claire-row { display: flex; flex-wrap: wrap; align-items: center; gap: 6px 4px; margin: 4px 0; }
+.terminal-text .claire-label { color: #8b949e; margin-right: 4px; }
+.terminal-text .claire-row .tbtn { padding: 2px 8px; text-align: left; }
+.terminal-text .tbtn.on { background: #1f6feb; border-color: #1f6feb; }
+.terminal-text .tbtn:disabled { opacity: .45; cursor: not-allowed; }
 .body-text .ai-claim { display: block; color: #c62828; font-weight: 700; font-size: 1.15em; margin-top: 6px; }
 .ai-banner { background: #e8f1ff; color: #1d3f7a; border-left: 4px solid #2563eb; padding: 8px 12px; border-radius: 4px; font-weight: 600; }
 .fn-claim { margin: 4px 0; }
@@ -1221,7 +1357,8 @@ a.csie-course:hover { border-color: var(--accent); }
 .spot-frame { flex: 0 0 auto; border: 2px solid var(--line, #c9c2b6); border-radius: 10px; padding: 6px; background: var(--paper, #fff); }
 .spot-frame.spot-pc { width: 236px; } .spot-frame.spot-tablet { width: 174px; } .spot-frame.spot-phone { width: 120px; }   /* 三台加起來要塞得進 640 寬的小關卡視窗，手機那台才不會被切掉 */
 .spot-frame.spot-lit { box-shadow: 0 0 0 3px #f2b84b; }
-.spot-frame .mock { font-size: 11px; max-height: 320px; overflow: hidden; position: relative; }
+.spot-frame .mock { font-size: 11px; overflow: hidden; position: relative; }   /* 整頁畫出來，不在小框裡捲；左右超出的照樣切掉（平板表單要左右捲那個錯） */
+.spot-frame .mock-phone .mock-campaign-submit { padding-bottom: 32px; }   /* 手機的橫幅蓋住送出鈕下半截：露出上半截才看得出是按鈕被蓋住，也點得到 */
 .spot-name { text-align: center; font-size: 12px; color: var(--muted, #777); margin-top: 4px; }
 .mock-region { position: relative; cursor: pointer; border: 1px dashed transparent; border-radius: 6px; padding: 4px; margin: 4px 0; }
 .mock-region:hover { border-color: #c9c2b6; }
@@ -1256,3 +1393,22 @@ a.csie-course:hover { border-color: var(--accent); }
 .diff-no { width: 3em; color: #999; text-align: right; flex: 0 0 auto; } .diff-sign { width: 1em; flex: 0 0 auto; }
 .diff-line .fn-code { white-space: pre; flex: 1 1 auto; background: transparent; padding: 0; }
 .diff-line .review-menu { flex-basis: 100%; }
+
+/* ── 同事座位，直式畫面（手機、直式平板）：上下放。同事的螢幕腳貼齊桌緣，擺設放在螢幕下面的桌面上；
+   有靠牆的櫃子時，螢幕讓出左邊給櫃子（櫃子比螢幕矮，放在螢幕後面會整個被擋住）。--px 是像素圖放大倍數、--spx 是櫃子的 ── */
+@media (orientation: portrait) {
+  .seat-room { --side: 24px; --mon: 1; --px: 6; --spx: 6; }
+  .seat-room:has(.seat-fixture) { --mon: .68; }
+  .seat-monitor { left: auto; right: var(--side); bottom: calc(100% - var(--edge)); width: calc((100vw - 2 * var(--side)) * var(--mon)); max-height: none; }
+  .seat-actions { right: calc(var(--side) + (100vw - 2 * var(--side)) * var(--mon) / 2); bottom: calc(100% - var(--edge) + (100vw - 2 * var(--side)) * var(--mon) * .3125); }
+  .seat-props { left: var(--side); right: var(--side); width: auto; bottom: 16px; justify-content: center; gap: 16px; }
+  .seat-props li { flex: 0 1 calc(28px * var(--px)); }
+  .seat-props .prop-img { max-height: calc(28px * var(--px)); }
+  .seat-room[data-mode="legacy"] li, .seat-room[data-mode="hybrid"] li { flex: 0 1 calc(var(--w, 28) * 1px * var(--px)); }
+  .seat-scenery, .seat-room[data-mode] .seat-scenery { left: var(--side); }
+  .seat-scenery li { width: calc(36px * var(--spx)); }
+  .seat-room[data-mode="legacy"] .seat-scenery li, .seat-room[data-mode="hybrid"] .seat-scenery li { width: calc(var(--w, 36) * 1px * var(--spx)); }
+}
+@media (orientation: portrait) and (max-width: 700px) {
+  .seat-room { --side: 12px; --px: 4; --spx: 3; }
+}

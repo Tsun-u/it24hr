@@ -139,25 +139,46 @@
       const v = this.root.querySelector('.visitor'); v.hidden = false; v.classList.add('arrive');
       v.querySelector('.visitor-text').textContent = `${src.from}站在桌邊，沒有要走的意思。`;
       v.querySelector('.visitor-talk').hidden = false;
-      this.firstVisitorHint();
+      if (this.engine.place === 'desk') this.firstVisitorHint();   // 人在同事座位看不到訪客（樣式藏起來），回座位還在才講
     }
-    hideVisitor() { const v = this.root.querySelector('.visitor'); v.hidden = true; v.classList.remove('arrive'); }
+    hideVisitor() {
+      const v = this.root.querySelector('.visitor'); v.hidden = true; v.classList.remove('arrive');
+      const replies = v.querySelector('.visitor-replies'); if (replies) replies.remove();
+    }
     // 點了才開始交辦：一句一句講，講完人走、話進文件
     talkToVisitor() {
       const src = this.engine.visitor; if (!src) return;
+      this.engine.listenTo(src.id);
       const v = this.root.querySelector('.visitor'); v.querySelector('.visitor-talk').hidden = true;
       const lines = [...(src.lines || [])]; const text = v.querySelector('.visitor-text');
       const next = () => {
-        if (!lines.length) { this.engine.talkTo(src.id); this.hideVisitor(); this.toast(`${src.from}講的話在電腦的「文件」裡`); return; }
-        text.textContent = `${src.from}：「${lines.shift()}」`; setTimeout(next, 2200);
+        if (lines.length) { text.textContent = `${src.from}：「${lines.shift()}」`; setTimeout(next, 2200); return; }
+        if (src.replies) { this.visitorReplies(src); return; }
+        this.engine.talkTo(src.id); this.hideVisitor(); this.toast(`${src.from}講的話在電腦的「文件」裡`);
       };
       next();
+    }
+    // 講完等你回話（劇本 replies）：phone＝當場看她的手機，她站在旁邊等到手機還她；leave＝她回一句就回座位
+    visitorReplies(src) {
+      const v = this.root.querySelector('.visitor'); const row = h('div', 'visitor-replies');
+      for (const r of src.replies) {
+        const b = h('button', 'btn small', r.say);
+        b.addEventListener('click', () => {
+          this.engine.talkTo(src.id);   // 她的話進文件；visitor:talked 會先把人收掉，這裡再叫回來講最後一句
+          const text = v.querySelector('.visitor-text'); v.hidden = false; v.querySelector('.visitor-talk').hidden = true;
+          if (r.act === 'phone') { this.openWifePhone({ beside: true }); return; }
+          text.textContent = `${src.from}：「${r.back}」`;
+          setTimeout(() => { if (!this.wifeBeside) this.hideVisitor(); }, 2200);
+        });
+        row.append(b);
+      }
+      v.append(row); Ink.paperize(row);
     }
     firstVisitorHint() {
       let seen = false;
       try { seen = localStorage.getItem(VISITOR_HINT_KEY) === '1'; } catch (e) { /* 私密視窗沒有儲存空間 */ }
       if (seen) return;
-      this.showHint({ text: '有人站在桌邊。點他，聽他要什麼；不點，他會留一張紙在桌上就走。', pause: false });
+      this.showHint({ text: '有人站在桌邊。點他，聽他要什麼，他講的話會收進「文件」；不點，他會留一張紙在桌上就走，紙要數位化才會進文件。', pause: false });
       try { localStorage.setItem(VISITOR_HINT_KEY, '1'); } catch (e) { /* 同上 */ }
     }
     // ── 手動測試：整張桌子壓暗進測試模式，點手機、平板＝實機測，點電腦螢幕出 devtools 選模擬；「做完了」才記到卡上 ──
@@ -307,13 +328,15 @@
       e.on('seat:say', ({ seat, who, text }) => {
         if (this.seatRoom && e.place === seat) this.seatRoom.querySelector('.seat-say').textContent = `${who.split(' ').pop()}：「${text}」`;
       });
-      e.on('chore:changed', () => { this.refreshPartsBox(); this.refreshSeatHand(); });
+      e.on('chore:changed', () => { this.refreshPartsBox(); this.refreshSeatHand(); this.refreshWifi(); this.refreshMail(); this.refreshDocs(); });   // refreshDocs：雜事收尾了，LIME 那個話題的選項收掉
       e.on('talk:changed', () => this.refreshDocs());
       e.on('bench:closed', () => this.refreshSeatHand());
       e.on('call:changed', (call) => this.refreshCall(call));
       e.on('call:connected', () => Sound.play('connect'));
       this.setupPartsBox();
       this.setupWorkPhone();
+      this.setupWifi();
+      this.setupMail();
       this.root.querySelector('.visitor-talk').addEventListener('click', () => this.talkToVisitor());
       this.dragDevices();
       e.on('visitor:arrived', (src) => this.showVisitor(src));
@@ -348,6 +371,15 @@
       e.on('ai:deploying', ({ card, lines }) => { aiLines(lines); this.refreshCard(card.id); });
       e.on('ai:notes', () => { this.refreshTerminal(); this.refreshDocs(); });
       e.on('ai:quota', () => { this.updateQuota(); aiLines([{ text: '— AI 額度補滿了 —', kind: 'note' }]); });
+      // 問 Claire（能問問題的關卡）：問的那句、等多久、回答都寫進終端機
+      e.on('claire:asked', ({ say, model, wait }) => {
+        const label = (e.aiModel(model) || {}).label;
+        aiLines([{ text: `$ claire${label ? ` --model "${label}"` : ''} "${say}"`, kind: 'cmd' }, ...(wait ? [{ text: `（${label} 想一下，約 ${wait} 分鐘）`, kind: 'note' }] : [])]);
+        this.updateQuota();
+      });
+      e.on('claire:answer', ({ lines }) => aiLines(lines.map(text => ({ text, kind: 'claire' }))));
+      // 小事件回「好，我過去。」：黑畫面跑一趟，回來時間過掉、人在自己座位
+      e.on('errand:go', ({ id, tripText }) => this.trip(tripText, () => e.errandTrip(id)));
       this.updateQuota();
       e.on('site:down', (card) => { this.root.querySelector('.desk').classList.add('down'); this.toast(`內網 502 了。替換排在上傳前面，現在站台是空的。`, '部署'); });
       e.on('site:up', (card) => { this.root.querySelector('.desk').classList.remove('down'); this.toast(`內網回來了，掛了 ${e.downMinutes(card)} 分鐘。`, '部署'); });
@@ -376,6 +408,7 @@
     enterHome() {
       this.exitMeeting(); this.hideHint();
       for (const id of [...this.wm.windows.keys()]) this.wm.close(id);   // 公司的視窗留在公司
+      this.closePartsBox();   // 舊料箱也留在公司（鈕由 .desk.at-home 收起來）
       this.root.querySelector('.desk').classList.add('at-home');
       this.root.querySelector('.laptop-screen').hidden = true;
       this.root.querySelector('.screen.laptop').prepend(this.desktop);
@@ -474,7 +507,8 @@
 
     // ── 會議：外接螢幕收起來，筆電跟桌上一樣大、移到正中間，視窗都還在上面能用；討論像彈幕從筆電上方飄過 ──
     enterMeeting(spec) {
-      if (this.meetingRoom) this.closeMeetingRoom();   // 上一場的彈幕還沒飛完就接著開會：先收掉
+      if (this.meetingRoom) this.closeMeetingRoom({ nextMeeting: true });   // 上一場的彈幕還沒飛完就接著開會：先收掉
+      this.engine.holdHints(true);   // 會議室收掉之前不跳提示（提示會暫停時鐘，把會議凍住）
       const desk = this.root.querySelector('.desk'); desk.classList.add('in-meeting');
       const room = h('div', 'meeting-room');
       room.innerHTML = `<div class="projector"><h2 class="projector-title"></h2></div><div class="danmaku"></div>
@@ -505,13 +539,15 @@
       if (this.leavingMeeting || !this.meetingRoom.querySelector('.dm')) this.closeMeetingRoom();
       else this.meetingRoom.classList.add('ending');
     }
-    closeMeetingRoom() {
+    // nextMeeting：緊接著開下一場，拿著的提示繼續等
+    closeMeetingRoom({ nextMeeting = false } = {}) {
       this.leavingMeeting = false;
       this.meetingRoom.remove(); this.meetingRoom = null;
       this.root.querySelector('.screen.monitor').prepend(this.desktop);
       this.root.querySelector('.laptop-screen').hidden = false;
       this.root.querySelector('.desk').classList.remove('in-meeting');
       this.wm.fitClip();
+      if (!nextMeeting) this.engine.holdHints(false);
       this.engine.emit('meeting:closed');   // 彈幕飛完、會議室真的收掉了；meeting:end 時彈幕可能還在飛，那時暫停時鐘會把它們凍住
     }
     fly(line) {
@@ -584,8 +620,9 @@
     seatOf(who) { const seats = this.engine.script.seats || {}; return Object.keys(seats).find(id => seats[id].who === who) || null; }
     // 黑畫面那幾秒時鐘停住：走一趟就是 engine 算的 C.WALK_MIN 分鐘
     walkTo(seatId) {
-      const seat = (this.engine.script.seats || {})[seatId]; if (!seat || this.engine.place !== 'desk' || this.engine.meeting) return;
+      const seat = (this.engine.script.seats || {})[seatId]; if (!seat || this.engine.home || this.engine.place !== 'desk' || this.engine.meeting) return;
       if (this.meetingRoom) this.closeMeetingRoom();   // 散會了、最後幾句彈幕還在飛：人走出去就收掉
+      this.closeWifePhone();
       if (this.engine.plugged.has('work')) { this.unplugDevice('work'); this.toast('拔掉充電線，公務手機帶著走。'); }
       this.engine.clock.pause('walk'); this.trip(`走到${seat.title}。`, () => this.engine.clock.resume('walk'));
       this.engine.walk(seatId);
@@ -603,23 +640,335 @@
       const monitor = h('div', 'seat-monitor'); const icons = h('div', 'seat-shortcuts');
       for (const name of seat.shortcuts || []) icons.append(withIcon(h('span', 'seat-shortcut'), 'file-text', name));
       monitor.append(icons);
-      const props = h('ul', 'seat-props'); for (const p of seat.props || []) props.append(h('li', '', p));
+      // 他座位上的東西：桌上的擺設（props）和靠牆站在桌子後面的（scenery）。是場景的一部分，只放圖、名稱放在 alt；
+      // 畫風跟著時代（legacy 手刻 SVG、hybrid PIL 像素圖、speedrun AI 生圖去背），沒有圖或圖載不到才顯示名稱；像素圖照原圖格數（--w）放大
+      const mode = this.engine.script.mode; room.dataset.mode = mode;
+      const things = {};
+      const thing = (p, cls) => {
+        const el = h('li', cls); const label = p.label || p;
+        if (!p.img) { el.append(h('span', '', label)); return el; }
+        const img = h('img', `prop-img ${mode}`); img.alt = label;
+        img.src = `assets/seat/${mode}/${p.img}.${mode === 'legacy' ? 'svg' : 'png'}`;
+        img.addEventListener('load', () => el.style.setProperty('--w', img.naturalWidth));
+        img.addEventListener('error', () => img.replaceWith(h('span', '', label)));
+        el.append(img); things[p.img] = el;
+        return el;
+      };
+      const props = h('ul', 'seat-props'); for (const p of seat.props || []) props.append(thing(p, 'seat-prop'));
+      const scenery = h('ul', 'seat-scenery'); for (const p of seat.scenery || []) scenery.append(thing(p, 'seat-fixture'));
+      // 能做的事：按鈕放在那件東西上（action 的 on：印表機、她的手機），沒寫的是他電腦裡的事，放在螢幕正中央
       const acts = h('div', 'seat-actions');
       for (const a of seat.actions || []) {
-        const b = h('button', 'btn', a.label);
+        const b = h('button', 'btn primary', a.label);
         if (a.bench) b.addEventListener('click', () => BenchLoader.open({ host: this.root, engine: this.engine, scene: a.bench, chore: a.chore }));
-        acts.append(b);
+        if (a.phone) b.addEventListener('click', () => this.openWifePhone());
+        if (a.mailbox) b.addEventListener('click', () => this.openMailbox());
+        if (a.on && things[a.on]) { b.classList.add('on-thing'); things[a.on].append(b); } else acts.append(b);
       }
-      // 同事在旁邊講的話、手上帶過來的記憶體
-      room.append(h('h2', 'seat-title', seat.title), monitor, props, acts, h('p', 'seat-say'), h('p', 'seat-hand'));
+      // 牆面左上：座位名稱、同事在旁邊講的話、手上帶過來的記憶體。靠牆的櫃子在桌子後面，螢幕和擺設站在他的桌面上（螢幕跟自己的螢幕同一個位置，擺設在螢幕左邊）
+      room.append(h('div', 'seat-desktop'), h('h2', 'seat-title', seat.title), h('p', 'seat-say'), h('p', 'seat-hand'), scenery, monitor, props, acts);
       this.closePartsBox();
       this.root.querySelector('.screens-bg').prepend(room);
-      Ink.paperize(room);   // 桌上的東西和能做的事手繪；同事的螢幕裡沒有會套到的元素
-      // 公務手機：關卡有電話要打時一直放在桌上（setupWorkPhone），沒有的話到同事座位才拿出來
-      const phone = this.workPhone ? null : this.phoneButton();
-      if (phone) this.root.querySelector('.surface').append(phone);
+      Ink.paperize(room);   // 能做的事手繪；同事的螢幕裡沒有會套到的元素
+      // 公務手機在同事座位是一顆功能按鈕：自己桌上的手機卡留在原位（隱藏），本來就是按鈕的關卡沿用那顆
+      const phone = this.workPhone && !this.workPhone.classList.contains('device') ? null : this.phoneButton();
+      if (phone) { const surface = this.root.querySelector('.surface'); surface.insertBefore(phone, surface.querySelector('.coffee')); }   // 跟暫停、回座位排在同一排，回座位留在下班鈕的位置
       this.seatRoom = room; this.seatPhone = phone;
       this.refreshSeatHand();
+    }
+    // ── Wi-Fi（劇本的 wifi 雜事）：她的手機設定、自己電腦的基地台管理頁。兩邊都只把點擊送進 WifiRules，畫面照狀態重畫 ──
+    setupWifi() {
+      if (!this.engine.chores.wifi) return;
+      const sc = h('button', 'shortcut'); sc.innerHTML = `<span class="ico">${Icons.html('wifi')}</span>無線基地台`;
+      sc.addEventListener('click', this.company(() => this.openAp()));
+      this.desktop.querySelector('.shortcuts').append(sc);
+    }
+    refreshWifi() {
+      if (this.wifePhone) this.renderWifePhone();
+      if (this.wm.exists('ap')) this.wm.setContent('ap', this.apNode());
+    }
+    // 她人就在旁邊（拿著她的手機，或她站在桌邊、手機先放桌上）時做的事都算當面：做完她當面道謝（thanks），不再傳 LIME
+    wifiAct(action) {
+      const chore = this.engine.chores.wifi; const present = !!this.wifePhone || this.wifeBeside;
+      const out = this.engine.benchAct('wifi', { ...action, inPerson: present }); if (!out) return null;
+      const thanks = out.done && present ? `${chore.from}：「${chore.doneMessage.text}」` : '';
+      if (this.wifeBeside) this.besideLine();
+      return { out, thanks };
+    }
+    // 她站在桌邊時對話框那句：弄好了是道謝，不然照手機在你手上還是在桌上
+    besideLine() {
+      const chore = this.engine.chores.wifi;
+      const text = chore.stage === 'done' ? `${chore.from}：「${chore.doneMessage.text}」`
+        : this.wifePhone ? `${chore.from}站在旁邊等你看她的手機。` : `${chore.from}站在旁邊等，手機放在你桌上。`;
+      this.root.querySelector('.visitor .visitor-text').textContent = text;
+    }
+    // 她的手機：在她座位，或她站在你桌邊時才拿得到。iOS 的 Wi-Fi 設定：點網路是連線、ⓘ 是詳細資料
+    openWifePhone({ beside = false } = {}) {
+      this.closeWifePhone();
+      this.wifeBeside = beside; this.wifeView = 'list'; this.wifeSay = '';
+      this.pickUpWifePhone();
+    }
+    // 拿起來：畫面停在放下前那一頁
+    pickUpWifePhone() {
+      if (this.wifePhoneOnDesk) { this.wifePhoneOnDesk.remove(); this.wifePhoneOnDesk = null; }
+      this.wifePhone = h('div', `wife-phone${this.wifeBeside ? ' beside' : ''}`);
+      this.root.querySelector('.screens-bg').append(this.wifePhone);
+      this.renderWifePhone();
+      if (this.wifeBeside) this.besideLine();
+    }
+    // 她站在桌邊時先放桌上：騰出畫面操作電腦，她繼續在旁邊等；桌上那支點了拿起來接著弄
+    putDownWifePhone() {
+      this.wifePhone.remove(); this.wifePhone = null;
+      const onDesk = withIcon(h('button', 'btn wife-phone-desk'), 'smartphone', `${this.engine.chores.wifi.from}的手機`);
+      onDesk.addEventListener('click', () => this.pickUpWifePhone());
+      this.root.querySelector('.surface').append(onDesk); Ink.frame(onDesk, { seed: 43 });
+      this.wifePhoneOnDesk = onDesk;
+      this.besideLine();
+    }
+    closeWifePhone() {
+      if (this.wifePhone) { this.wifePhone.remove(); this.wifePhone = null; }
+      if (this.wifePhoneOnDesk) { this.wifePhoneOnDesk.remove(); this.wifePhoneOnDesk = null; }
+      if (this.wifeBeside) { this.wifeBeside = false; this.hideVisitor(); }   // 站在桌邊等的，手機還她就走
+    }
+    renderWifePhone() {
+      const s = this.engine.benchState('wifi'); const chore = this.engine.chores.wifi;
+      const act = (a) => { const r = this.wifiAct(a); if (r) this.wifeSay = [r.out.say, r.thanks].filter(Boolean).join('\n'); this.renderWifePhone(); };
+      const bar = h('div', 'wp-bar'); bar.append(h('b', '', `${chore.from}的手機`));
+      const btns = h('span', 'wp-bar-btns');
+      if (this.wifeBeside) { const down = h('button', 'btn small', '先放桌上'); down.addEventListener('click', () => this.putDownWifePhone()); btns.append(down); }
+      const close = h('button', 'btn small', '還給她'); close.addEventListener('click', () => this.closeWifePhone()); btns.append(close);
+      bar.append(btns);
+      const screen = h('div', 'wp-screen');
+      const status = (net) => (s.phone.network !== net ? '' : s.connected === net ? '已連線' : '無法加入網路');
+      const NETS = { office: 'OFFICE', guest: 'OFFICE-GUEST' };
+      if (this.wifeView === 'list') {
+        screen.append(h('h4', 'wp-title', 'Wi-Fi'));
+        const list = h('div', 'wp-list');
+        for (const [net, ssid] of Object.entries(NETS)) {
+          const row = h('div', `wp-row${s.phone.network === net ? ' current' : ''}`);
+          const join = h('button', 'wp-join'); join.append(h('span', 'wp-ssid', ssid), h('span', `wp-status${s.connected === net ? ' ok' : ''}`, status(net)));
+          // 點目前這個（連不上的）＝重新輸入密碼再試一次；點另一個＝改連過去
+          join.addEventListener('click', () => {
+            if (s.phone.network !== net) act({ type: 'join', network: net });
+            else if (s.connected !== net) act({ type: 'retype' });
+          });
+          const info = h('button', 'wp-info'); info.innerHTML = Icons.html('info'); info.setAttribute('aria-label', `${ssid} 的詳細資料`);
+          info.addEventListener('click', () => { this.wifeView = net; this.renderWifePhone(); });
+          row.append(join, info); list.append(row);
+        }
+        screen.append(list);
+      } else {
+        const back = h('button', 'wp-back', '‹ Wi-Fi'); back.addEventListener('click', () => { this.wifeView = 'list'; this.renderWifePhone(); });
+        screen.append(back, h('h4', 'wp-title', NETS[this.wifeView]));
+        const list = h('div', 'wp-list');
+        const priv = h('label', 'wp-item'); const sw = h('input', 'wp-switch'); sw.type = 'checkbox'; sw.checked = s.phone.private;
+        sw.addEventListener('change', () => act({ type: 'togglePrivate' }));
+        priv.append(h('span', '', '私人位址'), sw);
+        const addr = h('div', 'wp-item'); addr.append(h('span', '', 'Wi-Fi 位址'), h('code', 'wp-mac', s.phone.private ? WifiRules.PRIVATE_MAC : WifiRules.REAL_MAC));
+        list.append(priv, addr);
+        if (this.wifeView === s.phone.network && s.connected !== s.phone.network) {
+          const retype = h('button', 'wp-link', '重新輸入密碼'); retype.addEventListener('click', () => act({ type: 'retype' }));
+          list.append(retype);
+        }
+        screen.append(list, h('p', 'wp-note', '使用私人位址可減少不同 Wi-Fi 網路追蹤你的 iPhone。'));
+      }
+      this.wifePhone.replaceChildren(bar, screen, h('p', 'wp-msg', this.wifeSay));
+    }
+    openAp() {
+      this.apTab = this.apTab || 'log';
+      this.wm.open({ id: 'ap', title: '無線基地台', icon: 'wifi', x: 120, y: 40, w: 560, h: 400, cls: 'win-ap', content: this.apNode() });
+    }
+    // 基地台管理頁：連線紀錄（被擋的可以直接加白名單）、白名單、設定（MAC 過濾、重新啟動、訪客網路）
+    apNode() {
+      const s = this.engine.benchState('wifi'); const wrap = h('div', 'ap');
+      const redraw = () => this.wm.setContent('ap', this.apNode());
+      const act = (a) => {
+        const r = this.wifiAct(a); if (!r) return;
+        this.apSay = r.out.say; redraw();
+        if (r.thanks) { this.wifeSay = r.thanks; if (this.wifePhone) this.renderWifePhone(); }   // 手機放桌上的話，拿起來才看得到
+      };
+      const tabs = h('div', 'ap-tabs');
+      for (const [k, label] of [['log', '連線紀錄'], ['list', 'MAC 白名單'], ['set', '設定']]) {
+        const b = h('button', `btn small${this.apTab === k ? ' primary' : ''}`, label);
+        b.addEventListener('click', () => { this.apTab = k; this.apConfirm = false; redraw(); });
+        tabs.append(b);
+      }
+      const body = h('div', 'ap-body');
+      if (this.apTab === 'log') {
+        const table = h('table', 'ap-table'); table.innerHTML = '<thead><tr><th>時間</th><th>MAC 位址</th><th>結果</th><th></th></tr></thead>';
+        const tb = h('tbody'); tb.dataset.noTerms = '';   // 每一列都是同樣的字，術語只在表頭標一次
+        for (const r of [...s.log].reverse()) {
+          const blocked = r.result === 'blocked';
+          const tr = h('tr', blocked ? 'blocked' : '');
+          tr.append(h('td', '', hhmm(r.at)), h('td', 'mono', r.mac), h('td', '', blocked ? '擋下（不在白名單）' : '通過'));
+          const td = h('td');
+          if (blocked && !s.ap.whitelist.includes(r.mac)) { const add = h('button', 'btn small', '加入白名單'); add.addEventListener('click', () => act({ type: 'whitelist', mac: r.mac })); td.append(add); }
+          tr.append(td); tb.append(tr);
+        }
+        table.append(tb); body.append(table);
+      } else if (this.apTab === 'list') {
+        body.append(h('p', 'ap-note', 'MAC 過濾開著時，只有白名單裡的裝置連得上。'));
+        const ul = h('ul', 'ap-list'); for (const mac of s.ap.whitelist) ul.append(h('li', 'mono', mac)); body.append(ul);
+      } else {
+        const filter = h('div', 'ap-row'); filter.append(h('span', '', `MAC 過濾：${s.ap.filter ? '開' : '關'}`));
+        const fb = h('button', 'btn small', s.ap.filter ? '關閉' : '開啟'); fb.addEventListener('click', () => act({ type: 'filter', on: !s.ap.filter })); filter.append(fb);
+        const reboot = h('div', 'ap-row'); reboot.append(h('span', '', '重新啟動（所有無線連線會中斷）'));
+        const rb = h('button', `btn small${this.apConfirm ? ' danger' : ''}`, this.apConfirm ? '確定重新啟動' : '重新啟動');
+        rb.addEventListener('click', () => { if (!this.apConfirm) { this.apConfirm = true; redraw(); return; } this.apConfirm = false; act({ type: 'reboot' }); });
+        reboot.append(rb);
+        const guest = h('div', 'ap-row'); guest.append(h('span', '', '訪客網路 OFFICE-GUEST：開（跟公司內網隔開）'));
+        body.append(filter, reboot, guest);
+      }
+      wrap.append(tabs, body, h('p', 'ap-msg', this.apSay || ''));
+      return wrap;
+    }
+    // ── 信箱滿了（劇本的 outlook 雜事）：她座位的 OutLuck（能清）、自己電腦的郵件管理頁（只能看）。畫面只把點擊送進 MailboxRules ──
+    setupMail() {
+      if (!this.engine.chores.outlook) return;
+      const sc = h('button', 'shortcut'); sc.innerHTML = `<span class="ico">${Icons.html('mail')}</span>郵件管理`;
+      sc.addEventListener('click', this.company(() => this.openMailAdmin()));
+      this.desktop.querySelector('.shortcuts').append(sc);
+    }
+    refreshMail() {
+      if (this.outluck) this.renderMailbox();
+      if (this.wm.exists('mailadmin')) this.wm.setContent('mailadmin', this.mailAdminNode());
+    }
+    // 她的 OutLuck：蓋在她的螢幕上。預設照日期排，要自己想到照大小排；刪掉的先進「刪除的郵件」，清空才真的少
+    openMailbox() {
+      this.closeMailbox();
+      this.outluck = h('div', 'outluck');
+      this.mailFolder = 'inbox'; this.mailSort = { key: 'order', desc: true }; this.mailChecked = new Set(); this.mailSay = ''; this.mailPicking = null;
+      this.root.querySelector('.screens-bg').append(this.outluck);
+      this.renderMailbox();
+    }
+    closeMailbox() { if (this.outluck) { this.outluck.remove(); this.outluck = null; } }
+    mailAct(action) {
+      const out = this.engine.benchAct('outlook', { ...action, inPerson: true }); if (!out) return null;
+      const chore = this.engine.chores.outlook;
+      this.mailSay = [out.say, out.done ? `${chore.from}：「${chore.doneMessage.text}」` : ''].filter(Boolean).join('\n');
+      return out;
+    }
+    renderMailbox() {
+      const M = MailboxRules; const s = this.engine.benchState('outlook'); const chore = this.engine.chores.outlook;
+      const used = M.used(s); const pct = M.pct(s);
+      const redraw = () => this.renderMailbox();
+      const bar = h('div', 'ol-bar'); bar.append(h('b', '', `OutLuck — ${chore.from}`));
+      const close = h('button', 'btn small', '關掉'); close.addEventListener('click', () => this.closeMailbox()); bar.append(close);
+      // 容量條：80% 畫一條線（安全線），超過上限寄不出信
+      const quota = h('div', 'ol-quota');
+      const meter = h('div', `ol-meter${pct >= 100 ? ' over' : pct >= 80 ? ' warn' : ''}`);
+      const fill = h('span', 'ol-fill'); fill.style.width = `${Math.min(100, pct)}%`;
+      const line = h('span', 'ol-safe'); line.style.left = `${M.SAFE_RATIO * 100}%`;
+      meter.append(fill, line);
+      quota.append(h('span', 'ol-quota-text', `信箱 ${Math.round(used).toLocaleString()}／${s.quota.toLocaleString()} MB（${pct}%）${pct >= 100 ? '　信箱已滿，無法寄信' : ''}`), meter);
+      // 資料夾
+      const trashCount = s.groups.filter(g => g.where === 'trash').reduce((n, g) => n + g.count, 0);
+      const folders = h('div', 'ol-folders');
+      for (const [k, label] of [['inbox', '收件匣'], ['trash', `刪除的郵件（${trashCount}）`]]) {
+        const b = h('button', `btn small${this.mailFolder === k ? ' primary' : ''}`, label);
+        b.addEventListener('click', () => { this.mailFolder = k; this.mailChecked.clear(); this.mailPicking = null; redraw(); });
+        folders.append(b);
+      }
+      // 工具列：收件匣是封存、刪除；刪除的郵件是移回收件匣、清空
+      const tools = h('div', 'ol-tools');
+      const checked = () => [...this.mailChecked];
+      const run = (action) => { this.mailAct(action); this.mailChecked.clear(); redraw(); };
+      if (this.mailFolder === 'inbox') {
+        const archive = h('button', 'btn small', '封存');
+        archive.addEventListener('click', () => {
+          if (!checked().length) return;
+          if (!s.archiveTo) { this.mailPicking = checked(); redraw(); return; }
+          run({ type: 'archive', ids: checked() });
+        });
+        const del = h('button', 'btn small', '刪除'); del.addEventListener('click', () => { if (checked().length) run({ type: 'delete', ids: checked() }); });
+        tools.append(archive, del);
+      } else {
+        const restore = h('button', 'btn small', '移回收件匣'); restore.addEventListener('click', () => { if (checked().length) run({ type: 'restore', ids: checked() }); });
+        const purge = h('button', 'btn small', '清空刪除的郵件'); purge.addEventListener('click', () => run({ type: 'purge' }));
+        tools.append(restore, purge);
+      }
+      const PLACES = { local: '這台電腦（D:\\封存）', share: '公司共用槽（\\\\fs01\\共用）' };
+      const where = h('span', 'ol-archive-to', `封存檔：${s.archiveTo ? PLACES[s.archiveTo] : '還沒設定'}`);
+      if (s.archiveTo) {
+        const other = s.archiveTo === 'local' ? 'share' : 'local';
+        const change = h('button', 'act-link', `改放${PLACES[other].replace(/（.*/, '')}`); change.addEventListener('click', () => { this.mailAct({ type: 'archiveTo', place: other }); redraw(); });
+        where.append(' ', change);
+      }
+      tools.append(where);
+      // 第一次封存：問封存檔放哪裡，選了就接著封存剛剛勾的
+      const picker = h('div', 'ol-picker');
+      if (this.mailPicking) {
+        picker.append(h('span', '', '封存檔要放哪裡？'));
+        for (const [place, label] of Object.entries(PLACES)) {
+          const b = h('button', 'btn small', label);
+          b.addEventListener('click', () => { const ids = this.mailPicking; this.mailPicking = null; this.mailAct({ type: 'archiveTo', place }); run({ type: 'archive', ids }); });
+          picker.append(b);
+        }
+      }
+      // 信件清單：點欄位名稱排序（再點一次反過來）
+      const rows = s.groups.filter(g => g.where === this.mailFolder);
+      const { key, desc } = this.mailSort;
+      const val = (g) => (key === 'size' ? M.groupSize(g) : key === 'from' ? g.from : g.order);
+      rows.sort((a, b) => { const x = val(a), y = val(b); const c = typeof x === 'string' ? x.localeCompare(y, 'zh-Hant') : x - y; return desc ? -c : c; });
+      const table = h('table', 'ol-table');
+      const head = h('tr');
+      head.append(h('th', 'ol-check'));
+      for (const [k, label, cls] of [['from', '寄件人', 'ol-from'], [null, '主旨', ''], [null, '封數', 'ol-num'], ['order', '日期', 'ol-date'], ['size', '大小', 'ol-num']]) {
+        const th = h('th', cls);
+        if (!k) { th.textContent = label; head.append(th); continue; }
+        const sortBtn = h('button', 'ol-sort', `${label}${key === k ? (desc ? ' ▾' : ' ▴') : ''}`);
+        sortBtn.addEventListener('click', () => { this.mailSort = { key: k, desc: key === k ? !desc : true }; redraw(); });
+        th.append(sortBtn); head.append(th);
+      }
+      const thead = h('thead'); thead.append(head);
+      const tbody = h('tbody');
+      for (const g of rows) {
+        const tr = h('tr');
+        const cb = h('input'); cb.type = 'checkbox'; cb.disabled = !M.movable(g); cb.checked = this.mailChecked.has(g.id);
+        cb.addEventListener('change', () => { cb.checked ? this.mailChecked.add(g.id) : this.mailChecked.delete(g.id); });
+        const tdc = h('td', 'ol-check'); tdc.append(cb);
+        tr.append(tdc, h('td', 'ol-from', g.from), h('td', '', g.subject), h('td', 'ol-num', g.count.toLocaleString()), h('td', 'ol-date', g.date), h('td', 'ol-num', `${Math.round(M.groupSize(g))} MB`));
+        tbody.append(tr);
+      }
+      if (!rows.length) { const tr = h('tr'); const td = h('td', 'ol-empty', '這個資料夾是空的。'); td.colSpan = 6; tr.append(td); tbody.append(tr); }
+      table.append(thead, tbody);
+      const list = h('div', 'ol-list'); list.append(table);
+      this.outluck.replaceChildren(bar, quota, folders, tools, picker, list, h('p', 'ol-msg', this.mailSay));
+    }
+    openMailAdmin() {
+      this.mailAdminWho = this.mailAdminWho || null;
+      this.wm.open({ id: 'mailadmin', title: '郵件管理', icon: 'mail', x: 140, y: 50, w: 560, h: 400, cls: 'win-mailadmin', content: this.mailAdminNode() });
+    }
+    // 郵件管理頁：每個人的信箱用量，點美玲看佔用最多的郵件。只能看，要清得用她的帳號（去她座位）
+    mailAdminNode() {
+      const M = MailboxRules; const s = this.engine.benchState('outlook'); const chore = this.engine.chores.outlook;
+      const wrap = h('div', 'mailadmin');
+      const OTHERS = [['業務 君傑', 1312], ['行政 淑芬', 904], ['老闆娘', 210], [`IT ${this.engine.player.name}`, 388]];
+      const accounts = [[chore.from, M.used(s), true], ...OTHERS.map(([who, mb]) => [who, mb, false])];
+      const table = h('table', 'ap-table'); table.innerHTML = '<thead><tr><th>帳號</th><th>用量</th><th>上限</th><th></th></tr></thead>';
+      const tb = h('tbody'); tb.dataset.noTerms = '';
+      for (const [who, mb, detail] of accounts) {
+        const pct = Math.round(mb / s.quota * 1000) / 10;
+        const tr = h('tr', pct >= 100 ? 'blocked' : '');
+        tr.append(h('td', '', who), h('td', '', `${Math.round(mb).toLocaleString()} MB（${pct}%）`), h('td', '', `${s.quota.toLocaleString()} MB`));
+        const td = h('td');
+        if (detail) { const b = h('button', 'btn small', '佔用排行'); b.addEventListener('click', () => { this.mailAdminWho = who; this.wm.setContent('mailadmin', this.mailAdminNode()); }); td.append(b); }
+        tr.append(td); tb.append(tr);
+      }
+      table.append(tb); wrap.append(table);
+      if (this.mailAdminWho) {
+        wrap.append(h('h4', 'mailadmin-title', `${this.mailAdminWho}：佔用最多的郵件`));
+        const top = s.groups.filter(g => g.where === 'inbox' || g.where === 'trash').sort((a, b) => M.groupSize(b) - M.groupSize(a));
+        const t2 = h('table', 'ap-table'); t2.innerHTML = '<thead><tr><th>主旨</th><th>封數</th><th>大小</th><th>在哪</th></tr></thead>';
+        const tb2 = h('tbody'); tb2.dataset.noTerms = '';
+        for (const g of top) {
+          const tr = h('tr');
+          tr.append(h('td', '', g.subject), h('td', '', g.count.toLocaleString()), h('td', '', `${Math.round(M.groupSize(g))} MB`), h('td', '', g.where === 'trash' ? '刪除的郵件' : '收件匣'));
+          tb2.append(tr);
+        }
+        t2.append(tb2); wrap.append(t2, h('p', 'ap-note', '這裡只能看。要清理得登入使用者的信箱（到她的電腦操作）。'));
+      }
+      return wrap;
     }
     togglePhone() { this.phonePanel ? this.closePhone() : this.openPhone(this.engine.call && this.engine.call.stage !== 'ended' ? 'call' : 'line'); }
     phoneButton() {
@@ -693,6 +1042,8 @@
     leaveSeat() {
       if (!this.seatRoom) return;
       this.seatRoom.remove(); this.seatRoom = null;
+      if (!this.root.querySelector('.visitor').hidden) this.firstVisitorHint();   // 回到座位，訪客還站在桌邊
+      this.closeWifePhone(); this.closeMailbox();
       if (this.seatPhone) { this.seatPhone.remove(); this.seatPhone = null; }
       this.closePhone();
       this.root.querySelector('.desk').classList.remove('at-seat');
@@ -862,6 +1213,10 @@
           h('span', 't-out', '（連不到公司的伺服器。要做公司的事，先連 VPN。）\n'), h('span', 't-cmd', '$ _'));
         return pre;
       }
+      if (e.askable() && !this.terminalLines.length) {
+        pre.append('$ _\n\n（Claire Code 在這裡。可以在底下問她問題，每問一次扣額度；交給她的工作做好了也會停在這裡等你。）\n', this.claireAskNode());
+        return pre;
+      }
       if (!this.terminalLines.length) { pre.append(e.ai ? `$ _\n\n（AI 同事 ${e.aiName()}在這裡。交給它的工作做好了會停在這裡等你。）` : '$ _\n\n（今天還沒有 AI 同事。這台終端機只是開著。）'); return pre; }
       for (const line of this.terminalLines) pre.append(h('span', `t-${line.kind}`, line.text + '\n'));
       // 做事中：進度條；交件了：停在這裡等你（看一下／直接交）
@@ -873,7 +1228,36 @@
       for (const { card, work, job } of this.aiJobs('asking')) pre.append(this.aiAskingNode(card, work, job));
       for (const { card, work, job } of this.aiJobs('ready')) pre.append(this.aiReadyNode(card, work, job));
       pre.append(h('span', 't-cmd', '$ _'));
+      if (e.askable()) pre.append(this.claireAskNode());
       return pre;
+    }
+    // 問 Claire：選哪件事 → 問什麼（含 Claire 做不到的「幫我○○」）→ 用哪個模型（額度不夠、Pedia 用過的反灰）。
+    // 選到一半的放 this.claireDraft，問出去就清掉
+    claireAskNode() {
+      const e = this.engine; const box = h('span', 'claire-ask');
+      const topics = e.claireTopics(); const d = this.claireDraft || {};
+      const row = (label, items) => { const r = h('span', 'claire-row'); r.append(h('span', 'claire-label', label), ...items); box.append(r); };
+      const pick = (text, onClick, on = false) => { const b = h('button', `tbtn${on ? ' on' : ''}`, text); b.addEventListener('click', onClick); return b; };
+      if (!topics.length) { row('問 Claire：', [h('span', 'claire-label', '（還沒有事情可以問。）')]); return box; }
+      row('問 Claire：', topics.map(t => pick(t.label, () => { this.claireDraft = { topic: t.id }; this.refreshTerminal(); }, d.topic === t.id)));
+      const topic = topics.find(t => t.id === d.topic);
+      if (!topic) return box;
+      const asks = [...topic.asks, ...(topic.hands ? [{ id: 'hands', say: topic.hands }] : [])];
+      row('問什麼：', asks.map(a => pick(a.say, () => {
+        if (a.id === 'hands') { this.claireDraft = null; e.askClaire(topic.id, 'hands'); return; }
+        this.claireDraft = { topic: topic.id, ask: a.id }; this.refreshTerminal();
+      }, d.ask === a.id)));
+      if (!d.ask) return box;
+      row('用哪個模型：', Object.entries(e.script.ai.models).map(([name, m]) => {
+        const b = pick(`${m.label}・${m.cost} 格`, () => {
+          const r = e.askClaire(topic.id, d.ask, name);
+          if (r && r.error) { this.toast(r.error, 'Claire'); return; }
+          this.claireDraft = null; this.refreshTerminal();
+        });
+        const lack = e.modelLack(name); if (lack) { b.disabled = true; b.title = lack; }
+        return b;
+      }));
+      return box;
     }
     // 矯枉過正的 AI 停下來問你（筆記做法是 ask）：不回它就一直停在這裡
     aiAskingNode(card, work, job) {
@@ -1003,10 +1387,10 @@
         this.docsSelected.line = from;
         for (const b of list.children) b.classList.toggle('active', b.dataset.from === from);
         const log = h('div', 'discuss-log');
-        // 對方有座位（正式上班）：標題旁邊「走過去」
+        // 對方有座位（正式上班）：標題旁邊「走過去」；下班了人不在公司，不畫
         const head = h('div', 'chat-head'); head.append(h('h3', '', from));
         const seatId = this.seatOf(from);
-        if (seatId && this.engine.place === 'desk') {
+        if (seatId && this.engine.place === 'desk' && !this.engine.home) {
           const go = h('button', 'btn small', '走過去'); go.addEventListener('click', () => this.walkTo(seatId));
           if (this.engine.meeting) { go.disabled = true; go.title = '開完會再過去'; }
           head.append(go);
@@ -1119,8 +1503,8 @@
       form.append(field('母議題', parent));
       const mod = h('select'); mod.name = 'module'; mod.append(new Option('—', '')); for (const [k, v] of Object.entries(MODULES)) mod.append(new Option(v, k));
       form.append(field('影響範圍', mod));
-      // 正式上班沒有 SA 幫你整理雜事，只能指派給自己
-      form.append(field('指派', radios('assignee', [['me', `自己（${e.player.name}）`], ...(e.script.kind === 'sandbox' ? [] : [['sa', 'SA 怡君']])])));
+      // 劇本沒有 SA（noSA）：只能指派給自己
+      form.append(field('指派', radios('assignee', [['me', `自己（${e.player.name}）`], ...(e.script.noSA ? [] : [['sa', 'SA 怡君']])])));
       const pri = h('input'); pri.value = 'Priority'; pri.disabled = true; pri.className = 'priority-locked';
       form.append(field('優先度', pri));
       const body = h('fieldset', 'nc-body'); body.append(h('legend', '', '內文：勾該進卡的句子'));
@@ -1182,7 +1566,8 @@
       // Priority 徽章只在當天第一張卡點得到解釋：每張卡都一樣，看過一次就懂
       const tag = h('span', 'tag big', card.tag);
       if (card.no !== (e.script.issueBase || 100) + 1) tag.dataset.noTerms = '';
-      head.append(tag, h('h2', '', `#${card.no} ${card.title}`), h('span', `status s-${card.status}`, STATUS_ZH[card.status]));
+      const status = card.status === 'to_qc' && card.reviewer ? `交 ${card.reviewer.who}` : STATUS_ZH[card.status];
+      head.append(tag, h('h2', '', `#${card.no} ${card.title}`), h('span', `status s-${card.status}`, status));
       wrap.append(head);
       const meta = h('dl', 'card-meta');
       const row = (k, v) => { meta.append(h('dt', '', k), h('dd', '', v)); };
@@ -1204,7 +1589,10 @@
       // 交給 AI、交 QC、結案也各一行：最後一行「進已完成」減第一行，就是結算卡上這張卡的實際耗時
       const by = (x) => (x.by === 'ai' ? `（AI 填的${x.reviewed ? '' : '，沒看'}）` : '');
       const me = this.engine.player.name;
-      const EVENT_TEXT = { ai: (x) => `${me}：交給 AI 做${Works.label(x.work)}`, submit: () => `${me}：交給 QC`, closed: () => 'QC 阿姿：驗過了，進已完成' };
+      // 誰驗這張卡（engine.reviewerOf）：沒有人驗的卡是玩家自己結案
+      const reviewer = e.reviewerOf(card);
+      const handTo = card.reviewer ? card.reviewer.who : 'QC';
+      const EVENT_TEXT = { ai: (x) => `${me}：交給 AI 做${Works.label(x.work)}`, submit: () => `${me}：交給 ${handTo}`, closed: () => (reviewer ? `${reviewer}：${e.reviewPass(card)}` : `${me}：結案`) };
       const items = card.timeline();
       if (!items.length) act.append(h('p', 'muted', '還沒有人動過這張卡。'));
       for (const it of items) {
@@ -1216,32 +1604,38 @@
       }
       wrap.append(act);
 
-      if (card.chore) wrap.append(this.choreNode(card));
-      else if (mine) {
-        wrap.append(this.opsNode(card));
+      if (mine) {
+        wrap.append(card.chore ? this.choreProgress(card) : this.opsNode(card));
         const foot = h('div', 'card-foot');
-        const no = h('button', 'btn danger', '需求不明，退回 SA'); no.addEventListener('click', () => this.onOpenWork(card, 'reject'));
-        foot.append(no);
+        // 劇本沒有 SA（noSA）就沒有「退回 SA」
+        if (!e.script.noSA) { const no = h('button', 'btn danger', '需求不明，退回 SA'); no.addEventListener('click', () => this.onOpenWork(card, 'reject')); foot.append(no); }
         // Novel 寫的文件還留著廢話：交出去會被退。打開那份文件一行一行刪（或在終端機那份的答案卡退回「用人話寫」）
         for (const work of Object.keys(card.wordy || {}).filter(w => card.wordy[w])) {
           const fix = h('button', 'btn', `${Works.label(work)}還有 ${card.wordy[work].length} 行廢話`); fix.addEventListener('click', () => this.onOpenWork(card, work)); foot.append(fix);
         }
         // 不交 QC 的卡（POC 母議題）：部署完就算完成，沒有「交給 QC」這一步
         if (card.noQC) foot.append(h('span', 'muted', '這張不交 QC：子議題驗過、部署到 POC 就算完成。'));
-        else { const ok = h('button', 'btn primary', '完成，交給 QC'); ok.addEventListener('click', () => e.submit(card.id)); foot.append(ok); }
+        // 沒有人驗（劇本沒有 QC）：「交給 QC」換成「結案」，什麼時候結案玩家自己決定（IT 的模糊邊界都在需求單位旁邊處理，不用另外通知）
+        else if (!reviewer) { const close = h('button', 'btn primary', '結案'); close.addEventListener('click', () => { e.closeCard(card.id); this.refreshBoard(); this.refreshCard(card.id); }); foot.append(close); }
+        else { const ok = h('button', 'btn primary', `完成，交給 ${handTo}`); ok.addEventListener('click', () => e.submit(card.id)); foot.append(ok); }
         wrap.append(foot);
+      } else if (card.status === 'archived' && !reviewer && !card.noQC) {
+        if (card.chore) wrap.append(this.choreProgress(card));
+        wrap.append(h('p', 'muted readonly-note', '已結案。'));
       } else if (card.status === 'archived' && card.assignee === e.player.name) {
-        // 已完成的卡：QC 驗過了才能通知需求單位（LIME 才發出去）
+        // 已完成的卡：驗過了才能通知需求單位（LIME 才發出去）
         const foot = h('div', 'card-foot');
         const btn = h('button', 'btn primary', card.notified ? '已通知需求單位' : '通知需求單位'); btn.disabled = !!card.notified;
         btn.addEventListener('click', () => e.notifyDone(card.id));
         const said = card.notifyGroup
           ? (card.notified ? '上 POC 了，群組裡也說了。' : `上 POC 了。在「${card.notifyGroup}」說一聲他們才知道能登入。`)
-          : (card.notified ? '阿姿驗過、也跟需求單位說了。' : '阿姿驗過了。跟需求單位說一聲他們才知道能用。');
+          : card.reviewer
+            ? (card.notified ? `${card.reviewer.who}看過了，也跟需求單位說了。` : `${card.reviewer.who}看過了。跟需求單位說一聲。`)
+            : (card.notified ? '阿姿驗過、也跟需求單位說了。' : '阿姿驗過了。跟需求單位說一聲他們才知道能用。');
         foot.append(h('span', 'muted', said), btn); wrap.append(foot);
       } else {
         // 自己的卡但交出去了：講卡現在在誰那邊
-        const away = { to_qc: '交給 QC 了，阿姿驗完會回你。', rejected_to_sa: '退回給怡君了，現在在她那邊。' };
+        const away = { to_qc: card.reviewer ? `交給 ${card.reviewer.who}了，看完會回你。` : '交給 QC 了，阿姿驗完會回你。', rejected_to_sa: '退回給怡君了，現在在她那邊。' };
         const note = card.pending ? '怡君還在分析需求，等她寫好會變成你的。'
           : card.nextRound ? '怡君排進下一版了，這輪不用動。'
           : card.assignee === e.player.name && away[card.status] ? away[card.status] : '這是別人的卡，只能看。';
@@ -1249,18 +1643,11 @@
       }
       return wrap;
     }
-    // 正式上班的雜事卡：沒有工作鏈、沒有 QC，卡上只看得到雜事做到哪；什麼時候結案玩家自己決定
-    choreNode(card) {
+    // 雜事卡（card.chore）在「你可以做的事」的位置：沒有開發、文件的工作，只寫雜事做到哪（工作在同事座位、工作台、她的手機或信箱做）
+    choreProgress(card) {
       const chore = this.engine.chores[card.chore];
-      const foot = h('div', 'card-foot chore-foot');
-      foot.append(h('span', 'muted', `雜事：${chore.title}（${CHORE_STAGE[chore.stage] || chore.stage}）`));
-      if (card.status === 'archived') foot.append(h('span', 'muted', '已結案'));
-      else {
-        const close = h('button', 'btn primary', '結案');
-        close.addEventListener('click', () => { this.engine.closeCard(card.id); this.refreshBoard(); this.refreshCard(card.id); });
-        foot.append(close);
-      }
-      return foot;
+      const box = h('div', 'ops'); box.append(h('h4', '', '雜事'), h('p', 'muted', `${chore.title}：${CHORE_STAGE[chore.stage] || chore.stage}`));
+      return box;
     }
     // speedrun 交給 AI 時挑模型（Verse 快但錯多、Essay 中間、Novel 慢又吃兩格）
     // 選單展開在「你可以做的事」最底下一排（浮在按鈕旁邊會被卡片視窗的捲動範圍切掉）；再按一次 AI 或按別的地方就收起來
@@ -1272,6 +1659,7 @@
       box.append(h('span', 'muted', `${who ? who.textContent.replace(' ✓', '') : ''}交給哪個模型？`));
       for (const [name, m] of Object.entries(this.engine.script.ai.models)) {
         const b = h('button', 'op', `${m.label}　${m.turnaround[0]}～${m.turnaround[1]} 分鐘・${m.cost} 格`);
+        if (name === 'Pedia' && this.engine.pediaUsed) { b.disabled = true; b.title = 'Pedia 一天只能用一次。'; }   // 問一句和交辦共用一次
         b.addEventListener('click', (ev) => { ev.stopPropagation(); box.remove(); onPick(name); });
         box.append(b);
       }

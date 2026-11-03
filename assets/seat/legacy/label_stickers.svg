@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 28 21" width="28" height="21" shape-rendering="crispEdges">
+  <!-- legacy 的標籤貼紙：三捲＋一張還沒撕的 -->
+  <g transform="translate(0 1)">
+  <rect x="3" y="4" width="7" height="7" fill="#ffff00"/><rect x="5" y="6" width="3" height="3" fill="#c0c0c0"/>
+  <rect x="11" y="4" width="7" height="7" fill="#00ffff"/><rect x="13" y="6" width="3" height="3" fill="#c0c0c0"/>
+  <rect x="19" y="4" width="7" height="7" fill="#00ff00"/><rect x="21" y="6" width="3" height="3" fill="#c0c0c0"/>
+  <rect x="5" y="13" width="19" height="7" fill="#808080"/><rect x="6" y="14" width="17" height="5" fill="#fff"/>
+  <rect x="7" y="15" width="3" height="3" fill="#ffff00"/><rect x="11" y="15" width="3" height="3" fill="#00ffff"/>
+  <rect x="15" y="15" width="3" height="3" fill="#00ff00"/><rect x="19" y="15" width="3" height="3" fill="#c0c0c0"/>
+  </g>
+</svg>

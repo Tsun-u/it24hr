@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 28 21" width="28" height="21" shape-rendering="crispEdges">
+  <!-- legacy 的蘭花：白瓷盆、白色蝴蝶蘭 -->
+  <g transform="translate(0 1)">
+  <rect x="10" y="15" width="8" height="5" fill="#c0c0c0"/><rect x="11" y="15" width="6" height="4" fill="#fff"/>
+  <rect x="6" y="13" width="7" height="2" fill="#008000"/><rect x="15" y="13" width="7" height="2" fill="#008000"/>
+  <rect x="14" y="4" width="1" height="10" fill="#008000"/><rect x="15" y="3" width="5" height="1" fill="#008000"/>
+  <g fill="#fff"><rect x="11" y="3" width="3" height="3"/><rect x="16" y="1" width="3" height="3"/><rect x="20" y="3" width="3" height="3"/><rect x="9" y="6" width="3" height="3"/></g>
+  <g fill="#ffff00"><rect x="12" y="4" width="1" height="1"/><rect x="17" y="2" width="1" height="1"/><rect x="21" y="4" width="1" height="1"/><rect x="10" y="7" width="1" height="1"/></g>
+  <g fill="#c0c0c0"><rect x="11" y="6" width="3" height="1"/><rect x="16" y="4" width="3" height="1"/><rect x="20" y="6" width="3" height="1"/><rect x="9" y="9" width="3" height="1"/></g>
+  </g>
+</svg>

@@ -123,7 +123,7 @@
 
   // 電腦外的一般介面一次套上：遊戲外框與面板、表單欄位、分頁、按鈕；seed 照出現順序，同一個畫面每次長一樣。
   // 根元素自己符合也算（浮層面板直接傳面板進來）。字有底線的鈕本身就是連結的樣子，不再加外框（要掛在畫面上才讀得到樣式）
-  const BOX = '.badge-cols, .mode-badge, .mode-card, .report, .grad-card, .summary-card, .hb-panel, .box-panel, .home-box, .seat-props li, .ink-field, .seg, .atlas-tab, .journal-tab, .btn';
+  const BOX = '.badge-cols, .mode-badge, .mode-card, .report, .grad-card, .summary-card, .hb-panel, .box-panel, .home-box, .ink-field, .seg, .atlas-tab, .journal-tab, .btn';
   const PILL = '.reroll, .hb-jump, .hm-chip, .hm-tab';
   const PAPER = `${BOX}, ${PILL}`;
   const underlined = (el) => getComputedStyle(el).textDecorationLine.includes('underline');

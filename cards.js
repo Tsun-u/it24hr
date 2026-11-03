@@ -26,7 +26,9 @@
       this.deployTarget = spec.deployTarget || 'test';   // 部署到哪：test（測試機）／poc（客戶的 POC 環境）
       this.deployGate = spec.deployGate || null; // (engine) => 能不能部署；gateText 是反灰時滑上去的那句
       this.gateText = spec.gateText || '';
+      this.reviewer = spec.reviewer || null;   // 誰驗這張卡：{ who, pass? }（沒寫就是 QC 阿姿；例：檢討報告給 IT 經理看），pass 是驗過時那句
       this.notifyGroup = spec.notifyGroup || null;   // 「通知需求單位」發到哪個 LIME 群組（沒有就私訊 requester）
+      this.notifyText = spec.notifyText || null;   // 「通知需求單位」那則的內容（沒寫就是「QC 驗過、上線了，可以用了」）
       this.trialBy = spec.trialBy || null;   // 通知群組後是誰來試用、在群組裡講子議題留下的問題（沒寫就是 requester）
       this.nextRound = !!spec.nextRound;     // 排進下一版，這輪不用做（客戶回饋開的新卡）
       this.trialHello = spec.trialHello || null;   // 試用的人登進去後先說的那句（10 分鐘後）；沒寫就不說

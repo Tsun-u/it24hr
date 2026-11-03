@@ -32,6 +32,29 @@ test('提示出現時時鐘暫停，玩家做了提示要的事才繼續', () =>
   e.tick(min(1)); assert.strictEqual(e.clock.minute, m + 1);
 });
 
+test('會議室還開著時輪到的提示先拿著，收掉會議室才出現、才暫停時鐘', () => {
+  const s = mini(); s.hints = [{ after: 'card:arrived:a', text: '點開看板', until: 'board:opened' }];
+  const e = new Engine(s); let shown = null;
+  e.on('hint', h => shown = h);
+  e.holdHints(true);
+  e.tick(min(1)); assert.strictEqual(shown, null); assert.strictEqual(e.hint, null);
+  const m = e.clock.minute; e.tick(min(2)); assert.strictEqual(e.clock.minute, m + 2, '會議照常走');
+  e.holdHints(false); assert.strictEqual(shown.text, '點開看板');
+  e.tick(5000); assert.strictEqual(e.clock.minute, m + 2, '提示出現才暫停');
+});
+
+test('拿著的提示要的事在會議中就做了：那句不出，下一句照常接上', () => {
+  const s = mini(); s.hints = [
+    { after: 'card:arrived:a', text: '點開看板', until: 'board:opened' },
+    { after: 'board:opened', text: '打開規格', until: 'work:done:a:doc_spec' },
+  ];
+  const e = new Engine(s); const shown = [];
+  e.on('hint', h => shown.push(h.text));
+  e.holdHints(true); e.tick(min(1));
+  e.emit('board:opened'); assert.deepStrictEqual(shown, []);
+  e.holdHints(false); assert.deepStrictEqual(shown, ['打開規格']);
+});
+
 test('提示叫你按某個工作：打開之後時鐘停到做完，提示也留到做完', () => {
   const s = mini(); s.hints = [{ after: 'card:arrived:a', text: '按需求討論', until: 'work:done:a:doc_spec' }];
   const e = new Engine(s); e.tick(min(1));

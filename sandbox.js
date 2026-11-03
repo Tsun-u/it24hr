@@ -2,15 +2,18 @@
 // 每一關一個檔（sandbox-<關卡>.js），用 Sandbox.add 登記；劇本照時代（legacy／hybrid／speedrun）產，問題相同、只換代價。
 (function (root) {
   const levels = {};
+  const CLOSE_AT = 21 * 60;   // 強制下班的時鐘時間（分鐘）
   const Sandbox = {
     add(id, make) { levels[id] = make; },
     remove(id) { delete levels[id]; },
     ids() { return Object.keys(levels); },
-    // kind 讓 engine、app 分得出是正式上班；mode 照舊是時代，版面配色跟新人訓練共用
-    make(id, mode) {
+    // kind 讓 engine、app 分得出是正式上班；mode 照舊是時代，版面配色跟新人訓練共用。
+    // carry 是從外面帶進來的東西（{ notes }：全域 CLAIRE.md），有 AI 的時代帶進劇本。
+    // closeAt：跟新人訓練一樣 21:00 強制下班（隔天 08:00 在茶几結算）；哪一關要不同，劇本自己寫 closeAt 蓋過
+    make(id, mode, carry = {}) {
       const make = levels[id];
       if (!make) throw new Error(`沒有這一關：${id}`);
-      return { ...make(mode), kind: 'sandbox', level: id, mode };
+      return { closeAt: CLOSE_AT, ...make(mode, carry), kind: 'sandbox', level: id, mode };
     },
     // 存檔：{ levels: { 關卡: { 時代: { view, at, plays } } } }，每個時代只留最後一次的結算卡
     record(old, level, mode, view, at) {

@@ -165,8 +165,9 @@
     if (save) train.append(btn('mode-clear', '清掉新人訓練的存檔', () => { clearSave(); modes(player); }));
     const trainCol = el('section', 'mode-col');
     trainCol.append(el('h3', 'mode-group', '新人訓練'), train);
-    // 工作日誌：新人訓練結業後才有（CLAIRE.md、拿過的成就、正式上班每一關最後一次的結算卡）。正式上班還在做，跟著 ?office 一起開
-    if (save && save.graduated && OFFICE_OPEN) {
+    // 正式上班和工作日誌（CLAIRE.md、拿過的成就、正式上班每一關最後一次的結算卡）：新人訓練結業後才開放
+    const graduated = !!(save && save.graduated);
+    if (graduated) {
       const journal = el('article', 'mode-card mode-journal');
       journal.append(el('h4', '', '工作日誌'), el('p', 'mode-desc', 'CLAIRE.md、拿過的成就，還有正式上班每一關最後一次的結算卡。'));
       const open = () => Journal.open({
@@ -188,10 +189,10 @@
       const r = el('div', 'mode-actions');
       const draw = () => OfficeDraw.open({
         era: m, office,
-        onStart: (id) => start(player, Sandbox.make(id, m.id)),
+        onStart: (id) => start(player, Sandbox.make(id, m.id, { notes: loadClaire() || {} })),
         onReport: (view) => showReport(view, backToModes),
       });
-      if (!OFFICE_OPEN) r.append(btn('', save && save.graduated ? '準備中' : '完成新人訓練後開放'));
+      if (!graduated) r.append(btn('', '完成新人訓練後開放'));
       else r.append(btn('primary', '上班', draw));
       card.append(r); sandboxCol.append(card);
     }
@@ -219,8 +220,6 @@
   const CLAIRE_KEY = 'it24hr.claire';
   function loadClaire() { try { return JSON.parse(localStorage.getItem(CLAIRE_KEY)); } catch { return null; } }
   function writeClaire(notes) { try { localStorage.setItem(CLAIRE_KEY, JSON.stringify(notes)); } catch { /* 同上 */ } }
-  // 正式上班還在做：網址帶 ?office 才開放（開發用的入口）
-  const OFFICE_OPEN = new URLSearchParams(location.search).has('office');
   // 那一天開始時帶的東西：存檔每天都留一份（starts），做完的天才能重玩；只有 carry 的舊存檔只有下一天的
   function carryFor(save, day) { return (save.starts && save.starts[day]) || (save.day === day ? save.carry : null); }
   // 照存檔開始那一天：劇本照 carry 產，昨天沒結案的卡（carry.board）放回看板
@@ -244,7 +243,7 @@
         const now = new Date(); const pad = (n) => String(n).padStart(2, '0');
         const today = `${now.getFullYear()}-${pad(now.getMonth() + 1)}-${pad(now.getDate())}`;   // 玩家自己的日期（toISOString 是 UTC，台灣早上八點前會差一天）
         writeOffice(Sandbox.record(loadOffice(), script.level, script.mode, view, today));
-        showReport(view, [{ text: '回選玩法', onClick: () => modes(player) }, { text: '再上一天班', cls: 'primary', onClick: () => start(player, Sandbox.make(script.level, script.mode)) }]);
+        showReport(view, [{ text: '回選玩法', onClick: () => modes(player) }, { text: '再上一天班', cls: 'primary', onClick: () => start(player, Sandbox.make(script.level, script.mode, { notes: loadClaire() || {} })) }]);
         return;
       }
       const save = nextSave(engine, view); writeSave(save);

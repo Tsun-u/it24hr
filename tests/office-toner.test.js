@@ -79,19 +79,44 @@ test('整條路：看貼紙 → 打電話報 C8763 → 150 分鐘後送到淑芬
   assert.strictEqual(lines(e, '印出來了！謝謝～').length, 1);
 });
 
-test('全都要：五盒送來、成就「耗材霸總」、老闆追問材料費、結算卡寫買了 5 盒；淑芬也問用不用得到', () => {
+const MEILING_ASKS = { who: '財務 美玲', text: '請交付大量採購碳粉匣的說明報告。' };
+const hasPeer = (r, { who, text }) => r.peers.some(p => p.who === who && p.text === text);
+
+test('全都要：五盒送來、成就「耗材霸總」、老闆追問材料費、結算卡寫買了 5 盒；淑芬也問用不用得到，美玲要說明報告', () => {
   const e = asked();
   connect(e); say(e, '小孩子才做選擇');
   tickTo(e, e.clock.minute + C.TONER_DELIVERY_MIN);
   assert.strictEqual(lines(e, '訂這麼多都用得到嗎？用不到的話，美玲可能會要你寫檢討報告。').length, 1);
   const r = e.script.report(e);
   assert.ok(r.traits.some(t => t.title === '耗材霸總'));
-  assert.ok(r.peers.some(p => p.who === '老闆' && p.text === '這個月的材料設備費支出特別高，你有什麼頭緒嗎？'));
+  assert.ok(hasPeer(r, { who: '老闆', text: '這個月的材料設備費支出特別高，你有什麼頭緒嗎？' }));
+  assert.ok(hasPeer(r, MEILING_ASKS));
   assert.ok(r.extra.includes('碳粉匣買了 5 盒'));
 });
 
-test('沒買碳粉匣：結算卡沒有那行、沒有耗材霸總', () => {
+// 走到淑芬座位看印表機背面的貼紙，知道型號才報得出 C8763
+const knowModel = (e) => { e.walk('shufen'); e.benchAct('toner', { type: 'sawBack' }); e.goBack(); };
+
+test('只訂一盒：淑芬沒問、結算卡沒有美玲要說明報告那句', () => {
+  const e = asked(); knowModel(e);
+  connect(e); say(e, 'MP LazyJet C8763');
+  tickTo(e, e.clock.minute + C.TONER_DELIVERY_MIN);
+  assert.ok(!e.chores.toner.flags.bulkAsked);
+  assert.ok(!hasPeer(e.script.report(e), MEILING_ASKS));
+});
+
+test('一盒一盒訂到第三盒：淑芬問用不用得到，結算卡美玲要說明報告（不是全都要也一樣）', () => {
+  const e = asked(); knowModel(e);
+  for (let i = 0; i < 3; i++) { connect(e); say(e, 'MP LazyJet C8763'); tickTo(e, e.clock.minute + 20); }
+  tickTo(e, e.clock.minute + C.TONER_DELIVERY_MIN);
+  assert.ok(!e.chores.toner.flags.allIn);
+  assert.strictEqual(lines(e, '訂這麼多都用得到嗎？用不到的話，美玲可能會要你寫檢討報告。').length, 1);
+  assert.ok(hasPeer(e.script.report(e), MEILING_ASKS));
+});
+
+test('沒買碳粉匣：結算卡沒有那行、沒有耗材霸總、沒有美玲要說明報告', () => {
   const e = play(); const r = e.script.report(e);
   assert.ok(!r.extra.some(x => x.startsWith('碳粉匣')));
   assert.ok(!r.traits.some(t => t.title === '耗材霸總'));
+  assert.ok(!hasPeer(r, MEILING_ASKS));
 });

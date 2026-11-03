@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 14 24" width="14" height="24" shape-rendering="crispEdges">
+  <!-- legacy 的老闆娘手機：直立在手機架上、背面朝外，淡粉紅殼配金邊（玫瑰金），跟玩家的公務手機分得出來 -->
+  <rect x="3" y="0" width="8" height="1" fill="#e0a458"/><rect x="2" y="1" width="10" height="18" fill="#e0a458"/><rect x="3" y="19" width="8" height="1" fill="#e0a458"/>
+  <rect x="3" y="1" width="8" height="18" fill="#ffd1dc"/>
+  <rect x="4" y="2" width="5" height="6" fill="#e0a458"/>
+  <rect x="5" y="3" width="3" height="2" fill="#1f2328"/><rect x="5" y="6" width="3" height="1" fill="#1f2328"/>
+  <rect x="1" y="21" width="12" height="3" fill="#c8c1ae"/><rect x="1" y="21" width="12" height="1" fill="#f6f1e7"/>
+  <rect x="2" y="18" width="10" height="3" fill="#f6f1e7"/><rect x="2" y="20" width="10" height="1" fill="#c8c1ae"/>
+</svg>

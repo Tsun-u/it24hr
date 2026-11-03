@@ -3,7 +3,7 @@
 // 狀態存在 engine，畫面照狀態畫、把點擊翻成動作送進 apply；廠商送來的碳粉匣由 engine 用 deliver 放上桌
 (function (root) {
   const FITS = 'C';            // 這台吃的系列
-  const STARBURST = 16;        // 同一盒搖到第 16 下：星爆十六連擊，搖完了
+  const STARBURST = 16;        // 同一盒搖到第 16 下：星爆十六連擊；裝進去的那盒剛好搖了 16 下（不多不少）是成就
   const SHAKE_LINES = { 5: '要更快', 10: '還要更快！', [STARBURST]: '良し！' };
 
   // oldSeries：原本裝在裡面那盒的系列（就是這台吃的），畫面照它上色
@@ -51,7 +51,7 @@
         if (!cart || cart.at !== 'desk') break;
         cart.shakes += 1;
         out.say = SHAKE_LINES[cart.shakes] || '沙沙沙……';
-        if (cart.shakes === STARBURST) { out.events.push('starburst'); out.flags = { starburst: true }; }
+        if (cart.shakes === STARBURST) out.events.push('starburst');
         break;
       case 'peel':
         if (!cart) break;
@@ -66,6 +66,7 @@
         if (inPrinter(state)) { out.say = '裡面已經有一盒了。'; break; }
         if (cart.series !== FITS) { out.events.push('refused'); out.say = `推不進去，${cart.series} 系列不是這台的。`; break; }
         cart.at = 'printer'; out.say = '喀一聲，裝進去了。';
+        out.flags = { starburst: cart.shakes === STARBURST };   // 抽出來再搖、重裝，照最後裝進去那次算
         break;
       }
       case 'print': {

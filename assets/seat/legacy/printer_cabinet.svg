@@ -1,0 +1,14 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 36 40" width="36" height="40" shape-rendering="crispEdges">
+  <!-- legacy 的印表機櫃：靠牆的矮櫃，上面放一台雷射印表機；櫃子下半截被桌子擋住，所以畫到底就停 -->
+  <rect x="4" y="1" width="28" height="15" fill="#8c8578"/>
+  <rect x="5" y="2" width="26" height="13" fill="#f6f1e7"/>
+  <rect x="5" y="4" width="26" height="1" fill="#c8c1ae"/>
+  <rect x="23" y="2" width="5" height="2" fill="#3d5a80"/><rect x="29" y="2" width="1" height="1" fill="#5c9a5c"/>
+  <rect x="9" y="7" width="18" height="2" fill="#1f2328"/><rect x="11" y="7" width="14" height="1" fill="#ffffff"/>
+  <rect x="5" y="11" width="26" height="1" fill="#c8c1ae"/><rect x="15" y="13" width="6" height="1" fill="#8c8578"/>
+  <rect x="0" y="16" width="36" height="2" fill="#c8c1ae"/><rect x="0" y="17" width="36" height="1" fill="#8c8578"/>
+  <rect x="0" y="18" width="1" height="22" fill="#8c8578"/><rect x="35" y="18" width="1" height="22" fill="#8c8578"/>
+  <rect x="1" y="18" width="34" height="22" fill="#b3ab98"/>
+  <rect x="1" y="18" width="34" height="1" fill="#8c8578"/><rect x="17" y="19" width="1" height="21" fill="#8c8578"/>
+  <rect x="14" y="23" width="2" height="4" fill="#1f2328"/><rect x="19" y="23" width="2" height="4" fill="#1f2328"/>
+</svg>

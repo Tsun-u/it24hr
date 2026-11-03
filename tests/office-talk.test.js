@@ -12,11 +12,11 @@ const afterAsk = () => { const e = play(); tickTo(e, C.DAY_START_MIN + 22); retu
 const pick = (e, id, text) => e.talk(id, e.talkOptions(id).find(o => o.say.startsWith(text)).i);
 const waitReply = (e) => tickTo(e, e.clock.minute + 7);
 
-test('君傑還沒開口前不能找他聊；開口之後通訊錄有君傑和阿賢', () => {
+test('君傑還沒開口前不能找他聊；開口之後通訊錄有君傑和阿賢（legacy 還有小潘，可以問他記憶體的事）', () => {
   const e = play();
   assert.deepStrictEqual(e.talkOptions('junjie'), []);
   tickTo(e, C.DAY_START_MIN + 22);
-  assert.deepStrictEqual(e.contacts().map(c => c.who), ['業務 君傑', '資產室 阿賢']);
+  assert.deepStrictEqual(e.contacts().map(c => c.who), ['業務 君傑', '資產室 阿賢', '同事 小潘']);
   assert.strictEqual(e.talkOptions('junjie').length, 4);
 });
 

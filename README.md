@@ -64,4 +64,6 @@ node --test "tests/**/*.test.js"   # 純邏輯測試
 
 本專案以 MIT 授權釋出（見 `LICENSE`）。介面圖示來自 [Lucide](https://lucide.dev)（ISC，見 `LICENSES/lucide.txt`），手繪風圖解用 [Rough.js](https://roughjs.com/)（MIT，見 `LICENSES/roughjs.txt`）。IT 圖鑑的插圖用 [statechart-art](https://github.com/kevintngo/statechart-art) 的畫筆與紙張繪製（MIT，見 `LICENSES/statechart-art.txt`），圖上的中文是[芫荽](https://github.com/ButTaiwan/iansui)字型（OFL）。
 
+桌上紙條的手寫字是先畫成圖片才放進遊戲，repo 裡沒有字型檔：玩家的字是阿童的手寫字型「阿童體」，老闆的字是[辰宇落雁體](https://github.com/Chenyu-otf/chenyuluoyan_thin)（OFL），老闆娘的字是逸嘉的手寫字型[佮逸體](https://drive.google.com/drive/folders/1OnXPY_aZZ4a1SzrJnnS_JPUwwDcb5VGc)（OFL）。
+
 遊戲裡的公司、人物和軟體（LIME、Tearlol、Claire Code……）都是虛構的，如有雷同，純屬職場共通的苦難。

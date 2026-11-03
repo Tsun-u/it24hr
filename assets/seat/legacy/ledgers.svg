@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 28 21" width="28" height="21" shape-rendering="crispEdges">
+  <!-- legacy 的帳冊：四本一模一樣、排得整整齊齊 -->
+  <g transform="translate(0 1)">
+  <g fill="#000080"><rect x="5" y="3" width="4" height="16"/><rect x="10" y="3" width="4" height="16"/><rect x="15" y="3" width="4" height="16"/><rect x="20" y="3" width="4" height="16"/></g>
+  <g fill="#ffff00">
+    <rect x="6" y="6" width="2" height="1"/><rect x="11" y="6" width="2" height="1"/><rect x="16" y="6" width="2" height="1"/><rect x="21" y="6" width="2" height="1"/>
+    <rect x="6" y="16" width="2" height="1"/><rect x="11" y="16" width="2" height="1"/><rect x="16" y="16" width="2" height="1"/><rect x="21" y="16" width="2" height="1"/>
+  </g>
+  <rect x="4" y="19" width="21" height="1" fill="#808000"/>
+  </g>
+</svg>

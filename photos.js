@@ -34,7 +34,7 @@
       `<text x="34" y="58" font-size="10" fill="#6b7280">處理程序</text><text x="90" y="58" font-size="10" fill="#2563eb">效能</text>`
       + `<text x="34" y="80" font-size="16" font-weight="bold" fill="#111827">記憶體</text><text x="286" y="80" font-size="16" fill="#111827" text-anchor="end">8.0 GB DDR4</text>`
       + `<rect x="34" y="88" width="252" height="54" fill="#ede9fe"/><path d="M34 128 L90 120 L140 124 L190 110 L240 114 L286 108" stroke="#7c3aed" fill="none"/>`
-      + [['速度：', '2666 MT/s'], ['使用的插槽：', '1／4'], ['外形規格：', 'DIMM']].map(([k, v], i) =>
+      + [['速度:', '2666 MT/s'], ['已使用插槽:', '1 (總共 4)'], ['尺寸:', 'DIMM']].map(([k, v], i) =>
         `<text x="34" y="${164 + i * 16}" font-size="11" fill="#6b7280">${k}</text><text x="120" y="${164 + i * 16}" font-size="11" fill="#111827">${v}</text>`).join(''))),
   };
   const Photos = { html: (id) => PHOTOS[id] || '' , ids: () => Object.keys(PHOTOS) };

@@ -60,6 +60,12 @@ test('開著按電源鈕、拔電源線、關 PSU 開關：都是強制關機，
   }
 });
 
+test('強制斷電記成 hardOff（結算卡「硬碟殺手」）；照順序關機、關機後再拔電都不算', () => {
+  for (const type of ['power', 'plug', 'psu']) assert.ok(R.apply(fresh(), { type }).flags.hardOff, type);
+  const normal = run(fresh(), { type: 'screen', target: 'save' }, { type: 'screen', target: 'start' }, { type: 'screen', target: 'shutdown' }, { type: 'shutdownDone' }, { type: 'plug' });
+  assert.ok(!normal.events.includes('hardOff'));
+});
+
 test('關機途中斷電：照強制關機算，關機完成那一步不再做', () => {
   const r = run(fresh(), { type: 'screen', target: 'start' }, { type: 'screen', target: 'shutdown' }, { type: 'screen', target: 'promptDiscard' }, { type: 'plug' }, { type: 'shutdownDone' });
   assert.strictEqual(r.state.dirty, true); assert.strictEqual(r.state.shuttingDown, false);

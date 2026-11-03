@@ -60,9 +60,22 @@ test('十六連擊：同一盒搖到第 5 下「要更快」、第 10 下「還�
   assert.strictEqual(r.outs[9].say, '還要更快！');
   assert.strictEqual(r.outs[15].say, '良し！');
   assert.ok(r.outs[15].events.includes('starburst'));
-  assert.ok(r.outs[15].flags && r.outs[15].flags.starburst);
   assert.ok(!r.outs[16].events.includes('starburst'));
   assert.notStrictEqual(r.outs[16].say, '良し！');
+});
+
+test('星爆16連擊：裝進去的那盒剛好搖 16 下才算；15、17 下、抽出來多搖一下再裝都不算', () => {
+  const insertAfter = (n) => {
+    const s = delivered(['C']); const c = cart(s, 'C');
+    const r = run(s, { type: 'open' }, { type: 'pullOld' }, ...Array.from({ length: n }, () => ({ type: 'shake', cart: c })), { type: 'insert', cart: c });
+    return { r, c, flag: last(r).flags.starburst };
+  };
+  assert.strictEqual(insertAfter(16).flag, true);
+  assert.strictEqual(insertAfter(15).flag, false);
+  assert.strictEqual(insertAfter(17).flag, false);
+  const { r, c } = insertAfter(16);
+  const again = run(r.state, { type: 'pull', cart: c }, { type: 'shake', cart: c }, { type: 'insert', cart: c });
+  assert.strictEqual(last(again).flags.starburst, false);
 });
 
 test('第一次打開前蓋：先講看得到碳粉匣，再自己說「幫我撐十秒」、淑芬回一句；之後再開只有第一句', () => {

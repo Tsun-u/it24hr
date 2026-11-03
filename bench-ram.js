@@ -81,6 +81,7 @@
   function forceOff(state, out, what) {
     const lost = state.excel === 'unsaved';
     powerOff(state); state.dirty = true; state.excel = 'closed';
+    out.events.push('hardOff');
     if (lost) out.events.push('lostExcel');
     out.say = lost ? `${what}${EXCEL_CRY}` : what;
   }
@@ -229,6 +230,7 @@
     // 給 engine 的結果：裝好就結案（記下螢幕顯示的容量給結算卡評語），報價單沒存要記著
     if (out.events.includes('installed')) { out.done = true; out.flags = { shown: { size: state.shown, text: state.shownText } }; }
     if (out.events.includes('lostExcel')) out.flags = { ...out.flags, lostExcel: true };
+    if (out.events.includes('hardOff')) out.flags = { ...out.flags, hardOff: true };   // 強制斷電過（結算卡成就；dirty 跑完磁碟檢查就清掉，這個不清）
     return out;
   }
 

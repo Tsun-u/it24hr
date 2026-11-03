@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 28 21" width="28" height="21" shape-rendering="crispEdges">
+  <!-- legacy 的老花眼鏡：打開的深藍眼鏡盒，細框眼鏡摺好放在盒子旁邊的桌上 -->
+  <rect x="1" y="12" width="13" height="9" fill="#000080"/><rect x="2" y="13" width="11" height="3" fill="#0000ff"/>
+  <g fill="#808080">
+    <rect x="15" y="15" width="6" height="1"/><rect x="15" y="20" width="6" height="1"/><rect x="15" y="16" width="1" height="4"/><rect x="20" y="16" width="1" height="4"/>
+    <rect x="22" y="15" width="6" height="1"/><rect x="22" y="20" width="6" height="1"/><rect x="22" y="16" width="1" height="4"/><rect x="27" y="16" width="1" height="4"/>
+    <rect x="21" y="17" width="1" height="1"/><rect x="16" y="14" width="11" height="1"/>
+  </g>
+</svg>
