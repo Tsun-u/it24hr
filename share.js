@@ -22,6 +22,24 @@
   const HIGHLIGHT = 'rgba(255, 209, 102, .55)', PENCIL = '#8a8172';
   const GLUE = new Set('，。、？！：；）」』》…,.?!:;)');   // 換行時不放在行首的標點
   const seedOf = (s) => { let h = 7; for (const ch of String(s)) h = (h * 31 + ch.codePointAt(0)) % 2147483647; return h || 1; };
+  // 數字連同後面的英文單位（12 GB、2666 MT/s）、英文字、檔名各是一塊，其餘一個字一塊
+  const TOKEN = /\d[\d.,]*(?: ?[A-Za-z]+(?:\/[A-Za-z]+)?)?|[A-Za-z0-9][A-Za-z0-9._\/-]*|[\s\S]/gu;
+
+  // canvas 換行：中文一個字一個字量寬度，英文字、數字整塊換到下一行（比整行還長才拆開）；
+  // 新的一行不以空白或標點開頭，最多 maxLines 行（超過的最後一行補…）
+  function wrapText(g, s, maxW, maxLines = 99) {
+    const lines = []; let line = '';
+    const add = (tok) => {
+      if (tok === '\n') { lines.push(line); line = ''; return; }
+      if (g.measureText(line + tok).width > maxW && line && !GLUE.has(tok)) { lines.push(line); line = tok.trimStart(); } else line += tok;
+    };
+    for (const tok of String(s).match(TOKEN) || []) {
+      if (tok.length > 1 && g.measureText(tok).width > maxW) for (const ch of tok) add(ch); else add(tok);
+    }
+    if (line) lines.push(line);
+    if (lines.length > maxLines) { lines.length = maxLines; lines[maxLines - 1] = lines[maxLines - 1].slice(0, -1) + '…'; }
+    return lines;
+  }
 
   // 紙上的東西（標題紙條、紙卡、印章）用 rough.js 手繪，seed 從玩家名字算；成品畫面是螢幕上的系統，照原樣畫
   function card(view) {
@@ -34,17 +52,7 @@
     const css = getComputedStyle(document.documentElement);
     const SANS = css.getPropertyValue('--font').trim() || 'sans-serif', MONO = css.getPropertyValue('--mono').trim() || 'monospace';
     const font = (size, weight = 400, family = SANS) => { g.font = `${weight} ${size}px ${family}`; };
-    // 中文沒有空白可以斷：一個字一個字量，超過寬度就換行，最多 maxLines 行（超過的最後一行補…）
-    const wrap = (s, maxW, maxLines = 99) => {
-      const lines = []; let line = '';
-      for (const ch of String(s)) {
-        if (ch === '\n') { lines.push(line); line = ''; continue; }
-        if (g.measureText(line + ch).width > maxW && line && !GLUE.has(ch)) { lines.push(line); line = ch; } else line += ch;
-      }
-      if (line) lines.push(line);
-      if (lines.length > maxLines) { lines.length = maxLines; lines[maxLines - 1] = lines[maxLines - 1].slice(0, -1) + '…'; }
-      return lines;
-    };
+    const wrap = (s, maxW, maxLines) => wrapText(g, s, maxW, maxLines);
     const rrect = (x, y, w, h, r) => { g.beginPath(); g.roundRect(x, y, w, h, r); };
 
     g.fillStyle = BACKDROP[mode] || BACKDROP.legacy; g.fillRect(0, 0, W, H);
@@ -127,11 +135,19 @@
     const traits = report.traits || [];
     if (traits.length && room(120)) {
       heading('習慣與成就');
+      // 說明對齊在最長的名稱後面；名稱超過 210px（約六個字），說明換到下一行，留寬一點給說明
+      font(36, 800);
+      const titleW = Math.min(210, Math.max(...traits.map(t => g.measureText(t.title).width)));
+      const tx = ix + 28 + titleW + 28, tw = ix + iw - tx;
       for (const t of traits) {
-        if (!room(56)) break;
+        font(36, 800); const below = g.measureText(t.title).width > titleW;
+        font(36); const lines = wrap(t.text, tw, 2);
+        if (!room(56 * (lines.length + (below ? 1 : 0)))) break;
         rc.circle(ix + 8, y - 12, 14, pen({ fill: INK, fillStyle: 'solid', roughness: .8, strokeWidth: 1 }));
         font(36, 800); g.fillStyle = INK; g.fillText(t.title, ix + 28, y);
-        font(36); g.fillText(wrap(t.text, iw - 238, 1)[0], ix + 238, y); y += 56;
+        if (below) y += 50;
+        font(36); for (const l of lines) { g.fillText(l, tx, y); y += 50; }
+        y += 6;
       }
       y += 30;
     }
@@ -175,13 +191,7 @@
     const css = getComputedStyle(document.documentElement);
     const SANS = css.getPropertyValue('--font').trim() || 'sans-serif', MONO = css.getPropertyValue('--mono').trim() || 'monospace';
     const font = (size, weight = 400, family = SANS) => { g.font = `${weight} ${size}px ${family}`; };
-    const wrap = (s, maxW, maxLines) => {
-      const lines = []; let line = '';
-      for (const ch of String(s)) { if (g.measureText(line + ch).width > maxW && line && !GLUE.has(ch)) { lines.push(line); line = ch; } else line += ch; }
-      if (line) lines.push(line);
-      if (lines.length > maxLines) { lines.length = maxLines; lines[maxLines - 1] = lines[maxLines - 1].slice(0, -1) + '…'; }
-      return lines;
-    };
+    const wrap = (s, maxW, maxLines) => wrapText(g, s, maxW, maxLines);
     const rrect = (x, y, w, h, r) => { g.beginPath(); g.roundRect(x, y, w, h, r); };
     g.fillStyle = BACKDROP.speedrun; g.fillRect(0, 0, W, H);
     g.fillStyle = '#1a1d23'; g.fillRect(0, 0, W, 120);
