@@ -85,6 +85,7 @@
     screen.append(head, opts, tabs, panel, foot);
     host.append(screen);
     show();
+    Ink.paperize(screen);   // 外送 App 裡沒有會套到的元素，維持軟體的樣子
     return screen;
   }
 

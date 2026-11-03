@@ -18,20 +18,24 @@ test('沒登記的關卡要報錯', () => {
   assert.throws(() => Sandbox.make('nope', 'legacy'), /沒有這一關/);
 });
 
-// 抽關（設計稿「沙盒模式的劇本制」）：每次玩從劇本裡抽一個；玩過的劇本可以跳過不玩；所有劇本都開過之後可以不抽、直接用選的。
-// 「開過」＝任何一個時代玩完過一次（三個時代問題相同，只換代價）
-test('抽關：跳過的不會再抽到，全部跳過就沒得抽', () => {
-  const ids = Sandbox.ids();
-  assert.ok(ids.includes(Sandbox.draw([], () => 0)));
-  assert.strictEqual(Sandbox.draw(ids), null);
+// 抽關（設計稿「沙盒模式的劇本制」）：按上班進抽關畫面，抽到的可以重抽；玩過的關可以直接選。
+// 「玩過」＝任何一個時代玩完過一次（三個時代問題相同，只換代價）
+test('抽關：重抽避開現在這關；只剩這關時照樣抽得到', () => {
+  Sandbox.add('test-other', () => ({ name: '測試用的另一關' }));
+  try {
+    assert.strictEqual(Sandbox.draw(['blur'], () => 0), 'test-other');
+    assert.ok(Sandbox.ids().includes(Sandbox.draw(Sandbox.ids(), () => 0)));
+  } finally { Sandbox.remove('test-other'); }
 });
 
-test('全部關卡都開過才能直接選', () => {
-  assert.strictEqual(Sandbox.allOpened(null), false);
-  let save = null;
-  for (const id of Sandbox.ids()) save = Sandbox.record(save, id, 'legacy', { report: 1 }, '2026-11-03');
-  assert.strictEqual(Sandbox.allOpened(save), true);
-  assert.ok(Sandbox.opened(save).includes('blur'));
+test('玩過的關卡列得出來（抽關畫面直接選用）', () => {
+  assert.deepStrictEqual(Sandbox.opened(null), []);
+  const save = Sandbox.record(null, 'blur', 'hybrid', { report: 1 }, '2026-11-03');
+  assert.deepStrictEqual(Sandbox.opened(save), ['blur']);
+});
+
+test('每一關都有說明', () => {
+  for (const id of Sandbox.ids()) assert.ok(Sandbox.make(id, 'legacy').brief, id);
 });
 
 test('存檔紀錄照關卡和時代分開，次數往上加，不動到別的關', () => {

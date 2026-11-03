@@ -15,11 +15,29 @@
   const CLAIRE_DOC = 'claire-md';   // 文件裡那份 CLAIRE.md 的 id
   const PERMISSION_MODES = { acceptEdits: 'accept edits on', auto: 'auto mode on' };   // 劇本 ai.permission → 終端機上顯示的模式
   const withIcon = (node, name, text) => { node.append(Icons.el(name, 'ico-sm'), document.createTextNode(text)); return node; };
+  // 舊料箱裡的記憶體畫成真的樣子：電路板、晶片、貼紙、金手指和缺口。缺口位置跟 3D 工作台讀同一份規格（stick.notch），
+  // 桌機 DIMM 在 3D 裡長 1.33、筆電 SO-DIMM 長 0.8，這裡照比例畫
+  const stickSvg = (s) => {
+    const len3d = s.form === 'SO-DIMM' ? 0.8 : 1.33, W = s.form === 'SO-DIMM' ? 80 : 132, H = 34, GOLD = 6;
+    const notch = Math.max(-len3d / 2 + 0.08, Math.min(len3d / 2 - 0.08, s.notch));
+    const nx = Math.round(W * (0.5 + notch / len3d));
+    const chips = s.form === 'SO-DIMM' ? 2 : 4;
+    const chip = (i) => `<rect x="${Math.round(8 + i * ((W - 30) / Math.max(1, chips - 1)))}" y="3" width="14" height="11" fill="#1f2328"/>`;
+    return `<svg viewBox="0 0 ${W} ${H}" width="${W}" height="${H}" aria-hidden="true">`
+      + `<rect x="0" y="0" width="${W}" height="${H - GOLD}" rx="2" fill="#2e6b3f"/>`
+      + Array.from({ length: chips }, (_, i) => chip(i)).join('')
+      + `<rect x="${W / 2 - 24}" y="16" width="48" height="10" fill="#f8fafc"/>`
+      + `<rect x="0" y="${H - GOLD}" width="${nx - 3}" height="${GOLD}" fill="#d4a72c"/>`
+      + `<rect x="${nx + 3}" y="${H - GOLD}" width="${W - nx - 3}" height="${GOLD}" fill="#d4a72c"/>`
+      + '</svg>';
+  };
   const MODULES = { inventory: '資產盤點', users: '人員', reports: '報表' };
   // Tearlol 的欄名：從左到右是卡在誰手上——SA 區、IT 區、QC 區、完成
   const PHONE_WIDTH = matchMedia('(max-width: 720px)');
   const STATUS_ZH = { new: '新需求', rejected_to_sa: '退回 SA', open: 'IT 處理中', to_qc: '交 QC', returned: '退回 IT', archived: '已完成' };
   const CHORE_STAGE = { new: '還沒動', doing: '處理中', done: '做完了' };   // 正式上班的雜事做到哪
+  const CALL_STATUS = { menu: '語音選單', hold: '等候中…（擴音，可以先收起來做別的事）', ringing: '接通了！', asking: '通話中' };   // 公務手機打電話進行到哪
+  const DIALPAD = [['1', ''], ['2', 'ABC'], ['3', 'DEF'], ['4', 'GHI'], ['5', 'JKL'], ['6', 'MNO'], ['7', 'PQRS'], ['8', 'TUV'], ['9', 'WXYZ'], ['*', ''], ['0', '+'], ['#', '']];   // 手機撥號鍵盤，數字下面的英文字母
   const BOARD_ORDER = ['new', 'rejected_to_sa', 'open', 'returned', 'to_qc', 'archived'];
   const WALL_CLOCK_HAND = { legacy: '#1f2328', hybrid: '#464a56' };   // 牆上時鐘的指針色，照各自底圖原本畫的
   const h = (tag, cls, text) => { const el = document.createElement(tag); if (cls) el.className = cls; if (text !== undefined) el.textContent = text; return el; };
@@ -80,11 +98,15 @@
             <div class="visitor" hidden><span class="visitor-face">${Icons.html('boss')}</span><p class="visitor-text"></p><button class="btn visitor-talk">怎麼了？</button></div>
             <button class="coffee" title="暫停">${Icons.html('coffee')} 暫停</button>
             <div class="ai-quota" hidden title="AI 額度：每五小時補滿（09:00、14:00、19:00）"></div>
-            <button class="leave" hidden>下班</button>
+            <button class="leave" hidden><span class="leave-word">下班</span></button>
             <div class="hint" hidden></div>
           </div>
         </div>`;
       this.desktop = this.root.querySelector('.desktop');
+      // 桌上的實體物件用手繪外框（電腦螢幕裡的維持軟體樣子）
+      Ink.frame(this.root.querySelector('.coffee'), { seed: 11, pill: true });
+      Ink.frame(this.root.querySelector('.leave'), { seed: 23 });
+      Ink.frame(this.root.querySelector('.visitor-talk'), { seed: 47 });
       this.wallClock = this.root.querySelector('.wall-clock'); this.wallClockBox = null; this.wallClockMinute = null;
       this.taskbar = this.root.querySelector('.taskbar');
       this.hintEl = this.root.querySelector('.hint');
@@ -105,12 +127,13 @@
     readPaper(paper) {
       this.engine.readPaper(paper.id);
       const view = h('div', `paper-view ${paper.origin}`);
-      const sheet = h('div', 'sheet'); sheet.append(h('h3', '', paper.title), h('p', '', paper.text));
+      const sheet = h('div', 'sheet'); sheet.append(h('h3', '', paper.title), PaperInk.handNode(paper.text) || h('p', '', paper.text));
       const actions = h('div', 'sheet-actions');
       const put = h('button', 'btn', '放回去'); put.addEventListener('click', () => view.remove());
       const dig = h('button', 'btn primary', '數位化');
       dig.addEventListener('click', () => { this.engine.digitize(paper.id); view.remove(); this.renderPapers(); this.toast(`「${paper.title}」進電腦的文件了`); });
       actions.append(put, dig); sheet.append(actions); view.append(sheet); this.root.querySelector('.desk').append(view);
+      Ink.paperize(view);
     }
     showVisitor(src) {
       const v = this.root.querySelector('.visitor'); v.hidden = false; v.classList.add('arrive');
@@ -241,6 +264,7 @@
         const p = svg.querySelector(`[data-outlet="${outlet}"]`); if (p) p.remove();
         this.engine.unplug(name); this.updateDevices();
       };
+      this.unplugDevice = (name) => { const outlet = Object.keys(cables).find(o => cables[o] === name); if (outlet !== undefined) unplug(outlet); };
       for (const plug of this.root.querySelectorAll('.plug')) {
         const outlet = plug.dataset.outlet; let dragging = false;
         plug.addEventListener('pointerdown', (e) => { dragging = true; plug.setPointerCapture(e.pointerId); unplug(outlet); plug.classList.add('dragging'); });
@@ -280,6 +304,16 @@
       // 「下班」那顆在同事座位時是「回座位」（劇本：回座位的鈕放在下班鈕的位置）
       this.root.querySelector('.leave').addEventListener('click', () => (e.place === 'desk' ? e.leave() : this.backToDesk()));
       e.on('place:changed', (place) => (place === 'desk' ? this.leaveSeat() : this.enterSeat(place)));
+      e.on('seat:say', ({ seat, who, text }) => {
+        if (this.seatRoom && e.place === seat) this.seatRoom.querySelector('.seat-say').textContent = `${who.split(' ').pop()}：「${text}」`;
+      });
+      e.on('chore:changed', () => { this.refreshPartsBox(); this.refreshSeatHand(); });
+      e.on('talk:changed', () => this.refreshDocs());
+      e.on('bench:closed', () => this.refreshSeatHand());
+      e.on('call:changed', (call) => this.refreshCall(call));
+      e.on('call:connected', () => Sound.play('connect'));
+      this.setupPartsBox();
+      this.setupWorkPhone();
       this.root.querySelector('.visitor-talk').addEventListener('click', () => this.talkToVisitor());
       this.dragDevices();
       e.on('visitor:arrived', (src) => this.showVisitor(src));
@@ -354,6 +388,7 @@
       const table = h('div', 'home-table'); table.append(this.homeFood, this.homeFun); this.root.querySelector('.surface').append(table);
       // 洗澡睡覺放在公司「下班」鈕的位置：一天要結束的鈕都在同一個地方
       this.sleepBtn = h('button', 'leave sleep'); this.sleepBtn.innerHTML = Icons.html('bed'); this.sleepBtn.append(document.createTextNode('洗澡睡覺'));
+      Ink.frame(this.sleepBtn, { seed: 29 });
       this.sleepBtn.addEventListener('click', () => this.askSleep());
       this.root.querySelector('.leave').after(this.sleepBtn);
       this.wm.fitClip();
@@ -418,6 +453,7 @@
       stay.addEventListener('click', () => shade.remove());
       const row = h('div', 'home-row'); row.append(stay, go);
       box.append(h('p', '', '洗澡、睡覺，一覺到明天早上。'), dnd, row); shade.append(box); document.body.append(shade);
+      Ink.paperize(box);
     }
     // 半夜的電話（接不接是玩家的決策）：私人手機旁邊響，不擋畫面、正在玩的也不停；
     // 接了回到茶几、桌上多一張卡、VPN 要重掛；不理它，響一陣子就斷了，算漏接
@@ -465,6 +501,7 @@
     exitMeeting() {
       if (!this.meetingRoom) return;
       this.engine.clock.resume('raise');
+      this.refreshDocs();   // 散會了：LIME 的「走過去」可以按了
       if (this.leavingMeeting || !this.meetingRoom.querySelector('.dm')) this.closeMeetingRoom();
       else this.meetingRoom.classList.add('ending');
     }
@@ -515,6 +552,7 @@
           leave.addEventListener('click', () => { done(); this.leavingMeeting = true; this.engine.leaveMeeting(); });
           alt.append(lower, stretch, leave); raise.append(alt);
         }
+        Ink.paperize(raise);
       });
       // 關鍵句有兩個動畫（飄過、進場跳一下），只有「飄完」才算離場；進場跳完不能把它移掉
       el.addEventListener('animationend', (ev) => { if (ev.animationName === 'fly' && !el.classList.contains('held')) el.remove(); });
@@ -528,7 +566,7 @@
       this.root.querySelector('.private-time').textContent = label;
       const leave = this.root.querySelector('.leave'); const away = e.place !== 'desk';
       leave.hidden = !(away || e.canLeave());
-      const word = away ? '回座位' : '下班'; if (leave.textContent !== word) leave.textContent = word;
+      const word = away ? '回座位' : '下班'; const leaveWord = leave.querySelector('.leave-word'); if (leaveWord.textContent !== word) leaveWord.textContent = word;
       this.root.querySelector('.coffee').classList.toggle('on', e.paused);
       this.desktop.classList.toggle('paused', e.paused);
       this.root.querySelector('.desk').classList.toggle('on-break', e.paused);
@@ -546,7 +584,9 @@
     seatOf(who) { const seats = this.engine.script.seats || {}; return Object.keys(seats).find(id => seats[id].who === who) || null; }
     // 黑畫面那幾秒時鐘停住：走一趟就是 engine 算的 C.WALK_MIN 分鐘
     walkTo(seatId) {
-      const seat = (this.engine.script.seats || {})[seatId]; if (!seat || this.engine.place !== 'desk') return;
+      const seat = (this.engine.script.seats || {})[seatId]; if (!seat || this.engine.place !== 'desk' || this.engine.meeting) return;
+      if (this.meetingRoom) this.closeMeetingRoom();   // 散會了、最後幾句彈幕還在飛：人走出去就收掉
+      if (this.engine.plugged.has('work')) { this.unplugDevice('work'); this.toast('拔掉充電線，公務手機帶著走。'); }
       this.engine.clock.pause('walk'); this.trip(`走到${seat.title}。`, () => this.engine.clock.resume('walk'));
       this.engine.walk(seatId);
     }
@@ -567,34 +607,155 @@
       const acts = h('div', 'seat-actions');
       for (const a of seat.actions || []) {
         const b = h('button', 'btn', a.label);
-        if (a.bench) b.addEventListener('click', () => BenchLoader.open({ host: this.root, engine: this.engine, scene: a.bench }));
+        if (a.bench) b.addEventListener('click', () => BenchLoader.open({ host: this.root, engine: this.engine, scene: a.bench, chore: a.chore }));
         acts.append(b);
       }
-      room.append(h('h2', 'seat-title', seat.title), monitor, props, acts);
+      // 同事在旁邊講的話、手上帶過來的記憶體
+      room.append(h('h2', 'seat-title', seat.title), monitor, props, acts, h('p', 'seat-say'), h('p', 'seat-hand'));
+      this.closePartsBox();
       this.root.querySelector('.screens-bg').prepend(room);
-      const phone = withIcon(h('button', 'btn seat-phone'), 'smartphone', '公務手機');
-      phone.addEventListener('click', () => (this.phonePanel ? this.closePhone() : this.openPhone('line')));
-      this.root.querySelector('.surface').append(phone);
+      Ink.paperize(room);   // 桌上的東西和能做的事手繪；同事的螢幕裡沒有會套到的元素
+      // 公務手機：關卡有電話要打時一直放在桌上（setupWorkPhone），沒有的話到同事座位才拿出來
+      const phone = this.workPhone ? null : this.phoneButton();
+      if (phone) this.root.querySelector('.surface').append(phone);
       this.seatRoom = room; this.seatPhone = phone;
+      this.refreshSeatHand();
+    }
+    togglePhone() { this.phonePanel ? this.closePhone() : this.openPhone(this.engine.call && this.engine.call.stage !== 'ended' ? 'call' : 'line'); }
+    phoneButton() {
+      const phone = withIcon(h('button', 'btn seat-phone work-phone'), 'smartphone', '公務手機');
+      phone.addEventListener('click', () => this.togglePhone());
+      Ink.frame(phone, { seed: 41 });
+      return phone;
+    }
+    // 關卡有電話要打（劇本 calls）：公務手機一開始就在自己桌上、走到哪帶到哪。
+    // 劇本 devices 有 work 的話，長得跟開發機一樣、有電量，可以拉排插的線來充
+    setupWorkPhone() {
+      if (!this.engine.script.calls) return;
+      if ('work' in this.engine.devices) {
+        this.workPhone = h('div', 'device work-phone'); this.workPhone.dataset.device = 'work';
+        this.workPhone.append(h('span', 'dev-name', '公務手機'), h('span', 'battery'));
+        this.workPhone.addEventListener('click', () => this.togglePhone());
+        this.root.querySelector('.device.private').after(this.workPhone);
+        this.updateDevices();
+        return;
+      }
+      this.workPhone = this.phoneButton();
+      const surface = this.root.querySelector('.surface');
+      surface.insertBefore(this.workPhone, surface.querySelector('.coffee'));
+    }
+    refreshSeatHand() {
+      const el = this.seatRoom && this.seatRoom.querySelector('.seat-hand'); if (!el) return;
+      const box = this.engine.partsBox();
+      const hand = box ? box.sticks.filter(s => s.where === 'hand') : [];
+      el.textContent = hand.length >= 2 ? `手上搬著整箱舊料（${hand.length} 條）` : hand.length ? `手上拿著：${BenchRam.label(hand[0])}` : '';
+    }
+    // 自己座位的舊料箱（正式上班的加記憶體）：一次拿一條帶去同事座位，貼紙只寫世代和容量，長短要自己看
+    setupPartsBox() {
+      if (!this.engine.partsBox()) return;
+      const btn = withIcon(h('button', 'btn parts-box'), 'cpu', '舊料箱');
+      btn.addEventListener('click', () => (this.boxPanel ? this.closePartsBox() : this.openPartsBox()));
+      Ink.frame(btn, { seed: 37 });
+      const surface = this.root.querySelector('.surface');
+      surface.insertBefore(btn, surface.querySelector('.coffee'));
+    }
+    openPartsBox() {
+      this.closePartsBox();
+      this.boxPanel = h('div', 'box-panel');
+      this.root.querySelector('.screens-bg').append(this.boxPanel);
+      this.refreshPartsBox();
+    }
+    closePartsBox() { if (this.boxPanel) { this.boxPanel.remove(); this.boxPanel = null; } }
+    refreshPartsBox() {
+      const panel = this.boxPanel; if (!panel) return;
+      const { chore, sticks } = this.engine.partsBox();
+      const head = h('div', 'box-head'); head.append(h('h3', '', '舊料箱'));
+      const close = h('button', 'btn small', '關上'); close.addEventListener('click', () => this.closePartsBox()); head.append(close);
+      const row = (s, label, action) => {
+        const li = h('li', s.where === 'hand' ? 'in-hand' : '');
+        const stick = h('span', 'box-stick'); stick.innerHTML = stickSvg(s);
+        li.append(stick, h('span', 'box-label', BenchRam.label(s)));
+        if (label) { const b = h('button', 'btn small', label); b.addEventListener('click', action); li.append(b); }
+        return li;
+      };
+      const hand = sticks.filter(s => s.where === 'hand'); const wholeBox = hand.length >= 2;
+      const stow = () => this.engine.stowStick(chore.id);
+      const list = h('ul', 'box-list');
+      for (const s of hand) list.append(row(s, wholeBox ? null : '放回料箱', stow));
+      for (const s of sticks.filter(x => x.where === 'box')) list.append(row(s, '拿這條', () => this.engine.takeStick(chore.id, s.id)));
+      const note = wholeBox ? `整箱在手上（${hand.length} 條），走過去會比較久。` : hand.length ? '手上拿著一條，再拿別條會先放回去。' : '一次拿一條，或整箱搬過去（比較重，走路比較久）。';
+      const actions = h('div', 'box-actions');
+      if (wholeBox) { const back = h('button', 'btn small', '整箱放回'); back.addEventListener('click', stow); actions.append(back); }
+      else if (!hand.length) { const all = h('button', 'btn small', '整箱搬過去'); all.addEventListener('click', () => this.engine.takeAllSticks(chore.id)); actions.append(all); }
+      panel.replaceChildren(head, h('p', 'box-note', note), list, actions);
+      Ink.paperize(panel);   // 料箱是桌上的實物：面板和按鈕手繪，重建內容後框接回去
     }
     leaveSeat() {
       if (!this.seatRoom) return;
       this.seatRoom.remove(); this.seatRoom = null;
-      this.seatPhone.remove(); this.seatPhone = null;
+      if (this.seatPhone) { this.seatPhone.remove(); this.seatPhone = null; }
       this.closePhone();
       this.root.querySelector('.desk').classList.remove('at-seat');
     }
-    // 公務手機：只看得到 LIME 和信箱（回訊息、開卡要用電腦，回座位再做）
+    // 公務手機：看得到 LIME 和信箱（回訊息、開卡要用電腦，回座位再做）；關卡有電話要打時多一個「電話」分頁
     openPhone(kind) {
       this.closePhone();
       const panel = h('div', 'phone-panel'); const tabs = h('div', 'phone-tabs'); const body = h('div', 'phone-body');
-      for (const [k, label] of [['line', 'LIME'], ['mail', '信箱']]) {
+      // 沒電：只剩黑屏和收起來
+      if (this.engine.workPhoneDead()) {
+        panel.classList.add('dead');
+        const close = h('button', 'btn small', '收起來'); close.addEventListener('click', () => this.closePhone()); tabs.append(close);
+        body.append(h('p', 'phone-dead', '手機沒電了。'), h('p', 'phone-dead-hint', '回座位拉排插的線來充電。'));
+        panel.append(tabs, body); this.root.querySelector('.screens-bg').append(panel);
+        this.phonePanel = panel; this.phoneKind = kind;
+        return;
+      }
+      const apps = [['line', 'LIME'], ['mail', '信箱'], ...(this.engine.script.calls ? [['call', '電話']] : [])];
+      for (const [k, label] of apps) {
         const t = h('button', `btn small${k === kind ? ' primary' : ''}`, label); t.addEventListener('click', () => this.openPhone(k)); tabs.append(t);
       }
       const close = h('button', 'btn small', '收起來'); close.addEventListener('click', () => this.closePhone()); tabs.append(close);
-      body.append(this.docsNode(kind, this.docsSelected[kind]));
+      body.append(kind === 'call' ? this.callNode() : this.docsNode(kind, this.docsSelected[kind]));
       panel.append(tabs, body); this.root.querySelector('.screens-bg').append(panel);   // 放在螢幕區，不蓋到桌面上的「回座位」
       this.phonePanel = panel; this.phoneKind = kind;
+    }
+    // 電話分頁：沒在通話時列可以打的號碼（和上一通最後說了什麼）；通話中照進行到哪一步給按鍵
+    callNode() {
+      const e = this.engine, call = e.call, wrap = h('div', 'call-screen');
+      const log = () => { const box = h('div', 'call-log'); for (const line of call.lines.slice(-4)) box.append(h('p', '', line)); return box; };
+      if (!call || call.stage === 'ended') {
+        wrap.append(h('h3', '', '電話'));
+        const contacts = e.callContacts();
+        if (!contacts.length) wrap.append(h('p', 'muted', '現在沒有要打給誰。'));
+        for (const c of contacts) { const b = withIcon(h('button', 'btn call-dial'), 'phone', c.who); b.addEventListener('click', () => e.dial(c.id)); wrap.append(b); }
+        if (call) wrap.append(h('p', 'call-status', '上一通：'), log());
+        return wrap;
+      }
+      wrap.append(h('h3', '', e.script.calls[call.id].who), h('p', 'call-status', CALL_STATUS[call.stage]), log());
+      const keys = h('div', 'call-keys');
+      // 語音選單：手機的撥號鍵盤，按了有按鍵音，上面一行是按過的鍵
+      if (call.stage === 'menu') {
+        keys.classList.add('dialpad');
+        keys.append(h('p', 'call-typed', call.keys || ' '));
+        for (const [key, letters] of DIALPAD) {
+          const b = h('button', 'btn call-key'); b.append(h('b', '', key), h('small', '', letters));
+          b.setAttribute('aria-label', key);
+          b.addEventListener('click', () => { Sound.key(key); e.press(key); });
+          keys.append(b);
+        }
+      }
+      if (call.stage === 'ringing') { const b = h('button', 'btn primary call-pickup', '喂？'); b.addEventListener('click', () => e.pickUp()); keys.append(b); }
+      if (call.stage === 'asking') for (const a of e.callAnswers()) { const b = h('button', 'btn talk-option', a.say); b.addEventListener('click', () => e.answer(a.i)); keys.append(b); }
+      const hang = h('button', 'btn call-hang', '掛斷'); hang.addEventListener('click', () => e.hangUp());
+      wrap.append(keys, hang);
+      return wrap;
+    }
+    // 通話進行到下一步：等候時放音樂（擴音），接通時公務手機的鈕亮起來，電話分頁開著就重畫
+    refreshCall(call) {
+      if (call.stage === 'hold' && !this.holdMusic) this.holdMusic = Sound.loop('hold');
+      if (call.stage !== 'hold' && this.holdMusic) { this.holdMusic(); this.holdMusic = null; }
+      for (const b of this.root.querySelectorAll('.work-phone')) b.classList.toggle('ringing', call.stage === 'ringing');
+      if (this.phonePanel && this.phoneKind === 'call') this.openPhone('call');
     }
     closePhone() { if (this.phonePanel) { this.phonePanel.remove(); this.phonePanel = null; } }
     // 離開桌子一趟（例如去行銷部拍照）：整頁黑掉、一行旁白，過一下回來
@@ -670,6 +831,9 @@
         const v = this.engine.devices[d.dataset.device];
         const b = d.querySelector('.battery'); b.textContent = `${v}%`; b.classList.toggle('low', v <= Works.LOW_BATTERY);
       }
+      // 公務手機開著時電量歸零或充回來：畫面跟著換（沒電＝黑屏）
+      const dead = this.engine.workPhoneDead();
+      if (this.phonePanel && dead !== this.phonePanel.classList.contains('dead')) this.openPhone(this.phoneKind);
     }
 
     // 終端機：部署時指令一行一行打出來（engine 的 deploy:run），平常只開著
@@ -787,10 +951,18 @@
       Sound.play(app);
       const n = h('button', 'notif');
       n.append(h('b', '', `${app === 'line' ? 'LIME' : '信箱'} ・ ${doc.group ? `${doc.group}（${doc.from}）` : doc.from}`), h('span', '', doc.text.split('\n')[0]));
-      // 點哪則通知就選到哪則：信箱選那封信，LIME 選那個聯絡人或群組
-      n.addEventListener('click', () => { this.openDocs(app, app === 'line' ? (doc.group || doc.from) : doc.id); n.remove(); });
-      n.style.bottom = `${44 + 72 * this.desktop.querySelectorAll('.notif').length}px`;   // 幾則一起來就往上堆
-      this.desktop.append(n);
+      if (this.seatRoom) {
+        // 人在同事座位：自己的螢幕看不到，通知浮在最上層（工作台也蓋不住），點了開公務手機；開著工作台時點了就收掉
+        n.classList.add('away');
+        n.addEventListener('click', () => { if (!this.root.querySelector('.bench-panel')) this.openPhone(app); n.remove(); });
+        n.style.top = `${12 + 72 * this.root.querySelectorAll('.notif.away').length}px`;
+        this.root.append(n);
+      } else {
+        // 點哪則通知就選到哪則：信箱選那封信，LIME 選那個聯絡人或群組
+        n.addEventListener('click', () => { this.openDocs(app, app === 'line' ? (doc.group || doc.from) : doc.id); n.remove(); });
+        n.style.bottom = `${44 + 72 * this.desktop.querySelectorAll('.notif').length}px`;   // 幾則一起來就往上堆
+        this.desktop.append(n);
+      }
       setTimeout(() => n.classList.add('show'), 10); setTimeout(() => n.remove(), 6500);
     }
 
@@ -820,7 +992,12 @@
       const msgs = this.engine.docs.filter(d => d.origin === 'line');
       const chatOf = (m) => m.group || m.from;
       const wrap = h('div', 'docs line'); const list = h('div', 'doc-list'); const pane = h('div', 'doc-pane chat'); wrap.append(list, pane);
-      const contacts = [...new Set(msgs.map(chatOf))];
+      // 公司通訊錄（正式上班）：有座位的同事、現在找得到話題的人（劇本 talks）都有一個對話，還沒講過話的是空的，排在有訊息的對話後面。
+      // 有座位的人一開始就在，同事還沒開口也能走過去找他
+      const talkOf = Object.fromEntries(this.engine.contacts().map(c => [c.who, c]));
+      const seated = Object.values(this.engine.script.seats || {}).map(s => s.who);
+      const chatted = [...new Set(msgs.map(chatOf))];
+      const contacts = [...chatted, ...new Set([...Object.keys(talkOf), ...seated].filter(who => !chatted.includes(who)))];
       if (!contacts.length) { pane.append(h('p', 'muted', DOC_APPS.line.empty)); return wrap; }
       const show = (from) => {
         this.docsSelected.line = from;
@@ -829,8 +1006,13 @@
         // 對方有座位（正式上班）：標題旁邊「走過去」
         const head = h('div', 'chat-head'); head.append(h('h3', '', from));
         const seatId = this.seatOf(from);
-        if (seatId && this.engine.place === 'desk') { const go = h('button', 'btn small', '走過去'); go.addEventListener('click', () => this.walkTo(seatId)); head.append(go); }
+        if (seatId && this.engine.place === 'desk') {
+          const go = h('button', 'btn small', '走過去'); go.addEventListener('click', () => this.walkTo(seatId));
+          if (this.engine.meeting) { go.disabled = true; go.title = '開完會再過去'; }
+          head.append(go);
+        }
         pane.replaceChildren(head, log);
+        if (talkOf[from]) pane.append(this.composeNode(from));
         // 照時間排（engine.chatLog）：晚回的話排在回的時候，不黏在被回的那則下面；回訊息的鈕留在原本那則下面
         for (const entry of this.engine.chatLog(msgs.filter(x => chatOf(x) === from))) {
           if (entry.mine) {
@@ -841,6 +1023,7 @@
           const m = entry.msg;
           if (m.group && m.kind !== 'sent') log.append(h('span', 'chat-who', m.from));
           if (m.kind === 'sticker') { const s = h('p', 'them sticker'); s.innerHTML = Stickers.html(m.sticker); log.append(s); continue; }
+          if (m.kind === 'photo') { const p = h('p', 'them chat-photo'); p.innerHTML = Photos.html(m.photo); p.addEventListener('click', () => p.classList.toggle('big')); log.append(p); continue; }
           log.append(h('p', m.kind === 'sent' ? 'me' : 'them', Works.chatText(m.text)));
           const row = h('div', 'chat-actions');
           if (this.engine.place !== 'desk') { /* 人在同事座位只帶著公務手機：看得到訊息，回訊息、開卡回座位再做 */ }
@@ -854,6 +1037,8 @@
           }
           if (row.children.length) log.append(row);
         }
+        const waiting = talkOf[from] && this.engine.contactWaiting(from);
+        if (waiting) log.append(h('span', 'chat-typing', waiting === 'mail' ? '等對方回信…' : '對方輸入中…'));
         // 捲到最後一則。對話常常是剛建好、還沒接上視窗（量不到高度），要等下一幀；每次有新訊息、回了訊息都會重畫到這裡
         requestAnimationFrame(() => { log.scrollTop = log.scrollHeight; });
       };
@@ -862,8 +1047,20 @@
         const b = withIcon(h('button', 'doc-item'), groups.has(from) ? 'users' : 'message-circle', from); b.dataset.from = from;
         b.addEventListener('click', () => show(from)); list.append(b);
       }
-      show(contacts.includes(selectedFrom) ? selectedFrom : contacts.at(-1));
+      show(contacts.includes(selectedFrom) ? selectedFrom : (chatted.at(-1) || contacts[0]));
       return wrap;
+    }
+    // 對話底下的輸入列：點了展開這個人現在能講的話，挑一句傳出去（公務手機也能傳）。
+    // 一個人可以同時有好幾個話題，選項合起來、各自送回自己的話題；對方回之前，那個話題的選項不會出現
+    composeNode(who) {
+      const options = this.engine.contactOptions(who);
+      const box = h('div', 'chat-compose'); const picker = h('div', 'talk-picker'); picker.hidden = true;
+      for (const o of options) { const b = h('button', 'btn talk-option', o.say); b.addEventListener('click', () => { this.engine.talk(o.talkId, o.i); this.refreshDocs(); }); picker.append(b); }
+      const input = h('button', 'chat-input', options.length ? '傳訊息…' : '沒有要說的');
+      input.disabled = !options.length;
+      input.addEventListener('click', () => { picker.hidden = !picker.hidden; });
+      box.append(picker, input);
+      return box;
     }
     docsNode(kind, selectedId) {
       if (kind === 'line') return this.lineNode(selectedId);

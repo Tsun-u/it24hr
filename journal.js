@@ -44,6 +44,7 @@
     const show = (id) => {
       for (const b of tabs.children) b.setAttribute('aria-selected', String(b.dataset.tab === id));
       body.replaceChildren(id === 'claire' ? claireNode(data.claire) : id === 'achievements' ? achievementsNode(data) : eraNode(data, id, onReport));
+      Ink.paperize(panel);   // 換頁後新長出來的按鈕
     };
     for (const [id, label] of pages) {
       const b = h('button', `journal-tab${ERAS.includes(id) ? ' mono' : ''}`, label); b.type = 'button'; b.dataset.tab = id; b.setAttribute('role', 'tab');

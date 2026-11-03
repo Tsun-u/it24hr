@@ -37,6 +37,7 @@
     panel.append(head, body); overlay.append(panel);
     overlay.addEventListener('click', (e) => { if (e.target === overlay) closeOverlay(); });
     document.body.append(overlay);
+    Ink.paperize(panel);
   }
   if (typeof document !== 'undefined') document.addEventListener('keydown', (e) => { if (e.key === 'Escape') closeOverlay(); });
 

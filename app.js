@@ -56,14 +56,14 @@
         <form class="badge">
           <div class="badge-photo"><canvas class="avatar" width="96" height="112" aria-label="識別證頭像"></canvas>
             <button type="button" class="reroll" title="重拍一張">重拍一張</button></div>
-          <label>姓名<input name="name" value="" placeholder="不填就叫${DEFAULT_NAME}" maxlength="12"></label>
+          <label>姓名<span class="ink-field"><input name="name" value="" placeholder="不填就叫${DEFAULT_NAME}" maxlength="12"></span></label>
           <div class="field"><span>性別</span>
             <div class="seg" role="radiogroup" aria-label="性別">
               <label><input type="radio" name="gender" value="女"><span>女</span></label>
               <label><input type="radio" name="gender" value="男"><span>男</span></label>
               <label><input type="radio" name="gender" value="其他" checked><span>其他</span></label>
             </div></div>
-          <label>職稱<select name="title">${TITLES.map(t => `<option>${t}</option>`).join('')}</select></label>
+          <label>職稱<span class="ink-field"><select name="title">${TITLES.map(t => `<option>${t}</option>`).join('')}</select></span></label>
           <p class="muted">職稱不影響今天會發生的事。<br>因為對很多人來說，就是公司那群用電腦的人，不用分那麼細。<br>想知道實際上的工作差異，請參考 IT 圖鑑。</p>
           <button class="btn primary" type="submit">上班</button>
         </form>
@@ -107,6 +107,7 @@
       const player = { name: f.get('name').trim() || DEFAULT_NAME, gender: f.get('gender'), title: f.get('title'), avatarSalt: salt };
       writePlayer(player); modes(player);
     });
+    Ink.paperize(app);
   }
 
   // ── 選一種玩法：新人訓練（三天教學關，有存檔就接著上次）、正式上班（沙盒）三個模式。畫面跟識別證頁同一套：桌面輪播、紙色卡片；PC 兩欄 ──
@@ -176,7 +177,7 @@
       journal.append(actions); trainCol.append(journal);
     }
 
-    // 沙盒（玩家看到的叫「正式上班」）：每一欄是一個時代。按「上班」抽一關；抽到玩過的可以跳過再抽；全部開過之後不抽、直接選
+    // 沙盒（玩家看到的叫「正式上班」）：每一欄是一個時代。按「上班」打開抽劇本畫面（office-draw.js）：抽到的可以重抽，玩過的關可以直接選
     const sandboxCol = el('section', 'mode-col');
     sandboxCol.append(el('h3', 'mode-group', '正式上班'));
     const office = loadOffice();
@@ -185,31 +186,20 @@
       const card = el('article', 'mode-card');
       card.append(el('h4', 'mono', m.title), el('p', 'mode-desc', m.desc));
       const r = el('div', 'mode-actions');
-      const levelName = (id) => Sandbox.make(id, m.id).name;
-      const go = (id) => start(player, Sandbox.make(id, m.id));
-      const lastReport = (id) => { const last = Sandbox.last(office, id, m.id); return last ? btn('mode-done', '上次的結算卡', () => showReport(last.view, backToModes)) : null; };
-      // 抽到一關：寫在卡上，可以上班；玩過的可以跳過（skip 累積這次跳過的，不會再抽到）
-      const showDrawn = (skip) => {
-        const id = Sandbox.draw(skip);
-        r.replaceChildren();
-        if (!id) { r.append(el('p', 'mode-drawn', '能跳的都跳過了。'), btn('', '重抽', () => showDrawn([]))); return; }
-        r.append(el('p', 'mode-drawn', `今天抽到：${levelName(id)}`), btn('primary', '上班', () => go(id)));
-        if (Sandbox.opened(office).includes(id)) r.append(btn('', '跳過，換一關', () => showDrawn([...skip, id])));
-      };
+      const draw = () => OfficeDraw.open({
+        era: m, office,
+        onStart: (id) => start(player, Sandbox.make(id, m.id)),
+        onReport: (view) => showReport(view, backToModes),
+      });
       if (!OFFICE_OPEN) r.append(btn('', save && save.graduated ? '準備中' : '完成新人訓練後開放'));
-      else if (Sandbox.allOpened(office)) {
-        for (const id of Sandbox.ids()) {
-          const row = el('div', 'mode-level'); row.append(el('span', 'mode-level-name', levelName(id)));
-          const last = lastReport(id); if (last) row.append(last);
-          row.append(btn('primary', '上班', () => go(id))); r.append(row);
-        }
-      } else r.append(btn('primary', '上班', () => showDrawn([])));
+      else r.append(btn('primary', '上班', draw));
       card.append(r); sandboxCol.append(card);
     }
     cols.append(trainCol, sandboxCol);
     screen.append(bg, head, cols); app.append(screen);
     Handbook.mark(cols);
     startCarousel(bg);
+    Ink.paperize(app);
   }
 
   // ── 存檔：只存天與天之間（一天玩到一半關掉，下次從那天早上重來）──
@@ -349,6 +339,7 @@
     const row = app.querySelector('.report-actions');
     row.append(...Share.buttons(view, el));   // 分享結算卡（圖）、分享連結（參考 fab24hr）
     for (const a of actions) { const b = el('button', `btn ${a.cls || ''}`, a.text); b.addEventListener('click', a.onClick); row.append(b); }
+    Ink.paperize(app);
   }
   // 隔天：第一天 → 第二天（帶著第一天主卡的選擇、看板號碼、配色）→ 第三天（帶著 AI 筆記）→ 結業；前兩次都帶著沒結案的卡（board）。
   // view 是今天的結算卡，存起來給「做完了」看。結業過一次就一直算結業（graduated），重玩哪一天都不會把正式上班鎖回去；
@@ -393,6 +384,7 @@
     };
     card.addEventListener('click', next);
     next();
+    Ink.paperize(app);
   }
   // 三天總結算：三個時代各一句總評、三天的印章並排，可以分享
   function showSummary(save) {
@@ -429,10 +421,12 @@
     row.append(...Share.buttons({ summary, player: save.player }, el));
     const back = el('button', 'btn primary', '回選玩法'); back.addEventListener('click', () => modes(save.player)); row.append(back);
     screen.append(card, row); app.append(screen);
+    Ink.paperize(app);
   }
   function showToBeContinued(flags) {
     app.innerHTML = `<section class="bad-screen tbc"><h1>第三天</h1><p class="reason">還沒做。廠商的 POC 你${flags.volunteered ? '自己接了' : '被指定對接'}。</p><button class="btn primary">回到識別證</button></section>`;
     app.querySelector('button').addEventListener('click', badge);
+    Ink.paperize(app);
   }
   // 三天是三堂課：當掉哪一天重來哪一天
   // 瀏覽器要玩家點過畫面或按過鍵才給出聲：每次都確認通知音是開著的

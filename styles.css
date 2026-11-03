@@ -1,7 +1,7 @@
 /* it24hr — 辦公桌、螢幕、視窗、看板、卡片、結算卡 */
 :root {
   --wood: #6b4a2e; --wood-2: #8a6240; --bezel: #1b1d22; --bezel-edge: #3a3d45;
-  --ink: #1f2328; --paper: #f6f1e7; --muted: #6b7280;
+  --ink: #1f2328; --paper: #f6f1e7; --muted: #646a77;   /* 紙色上對比 4.8:1 */
   --priority: #d1242f; --accent: #2563eb; --ok: #15803d; --warn: #b45309;
   --font: "Noto Sans TC", "Microsoft JhengHei", system-ui, sans-serif;
   --mono: "Cascadia Code", Consolas, "Noto Sans Mono CJK TC", monospace;
@@ -14,6 +14,7 @@ button:focus-visible, a:focus-visible, input:focus-visible, select:focus-visible
 body { line-height: 1.5; }
 .muted { color: var(--muted); }
 .btn { border: 1px solid #c9c2b5; background: #fff; border-radius: 8px; padding: 8px 14px; }
+a.btn { display: inline-block; color: inherit; text-decoration: none; }   /* 長得像按鈕的連結（例：存圖）不帶瀏覽器預設的底線 */
 .btn.primary { background: var(--accent); border-color: var(--accent); color: #fff; }
 .btn.danger { background: #fff; border-color: var(--priority); color: var(--priority); }
 
@@ -182,6 +183,18 @@ body { line-height: 1.5; }
 .discuss-log { display: flex; flex-direction: column; gap: 6px; margin-bottom: 12px; }
 .docs.line .doc-pane.chat { background: var(--chat-bg); border-radius: 10px; padding: 10px; }   /* LIME 的萊姆黃 */
 .docs.line .discuss-log .them { background: var(--chat-them); }
+/* 同事傳來的照片（photos.js）：泡泡裡一張小圖，點了放大 */
+.discuss-log .them.chat-photo { padding: 4px; cursor: zoom-in; width: min(220px, 70%); }
+.discuss-log .them.chat-photo.big { width: min(480px, 100%); cursor: zoom-out; }
+.photo-svg { display: block; width: 100%; height: auto; border-radius: 6px; }
+/* 主動傳訊：對話底下的輸入列（點了展開能講的話）、對方輸入中 */
+.chat-compose { display: flex; flex-direction: column; gap: 6px; padding-top: 8px; border-top: 1px solid var(--os-border); }
+.talk-picker { display: flex; flex-direction: column; gap: 6px; max-height: 180px; overflow: auto; }
+.talk-picker[hidden] { display: none; }
+.btn.talk-option { text-align: left; white-space: normal; }
+.chat-input { text-align: left; padding: 8px 14px; border: 1px solid var(--os-border); border-radius: 18px; background: var(--chat-them); color: var(--os-muted); font: inherit; font-size: 14px; cursor: text; }
+.chat-input:disabled { cursor: default; opacity: .6; }
+.chat-typing { align-self: flex-start; font-size: 12px; color: var(--os-muted); }
 .docs.line .discuss-log .sticker { background: transparent; padding: 0; }
 .docs.line .chat-who { align-self: flex-start; margin: 4px 0 -4px 4px; font-size: 12px; color: var(--os-muted); }   /* 群組裡是誰說的 */.sticker-art { display: block; width: 96px; height: 96px; }
 .docs.line .doc-pane h3 { margin: 0 0 8px; }
@@ -226,6 +239,8 @@ body { line-height: 1.5; }
 @keyframes buzz { 0%, 100% { transform: none; } 25% { transform: translateX(-3px) rotate(-2deg); } 75% { transform: translateX(3px) rotate(2deg); } }
 .notif { position: absolute; right: 12px; bottom: 44px; z-index: 30; display: flex; flex-direction: column; align-items: flex-start; gap: 2px; max-width: 320px; padding: 10px 14px; border: 1px solid var(--os-border); border-radius: 10px; background: var(--os-win); color: var(--os-fg); box-shadow: 0 8px 24px var(--os-shadow); text-align: left; font-size: 13px; opacity: 0; transform: translateY(8px); transition: .25s; cursor: pointer; }
 .notif.show { opacity: 1; transform: none; }
+/* 人在同事座位時的通知：掛在螢幕外、浮在工作台（z-index 60）上面，顏色變數拿不到螢幕裡的，自己帶淺色那套 */
+.notif.away { position: fixed; bottom: auto; z-index: 70; --os-win: #ffffff; --os-fg: #1f2328; --os-border: #c5ccd8; --os-muted: #4b5563; --os-shadow: rgba(0,0,0,.25); }
 .notif b { font-size: 12px; color: var(--os-muted); }
 .notif span { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 290px; }
 /* 文件／信箱／LINE 與開卡 */
@@ -265,6 +280,7 @@ body { line-height: 1.5; }
 .paper-view .sheet p { white-space: pre-line; }
 .paper-view .sheet h3 { margin: 0 0 10px; font-size: 16px; }
 .paper-view .sheet p { margin: 0; white-space: pre-wrap; }
+.paper-view .sheet .hand { display: block; max-width: 100%; height: auto; opacity: .85; }   /* 手寫圖：paper-ink.js */
 .sheet-actions { display: flex; gap: 10px; justify-content: flex-end; margin-top: 18px; }
 .visitor { position: absolute; left: 24px; bottom: calc(100% + 8px); display: flex; align-items: center; gap: 12px; background: #fff; color: #1f2328; padding: 12px 16px; border-radius: 14px; box-shadow: 0 8px 24px rgba(0,0,0,.4); z-index: 30; max-width: 480px; }
 .visitor[hidden] { display: none; }
@@ -302,6 +318,48 @@ body { line-height: 1.5; }
 .device { user-select: none; }
 .device.plugged { border-color: #8fd18f; }
 .device.plugged .battery::after { content: ' ⚡'; }
+/* 手繪外框（ink-frame.js）：墊在按鈕文字後面、不吃點擊；底色和線都用同一個手繪形狀畫，色讀 --ink-fill／--ink */
+.inked { position: relative; isolation: isolate; background: transparent !important; border-color: transparent !important; }
+.inked > .ink-frame { position: absolute; inset: 0; z-index: -1; width: 100%; height: 100%; pointer-events: none; overflow: visible; }
+.ink-frame .ink-fill { fill: var(--ink-fill, #fff); stroke: none; }
+.ink-frame .ink-line { fill: var(--ink, #2b2f36); fill-opacity: .92; stroke: none; }
+.btn.parts-box.inked { --ink-fill: #fff; }
+.coffee.inked { --ink-fill: #d9c6a8; }
+.coffee.inked.on { --ink-fill: #fff; }
+.leave.inked { --ink-fill: #2d3b2d; --ink: #142014; }
+.badge-cols.inked, .mode-badge.inked, .mode-card.inked, .report.inked, .grad-card.inked, .summary-card.inked { --ink-fill: var(--paper); }
+.btn.inked { --ink-fill: #fff; }   /* --ink-fill 會繼承：按鈕自己設白底，不吃外層卡片的紙色 */
+.btn.mode-back.inked { --ink-fill: var(--paper); }
+.mode-actions .btn.inked:disabled { --ink-fill: #ece6da; --ink: #b9b0a0; }
+.btn.primary.inked { --ink-fill: var(--accent); }
+.btn.ghost.inked { --ink-fill: transparent; }
+.draw-played .btn.active.inked { --ink-fill: #eef4ff; }
+.mode-tabs .btn.index-tab:nth-child(1) { --ink-fill: #f4ec6b; }
+.mode-tabs .btn.index-tab:nth-child(2) { --ink-fill: #ecebdc; }
+.mode-tabs .btn.index-tab:nth-child(3) { --ink-fill: #7cc6f2; }
+.mode-tabs .btn.index-tab:nth-child(4) { --ink-fill: #f7a8c9; }
+.hb-panel.inked, .home-box.inked, .box-panel.inked, .seat-props li.inked { --ink-fill: var(--paper); }
+.seat-props li.inked { --ink: #cdbfa6; }   /* 桌上的東西是標籤不是按鈕：淺棕色的線 */
+.hb-panel.inked { box-sizing: border-box; padding: 4px; }   /* 內容的捲軸縮在框線內，不蓋到線 */
+.box-panel .btn.inked { padding: 5px 12px; }   /* 小字鈕套框後多留白，框線才不會貼字 */
+.hb-jump.inked, .atlas-tab.inked { --ink-fill: transparent; }
+.atlas-tab.on.inked { --ink-fill: rgba(37, 99, 235, .12); --ink: var(--accent); }
+.journal-tab.inked { --ink-fill: #ece6da; margin-bottom: 6px; }
+.journal-tab.inked[aria-selected="true"] { --ink-fill: #fff; margin-bottom: 6px; }
+/* 識別證的表單：輸入框、下拉選單包一層 .ink-field 畫框（input／select 裡面放不進 SVG）；性別三選一整組一個框，選中的那格縮在框線內 */
+.ink-field { display: block; }
+.ink-field.inked { --ink-fill: #fff; }
+.badge .ink-field input, .badge .ink-field select { display: block; width: 100%; box-sizing: border-box; border: 0; background: transparent; }
+.seg.inked { --ink-fill: #fff; gap: 2px; padding: 4px; overflow: visible; }
+.seg.inked span { background: transparent; border-right: 0; border-radius: 4px; }
+.seg.inked input:checked + span { background: var(--accent); }
+/* 深色底上的手繪鈕：線換淺色；hover 換底色要改 --ink-fill（.inked 把 background 鎖成透明） */
+.raise .btn.inked { --ink-fill: #f6f1e7; }
+.raise .btn.inked:hover { --ink-fill: #ffd166; }
+.raise .btn.ghost.inked { --ink-fill: transparent; --ink: #e9e4d6; }
+.raise .btn.ghost.inked:hover { --ink-fill: rgba(255, 255, 255, .12); }
+.hm-chip.inked, .hm-tab.inked { --ink-fill: transparent; --ink: #f3e9dc; }
+.hm-chip.on.inked, .hm-tab.on.inked { --ink-fill: #f3e9dc; }
 .coffee { margin-left: auto; border: 0; background: #d9c6a8; border-radius: 20px; padding: 10px 16px; }
 .coffee.on { background: #fff; }
 .leave { border: 0; background: #2d3b2d; color: #fff; border-radius: 8px; padding: 10px 18px; }
@@ -361,7 +419,8 @@ body { line-height: 1.5; }
 .badge-photo { position: relative; width: 96px; margin: 0 auto 6px; }
 .badge-photo canvas, .report-avatar { display: block; width: 96px; height: 112px; image-rendering: pixelated; border-radius: 6px; border: 1px solid #c9c2b5; background: #cfd6e0; }
 .report-avatar { width: 72px; height: 84px; margin: 0 0 6px; }
-.reroll { position: absolute; right: -4px; bottom: -4px; font-size: 11px; padding: 2px 7px; border: 1px solid #c9c2b5; background: #fff; border-radius: 10px; }
+.reroll { position: absolute; right: -4px; bottom: -4px; font-size: 11px; padding: 4px 10px; border: 1px solid #c9c2b5; background: #fff; border-radius: 12px; }
+.reroll.inked { --ink-fill: #fff; }
 .badge label, .badge .field { display: flex; flex-direction: column; gap: 4px; font-size: 13px; }
 .seg { display: flex; border: 1px solid #c9c2b5; border-radius: 6px; overflow: hidden; }
 .seg label { flex: 1; flex-direction: row; margin: 0; }
@@ -369,7 +428,7 @@ body { line-height: 1.5; }
 .seg span { display: block; width: 100%; text-align: center; padding: 8px 0; font-size: 14px; cursor: pointer; background: #fff; color: var(--ink); border-right: 1px solid #c9c2b5; }
 .seg label:last-child span { border-right: 0; }
 .seg input:checked + span { background: var(--accent); color: #fff; }
-.seg input:focus-visible + span { outline: 2px solid var(--accent); outline-offset: -2px; }
+.seg input:focus-visible + span { outline: 2px solid var(--accent); outline-offset: 2px; }   /* 往外畫，選中那格的藍底上也看得到 */
 .badge input, .badge select { font: inherit; padding: 8px; border: 1px solid #c9c2b5; border-radius: 6px; }
 .badge .muted { margin: 0; font-size: 12px; }
 .credit { margin: 4px 0 0; font-size: 12px; color: var(--muted); text-align: center; } .credit a { color: var(--accent); }
@@ -549,28 +608,77 @@ div:has(> button[aria-label="匯出存檔"]) > button::after { content: attr(ari
 /* ── 到同事座位（正式上班）：蓋在自己螢幕的位置上，自己的螢幕和視窗藏起來（回座位原樣都在）。
    同事的螢幕畫他的桌布和捷徑，桌上的東西先用文字小牌 ── */
 .desk.at-seat .screens { visibility: hidden; }
+/* 人在同事座位時自己的螢幕藏起來了，暫停的字和遮罩改蓋在座位畫面上（樣子跟電腦上那層一樣） */
+.desk.on-break .seat-room::after { content: '暫停中'; position: absolute; inset: 0; z-index: 5; display: grid; place-items: center; font-size: 28px; letter-spacing: .3em; color: #2b2f36; background: rgba(217, 210, 195, .6); pointer-events: none; }
 .seat-room { position: absolute; inset: 0; z-index: 3; display: grid; grid-template-columns: minmax(0, 1fr) auto; grid-template-rows: auto minmax(0, 1fr) auto; gap: 12px; padding: 16px 24px; background: linear-gradient(180deg, #d9d2c3, #c7bea9); color: #2b2f36; }
 .seat-title { grid-column: 1 / -1; margin: 0; font-size: 18px; }
 .seat-monitor { grid-column: 1; grid-row: 2; justify-self: start; height: 100%; max-width: 100%; aspect-ratio: 16 / 10; min-height: 0; overflow: hidden; padding: 12px; border: 10px solid var(--bezel); border-bottom-width: 22px; border-radius: 12px 12px 4px 4px; background: #1e293b; box-shadow: 0 10px 30px rgba(0,0,0,.35); }
 .seat-room[data-wallpaper="sportscar"] .seat-monitor { background: linear-gradient(160deg, #0f172a 0 52%, #b91c1c 52% 60%, #0f172a 60% 64%, #b91c1c 64% 67%, #0f172a 67%); }   /* 跑車桌布：兩道紅色斜線 */
+.seat-room[data-wallpaper="family"] .seat-monitor { background: radial-gradient(circle at 30% 62%, #f2c9a0 0 7%, transparent 7.5%), radial-gradient(circle at 46% 58%, #e8b48a 0 8%, transparent 8.5%), radial-gradient(circle at 62% 64%, #f2c9a0 0 6%, transparent 6.5%), linear-gradient(180deg, #9fd3f0 0 55%, #8cc87a 55%); }   /* 全家福桌布：藍天草地上三顆頭 */
 .seat-shortcuts { display: flex; flex-flow: column wrap; align-content: flex-start; gap: 12px; height: 100%; }
 .seat-shortcut { display: inline-flex; flex-direction: column; align-items: center; gap: 4px; width: 96px; font-size: 12px; color: #fff; text-align: center; text-shadow: 0 1px 2px rgba(0,0,0,.7); }
-.seat-actions { grid-column: 2; grid-row: 2; display: flex; flex-direction: column; gap: 8px; }
-.seat-props { grid-column: 1 / -1; display: flex; flex-wrap: wrap; gap: 8px; margin: 0; padding: 0; list-style: none; }
+.seat-actions { grid-column: 1 / -1; grid-row: 3; display: flex; flex-wrap: wrap; gap: 8px; }   /* 能做的事在螢幕正下方 */
+.seat-props { grid-column: 2; grid-row: 2; display: flex; flex-direction: column; align-items: flex-start; gap: 8px; margin: 0; padding: 0; list-style: none; }   /* 桌上的擺設在螢幕旁邊 */
 .seat-props li { padding: 4px 10px; border: 1px solid #cdbfa6; border-radius: 6px; background: #f6f1e7; font-size: 13px; }
 .btn.seat-phone { display: inline-flex; align-items: center; gap: 6px; }
+/* 同事在旁邊講的話、手上帶著的記憶體：沒內容就不佔位置 */
+.seat-say, .seat-hand { grid-column: 1 / -1; margin: 0; }
+.seat-say { justify-self: start; max-width: 100%; padding: 8px 14px; border-radius: 14px; background: #fff; box-shadow: 0 2px 6px rgba(0,0,0,.12); font-size: 15px; }
+.seat-hand { font-size: 13px; color: #4b4436; }
+.seat-say:empty, .seat-hand:empty { display: none; }
+/* 自己座位的舊料箱：人在同事座位時收起來 */
+.btn.parts-box { display: inline-flex; align-items: center; gap: 6px; }
+.desk.at-seat .parts-box { display: none; }
+.box-panel { position: absolute; left: 24px; bottom: 12px; z-index: 20; width: min(360px, calc(100% - 32px)); max-height: calc(100% - 24px); overflow: auto; padding: 12px 14px; border-radius: 12px; background: #f6f1e7; color: #2b2f36; box-shadow: 0 10px 30px rgba(0,0,0,.35); box-sizing: border-box; }
+.box-head { display: flex; align-items: center; justify-content: space-between; }
+.box-head h3 { margin: 0; font-size: 16px; }
+.box-note { margin: 6px 0 10px; font-size: 13px; color: #6b6457; }
+.box-list { display: flex; flex-direction: column; gap: 8px; margin: 0; padding: 0; list-style: none; }
+.box-list li { display: grid; grid-template-columns: 132px minmax(0, 1fr) auto; align-items: center; gap: 10px; padding: 6px 8px; border: 1px solid #cdbfa6; border-radius: 8px; background: #fff; }
+.box-list li.in-hand { border-color: #2563eb; background: #eef4ff; }
+/* 記憶體畫成真的樣子（desk.js 的 stickSvg）：SO-DIMM 短一截、缺口位置照世代，貼紙不寫外形，要看這裡 */
+.box-stick { display: block; line-height: 0; }
+.box-actions { display: flex; justify-content: flex-end; gap: 8px; margin-top: 10px; }
+.box-actions:empty { display: none; }
+.box-label { font-family: var(--mono); font-size: 14px; }
 /* 公務手機：只看 LIME 和信箱，浮在桌面右下 */
-.phone-panel { position: absolute; right: 24px; bottom: 12px; z-index: 20; display: flex; flex-direction: column; width: min(440px, calc(100% - 32px)); height: calc(100% - 24px); overflow: hidden; border: 10px solid #1f2328; border-radius: 22px; background: #f6f1e7; box-shadow: 0 10px 30px rgba(0,0,0,.4); }
+.phone-panel { position: absolute; right: 24px; bottom: 12px; z-index: 20; display: flex; flex-direction: column; width: min(440px, calc(100% - 32px)); height: calc(100% - 24px); overflow: hidden; border: 10px solid #1f2328; border-radius: 22px; background: #f6f1e7; box-shadow: 0 10px 30px rgba(0,0,0,.4);
+  --os-fg: #1f2328; --os-border: #c5ccd8; --os-muted: #4b5563; --chat-bg: #e6f19a; --chat-them: #ffffff; }   /* 手機在電腦外面，吃不到電腦的配色：LIME 用淺色那套 */
 .phone-tabs { display: flex; gap: 6px; padding: 8px; background: #1f2328; }
 .phone-tabs .btn:last-child { margin-left: auto; }
+/* 公務手機的電話分頁（手機螢幕＝軟體樣子）：號碼一顆一顆、通話中最後幾句、語音選單的數字鍵、掛斷 */
+.call-screen { display: grid; gap: 10px; align-content: start; padding: 12px; color: #1f2328; }
+.call-screen h3 { margin: 0; font-size: 16px; }
+.call-status { margin: 0; font-size: 13px; color: var(--muted); }
+.call-log { display: grid; gap: 6px; padding: 10px; border-radius: 10px; background: #fff; font-size: 14px; line-height: 1.5; }
+.call-log p { margin: 0; }
+.call-keys { display: flex; flex-wrap: wrap; gap: 8px; }
+/* 語音選單的撥號鍵盤：三欄十二鍵，數字大、英文字母小 */
+.call-keys.dialpad { display: grid; grid-template-columns: repeat(3, 60px); gap: 10px 18px; justify-content: center; }
+.call-typed { grid-column: 1 / -1; margin: 0; min-height: 28px; text-align: center; font-size: 22px; letter-spacing: 4px; font-variant-numeric: tabular-nums; }
+.btn.call-key { width: 60px; height: 60px; border-radius: 50%; padding: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; line-height: 1.1; }
+.btn.call-key b { font-size: 22px; font-weight: 500; }
+.btn.call-key small { min-height: 11px; font-size: 9px; letter-spacing: 1px; color: var(--muted); }
+.btn.call-dial { display: inline-flex; align-items: center; gap: 8px; justify-self: start; }
+.btn.call-hang { justify-self: center; background: #dc2626; border-color: #dc2626; color: #fff; }
+/* 接通了：桌上的公務手機亮起來，要自己拿起來接 */
+.work-phone.ringing { animation: phone-ring .5s ease-in-out infinite alternate; }
+.work-phone.ringing.inked { --ink-fill: #fde68a; }
+@keyframes phone-ring { from { transform: rotate(-4deg); } to { transform: rotate(4deg); } }
 .phone-body { flex: 1; min-height: 0; overflow: auto; }
+/* 公務手機沒電：黑屏一句話 */
+.phone-panel.dead .phone-body { background: #111; color: #9ca3af; display: grid; align-content: center; justify-items: center; gap: 6px; }
+.phone-dead { margin: 0; font-size: 18px; color: #e5e7eb; }
+.phone-dead-hint { margin: 0; font-size: 13px; }
 .phone-body > .docs { height: 100%; grid-template-columns: minmax(0, 1fr); grid-template-rows: auto minmax(0, 1fr); padding: 8px; box-sizing: border-box; }   /* 手機：聯絡人一排在上、對話在下 */
 .phone-body .doc-list { flex-direction: row; flex-wrap: wrap; border-right: 0; border-bottom: 1px solid var(--os-border); padding: 0 0 6px; }
 @media (max-width: 700px) {
   .seat-room { grid-template-columns: minmax(0, 1fr); grid-template-rows: auto minmax(0, 1fr) auto auto; padding: 10px 12px; }
   .seat-monitor { width: 100%; height: auto; align-self: start; }
-  .seat-actions { grid-column: 1; grid-row: 3; flex-direction: row; flex-wrap: wrap; }
+  .seat-actions { grid-column: 1; grid-row: 3; }
+  .seat-props { grid-column: 1; grid-row: 4; flex-direction: row; flex-wrap: wrap; }
   .phone-panel { right: 8px; left: 8px; width: auto; }
+  .box-panel { left: 8px; right: 8px; width: auto; }
 }
 
 /* ── 3D 工作台（bench-loader.js）：蓋住整張辦公桌；載入中畫面第一幀畫好才淡出 ── */
@@ -583,7 +691,7 @@ div:has(> button[aria-label="匯出存檔"]) > button::after { content: attr(ari
 @keyframes bench-spin { to { transform: rotate(360deg); } }
 @media (prefers-reduced-motion: reduce) { .bench-spinner { animation: none; } }
 .bench-bar { display: flex; align-items: center; gap: 10px; }
-.bench-msg { flex: 1; min-height: 1.5em; margin: 0; font-size: 15px; line-height: 1.5; }
+.bench-msg { flex: 1; min-height: 1.5em; margin: 0; font-size: 15px; line-height: 1.5; white-space: pre-line; }
 
 /* ── 會議模式：外接螢幕收起，筆電跟桌上一樣大、移到正中間；會議室鋪滿背景（被筆電擋到沒關係），
    彈幕疊在筆電上面、只飛在筆電上緣以上那一條（擋住背景沒關係，不要擋住彈幕） ── */
@@ -727,6 +835,12 @@ div:has(> button[aria-label="匯出存檔"]) > button::after { content: attr(ari
 .hm-spot .hm-name { padding: 0 8px; border-radius: 8px; background: rgba(20,14,10,.78); font-size: 13px; }
 .hm-spot .hm-count { padding: 2px 4px; border-radius: 18px; background: rgba(20,14,10,.78); gap: 4px; }
 .hm-spot .hm-btn { min-width: 32px; min-height: 32px; font-size: 16px; }
+/* 窄螢幕五間店擠在一起：份數放上面一列、－＋並排在下面，每間的寬度從約 96px 收到約 54px 才不會互相蓋到 */
+@media (max-width: 480px) {
+  .hm-spot .hm-count { display: grid; grid-template-columns: 24px 24px; gap: 2px; justify-items: center; }
+  .hm-spot .hm-count b { grid-column: 1 / -1; grid-row: 1; font-size: 13px; }   /* 店面整片照 em 縮，份數要固定字級才看得到 */
+  .hm-spot .hm-btn { min-width: 24px; min-height: 24px; width: 24px; height: 24px; padding: 0; font-size: 14px; }
+}
 .prop-img { width: 96px; height: 96px; object-fit: contain; }
 .prop-ph { display: grid; place-items: center; color: #d9c2a0; }
 .prop-ph .icon { width: 40px; height: 40px; }
@@ -759,6 +873,7 @@ div:has(> button[aria-label="匯出存檔"]) > button::after { content: attr(ari
   .screen.laptop { left: 0; right: 96px; width: auto; height: calc(44% - 12px); }
   .desk.in-meeting .screen.laptop { left: 0; }   /* 開會時筆電維持原位原大小 */
   .desk .surface .device[data-device] { position: absolute; }   /* 定位在桌面那排上方；不設 z-index，測試模式的高亮照常 */
+  .desk .surface .device.work-phone { position: static; }   /* 公務手機留在桌面那排，跟私人手機放一起 */
   .device.tablet { right: 24px; bottom: calc(100% + 8px); }
   .device.phone { right: 36px; bottom: calc(100% + 86px); }
   .surface { flex-wrap: wrap; align-content: center; gap: 8px; min-height: 120px; padding: 8px 10px; }
@@ -892,7 +1007,7 @@ div:has(> button[aria-label="匯出存檔"]) > button::after { content: attr(ari
 .mode-days .mono { font-family: var(--mono); }
 .mode-days .mode-state { margin-left: auto; font-size: 12px; color: var(--muted); }
 .mode-days li.done { color: var(--muted); }
-.mode-days .mode-replay { padding: 2px 10px; font-size: 12px; }
+.mode-days .mode-replay { padding: 5px 12px; font-size: 12px; }
 .mode-days .mode-done { padding: 2px 8px; border: 0; background: transparent; text-decoration: underline; text-underline-offset: 3px; cursor: pointer; }   /* 按了看那天的結算卡 */
 .mode-days li.next { background: color-mix(in srgb, var(--accent) 9%, #fff); }
 .mode-days li.next .mode-state { color: var(--accent); font-weight: 600; }
@@ -901,13 +1016,6 @@ div:has(> button[aria-label="匯出存檔"]) > button::after { content: attr(ari
 .mode-actions .btn { flex: 1 1 auto; padding: 11px 14px; font-size: 16px; white-space: nowrap; }
 .mode-actions .btn.primary { flex-grow: 2; font-weight: 700; }
 .mode-actions .btn:disabled { opacity: 1; color: var(--muted); background: #ece6da; border-color: #d8d0c1; }
-/* 正式上班：抽到的關卡一行字在上、鈕在下；全部開過之後一關一行直接選 */
-.mode-actions:has(.mode-drawn), .mode-actions:has(.mode-level) { flex-wrap: wrap; }
-.mode-drawn { flex: 1 0 100%; margin: 0; font-size: 15px; font-weight: 600; }
-.mode-level { flex: 1 0 100%; display: flex; align-items: center; gap: 8px; }
-.mode-level-name { flex: 1 1 auto; font-size: 15px; font-weight: 600; }
-.mode-actions .mode-level .btn { flex: 0 0 auto; }
-.mode-level .mode-done { padding: 2px 8px; border: 0; background: transparent; text-decoration: underline; text-underline-offset: 3px; cursor: pointer; font-size: 13px; }
 .btn.mode-clear { justify-self: end; padding: 0; border: 0; background: none; font-size: 12px; color: var(--muted); text-decoration: underline; }
 @media (min-width: 900px) { .mode-cols { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); } }
 
@@ -920,8 +1028,10 @@ div:has(> button[aria-label="匯出存檔"]) > button::after { content: attr(ari
 .term-pop-more { margin-top: 6px; background: none; border: 0; padding: 0; color: var(--accent); font-weight: 600; }
 .handbook { line-height: 1.6; }
 .hb-intro { margin: 0 0 8px; font-size: 13px; color: var(--os-muted, var(--muted)); }
-.hb-nav { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 4px; }
-.hb-jump { border: 1px solid var(--os-border, #d8cfbd); background: transparent; color: inherit; border-radius: 999px; padding: 2px 10px; font-size: 13px; }
+/* 章節頁籤固定在捲動範圍最上面，捲到哪都能跳章節；底色跟著所在的地方（電腦視窗／紙），內容才不會從後面透出來 */
+.hb-nav { position: sticky; top: 0; z-index: 1; display: flex; flex-wrap: wrap; gap: 8px; padding: 8px 0; background: var(--os-win, var(--paper)); border-bottom: 1px solid var(--os-border, #d8cfbd); }
+.hb-jump { border: 1px solid var(--os-border, #d8cfbd); background: transparent; color: inherit; border-radius: 999px; padding: 7px 16px; font-size: 14px; }
+.hb-group { scroll-margin-top: 64px; }   /* 跳過去時章節標題不被固定的頁籤擋住 */
 .hb-group h3 { margin: 16px 0 6px; padding-bottom: 4px; font-size: 15px; border-bottom: 1px solid var(--os-border, #d8cfbd); }
 .hb-list { margin: 0; display: grid; gap: 10px; }
 .hb-item { padding: 4px 6px; border-radius: 6px; }
@@ -934,6 +1044,21 @@ div:has(> button[aria-label="匯出存檔"]) > button::after { content: attr(ari
 .hb-panel { width: min(720px, 100%); max-height: min(88vh, 900px); display: flex; flex-direction: column; background: var(--paper); color: var(--ink); border-radius: 8px; box-shadow: 0 10px 30px rgba(0,0,0,.35); }
 .hb-head { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 10px 16px; border-bottom: 1px solid #d8cfbd; }
 .hb-head h2 { margin: 0; font-size: 18px; }
+/* 正式上班的抽劇本畫面（office-draw.js）：抽到的那張在上、三顆鈕（上班一整列，重抽、退出並排）、玩過的關在下 */
+.hb-panel.office-draw { width: min(520px, 100%); overflow-y: auto; }
+.draw-count { font-size: 14px; color: var(--muted); white-space: nowrap; }
+.draw-card { padding: 16px; }
+.draw-label { margin: 0 0 4px; font-size: 13px; color: var(--muted); }
+.draw-name { margin: 0 0 8px; font-size: 22px; }
+.draw-brief { margin: 0 0 10px; line-height: 1.7; }
+.btn.draw-last { padding: 0; border: 0; background: none; text-decoration: underline; text-underline-offset: 3px; font-size: 13px; }
+.draw-actions { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; padding: 0 16px 16px; }
+.draw-actions .draw-go { grid-column: 1 / -1; }
+.draw-played { display: flex; flex-wrap: wrap; gap: 8px; padding: 12px 16px 16px; border-top: 1px dashed #d8cfbd; }
+.draw-played:empty { display: none; }
+.draw-played .draw-label { flex: 1 0 100%; }
+.draw-played .btn { padding: 6px 14px; }   /* 手繪框的線吃掉約 3px，小字要多留一點才不會貼線 */
+.draw-played .btn.active { border-color: var(--accent, #2563eb); background: #eef4ff; }
 /* 工作日誌：五個分頁（CLAIRE.md、成就、三個時代），一列一個成就或一關 */
 .journal-tabs { display: flex; flex-wrap: wrap; gap: 6px; padding: 10px 16px 0; border-bottom: 1px solid #d8cfbd; }
 .journal-tab { padding: 8px 12px; border: 1px solid #d8cfbd; border-bottom: 0; border-radius: 6px 6px 0 0; background: #ece6da; color: var(--ink); font-size: 14px; cursor: pointer; }
@@ -945,7 +1070,9 @@ div:has(> button[aria-label="匯出存檔"]) > button::after { content: attr(ari
 .journal-words { display: flex; flex-direction: column; gap: 2px; min-width: 0; }
 .journal-where { flex: 0 0 auto; font-size: 12px; color: var(--muted); }
 .journal-row.unplayed b { font-size: 20px; color: var(--muted); }
-.hb-panel .handbook { flex: 1; min-height: 0; overflow-y: auto; padding: 12px 16px 20px; }
+.hb-panel .handbook { flex: 1; min-height: 0; overflow-y: auto; padding: 0 16px 20px; }
+.win-handbook .win-body { padding-top: 0; }
+.hb-panel .handbook > :first-child, .win-handbook .handbook > :first-child { margin-top: 12px; }   /* 上緣留白放在內容上，固定的章節頁籤才貼得到頂 */
 .hb-panel .changelog { flex: 1; min-height: 0; overflow-y: auto; padding: 12px 16px 20px; }
 .cl-command { margin: 0 0 12px; color: var(--muted); font-family: var(--mono); font-size: 13px; }
 .cl-day { position: relative; padding-left: 20px; }

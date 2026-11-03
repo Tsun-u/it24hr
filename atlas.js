@@ -92,6 +92,7 @@
     overlay.append(panel);
     overlay.addEventListener('click', (e) => { if (e.target === overlay) closeOverlay(); });
     document.body.append(overlay);
+    Ink.paperize(panel);
   }
   function closeOverlay() { if (overlay) overlay.remove(); overlay = null; }
   // Esc：手冊疊在上面時先關手冊（handbook.js 自己會關），圖鑑留著。用捕捉階段，在手冊關掉前先數有幾層

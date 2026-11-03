@@ -4,6 +4,7 @@
   const levels = {};
   const Sandbox = {
     add(id, make) { levels[id] = make; },
+    remove(id) { delete levels[id]; },
     ids() { return Object.keys(levels); },
     // kind 讓 engine、app 分得出是正式上班；mode 照舊是時代，版面配色跟新人訓練共用
     make(id, mode) {
@@ -19,14 +20,14 @@
       return { levels: saved };
     },
     last(save, level, mode) { return (save && save.levels && save.levels[level] && save.levels[level][mode]) || null; },
-    // 抽關：每次玩抽一個，skip 是這次已經跳過的（玩過的關才能跳）；全部跳過就回 null
-    draw(skip = [], random = Math.random) {
-      const pool = Object.keys(levels).filter(id => !skip.includes(id));
-      return pool.length ? pool[Math.floor(random() * pool.length)] : null;
+    // 抽關：avoid 是重抽時不想再抽到的（現在顯示的那關）；只剩那幾關時照樣從全部抽
+    draw(avoid = [], random = Math.random) {
+      const all = Object.keys(levels); const rest = all.filter(id => !avoid.includes(id));
+      const pool = rest.length ? rest : all;
+      return pool[Math.floor(random() * pool.length)];
     },
-    // 開過＝任何一個時代玩完過一次；全部開過之後可以不抽、直接選
+    // 玩過＝任何一個時代玩完過一次（三個時代問題相同）；玩過的關可以在抽關畫面直接選
     opened(save) { return Object.keys((save && save.levels) || {}); },
-    allOpened(save) { const opened = Sandbox.opened(save); return Object.keys(levels).every(id => opened.includes(id)); },
   };
   if (typeof module !== 'undefined') module.exports = { Sandbox };
   else root.Sandbox = Sandbox;

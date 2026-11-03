@@ -40,6 +40,11 @@ C.REPO_URL = 'https://github.com/Tsun-u/it24hr';
 C.DONATE_URL = 'https://portaly.cc/atone0331/support';
 // 正式上班：走到同事座位（或走回來）要幾遊戲分鐘
 C.WALK_MIN = 3;
+// 加記憶體：君傑的電腦不能用、IT 又不在座位旁時，每隔幾分鐘在 LIME 催一次；離開幾分鐘後他自己動手拔舊的記憶體
+C.RAM_NAG_MIN = 10;
+C.BOX_WALK_EXTRA_MIN = 2;   // 搬著整箱舊料走一趟多花的分鐘
+C.TONER_DELIVERY_MIN = 150;  // 打電話訂碳粉匣，廠商下午送到：下單後幾分鐘
+C.RAM_DIY_MIN = 30;
 // 存檔備份帶走的 localStorage：沒列到的 key 還原時會默默少一塊，測試會比對程式實際用到的
 C.SAVE_KEYS = ['it24hr.save', 'it24hr.player', 'it24hr.office', 'it24hr.claire','it24hr.sound', 'it24hr.meetingHintSeen', 'it24hr.visitorHintSeen'];
 // Google 雲端備份：跟其他遊戲共用同一個 OAuth client，只有登記過的網域才顯示雲端按鈕（其他網域按了會跳 Google 的 origin_mismatch 錯誤頁）

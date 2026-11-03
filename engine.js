@@ -69,6 +69,17 @@
   const subtasksFor = (type, doc) => (type === 'bug' ? doc.subtasks.filter(s => s.work !== 'doc_spec') : doc.subtasks);
   const ORIGIN_WORD = { boss: '老闆口頭', mail: '信', line: 'LIME', paper: '紙本' };   // 附件「原文：…（來源）」的字
   // 劇本裡任何一句的 {玩家名稱} 換成玩家取的名字。開工時整份換一次（共用的物件照樣共用，function 不動）
+  // 字串種子的亂數（mulberry32）：同一個種子每次出來的一串都一樣
+  function seededRandom(seed) {
+    let a = 2166136261;
+    for (const ch of String(seed)) a = Math.imul(a ^ ch.charCodeAt(0), 16777619);
+    return () => {
+      a = (a + 0x6D2B79F5) | 0;
+      let t = Math.imul(a ^ (a >>> 15), 1 | a);
+      t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t;
+      return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+    };
+  }
   function fillName(v, name, seen = new Map()) {
     if (typeof v === 'string') return v.replaceAll('{玩家名稱}', () => name);
     if (!v || typeof v !== 'object') return v;
@@ -84,6 +95,7 @@
     constructor(script, player = { name: '玩家', title: '軟體工程師' }, { carried = null } = {}) {
       this.script = fillName(script, player.name);
       this.shuffleSeed = Math.floor(Math.random() * 1e9).toString(36);   // 這一輪選項顯示順序的種子（每玩一次不一樣）
+      this.random = seededRandom(this.shuffleSeed);   // 這一輪的亂數（舊料箱內容、對方回訊息的間隔），同一輪固定
       this.player = player;
       this.clock = new Clock();
       this.board = new Board(player.name, script.issueBase);
@@ -100,10 +112,13 @@
       this.visitor = null;           // 站在桌邊的人（老闆）
       this.papers = [];              // 桌上的紙
       this.docs = [];                // 電腦裡的文件（含信、LINE）
-      this.stats = { forwardedToSA: 0, emptyDrafts: 0, selfOpened: 0, trips: 0 };
+      this.stats = { forwardedToSA: 0, emptyDrafts: 0, selfOpened: 0, trips: 0, turns: 0 };
       // 正式上班的雜事：進度跟卡分開存，可以不開卡直接做；卡結案了雜事照樣在（例如信箱清太少，下午又滿）
       this.chores = Object.fromEntries((script.chores || []).map(c => [c.id, { ...c, stage: 'new', flags: {}, log: [] }]));
       this.place = 'desk';           // 人在哪裡：desk，或劇本 seats 的 id（到同事座位）
+      this.askedInPerson = new Set();   // 還沒開口就被走過去、改成當面問的來源（劇本 src.early）
+      this.knows = new Set();        // 玩家查到的事（劇本自己取的鍵，例：toner:c8763），打電話時能報什麼看這個
+      this.call = null;              // 公務手機正在打的電話（劇本 calls），掛斷後留著讓畫面看最後幾句
       this.plugged = new Set();      // 插著充電線的裝置
       this.inUse = new Set();        // 拿起來實機測試中的裝置
       this.drainCarry = {};          // 還不到 1% 的耗電，累積到滿 1 才扣
@@ -113,7 +128,8 @@
       // 自己早上寫的便條也是桌上的一張紙
       if (script.unlabeled && script.unlabeled.note) {
         this.papers.push({ id: 'note', title: '便條', from: '自己', module: null, text: script.unlabeled.note, sentences: [], subtasks: [], origin: 'self' });
-        this.papers.push({ id: 'http_note', title: 'HTTP 對照表', label: 'HTTP', from: '自己', module: null, text: C.HTTP_NOTE, sentences: [], subtasks: [], origin: 'self' });
+        // HTTP 對照表給寫程式的日子；正式上班沒有排開發，不放
+        if (script.kind !== 'sandbox') this.papers.push({ id: 'http_note', title: 'HTTP 對照表', label: 'HTTP', from: '自己', module: null, text: C.HTTP_NOTE, sentences: [], subtasks: [], origin: 'self' });
       }
       if (carried) this.restore(carried);
       this.schedule();
@@ -159,7 +175,7 @@
       // when(engine) 不成立的不來（例如早會沒推掉技術支援窗口才有的卡、母議題上了 POC 之後的進度詢問）
       const due = (x) => (!this.home || x.atHome) && (!x.when || x.when(this));
       for (const spec of s.cards || []) this.clock.at(C.DAY_START_MIN + spec.at, () => { if (due(spec)) this.arrive(spec); });
-      for (const src of s.sources || []) this.clock.at(C.DAY_START_MIN + src.at, () => { if (due(src)) this.arriveSource(src); });
+      for (const src of s.sources || []) this.clock.at(C.DAY_START_MIN + src.at, () => { if (due(src) && !this.askedInPerson.has(src.id)) this.arriveSource(src); });
       for (const m of s.meetings || []) {
         this.clock.at(C.DAY_START_MIN + m.at, () => this.startMeeting(m));
         for (const line of m.lines || []) this.clock.at(C.DAY_START_MIN + m.at + line.at, () => (line.closing ? this.closeMeeting(m, line) : this.meetingLine(m, line)));
@@ -1172,13 +1188,15 @@
         const lost = Math.floor(this.drainCarry[name] + 1e-9);
         if (!lost) continue;
         this.drainCarry[name] -= lost; this.devices[name] = Math.max(0, this.devices[name] - lost);
+        // 公務手機講到沒電：電話直接斷
+        if (name === 'work' && this.devices.work <= 0 && this.call && this.call.stage !== 'ended') this.endCall('dead', '……手機沒電了。');
         this.emit('device:drained', name);
       }
       this.clock.at(this.clock.minute + 1, () => this.drain());
     }
     // 手動測試拿起哪台裝置（一次只拿一台）；放下、換去電腦看就沒在用
-    useDevice(name) { this.inUse.clear(); if (name in this.devices) this.inUse.add(name); }
-    putDownDevices() { this.inUse.clear(); }
+    useDevice(name) { this.inUse.delete('phone'); this.inUse.delete('tablet'); if (name in this.devices) this.inUse.add(name); }
+    putDownDevices() { this.inUse.delete('phone'); this.inUse.delete('tablet'); }   // 測試用的開發機放下；講電話中的公務手機不算
 
     // ── 會議 ──
     // 句子照時間一句一句發出去（畫面做成彈幕飄過）；標 key 的那句飄過時可以舉手。
@@ -1283,18 +1301,252 @@
       this.emit('chore:changed', chore);
       return chore;
     }
+    // ── 工作台：狀態存在雜事上（chore.bench），規則是劇本給的 chore.rules（例：BenchRam），畫面只送動作進來 ──
+    benchState(choreId) {
+      const chore = this.chores[choreId]; if (!chore || !chore.rules) return null;
+      if (!chore.bench) chore.bench = chore.rules.init(typeof chore.box === 'function' ? chore.box(this.random) : (chore.box || []));
+      return chore.bench;
+    }
+    // 規則回 out.done 就結案、out.flags 併進雜事的旗標（結算卡、同事評語要用的事實由各張卡的規則自己決定）
+    benchAct(choreId, action) {
+      const chore = this.chores[choreId]; const before = this.benchState(choreId); if (!before) return null;
+      const out = chore.rules.apply(before, action);
+      chore.bench = out.state;
+      if (out.flags) Object.assign(chore.flags, out.flags);
+      if (out.done) this.choreSet(choreId, { stage: 'done' }, out.say);
+      else if (chore.stage === 'new' && JSON.stringify(out.state) !== JSON.stringify(before)) this.choreSet(choreId, { stage: 'doing' });
+      return out;
+    }
+    closeBench(choreId) { this.emit('bench:closed', { chore: choreId }); }
+    // 結算卡的「機殼：轉了 N 圈」只算宣告 countsTurns 的工作台
+    benchTurned(choreId) { const chore = this.chores[choreId]; if (chore && chore.rules && chore.rules.countsTurns) this.stats.turns++; }
+    // 自己座位的舊料箱：有 box 的雜事，列料箱裡和手上的
+    partsBox() {
+      const chore = Object.values(this.chores).find(c => c.box && c.rules); if (!chore) return null;
+      return { chore, sticks: this.benchState(chore.id).sticks.filter(s => s.where === 'box' || s.where === 'hand') };
+    }
+    takeStick(choreId, stickId) { this.updateBench(choreId, (rules, state) => rules.take(state, stickId)); }
+    takeAllSticks(choreId) { this.updateBench(choreId, (rules, state) => rules.takeAll(state)); }
+    // 走一趟的分鐘：手上搬著重的（規則的 carrying 說 heavy，例：整箱舊料）比較久
+    walkMinutes() {
+      const heavy = Object.values(this.chores).some(c => c.bench && c.rules.carrying && c.rules.carrying(c.bench).heavy);
+      return C.WALK_MIN + (heavy ? C.BOX_WALK_EXTRA_MIN : 0);
+    }
+    stowStick(choreId) { this.updateBench(choreId, (rules, state) => rules.stow(state)); }
+    updateBench(choreId, change) {
+      if (this.place !== 'desk' || !this.benchState(choreId)) return;
+      const chore = this.chores[choreId];
+      chore.bench = change(chore.rules, chore.bench);
+      this.emit('chore:changed', chore);
+    }
+    // 同事在座位旁邊講的話（人在那邊才聽得到）；不在旁邊時講的話走 LIME
+    seatSay(seatId, text) {
+      const seat = (this.script.seats || {})[seatId]; if (!seat) return;
+      for (const chore of Object.values(this.chores)) if (chore.seat === seatId) chore.log.push({ at: this.clock.minute, text });
+      this.emit('seat:say', { seat: seatId, who: seat.who, text });
+    }
+    coworkerSays(chore, text) {
+      this.addDoc({ id: `${chore.id}:say:${this.clock.minute}`, title: chore.from, from: chore.from, module: null, origin: 'line', kind: 'chat',
+        text, sentences: [], subtasks: [] });
+    }
+    // 電腦拆到一半人走開：同事每隔一陣子催，等太久自己動手。時鐘排程不能取消，所以每次離開記一個 awaySince，排程觸發時先確認還是同一次離開
+    leaveChore(chore) {
+      const since = this.clock.minute; chore.flags.awaySince = since;
+      const still = () => this.place !== chore.seat && chore.flags.awaySince === since && chore.rules.blocked(chore.bench);
+      const nag = (t) => this.clock.at(t, () => { if (!still()) return; this.coworkerSays(chore, '好了沒？'); nag(t + C.RAM_NAG_MIN); });
+      nag(since + C.RAM_NAG_MIN);
+      this.clock.at(since + C.RAM_DIY_MIN, () => {
+        if (!still()) return;
+        const out = chore.rules.apply(chore.bench, { type: 'diy' });
+        if (!out.events.includes('diy')) return;
+        chore.bench = out.state; chore.flags.diyUnseen = true;
+        this.coworkerSays(chore, '我幫你拆好了！');
+        this.emit('chore:changed', chore);
+      });
+    }
     // 走到同事座位要時間，去程、回程各算一趟
     walk(seatId) {
       if (this.place !== 'desk' || !(this.script.seats || {})[seatId]) return false;
-      this.clock.spend(C.WALK_MIN); this.stats.trips++;
+      this.clock.spend(this.walkMinutes()); this.stats.trips++;
       this.place = seatId; this.emit('place:changed', this.place);
+      for (const chore of Object.values(this.chores)) {
+        if (chore.seat === seatId && chore.flags.diyUnseen) { chore.flags.diyUnseen = false; this.seatSay(seatId, '我幫你拆好了！'); }
+      }
+      this.askEarly(seatId);
       return true;
+    }
+    // ── 主動傳訊（劇本 talks）：對誰、回覆走哪個管道、幾輪。每輪的選項選錯劃掉、選對進下一輪；對方回之前不能再傳 ──
+    talkState(id) {
+      if (!this.talkStates) this.talkStates = {};
+      if (!this.talkStates[id]) this.talkStates[id] = { round: 0, struck: [], waiting: false, ended: null };
+      return this.talkStates[id];
+    }
+    talkOptions(id) {
+      const talk = (this.script.talks || {})[id];
+      if (!talk || (talk.when && !talk.when(this))) return [];
+      const state = this.talkState(id);
+      const round = !state.waiting && !state.ended && talk.rounds[state.round];
+      return round ? round.options.map((o, i) => ({ ...o, i })).filter(o => !state.struck.includes(o.i)) : [];
+    }
+    // 公司通訊錄：現在找得到話題的人，一個人列一次（ids 是他現在的話題，例：阿賢同時管記憶體和印表機的財產資料）
+    contacts() {
+      const byWho = new Map();
+      for (const [id, t] of Object.entries(this.script.talks || {})) {
+        if (t.when && !t.when(this)) continue;
+        if (!byWho.has(t.who)) byWho.set(t.who, { who: t.who, ids: [] });
+        byWho.get(t.who).ids.push(id);
+      }
+      return [...byWho.values()];
+    }
+    // 對一個人現在能傳的句子：各話題這一輪的選項合起來，標上是哪個話題（talkId）
+    contactOptions(who) {
+      const contact = this.contacts().find(c => c.who === who); if (!contact) return [];
+      return contact.ids.flatMap(talkId => this.talkOptions(talkId).map(o => ({ ...o, talkId })));
+    }
+    // 正在等這個人回哪種管道（'line'／'mail'），沒有在等就是 null
+    contactWaiting(who) {
+      const contact = this.contacts().find(c => c.who === who); if (!contact) return null;
+      const id = contact.ids.find(talkId => this.talkState(talkId).waiting);
+      return id ? (this.script.talks[id].replyBy || 'line') : null;
+    }
+    talk(id, i) {
+      const option = this.talkOptions(id).find(o => o.i === i); if (!option) return null;
+      const talk = this.script.talks[id]; const state = this.talkState(id);
+      const n = this.talkCount = (this.talkCount || 0) + 1;
+      state.waiting = true;
+      this.addDoc({ id: `talk:${id}:${n}`, title: talk.who, from: talk.who, module: null, origin: 'line', kind: 'sent', text: option.say, sentences: [], subtasks: [] });
+      const [lo, hi] = talk.delay || [2, 2];
+      this.clock.at(this.clock.minute + lo + Math.floor(this.random() * (hi - lo + 1)), () => {
+        const back = option.back;
+        if (talk.replyBy === 'mail') {
+          this.addDoc({ id: `talk:${id}:${n}:re`, title: back.title, from: talk.who, module: null, origin: 'mail', kind: 'chat', text: back.text, sentences: [], subtasks: [] });
+          // 用信回的人在 LIME 也說一聲，對話才不會停在玩家傳的那句
+          if (talk.notice) this.addDoc({ id: `talk:${id}:${n}:notice`, title: talk.who, from: talk.who, module: null, origin: 'line', kind: 'chat', text: talk.notice, sentences: [], subtasks: [] });
+        } else this.addDoc({ id: `talk:${id}:${n}:re`, title: talk.who, from: talk.who, module: null, origin: 'line', kind: back.photo ? 'photo' : 'chat',
+          photo: back.photo || null, text: back.photo ? `傳了一張照片` : back, sentences: [], subtasks: [] });
+        state.waiting = false;
+        for (const key of [].concat(option.know || [])) this.know(key);   // 對方回的話裡查到的事（例：阿賢的信寫了型號）
+        if (option.end) state.ended = option.end;
+        else if (option.next) { state.round += 1; state.struck = []; }
+        else state.struck.push(option.i);
+        this.emit('talk:changed', { id, state });
+      });
+      this.emit('talk:changed', { id, state });
+      return option;
+    }
+    know(key) { this.knows.add(key); }
+
+    // ── 公務手機打電話（劇本 calls）：撥出 → 語音選單 → 排隊等候（擴音，可以先做別的事）→ 接通響一聲、時間內要接 → 回答客服 ──
+    // 等候、接通的計時用 clock.at，排程不能取消，所以觸發時先確認還是同一通、還在那一步
+    callContacts() {
+      return Object.entries(this.script.calls || {}).filter(([, c]) => !c.when || c.when(this)).map(([id, c]) => ({ id, who: c.who }));
+    }
+    // 公務手機（devices.work）沒電就打不了；通話中算拿在手上用，掉電比較快
+    workPhoneDead() { return 'work' in this.devices && this.devices.work <= 0; }
+    dial(id) {
+      const spec = (this.script.calls || {})[id];
+      if (!spec || (this.call && this.call.stage !== 'ended') || this.workPhoneDead()) return false;
+      this.call = { id, stage: 'menu', lines: [spec.menu.prompt], until: null, reason: null };
+      if ('work' in this.devices) this.inUse.add('work');
+      this.emit('call:changed', this.call);
+      return this.call;
+    }
+    // 語音選單按鍵（0～9、*、#）：按過的鍵記在 call.keys 給畫面顯示；選單沒有的鍵念 menu.wrong
+    press(key) {
+      const call = this.call; if (!call || call.stage !== 'menu') return;
+      const spec = this.script.calls[call.id]; key = String(key);
+      call.keys = (call.keys || '') + key;
+      if (key === String(spec.menu.right)) this.queueCall(call, spec);
+      else {
+        const branch = (spec.menu.press || {})[key];
+        if (branch) {
+          call.lines.push(branch.say);
+          if (branch.hangup) { this.endCall('menu'); return; }
+        } else if (spec.menu.wrong) call.lines.push(spec.menu.wrong);
+      }
+      this.emit('call:changed', call);
+    }
+    queueCall(call, spec) {
+      const [lo, hi] = spec.hold;
+      call.stage = 'hold'; call.until = this.clock.minute + lo + Math.floor(this.random() * (hi - lo + 1));
+      this.clock.at(call.until, () => {
+        if (this.call !== call || call.stage !== 'hold') return;
+        call.stage = 'ringing'; call.until = this.clock.minute + spec.answerWithin;
+        this.emit('call:connected', call); this.emit('call:changed', call);
+        this.clock.at(call.until, () => { if (this.call === call && call.stage === 'ringing') this.endCall('timeout', '嘟——嘟——（對方掛斷了）'); });
+      });
+    }
+    pickUp() {
+      const call = this.call; if (!call || call.stage !== 'ringing') return;
+      call.stage = 'asking'; call.lines.push(this.script.calls[call.id].greet);
+      this.emit('call:changed', call);
+    }
+    // 客服問的時候能回的話：只列玩家查得到的（答案自己的 when），i 是在劇本 answers 裡的位置
+    callAnswers() {
+      const call = this.call; if (!call || call.stage !== 'asking') return [];
+      return this.script.calls[call.id].answers.map((a, i) => ({ ...a, i })).filter(a => !a.when || a.when(this));
+    }
+    answer(i) {
+      const a = this.callAnswers().find(x => x.i === i); if (!a) return;
+      const spec = this.script.calls[this.call.id];
+      this.call.lines.push(a.say, a.back);
+      if (a.order) this.placeOrder(spec, a);
+      this.endCall(a.order ? 'ordered' : 'hangup');
+    }
+    hangUp() { if (this.call && this.call.stage !== 'ended') this.endCall('hangup'); }
+    endCall(reason, line) {
+      const call = this.call; call.stage = 'ended'; call.reason = reason;
+      this.inUse.delete('work');
+      if (line) call.lines.push(line);
+      this.emit('call:changed', call);
+    }
+    // 下單：可以重複訂，每一單各自過 C.TONER_DELIVERY_MIN 分鐘送到（下班後才到的就不送了）；送來的放上那張卡的工作台
+    placeOrder(spec, a) {
+      const chore = this.chores[spec.chore];
+      chore.flags.bought = (chore.flags.bought || 0) + a.order.length;
+      if (a.allIn) chore.flags.allIn = true;
+      if (chore.stage === 'new') this.choreSet(chore.id, { stage: 'doing' });
+      this.clock.at(this.clock.minute + C.TONER_DELIVERY_MIN, () => {
+        if (this.home) return;
+        chore.bench = chore.rules.deliver(this.benchState(chore.id), a.order);
+        chore.flags.delivered = (chore.flags.delivered || 0) + a.order.length;
+        this.choreLine(chore, spec.delivered);
+        // 送來的總數到了 bulk.count：收貨的人問一句（只問一次）
+        if (spec.bulk && !chore.flags.bulkAsked && chore.flags.delivered >= spec.bulk.count) { chore.flags.bulkAsked = true; this.choreLine(chore, spec.bulk); }
+        this.emit('chore:changed', chore);
+      });
+    }
+    choreLine(chore, { from, text }) {
+      const n = this.choreLineCount = (this.choreLineCount || 0) + 1;
+      this.addDoc({ id: `${chore.id}:line:${n}`, title: from, from, module: null, origin: 'line', kind: 'chat', text, sentences: [], subtasks: [] });
+    }
+    // 對方還沒開口就走到他座位：他當面講（劇本 src.early），請求變成口頭的文件（跟老闆講的話一樣），排好的那則就不來了
+    askEarly(seatId) {
+      for (const src of this.script.sources || []) {
+        const early = src.early;
+        if (!early || early.seat !== seatId || this.askedInPerson.has(src.id)) continue;
+        if (this.clock.minute >= C.DAY_START_MIN + src.at || this.docs.some(d => d.id === src.id)) continue;
+        this.askedInPerson.add(src.id);
+        this.seatSay(seatId, early.text);
+        this.addDoc(makeDoc({ ...src, ...early, kind: 'boss' }, 'boss'));
+      }
     }
     goBack() {
       if (this.place === 'desk') return false;
-      this.clock.spend(C.WALK_MIN); this.stats.trips++;
+      const from = this.place;
+      this.clock.spend(this.walkMinutes()); this.stats.trips++;
       this.place = 'desk'; this.emit('place:changed', this.place);
+      for (const chore of Object.values(this.chores)) {
+        if (chore.seat === from && chore.bench && chore.rules.blocked(chore.bench)) this.leaveChore(chore);
+        if (chore.stage === 'done' && chore.doneMessage && !chore.flags.doneSent) this.sendDoneMessage(chore);
+      }
       return true;
+    }
+    // 雜事做完、人回到自己座位：委託的人一分鐘後傳 LIME（劇本 doneMessage：text 和 reply 題），只傳一次
+    sendDoneMessage(chore) {
+      chore.flags.doneSent = true;
+      const { text, reply } = chore.doneMessage;
+      this.clock.at(this.clock.minute + 1, () => this.addDoc({ id: `${chore.id}:done`, title: chore.from, from: chore.from, module: null, origin: 'line', kind: 'chat', text, reply, sentences: [], subtasks: [] }));
     }
     // 雜事卡沒有 QC，什麼時候算結案玩家自己決定
     closeCard(cardId) {

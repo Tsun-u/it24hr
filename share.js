@@ -19,12 +19,18 @@
   const W = 1080, H = 1920, PAD = 64;
   const INK = '#1f2328', PAPER = '#f6f1e7', MUTED = '#6b7280', RED = '#b3261e', AMBER = '#ffd166';
   const BACKDROP = { legacy: '#d9d3c3', hybrid: '#cdd4dc', speedrun: '#2b2f3a' };
+  const HIGHLIGHT = 'rgba(255, 209, 102, .55)', PENCIL = '#8a8172';
+  const GLUE = new Set('，。、？！：；）」』》…,.?!:;)');   // 換行時不放在行首的標點
+  const seedOf = (s) => { let h = 7; for (const ch of String(s)) h = (h * 31 + ch.codePointAt(0)) % 2147483647; return h || 1; };
 
+  // 紙上的東西（標題紙條、紙卡、印章）用 rough.js 手繪，seed 從玩家名字算；成品畫面是螢幕上的系統，照原樣畫
   function card(view) {
     if (view.summary) return summaryCard(view);
     const { report, shot, badEnd, mode } = view;
     const cv = document.createElement('canvas'); cv.width = W; cv.height = H;
-    const g = cv.getContext('2d');
+    const g = cv.getContext('2d'), rc = root.rough.canvas(cv);
+    let seed = seedOf(report.player.name);
+    const pen = (o = {}) => ({ seed: seed++, roughness: 1.3, bowing: 1.2, strokeWidth: 3, stroke: INK, ...o });
     const css = getComputedStyle(document.documentElement);
     const SANS = css.getPropertyValue('--font').trim() || 'sans-serif', MONO = css.getPropertyValue('--mono').trim() || 'monospace';
     const font = (size, weight = 400, family = SANS) => { g.font = `${weight} ${size}px ${family}`; };
@@ -33,7 +39,7 @@
       const lines = []; let line = '';
       for (const ch of String(s)) {
         if (ch === '\n') { lines.push(line); line = ''; continue; }
-        if (g.measureText(line + ch).width > maxW && line) { lines.push(line); line = ch; } else line += ch;
+        if (g.measureText(line + ch).width > maxW && line && !GLUE.has(ch)) { lines.push(line); line = ch; } else line += ch;
       }
       if (line) lines.push(line);
       if (lines.length > maxLines) { lines.length = maxLines; lines[maxLines - 1] = lines[maxLines - 1].slice(0, -1) + '…'; }
@@ -42,19 +48,21 @@
     const rrect = (x, y, w, h, r) => { g.beginPath(); g.roundRect(x, y, w, h, r); };
 
     g.fillStyle = BACKDROP[mode] || BACKDROP.legacy; g.fillRect(0, 0, W, H);
-    // 頂端：遊戲名＋哪一天
-    g.fillStyle = '#1a1d23'; g.fillRect(0, 0, W, 120);
-    g.textBaseline = 'middle'; font(44, 700, MONO); g.fillStyle = AMBER; g.fillText('IT24hr', PAD, 62);
-    const wName = g.measureText('IT24hr').width; font(34, 500); g.fillStyle = '#e6e8ee';
-    g.fillText(`${dayOf(view)}・${mode || 'legacy'}`, PAD + wName + 28, 64);
-    let y = 120;
-    if (badEnd) {   // BAD END：上面一條暗紅底，原因寫在裡面
-      g.fillStyle = 'rgba(26, 10, 10, .92)'; g.fillRect(0, y, W, 190);
-      g.textAlign = 'center'; font(64, 800, MONO); g.fillStyle = '#ffd9d9'; g.fillText('B A D   E N D', W / 2, y + 62);
-      font(32, 500); wrap(badEnd, W - PAD * 2, 2).forEach((l, i) => g.fillText(l, W / 2, y + 122 + i * 40));
-      g.textAlign = 'left'; y += 190;
+    // 頂端：遊戲名＋哪一天，寫在一張微歪的紙條上
+    g.save(); g.translate(PAD, 34); g.rotate(-1.2 * Math.PI / 180);
+    rc.rectangle(0, 0, 560, 92, pen({ fill: '#1a1d23', fillStyle: 'solid', stroke: '#1a1d23', roughness: 1.1 }));
+    g.textBaseline = 'middle'; font(44, 700, MONO); g.fillStyle = AMBER; g.fillText('IT24hr', 30, 48);
+    const wName = g.measureText('IT24hr').width; font(32, 500); g.fillStyle = '#e6e8ee';
+    g.fillText(`${dayOf(view)}・${mode || 'legacy'}`, 30 + wName + 24, 50); g.restore();
+    g.textBaseline = 'middle';
+    let y = 150;
+    if (badEnd) {   // BAD END：一塊暗紅底，原因寫在裡面
+      rc.rectangle(PAD - 10, y, W - PAD * 2 + 20, 180, pen({ fill: 'rgba(26, 10, 10, .92)', fillStyle: 'solid', stroke: '#3a1414' }));
+      g.textAlign = 'center'; g.textBaseline = 'middle'; font(64, 800, MONO); g.fillStyle = '#ffd9d9'; g.fillText('B A D   E N D', W / 2, y + 58);
+      font(32, 500); wrap(badEnd, W - PAD * 2 - 40, 2).forEach((l, i) => g.fillText(l, W / 2, y + 118 + i * 40));
+      g.textAlign = 'left'; y += 200;
     }
-    y += 40;
+    y += 20;
     // 成品畫面：簡化成一個瀏覽器視窗，裡面照成品的欄位和資料畫表格；沒寫程式就是 404
     if (shot) {
       const m = shot.model, h = badEnd ? 380 : 460, x = PAD, w = W - PAD * 2;
@@ -88,32 +96,42 @@
     }
     // 紙卡：頭像名字、今天你是（印章）、總評、習慣與成就、一句同事評語
     const cx = PAD, cw = W - PAD * 2, cTop = y, cBottom = H - 130;
-    g.save(); g.shadowColor = 'rgba(0,0,0,.28)'; g.shadowBlur = 36; g.shadowOffsetY = 12;
-    rrect(cx, cTop, cw, cBottom - cTop, 22); g.fillStyle = PAPER; g.fill(); g.restore();
+    g.save(); g.shadowColor = 'rgba(0,0,0,.22)'; g.shadowBlur = 30; g.shadowOffsetY = 10;
+    g.fillStyle = PAPER; g.fillRect(cx + 4, cTop + 4, cw - 8, cBottom - cTop - 8); g.restore();
+    rc.rectangle(cx, cTop, cw, cBottom - cTop, pen({ stroke: PENCIL, strokeWidth: 2.5, roughness: 1.5 }));
     const ix = cx + 48, iw = cw - 96; y = cTop + 48;
     const face = root.Avatar.draw(document.createElement('canvas'), { name: report.player.name, gender: report.player.gender, salt: report.player.avatarSalt || 0 }, 7);
     g.imageSmoothingEnabled = false; g.drawImage(face, ix, y, face.width, face.height); g.imageSmoothingEnabled = true;
+    rc.rectangle(ix - 6, y - 6, face.width + 12, face.height + 12, pen({ stroke: PENCIL, strokeWidth: 2 }));
     g.textBaseline = 'alphabetic'; font(54, 800); g.fillStyle = INK; g.fillText(report.player.name, ix + face.width + 32, y + 80);
     font(34); g.fillStyle = MUTED; g.fillText(report.player.title || '', ix + face.width + 32, y + 134);
     y += face.height + 40;
     font(30, 500); g.fillStyle = MUTED; g.fillText('今天你是', ix, y);
-    // 印章：雙框紅字，歪 4 度
+    // 印章：手繪雙框紅字，歪 4 度
     font(88, 800, MONO); const sw = g.measureText(report.kind).width + 72;
     g.save(); g.translate(ix + 6, y + 26); g.rotate(-4 * Math.PI / 180);
-    g.strokeStyle = RED; g.lineWidth = 6; rrect(0, 0, sw, 128, 14); g.stroke(); g.lineWidth = 2; rrect(11, 11, sw - 22, 106, 9); g.stroke();
+    rc.rectangle(0, 0, sw, 128, pen({ stroke: RED, strokeWidth: 6, roughness: 1.8 }));
+    rc.rectangle(11, 11, sw - 22, 106, pen({ stroke: RED, strokeWidth: 2, roughness: 1.4 }));
     g.fillStyle = RED; g.textBaseline = 'middle'; g.fillText(report.kind, 36, 68); g.restore();
     g.textBaseline = 'alphabetic'; y += 214;
     font(44, 800); g.fillStyle = INK;
     for (const l of wrap(report.line, iw, 3)) { g.fillText(l, ix, y); y += 60; }
     y += 24;
     const room = (need) => y + need < cBottom - 48;
+    // 區塊標題：先塗一筆螢光筆，字寫在上面
+    const heading = (s) => {
+      font(30, 600); const w = g.measureText(s).width;
+      rc.line(ix - 6, y - 10, ix + w + 8, y - 12, pen({ stroke: HIGHLIGHT, strokeWidth: 28, roughness: 2 }));
+      g.fillStyle = INK; g.fillText(s, ix, y); y += 56;
+    };
     const traits = report.traits || [];
     if (traits.length && room(120)) {
-      font(30, 600); g.fillStyle = MUTED; g.fillText('習慣與成就', ix, y); y += 56;
+      heading('習慣與成就');
       for (const t of traits) {
         if (!room(56)) break;
-        font(36, 800); g.fillStyle = INK; g.fillText(t.title, ix, y);
-        font(36); g.fillText(wrap(t.text, iw - 210, 1)[0], ix + 210, y); y += 56;
+        rc.circle(ix + 8, y - 12, 14, pen({ fill: INK, fillStyle: 'solid', roughness: .8, strokeWidth: 1 }));
+        font(36, 800); g.fillStyle = INK; g.fillText(t.title, ix + 28, y);
+        font(36); g.fillText(wrap(t.text, iw - 238, 1)[0], ix + 238, y); y += 56;
       }
       y += 30;
     }
@@ -121,13 +139,15 @@
     const quotes = []; let need = 56;
     font(36, 700);
     for (const peer of (report.peers || []).slice(0, 3)) {
-      const lines = wrap(peer.text, iw, 2), h = lines.length * 50 + 52;
+      const lines = wrap(peer.text, iw - 30, 2), h = lines.length * 50 + 52;
       if (!room(need + h)) break;
       quotes.push({ peer, lines }); need += h;
     }
-    if (quotes.length) { font(30, 600); g.fillStyle = MUTED; g.fillText('同事怎麼說', ix, y); y += 56; }
+    if (quotes.length) heading('同事怎麼說');
     for (const { peer, lines } of quotes) {
-      font(36, 700); g.fillStyle = INK; for (const l of lines) { g.fillText(l, ix, y); y += 50; }
+      const top = y - 38;
+      font(36, 700); g.fillStyle = INK; for (const l of lines) { g.fillText(l, ix + 30, y); y += 50; }
+      rc.line(ix + 8, top, ix + 6, y - 40, pen({ stroke: '#b9b0a0', strokeWidth: 4, roughness: 1.2 }));   // 引言前的手畫直線
       font(28); g.fillStyle = MUTED; g.textAlign = 'right'; g.fillText(`—— ${peer.who}`, ix + iw, y); g.textAlign = 'left'; y += 52;
     }
     // 底下：網址和 hashtag
@@ -157,7 +177,7 @@
     const font = (size, weight = 400, family = SANS) => { g.font = `${weight} ${size}px ${family}`; };
     const wrap = (s, maxW, maxLines) => {
       const lines = []; let line = '';
-      for (const ch of String(s)) { if (g.measureText(line + ch).width > maxW && line) { lines.push(line); line = ch; } else line += ch; }
+      for (const ch of String(s)) { if (g.measureText(line + ch).width > maxW && line && !GLUE.has(ch)) { lines.push(line); line = ch; } else line += ch; }
       if (line) lines.push(line);
       if (lines.length > maxLines) { lines.length = maxLines; lines[maxLines - 1] = lines[maxLines - 1].slice(0, -1) + '…'; }
       return lines;
@@ -269,6 +289,7 @@
     close.addEventListener('click', done); box.addEventListener('click', (e) => { if (e.target === box) done(); });
     const row = el('div', 'share-actions'); row.append(save, close);
     inner.append(img, tip, row); box.append(inner); document.body.append(box); close.focus();
+    root.Ink.paperize(row);
   }
 
   const api = { text, url, card, image, buttons, dayQuotes };

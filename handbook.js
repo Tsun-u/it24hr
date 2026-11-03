@@ -2,7 +2,7 @@
 (function (root) {
   const h = (tag, cls, text) => { const el = document.createElement(tag); if (cls) el.className = cls; if (text !== undefined) el.textContent = text; return el; };
   // 不標的地方：能點的東西（按鈕、連結、輸入框、選項的 label——點字要能勾選）、程式碼、視窗標題列、小卡和手冊自己
-  const SKIP = 'button, a, input, textarea, select, label, code, .fn-code, .fn-head, .terminal-text, .win-bar, .term-pop, [data-no-terms]';
+  const SKIP = 'button, a, input, textarea, select, label, code, .fn-code, .fn-head, .terminal-text, .win-bar, .term-pop, [data-no-terms], svg';
   // 「同一段只標第一次」的段落
   const BLOCK = 'p, pre, li, dd, dt, legend, h2, h3, h4, td, figcaption';
 
@@ -127,6 +127,7 @@
       panel.append(head, bookNode()); overlay.append(panel);
       overlay.addEventListener('click', (e) => { if (e.target === overlay) closeOverlay(); });
       document.body.append(overlay);
+      Ink.paperize(panel);   // 只有疊在畫面上的這份；電腦視窗裡的手冊維持軟體的樣子
     }
     focusIn(overlay, id);
   }
