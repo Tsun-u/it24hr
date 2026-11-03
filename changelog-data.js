@@ -2,6 +2,11 @@
 (function (root) {
   const CHANGELOG = [
   {
+    "hash": "fabf009",
+    "date": "2026-11-04",
+    "subject": "結算分享圖：成就名稱太長不再壓到說明"
+  },
+  {
     "hash": "3f14da4",
     "date": "2026-11-04",
     "subject": "正式上班開放：新人訓練結業後就能玩第一關「IT 的模糊邊界」"
