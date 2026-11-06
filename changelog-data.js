@@ -2,6 +2,11 @@
 (function (root) {
   const CHANGELOG = [
   {
+    "hash": "0f35fde",
+    "date": "2026-11-06",
+    "subject": "正式上班第二關「最美的風景」上線：替源裕水產做一套自己的 ERP"
+  },
+  {
     "hash": "fabf009",
     "date": "2026-11-04",
     "subject": "結算分享圖：成就名稱太長不再壓到說明"
