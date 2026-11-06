@@ -63,3 +63,9 @@ test('三天總結算：照第一、二、三天排，各一個印章一句總�
   const estimates = [{ card: '#121 盤點', yours: '4 小時', actual: '2 小時', boss: '你在摸魚嗎？' }];
   assert.deepStrictEqual(V.summary({ day1: { mode: 'legacy', report: { kind: 'Stack', line: '一', estimates } } }).days[0].estimates, estimates, '估時也帶著');
 });
+
+test('估時的現實參考可以多一句說明（note）', () => {
+  assert.strictEqual(V.realLine({ manual: '6 個月～1.5 年', ai: '4～8 個月', note: '其中約有 3 個月在釐清產業 knowhow 和需求單位的工作風格' }),
+    '現實中純手工大約 6 個月～1.5 年，有 AI 幫忙大約 4～8 個月；其中約有 3 個月在釐清產業 knowhow 和需求單位的工作風格');
+  assert.doesNotMatch(V.realLine({ manual: '3 天', ai: '1 天' }), /；/);
+});

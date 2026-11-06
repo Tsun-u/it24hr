@@ -24,18 +24,21 @@
     deploy: '系統 502 的時間多長，取決於你要花多少時間把步驟做對。',
     doc_accept: '你寫得越清楚，QC 退你的時候寫得也越清楚。',
     reply: '已讀不回也是一種回覆，只是通常不是對方想要的那種。',
+    route: '別人做到一半的東西，接下來就是你的了。或者，當它不存在。',
   };
   const LABELS = {
     read_req: '整理需求', discuss: '需求討論', estimate: '估時', ui_design: '前端設計',
     code: '開發', test: '寫測試程式', device_test: '跨裝置測試', manual_test: '手動測試', review_front: '檢閱程式碼（前端）', review_back: '檢閱程式碼（後端）',
     debug: 'Debug', deploy: '部署', doc_plan: '開發計畫文件', doc_spec: '開發規格文件',
-    doc_accept: '驗收文件', reply: '回訊息', reject: '退回 SA',
+    doc_accept: '驗收文件', reply: '回訊息', reject: '退回 SA', route: '接手或重來',
     report: '寫檢討報告', dig: '嘗試找舊資料', restore: '手動補救',
   };
 
   // 卡片介面的核心操作列：有 children 的是子選單
-  // 驗收文件也是文件；開發分測試程式、程式本體；檢閱程式碼分前端、後端（第三天才有）；手動測試獨立一顆
+  // 驗收文件也是文件；開發分測試程式、程式本體；檢閱程式碼分前端、後端（第三天才有）；手動測試獨立一顆；
+  // 接手或重來（別人做過一版的卡，選了才知道接下來要做哪些）排最前面
   const MENU = [
+    { id: 'route' },
     { id: 'read_req' }, { id: 'discuss' }, { id: 'estimate' }, { id: 'ui_design' },
     { id: 'docs', label: '文件', children: [{ id: 'doc_plan', short: '計畫' }, { id: 'doc_spec', short: '規格' }, { id: 'doc_accept', short: '驗收' }] },   // short：手機版的按鈕字，上層已經寫了文件
     { id: 'dev', label: '開發', children: [{ id: 'test', label: '測試程式' }, { id: 'code', label: '程式本體' }] },
@@ -65,6 +68,12 @@
     }
     return [...new Set(out)];
   }
+  // 前面某份文件帶入的選項（given）：那份文件做了、條件沒成立的（例如會議沒問到），AI 也不知道；那份還沒做的不算（沒有文件，照骰）
+  function unbacked(item, picks, done) {
+    const rules = [].concat(item.given || []).filter(r => done(r.work));
+    const known = new Set(givenOptions(item, picks, done));
+    return [...new Set(rules.flatMap(r => r.options))].filter(o => !known.has(o));
+  }
   // item.showIf：{ 選項: 條件 }——條件沒達成的選項看不到、也不算在正解裡（例如需求討論有問到財務那段，驗收才會多出「財務只看得到簽核過的」）
   // item.hideIf：{ 選項: 條件 }——反過來，條件達成就收掉（例如退回 SA 指出 R4 是 AI 加的，怡君刪掉後文件裡那項跟著消失）
   function hiddenOptions(item, picks) {
@@ -90,6 +99,9 @@
   }
   // f.onlyIf：前面某題選了某個選項才有這個 function（例如前端設計勾了報表頁，開發多三個 function）
   const activeFunction = (f, picks) => !f.onlyIf || met(picks, f.onlyIf);
+  // 題目的 onlyIf：前面某題選了某個選項，這題才由玩家決定（例：檢閱挑出這一格，接手別人的版本時才改得到）；
+  // 沒成立就照 item.inherit（原本那版），看得到、不能改，照那版的選擇計分（接手了，那版的錯也算你的），AI 也照填
+  const activeItem = (item, picks) => !item.onlyIf || met(picks, item.onlyIf);
 
   // 多選：漏選照比例扣，多勾了最多拿一半
   // item.alt：{ 選項: 它頂替的正解 }——勾了替代解算答到那一項，不算多勾（例如日期照格式打 vs 自動轉，兩種都對）
@@ -128,6 +140,30 @@
     if (Array.isArray(item.answer)) return pickedRatio(item, answer, hidden);
     if (item.accept) return item.accept.includes(answer) ? 1 : 0;   // 單選但有好幾個答案都算對
     return answer === item.answer ? 1 : 0;
+  }
+
+  // 選了某個寫法，成品上線後會怎樣：前端設計的題目（item.outcome）、開發 function 的欄位（field.outcome）
+  // 都是 { 選項: { kind, say, red?, junk?, kg? } }，kind 是 annoy（會動、員工看到紅字惱怒）／miss（QC 亂打翻得出來的漏做）／
+  // late（QC 驗不出來，上線後月底才出事）／stuck（流程卡住）。這件工作沒做、或這格沒選，照 ifSkipped（沒人想過時最直覺的做法）；
+  // 題目的 onlyIf 沒成立（picks 看前面的工作），照 inherit。sample 是那一格在成品畫面上的樣子（沒有紅字、怪東西可畫時用）
+  function outcomes(question, answers, { done = true, picks = null } = {}) {
+    if (!question) return [];
+    const picked = (spot, a) => { const empty = a == null || (Array.isArray(a) && !a.length); return [].concat(empty ? (spot.ifSkipped ?? []) : a); };
+    const hits = (spot, a, at) => picked(spot, a).filter(opt => spot.outcome[opt]).map(opt => ({ ...at, opt, ...spot.outcome[opt] }));
+    if (question.kind === 'functions') return question.functions.flatMap((f, i) => Object.entries(f.fields || {}).filter(([, field]) => field.outcome)
+      .flatMap(([key, field]) => hits(field, done && answers ? (answers[i] || {})[key] : undefined, { fn: f.name, key, field: null })));
+    const chosen = (item, i) => (!activeItem(item, picks) ? item.inherit : done && answers ? answers[i] : undefined);
+    return (question.items || []).flatMap((item, i) => (item.outcome ? hits(item, chosen(item, i), { item: i, field: item.field || null }) : []));
+  }
+  // 規格預填開發：function 寫了 spec: { item }，規格那題寫了，它唯一的欄位就預填規格選的那個（玩家還是可以改）。
+  // 回傳 base 的複本，只換這幾格
+  function prefill(question, picks, base = []) {
+    const spec = picks && picks.doc_spec;
+    return question.functions.map((f, i) => {
+      const a = { ...(base[i] || {}) };
+      if (f.spec && typeof f.spec === 'object' && spec && spec[f.spec.item] != null) a[Object.keys(f.fields)[0]] = spec[f.spec.item];
+      return a;
+    });
   }
 
   // kind:'functions'：開發小關卡，用 function 當單位。預填（直接拉進 IDE、不用填）要兩關都過：
@@ -211,13 +247,18 @@
     if (manual >= 0) return '不寫測試，做完人工測';
     return '沒測';
   }
-  // 答案：每個 function 一個物件 { 欄位: 選項索引 }；填錯的欄位是 bug，之後 QC 會抓
+  // 答案：每個 function 一個物件 { 欄位: 選項索引 }；填錯的欄位是 bug，之後 QC 會抓。
+  // 選了有 outcome 的寫法不是 bug：不加分，後果照 outcome 走
   function gradeFunctions(question, answers, ctx) {
     const toFill = functionsToFill(question, ctx.covered, ctx.picks);
     let score = 0, max = 0; const bugs = [];
     for (const i of toFill) {
       const f = question.functions[i], a = (answers && answers[i]) || {};
-      for (const [key, field] of Object.entries(f.fields || {})) { max++; if (a[key] === field.answer) score++; else bugs.push({ fn: f.name, field: key }); }
+      for (const [key, field] of Object.entries(f.fields || {})) {
+        max++;
+        if (a[key] === field.answer) score++;
+        else if (!(field.outcome && field.outcome[a[key]])) bugs.push({ fn: f.name, field: key });
+      }
     }
     return { score, max, minutes: question.minutes, wrong: bugs.map(b => b.fn), bugs, toFill, violated: [], choices: {} };
   }
@@ -243,7 +284,9 @@
 
   // ── 交給 AI：AI 把同一張答案卡填好，玩家 review ──
   // AI 錯在哪寫在劇本：item.ai / field.ai = { pick, kind }，pick 是它錯的時候會選的、kind 是錯在哪一類（給寫劇本的人看）。
-  // 錯不錯照種子決定（同一個種子永遠一樣）；judgment 的 function 它一律填自己的主張；需求討論它全圈、每題都選最客氣的那個（ask.polite，預設最後一個）。
+  // 錯不錯照種子決定（同一個種子永遠一樣），每題照模型的正確率骰一次；judgment 的 function 它一律填自己的主張；
+  // 需求討論它全圈，每題照正確率骰，骰錯選最客氣的那個（ask.polite，預設最後一個）。
+  // 前面的文件決定了的照文件寫：規格（f.spec）、測試（drives）、帶入的選項（given；來源文件做了卻沒寫到的它也不寫）、欄位的 follows（文件對它就對，文件錯它跟著錯）。
   // AI 筆記：notes = { 主題: 做法 }（或 { stance, text }），選項標 tags = { 選項: '主題:做法' }。
   // AI 填完先套筆記：單選挑標了那做法的選項、多選只留做法相符的、做法是 skip（「以後我不碰」）就留白擺爛
   function aiRoll(seed) {   // FNV-1a 雜湊＋murmur3 的收尾攪拌 → 0～1（只差最後一個字的種子也要分得開）
@@ -255,7 +298,29 @@
   // done：卡上做過的工作（前面文件帶進來的，AI 寫的文件也帶）；drives：卡上先寫好的測試要它怎麼寫（testDrives），比筆記和主張都優先；
   // locked(field)：欄位還鎖著（等的文件沒來），只能填 lockedTo——AI 也一樣，資料沒來它也只能寫 TODO
   const lockedFields = (f, locked) => Object.fromEntries(Object.entries(f.fields || {}).filter(([, field]) => locked(field)).map(([key, field]) => [key, field.lockedTo]));
-  function aiAnswers(question, { covered = 'all', picks = null, accuracy = 0.5, seed = '', notes = {}, done = [], drives = {}, locked = () => false } = {}) {
+  // field.follows = { work, item, wrong: { 文件的選項: 這格跟著錯成的選項 } }：這格照前面那份文件的那題寫，文件沒選錯就是正解
+  function followDoc(field, picks) {
+    const { work, item, wrong = {} } = field.follows;
+    const doc = [].concat((picks && picks[work] && picks[work][item]) ?? []);
+    const hit = Object.keys(wrong).find(opt => doc.includes(Number(opt)));
+    return hit === undefined ? field.answer : wrong[hit];
+  }
+  // rollOnce：Pedia 一次做整張卡，這份只骰一次；失誤時從可選的題（keys：有錯法、不是前面文件決定的）照種子挑一題錯，其他照正解
+  function onceMiss(keys, seed, accuracy) {
+    if (!keys.length || aiRoll(`${seed}:once`) < accuracy) return null;
+    return keys[Math.floor(aiRoll(`${seed}:which`) * keys.length)];
+  }
+  // focus：這一次交辦的暫時筆記（Pedia one shot 的交付重點選錯時），一串 outcome 的 kind。題目、function 欄位有那種寫法的照它選
+  // （照順序找第一個有的；多選題選那一個），沒有的照原本的答；方向已經定了，不另外照正確率骰。蓋過文件和 CLAIRE.md，蓋不過先寫好的測試
+  function focusPick(spot, focus) {
+    if (!focus || !spot.outcome) return undefined;
+    for (const kind of focus) {
+      const opt = Object.keys(spot.outcome).find(o => spot.outcome[o].kind === kind);
+      if (opt !== undefined) return Array.isArray(spot.answer) ? [Number(opt)] : Number(opt);
+    }
+    return undefined;
+  }
+  function aiAnswers(question, { covered = 'all', picks = null, accuracy = 0.5, seed = '', notes = {}, done = [], drives = {}, locked = () => false, rollOnce = false, focus = null } = {}) {
     if (!question || ['manual', 'device', 'terminal'].includes(question.kind)) return null;   // 要自己動手的
     const errors = [];
     // 資料登打交給 AI：字都打好了，但照片漏放
@@ -268,23 +333,38 @@
       errors.push('miss');
       return { answers: { marks, lgtm: false, hintsUsed: 0 }, errors };
     }
+    let missKey = null;   // rollOnce 時挑中要錯的那題
     const guess = (spec, right, key) => {
-      if (spec && aiRoll(`${seed}:${key}`) >= accuracy) { errors.push(spec.kind || 'logic'); return spec.pick; }
+      const miss = !focus && (rollOnce ? String(key) === missKey : aiRoll(`${seed}:${key}`) >= accuracy);
+      if (spec && miss) { errors.push(spec.kind || 'logic'); return spec.pick; }
       return right;
     };
     if (question.kind === 'functions') {
       const toFill = functionsToFill(question, covered, picks);
       const driven = (f) => drives[f.name] || {};
+      // 這格照什麼寫：測試、規格、前面文件（follows）、它的主張，都沒有才照正確率骰（roll）
+      const sourceOf = (f, key, field) => {
+        if (key in driven(f)) return 'test';
+        if (f.spec && typeof f.spec === 'object' && picks && picks.doc_spec && picks.doc_spec[f.spec.item] != null) return 'spec';
+        if (field.follows) return 'follows';
+        if (f.judgment && field.ai) return 'claim';
+        return 'roll';
+      };
+      if (rollOnce) missKey = onceMiss(question.functions.flatMap((f, i) => (toFill.includes(i) ? Object.entries(f.fields || {})
+        .filter(([key, field]) => field.ai && !locked(field) && sourceOf(f, key, field) === 'roll').map(([key]) => `${i}:${key}`) : [])), seed, accuracy);
       const raw = question.functions.map((f, i) => {
         if (!toFill.includes(i)) return {};
         return Object.fromEntries(Object.entries(f.fields || {}).map(([key, field]) => {
-          if (key in driven(f)) return [key, driven(f)[key]];
-          if (f.judgment && field.ai) return [key, field.ai.pick];   // 它的主張；筆記沒蓋過才算數（下面記 claim）
-          if (field.ai && field.ai.always) { errors.push(field.ai.kind || 'logic'); return [key, field.ai.pick]; }   // 它一定這樣做（例如報表一定做成儀表板）
+          const source = sourceOf(f, key, field);
+          if (source === 'test') return [key, driven(f)[key]];
+          if (source === 'spec') return [key, picks.doc_spec[f.spec.item]];   // 規格寫了，AI 照規格寫
+          if (source === 'follows') return [key, followDoc(field, picks)];
+          if (source === 'claim') return [key, field.ai.pick];   // 它的主張；筆記沒蓋過才算數（下面記 claim）
           return [key, guess(field.ai, field.answer, `${i}:${key}`)];
         }));
       });
-      const answers = applyNotes(question, raw, notes).map((a, i) => (toFill.includes(i) ? { ...a, ...driven(question.functions[i]), ...lockedFields(question.functions[i], locked) } : a));
+      const focused = (f) => Object.fromEntries(Object.entries(f.fields || {}).map(([key, field]) => [key, focusPick(field, focus)]).filter(([, v]) => v !== undefined));
+      const answers = applyNotes(question, raw, notes).map((a, i) => (toFill.includes(i) ? { ...a, ...focused(question.functions[i]), ...driven(question.functions[i]), ...lockedFields(question.functions[i], locked) } : a));
       question.functions.forEach((f, i) => {
         if (f.judgment) for (const [key, field] of Object.entries(f.fields || {})) if (field.ai && answers[i][key] === field.ai.pick) errors.push('claim');
       });
@@ -292,19 +372,33 @@
     }
     if (question.kind === 'discuss') {
       const circled = Object.keys(question.asks).map(Number); const asks = {};
-      for (const i of circled) asks[i] = askList(question, i).map(q => {
-        const polite = q.polite ?? q.options.length - 1;
-        if (polite !== q.answer) errors.push('miss');
-        return polite;
+      for (const i of circled) asks[i] = askList(question, i).map((q, k) => {
+        const pick = aiRoll(`${seed}:${i}:${k}`) >= accuracy ? (q.polite ?? q.options.length - 1) : q.answer;
+        if (pick !== q.answer) errors.push('miss');
+        return pick;
       });
       return { answers: { circled, asks }, errors: [...new Set(errors)] };
     }
-    // 沒有對錯的題（free，例如估時）：AI 照它自己的填（估時一律樂觀），不算錯
+    const isDone = (w) => done.includes(w);
+    // rollOnce 可選的題：有錯法、不是 free，而且沒有來源已經做了的帶入（那題由前面的文件決定）
+    if (rollOnce) missKey = onceMiss(question.items.map((item, i) => (!item.free && activeItem(item, picks) && visibleItem(item, picks).ai
+      && ![].concat(item.given || []).some(r => isDone(r.work)) ? String(i) : null)).filter(k => k !== null), seed, accuracy);
+    // 沒有對錯的題（free，例如估時）：AI 照它自己的填（估時一律樂觀），不算錯；照原本那版的題（onlyIf 沒成立）填 inherit
     const answers = applyNotes(question, question.items.map((item, i) => {
+      if (!activeItem(item, picks)) return item.inherit;
       if (item.free) return item.ai && item.ai.pick;
-      const shown = visibleItem(item, picks); return guess(shown.ai, shown.answer, i);
+      const shown = visibleItem(item, picks);
+      return guess(shown.ai, shown.answer, i);
     }), notes);
-    return { answers: answers.map((a, i) => withGiven(question.items[i], a, givenOptions(question.items[i], picks, (w) => done.includes(w)))), errors };
+    return { answers: answers.map((a, i) => {
+      const item = question.items[i];
+      if (!activeItem(item, picks)) return item.inherit;   // 筆記、交付重點都改不動
+      const filled = withGiven(item, focusPick(item, focus) ?? a, givenOptions(item, picks, isDone));
+      if (!Array.isArray(filled)) return filled;
+      // 前面文件沒寫到的它也不知道，CLAIRE.md 點名要的照寫
+      const drop = unbacked(item, picks, isDone).filter(o => !noteKept(item, notes || {}).includes(o));
+      return filled.filter(v => !drop.includes(v));
+    }), errors };
   }
   // 帶進來的選項 AI 不會漏：多選併進去；排序題照正解的先後插進它排的清單
   function withGiven(item, answer, given) {
@@ -324,21 +418,27 @@
     const at = before.length ? list.indexOf(before[before.length - 1]) + 1 : (spot.answer.includes(opt) ? 0 : list.length);
     return [...list.slice(0, at), opt, ...list.slice(at)];
   }
+  // 筆記管得到的標記：主題有筆記、做法不是 ask（ask 的交件前先問，不照筆記決定）
+  const notedTags = (spot, notes) => allTags(spot).filter(t => notes[t.topic] != null && stanceOf(notes[t.topic]) !== 'ask');
+  const fitsNote = (t, notes) => t.stances.includes(stanceOf(notes[t.topic]));
+  // 多選、排序：筆記點名要的選項——標了的每個主題，筆記的做法都對得上
+  function noteKept(spot, notes) {
+    const tagged = notedTags(spot, notes);
+    return [...new Set(tagged.map(t => t.opt))].filter(opt => tagged.filter(t => t.opt === opt).every(t => fitsNote(t, notes)));
+  }
   // 一題（item 或 function 的一個欄位）套筆記；multi 是多選或排序。做法是 ask 的主題不照筆記決定，交件前先問（firstAsks）
   function noteOne(spot, value, notes) {
-    const tagged = allTags(spot).filter(t => notes[t.topic] != null && stanceOf(notes[t.topic]) !== 'ask');
+    const tagged = notedTags(spot, notes);
     if (!tagged.length) return value;
-    const fits = (t) => t.stances.includes(stanceOf(notes[t.topic]));
     if (!Array.isArray(spot.answer)) {   // 單選：不碰就留白，不然挑標了那做法的
       if (tagged.some(t => stanceOf(notes[t.topic]) === 'skip')) return null;
-      const hit = tagged.find(fits);
+      const hit = tagged.find(t => fitsNote(t, notes));
       return hit ? hit.opt : value;
     }
     // 多選、排序：標了的選項，每個主題的筆記都對得上才留著，對得上又不在清單上就補進去
-    const opts = [...new Set(tagged.map(t => t.opt))];
-    const keep = (opt) => tagged.filter(t => t.opt === opt).every(fits);
-    let list = [].concat(value ?? []).filter(v => !opts.includes(v) || keep(v));
-    for (const opt of opts) if (keep(opt) && !list.includes(opt)) list = insertInOrder(spot, list, opt);
+    const opts = [...new Set(tagged.map(t => t.opt))], kept = noteKept(spot, notes);
+    let list = [].concat(value ?? []).filter(v => !opts.includes(v) || kept.includes(v));
+    for (const opt of kept) if (!list.includes(opt)) list = insertInOrder(spot, list, opt);
     return list;
   }
   // 矯枉過正（筆記做法是 ask）：標了那個主題、寫了 askFirst 的選項，AI 交件前一題一題停下來問人類
@@ -395,8 +495,8 @@
       return ((answers && answers.circled) || []).flatMap(seg => askList(question, seg).map((ask, k) => (
         { key: `d${seg}.${k}`, label: question.segments[seg], shown: optText(ask, ((answers.asks || {})[seg] || [])[k]), fixes: fixesOf(ask) })));
     }
-    // 沒有對錯的題（free）沒得圈：不對就自己在答案卡上改
-    return question.items.flatMap((item, i) => (item.free ? [] : [{ key: `i${i}`, label: item.text, shown: optText(item, answers[i]), fixes: fixesOf(visibleItem(item, picks)) }]));
+    // 沒有對錯的題（free）沒得圈：不對就自己在答案卡上改；照原本那版、鎖住的題也不能圈
+    return question.items.flatMap((item, i) => (item.free || !activeItem(item, picks) ? [] : [{ key: `i${i}`, label: item.text, shown: optText(item, answers[i]), fixes: fixesOf(visibleItem(item, picks)) }]));
   }
   // 講的話寫成筆記：劇本有 AI 口吻（ai.topics[主題][做法]）就用，沒有就用講的那句（自動那句寫成「記住：正解」）
   // 做法寫 null 的主題不是筆記，是要劃掉的舊筆記（fixDrops）；沒有 set 的補充說明不留筆記，那題照正確率重做
@@ -481,7 +581,8 @@
     question.items.forEach((item, i) => {
       if (item.free) { choices[item.key || i] = answers[i]; return; }
       max++;
-      const s = gradeItem(withDeployOrder(question, item), answers[i], hiddenOptions(item, ctx.picks));
+      const given = activeItem(item, ctx.picks) ? answers[i] : item.inherit;   // 照原本那版、不能改的題照 inherit 計分
+      const s = gradeItem(withDeployOrder(question, item), given, hiddenOptions(item, ctx.picks));
       score += s;
       if (s < 1) { wrong.push(i); if (item.heuristic) violated.push(item.heuristic); }
     });
@@ -514,7 +615,7 @@
     return order;
   }
 
-  const api = { grade, replyAnswered, chatText, deployBefore, functionsToFill, testDrives, givenOptions, summarize, testStyle, deviceTestOptions, label, intro, aiAnswers, aiRoll, applyNotes, firstAsks, applyAsk, aiSpots, fixNotes, fixDrops, reviseAnswers, displayOrder, pickedIn, hiddenOptions, visibleItem, activeFunction, LABELS, INTROS, MENU, LOW_BATTERY };
+  const api = { grade, outcomes, prefill, replyAnswered, chatText, deployBefore, functionsToFill, testDrives, givenOptions, summarize, testStyle, deviceTestOptions, label, intro, aiAnswers, aiRoll, applyNotes, firstAsks, applyAsk, aiSpots, fixNotes, fixDrops, reviseAnswers, displayOrder, pickedIn, hiddenOptions, visibleItem, activeFunction, activeItem, LABELS, INTROS, MENU, LOW_BATTERY };
   if (typeof module !== 'undefined') module.exports = api;
   else root.Works = api;
 })(typeof window !== 'undefined' ? window : globalThis);

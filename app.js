@@ -189,7 +189,7 @@
       const r = el('div', 'mode-actions');
       const draw = () => OfficeDraw.open({
         era: m, office,
-        onStart: (id) => start(player, Sandbox.make(id, m.id, { notes: loadClaire() || {} })),
+        onStart: (id) => start(player, Sandbox.make(id, m.id, officeCarry(m.id))),
         onReport: (view) => showReport(view, backToModes),
       });
       if (!graduated) r.append(btn('', '完成新人訓練後開放'));
@@ -220,6 +220,11 @@
   const CLAIRE_KEY = 'it24hr.claire';
   function loadClaire() { try { return JSON.parse(localStorage.getItem(CLAIRE_KEY)); } catch { return null; } }
   function writeClaire(notes) { try { localStorage.setItem(CLAIRE_KEY, JSON.stringify(notes)); } catch { /* 同上 */ } }
+  // 正式上班開工帶的東西：全域 CLAIRE.md；speedrun 還沒在任何一關玩完過的是第一次（劇本給一句 Pedia one shot 的提示）
+  function officeCarry(mode) {
+    const played = Object.values((loadOffice() || {}).levels || {}).some(l => l.speedrun);
+    return { notes: loadClaire() || {}, firstSpeedrun: mode === 'speedrun' && !played };
+  }
   // 那一天開始時帶的東西：存檔每天都留一份（starts），做完的天才能重玩；只有 carry 的舊存檔只有下一天的
   function carryFor(save, day) { return (save.starts && save.starts[day]) || (save.day === day ? save.carry : null); }
   // 照存檔開始那一天：劇本照 carry 產，昨天沒結案的卡（carry.board）放回看板
@@ -243,7 +248,7 @@
         const now = new Date(); const pad = (n) => String(n).padStart(2, '0');
         const today = `${now.getFullYear()}-${pad(now.getMonth() + 1)}-${pad(now.getDate())}`;   // 玩家自己的日期（toISOString 是 UTC，台灣早上八點前會差一天）
         writeOffice(Sandbox.record(loadOffice(), script.level, script.mode, view, today));
-        showReport(view, [{ text: '回選玩法', onClick: () => modes(player) }, { text: '再上一天班', cls: 'primary', onClick: () => start(player, Sandbox.make(script.level, script.mode, { notes: loadClaire() || {} })) }]);
+        showReport(view, [{ text: '回選玩法', onClick: () => modes(player) }, { text: '再上一天班', cls: 'primary', onClick: () => start(player, Sandbox.make(script.level, script.mode, officeCarry(script.mode))) }]);
         return;
       }
       const save = nextSave(engine, view); writeSave(save);

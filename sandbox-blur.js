@@ -228,19 +228,6 @@
       ] },
     },
   };
-  // 每個時代的 Claire：hybrid 挑三姐妹，speedrun 多 Pedia（5 格、98%、一天一次，問一句和交辦共用）。askMin 是問了之後幾分鐘回答；
-  // 檢討報告可以交給她寫（童童：AI 很會寫檢討報告），turnaround、accuracy 是交辦用的，跟第二（hybrid）、三天（speedrun）一樣；額度也一樣
-  const CLAIRE_AI = {
-    hybrid: { model: 'Essay 4.5', quota: 6, permission: 'acceptEdits', models: {
-      Verse: { label: 'Verse 4.5', cost: 1, askMin: 1, turnaround: [5, 10], accuracy: 0.4 },
-      Essay: { label: 'Essay 4.5', cost: 1, askMin: 2, turnaround: [10, 25], accuracy: 0.5 },
-      Novel: { label: 'Novel 4.5', cost: 2, askMin: 4, turnaround: [15, 30], accuracy: 0.65 } } },
-    speedrun: { model: 'Essay 5', quota: 10, permission: 'auto', models: {
-      Verse: { label: 'Verse 5', cost: 1, askMin: 1, turnaround: [3, 6], accuracy: 0.65 },
-      Essay: { label: 'Essay 5', cost: 1, askMin: 2, turnaround: [6, 12], accuracy: 0.75 },
-      Novel: { label: 'Novel 5', cost: 2, askMin: 4, turnaround: [10, 20], accuracy: 0.9 },
-      Pedia: { label: 'Pedia 5', cost: 5, askMin: 3, turnaround: [10, 20], accuracy: 0.98 } } },
-  };
   // 問小潘（同部門的資深同事，三個時代都在，同一批問題，20 分鐘後回、問過就劃掉）。他是人，不會幻覺；問型號會提示能問阿賢（童童定）。
   // hybrid 回得一樣、但會唸你怎麼不問 Claire；speedrun 他懶得回，把他問 Claire Essay 的回答原封不動貼給你（B8964 照貼）
   const PAN = '同事 小潘';
@@ -280,7 +267,7 @@
   }
 
   function make(mode, carry = {}) {
-    const claireAi = CLAIRE_AI[mode];
+    const claireAi = Sandbox.AI[mode];   // 檢討報告也能交給 Claire 寫
     return {
       name: 'IT 的模糊邊界', issueBase: 300,
       // 這一關沒排開發：沒有 SA（開卡只能指派自己）、沒有 QC（卡做完那件工作就結案）、桌上不放 HTTP 對照表
@@ -423,14 +410,8 @@
         // 問小潘：三個時代都能問，回法照時代
         ...panTalks(mode),
       },
-      // 小事件池（童童定：每天抽幾件、可接可推，推掉不扣分、對方那句進結算卡同事評語）：10:20／14:40／16:20 各一件，LIME 來。
-      // trip 是跑一趟的分鐘數，tripText 是黑畫面那句（阿宇補）
-      errands: { pick: 3, slots: [80, 340, 440], pool: [
-        { id: 'water', who: JUNJIE, text: '飲水機沒水了，你們 IT 可以換一下嗎？', trip: 10, tripText: '你扛著一桶水走到茶水間，換好順便把空桶疊回去。', decline: '你們 IT 不是什麼都會？' },
-        { id: 'aircon', who: SHUFEN, text: '冷氣好冷，可以幫忙調高一點嗎？', trip: 5, tripText: '你把冷氣從 22 度調到 26 度，淑芬說終於不用穿外套了。', decline: '冷氣是電器，IT 要負責吧？' },
-        { id: 'font', who: '老闆', text: '手機字太小了，過來幫我弄大一點。', trip: 10, tripText: '你把老闆手機的字調到最大，他說這樣好多了，一個畫面只剩三行。', decline: '手機不是 IT 要處理嗎？' },
-        { id: 'projector', who: MEILING, text: '投影機沒訊號，等一下要開會，可以幫忙看一下嗎？', trip: 15, tripText: '你把投影機後面鬆掉的線插回去，畫面出來了。', decline: 'IT 不幫我們處理投影機我們怎麼開會？' },
-      ] },
+      // 小事件池（每天抽幾件、可接可推，推掉不扣分、對方那句進結算卡同事評語）：10:20／14:40／16:20 各一件，LIME 來
+      errands: { pick: 3, slots: [80, 340, 440], pool: Sandbox.ERRANDS },
       // hybrid、speedrun：終端機可以問 Claire（askable），檢討報告也能交給她寫；筆記是全域的 CLAIRE.md
       ...(claireAi ? { ai: { askable: true, ...claireAi, notes: carry.notes || {} }, claire: CLAIRE } : {}),
       // 打電話（公務手機）：語音選單、等候、接通後回答客服；客服問機型時只列玩家查得到的，可以重複訂，每一單各自送到淑芬那邊
@@ -532,7 +513,7 @@
           actions: [{ id: 'mailbox', label: '看看她的信箱', mailbox: 'outlook' }],
         },
       },
-      home: { commute: 30, pickupExtra: 15, deliveryWait: 40, vpnMin: 5, vpnDrop: 0.15, ringMin: 20, emergencies: [] },
+      home: Sandbox.HOME,
       // 結算卡多的行（劇本「結算卡多的行」）：其他的跟著各張卡進來
       report: (e) => ({
         extra: [`走了 ${e.stats.trips} 趟`, `寫了 ${docsWritten(e)} 份文件`, ...hintExtra(e), ...(e.stats.turns ? [`機殼轉了 ${e.stats.turns} 圈`] : []),
@@ -545,7 +526,7 @@
           ...(junjieNemesis(e.chores.ram.flags) ? [{ title: '君傑的仇人', text: '報價單沒存就關機，記憶體還裝成 12 GB 單通道' }] : []),
           ...(e.chores.ram.flags.hardOff ? [{ title: '硬碟殺手', text: '電腦還開著，你就直接斷了它的電' }] : []),
           ...(e.chores.toner.flags.starburst ? [{ title: '星爆16連擊', text: '碳粉匣搖了 16 下，不多不少' }] : []),
-          ...(e.pediaUsed ? [{ title: '今日王牌模型用途', text: `「${e.pediaUsed}」` }] : []),
+          ...(e.modelUses.Pedia ? [{ title: '今日王牌模型用途', text: e.modelUses.Pedia.map(use => `「${use}」`).join('') }] : []),
         ],
         peers: [...ramPeers(e.chores.ram.flags.shown), ...tonerPeers(e.chores.toner.flags), ...wifiPeers(e.chores.wifi), ...outlookPeers(e.chores.outlook, e), ...e.errandPeers()],
       }),

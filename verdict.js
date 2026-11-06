@@ -26,10 +26,11 @@
     return day >= 0 ? clock : `${day === -1 ? '昨天' : `${-day} 天前`} ${clock}`;
   }
   // 估時的參考：這張卡在現實中大約多久；claire 是把 Claire 自己加的規格也做完的工時
-  const realLine = (real) => `現實中純手工大約 ${real.manual}，有 AI 幫忙大約 ${real.ai}${real.claire ? `，加了 Claire 自主規格大約 ${real.claire}` : ''}`;
-  // 主管看估時：估的比實際多超過 4 小時是摸魚、實際比估的多超過 4 小時是能力不足，其他算按時
+  const realLine = (real) => `現實中純手工大約 ${real.manual}，有 AI 幫忙大約 ${real.ai}${real.claire ? `，加了 Claire 自主規格大約 ${real.claire}` : ''}${real.note ? `；${real.note}` : ''}`;
+  // 主管看估時：一整天都沒估（estimateHours 是 null）有一句；估的比實際多超過 4 小時是摸魚、實際比估的多超過 4 小時是能力不足，其他算按時
   const ESTIMATE_GAP_HOURS = 4;
   function estimateComment(estimateHours, actualMin) {
+    if (estimateHours == null) return '沒估時，要我怎麼排時程？通靈嗎？';
     const gap = estimateHours - actualMin / 60;
     if (gap > ESTIMATE_GAP_HOURS) return '你在摸魚嗎？';
     if (gap < -ESTIMATE_GAP_HOURS) return '多花了這麼多時間是能力不足嗎？';
@@ -68,7 +69,7 @@
   // lines 是整張卡攤平的文字，給測試和純文字輸出用
   // 分數最多一位小數、無條件捨去：差一點的不會被進位成滿分
   const oneDecimal = (n) => Math.floor(n * 10 + 1e-9) / 10;
-  // estimates：有估時的卡 [{ card, yours, actual, boss, real: { manual, ai } }]
+  // estimates：有估時的卡 [{ card, yours, actual, boss, real: { manual, ai }, missed? }]（missed：一整天都沒估）
   // traits：習慣與成就 [{ title, text }]（測試風格、大胃王、公私分明……），便條和平板也排進這裡
   // extra：左欄的其他明細，字串或 { text, group }
   // works：照卡分組 [{ card: '#124 卡名', items: [{ label, score, max, times }] }]，同一張卡重做的工作只列最後一次、註明做了幾次
@@ -93,7 +94,7 @@
       ...verdict.evidence.map(e => `・${e}`),
       ...tally.map(t => t.text),
       ...(habits.length ? ['── 習慣與成就 ──', ...habits.map(t => `${t.title}：${t.text}`)] : []),
-      ...estimates.map(e => `估時 ${e.card}：你估 ${e.yours}，實際 ${e.actual}${e.real ? `（${realLine(e.real)}）` : ''}${e.boss ? `，主管：「${e.boss}」` : ''}`),
+      ...estimates.map(e => `估時 ${e.card}：${e.missed ? '沒估' : `你估 ${e.yours}`}，實際 ${e.actual}${e.real ? `（${realLine(e.real)}）` : ''}${e.boss ? `，主管：「${e.boss}」` : ''}`),
       ...(peers.length ? ['── 同事怎麼說 ──', ...peers.map(p => `${p.who}：${p.text}`)] : []),
     ];
     return { lines, player, kind: v.name, line: v.line, evidence: verdict.evidence, tally, traits: habits, estimates, peers };

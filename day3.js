@@ -5,6 +5,7 @@
 (function (root) {
   const DAY1 = typeof require === 'function' ? require('./day1.js') : root.DAY1;
   const DAY2 = typeof require === 'function' ? require('./day2.js') : root.DAY2;
+  const { ClaireSkills } = typeof require === 'function' ? require('./claire-skills.js') : root;
 
   const SA = 'SA／PM 怡君', PM = '莎禾 PM 佩珊', IT = '莎禾 IT 志豪';
   const POC = '莎禾 POC 群組';
@@ -673,17 +674,9 @@ AI服務額度有上限，請各位同仁依照工作類型選擇合適的AI模�
           Novel: { label: 'Novel 5', turnaround: [10, 20], accuracy: 0.9, cost: 2 },
         },
         topics: AI_TOPICS, notes: (carry && carry.notes) || {},
-        // 可以事先寫進 CLAIRE.md 的規範：部署流程寫了 AI 部署就不再每步問；整理需求的讀法從三派句子選（空的不列）
-        skills: [
-          { id: 'deploy', label: '部署流程', text: '部署：先備份，再上傳、替換，最後煙霧測試；通知等 QC 驗過，由人按。' },
-          // 效果：原則派讀歪減半、情緒化加倍（engine.readReqFactor）；
-          // 過於細節只對點名的區塊鏈有效：poc_approve 整理需求的「區塊鏈存證」標了 readReq:emotional，原則、細節派不挑它，情緒化照單全收
-          { id: 'readReq', label: '整理需求的讀法', options: [
-            { stance: 'principle', say: '需求內提到的規格要考慮合理性，不合理的部份放待確認先不做。準則是 YAGNI 原則。', text: '整理需求：規格要看合不合理，不合理的放待確認、先不做（YAGNI：現在用不到的不做）' },
-            { stance: 'detail', say: '莎禾的盤點系統用不到區塊鏈，所以那個很明顯是不用做的。', text: '莎禾的盤點系統用不到區塊鏈，那條不是需求' },
-            { stance: 'emotional', say: '你是不是讀不出寫需求的人亂寫的東西？沒把握不要做。', text: '整理需求：看不出是不是亂寫的就先不挑，沒把握的不做' },
-          ] },
-        ] },
+        // 可以事先寫進 CLAIRE.md 的規範（跟正式上班共用，claire-skills.js）：部署流程寫了 AI 部署就不再每步問；整理需求的讀法從三派句子選。
+        // 過於細節派點名這天的區塊鏈，只對它有效：poc_approve 整理需求的「區塊鏈存證」標了 readReq:emotional，原則、細節派不挑它，情緒化照單全收
+        skills: [ClaireSkills.deploy, ClaireSkills.readReq({ say: '莎禾的盤點系統用不到區塊鏈，所以那個很明顯是不用做的。', text: '莎禾的盤點系統用不到區塊鏈，那條不是需求' })] },
       cards: [poc, ...subs],
       sources: [...mails, ...pocGroup, ...team, ...chaos],
       meetings: [DAY2.transitionNext],   // 開場是昨天結束時那場早會：老闆買了 Claire、怡君當 PM、兩次舉手

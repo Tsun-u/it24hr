@@ -21,6 +21,8 @@
       this.deviceBugs = spec.deviceBugs || [];  // 只有實機測得出來的 bug：[{ text }]
       this.noDeploy = !!spec.noDeploy;          // 不用部署也能交 QC（例如資料補救）
       this.noQC = !!spec.noQC;                  // 不交 QC：部署完直接進已完成（第三天的 POC 母議題，子議題驗過視同驗過）
+      this.closeWith = spec.closeWith || null;  // 'children'：母議題不交 QC，底下的子議題都結案它就跟著結案（engine.closeParentOf）
+      this.mustEstimate = !!spec.mustEstimate;   // 一整天都沒估時，結算卡估時表照樣列出、主管說一句（沒標的卡沒估就不列）
       this.closeOn = spec.closeOn || null;      // 做完這個工作就結案（沒部署、沒 QC 的卡，例如看小潘的 PR）
       this.reviewFires = spec.reviewFires || null;   // 檢閱放水的代價：{ work: { at, miss } }，那個時間需求者在 LIME 說那句
       this.deployTarget = spec.deployTarget || 'test';   // 部署到哪：test（測試機）／poc（客戶的 POC 環境）
@@ -40,6 +42,10 @@
       this.saChecks = spec.saChecks || null;    // 退回 SA 的勾選題：[{ title, options: [{ text, right, adds?, replaces?, claim?, asked?, why? }] }]
       this.estimate = spec.estimate ?? null;    // 玩家估的時間（小時）
       this.subtasks = spec.subtasks || [];      // [{ work, question }]
+      this.routes = spec.routes || null;        // 卡上選路（接手或重來）：[{ subtasks }, …]，選了哪條，卡的工作換成那條的（engine.chooseRoute）
+      this.route = null;                        // 選了第幾條路
+      this.migrate = spec.migrate || null;      // 部署的資料轉換有轉不過去的舊資料：{ rows, left, sample }（engine.deployStep 印；第一次轉時一筆一分鐘對回去）
+      this.reconciled = false;                  // 轉不過去的那幾筆對過了沒
       this.tag = C.PRIORITY;
       this.status = 'new';
       this.history = [];                        // [{ work, minutes, version, at }]
@@ -57,8 +63,9 @@
               ...this.events.map(e => ({ ...e, kind: 'event', type: e.kind }))].sort((a, b) => (a.at || 0) - (b.at || 0));
     }
     // by：'ai' 是交給 AI 的（reviewed 記玩家送出前有沒有看過）
-    record(work, { minutes = 0, version, at = null, result, by = 'self', reviewed } = {}) {
-      this.history.push({ work, minutes, version, at, result, by, reviewed });
+    // aiJob：收下 AI 那份時記 { group：哪一批交辦（'oneshot' 是整張交給 Pedia）, untouched：照它交的原樣收下 }
+    record(work, { minutes = 0, version, at = null, result, by = 'self', reviewed, aiJob } = {}) {
+      this.history.push({ work, minutes, version, at, result, by, reviewed, aiJob });
       this.actualMin += minutes;
       if (this.status === 'new') this.status = 'open';
     }

@@ -3,10 +3,12 @@
 // render(model, device) 把它畫成 DOM，手動測試的預覽和結算卡縮圖都用它。
 // 卡的 screen：{ app, fields, rows, bugs: { functionName: effect } }；effect 是 serialWrong／scrapGone／filterBroken／editBroken，
 // 第三天 POC 的：wrongDomain／wrongReset／approveVisible（登入與權限）、axianApproves／serialOurs／deptOurs（簽核照客戶的組織）、
-// botChatty／botLeaks（QA 機器人）、bomVisible／noSchedule（匯出給 ERP）。
+// botChatty／botLeaks（QA 機器人）、bomVisible／noSchedule（匯出給 ERP）；effect 也可以直接寫成 { voice, row?, cells }（正式上班第二關起）。
+// screen.form：多畫一張新增表單，欄位照前端設計的欄位題（role 'field'）畫成下拉、紅字或怪東西。
 // 沒做前端設計：版型 plain（2008 年內網風的裸表格）、什麼元件都沒有。
 (function (root) {
-  const flags = (item, answer) => { const idx = [].concat(answer ?? []); return Object.fromEntries((item.keys || []).map((k, i) => [k, idx.includes(i)])); };
+  const Works = typeof require === 'function' ? require('./works.js') : root.Works;
+  const flags =(item, answer) => { const idx = [].concat(answer ?? []); return Object.fromEntries((item.keys || []).map((k, i) => [k, idx.includes(i)])); };
 
   // 行銷部用 AI 做的活動頁（第三天，檢閱程式碼前端「三機找碴」）：卡的 screen 是 { app, campaign: true, defects: { 瑕疵: 修它的 function } }。
   // 瑕疵一開始都在；開發裡對應的 function 填對了那個瑕疵才消失（檢閱沒抓到的照原樣，手動測試照現況畫）
@@ -18,7 +20,8 @@
     const fixed = Object.entries(spec.defects || {}).filter(([, fn]) => filled.has(fn) && !buggy.has(fn)).map(([d]) => d);
     const effects = Object.fromEntries(Object.keys(spec.defects || {}).filter(d => !fixed.includes(d)).map(d => [d, true]));
     return { app: spec.app, campaign: true, designed: true, built: true, template: 'campaign', components: {}, validations: {}, theme: spec.theme || null, confirm: null, hint: null,
-      fields: [], rows: [], effects, fixed, readOnly: false, loginRequired: false, report: false, styleRef: null, aliases: null, deptOptions: null, exportPreview: false, loginLabel: '', pwReset: false, erpPreview: false };
+      fields: [], rows: [], effects, fixed, readOnly: false, loginRequired: false, report: false, styleRef: null, aliases: null, deptOptions: null, exportPreview: false, loginLabel: '', pwReset: false, erpPreview: false,
+      form: false, fieldLooks: {}, annoyed: [], bugNotes: [] };
   }
   function model(card) {
     const spec = card.screen || { app: card.title, fields: [], rows: [], bugs: {} };
@@ -48,11 +51,30 @@
       if (item.role === 'hint') hint = item.thumb[first] || null;
     });
     const code = [...(card.history || [])].reverse().find(h => h.work === 'code' && h.result);
-    const effects = {};
-    for (const b of ((code && code.result.bugs) || [])) { const eff = (spec.bugs || {})[b.fn]; if (eff) effects[eff] = true; }
+    // 開發的 bug：效果名稱（字串，畫面照名稱畫），或劇本直接寫長怎樣 { voice, row?, cells: { 欄位: 顯示的值 } }
+    const effects = {}; const bugNotes = [];
+    for (const fn of new Set(((code && code.result.bugs) || []).map(b => b.fn))) {
+      const eff = (spec.bugs || {})[fn];
+      if (typeof eff === 'string') effects[eff] = true; else if (eff) bugNotes.push(eff);
+    }
+    // 欄位題（role 'field'）：每個欄位最後做成什麼樣子——正解是下拉（sample），題目寫 input 'free' 的正解是自由填的文字框（free，sample 當提示字）、
+    // 做錯是跳紅字（red）、漏做是收了怪東西（junk）；其他寫法的後果有寫 sample 的（例：配方只記主原料），那一格照它畫；
+    // 沒做前端設計照每題的 ifSkipped。員工的惱怒（annoy 的 say）給 userVoice
+    const fieldLooks = {}; let annoyed = [];
+    if (sub && (sub.question.items || []).some(item => item.role === 'field')) {
+      const outs = Works.outcomes(sub.question, answers, { done: designed, picks: card.picks });
+      for (const item of sub.question.items.filter(it => it.role === 'field' && it.field)) {
+        const mine = outs.filter(o => o.field === item.field);
+        const junk = mine.find(o => o.kind === 'miss'), red = mine.find(o => o.kind === 'annoy'), shown = mine.find(o => o.sample != null);
+        fieldLooks[item.field] = junk ? { look: 'junk', text: junk.junk || '' } : red ? { look: 'red', text: red.red || '' }
+          : shown ? { look: 'right', text: shown.sample } : { look: item.input === 'free' ? 'free' : 'right', text: item.sample || '' };
+      }
+      annoyed = outs.filter(o => o.kind === 'annoy').map(o => o.say);
+    }
     return { app: spec.app, designed: designed || !!fixed, template, components, validations, theme, confirm, hint, fields: spec.fields || [], rows: spec.rows || [], effects, built: !!code, readOnly: !!spec.readOnly, loginRequired: !!spec.loginRequired, report, styleRef: spec.styleRef || null,
       aliases: spec.aliases || null, deptOptions: spec.deptOptions || null, exportPreview: !!spec.exportPreview,
-      loginLabel: spec.loginLabel || '公司帳號 ▢　密碼 ▢　[用公司 AD 登入]', pwReset: !!spec.pwReset, erpPreview: !!spec.erpPreview };
+      loginLabel: spec.loginLabel || '公司帳號 ▢　密碼 ▢　[用公司 AD 登入]', pwReset: !!spec.pwReset, erpPreview: !!spec.erpPreview,
+      form: !!spec.form, fieldLooks, annoyed, bugNotes };
   }
   // 唯讀頁上出現了能改資料的東西：自己放了新增／修改／報廢，或程式寫成能改
   const editableOnReadOnly = (m) => m.readOnly && (m.effects.editable || m.components.add || m.components.edit || m.components.scrap);
@@ -102,6 +124,8 @@
   // 開發的 bug 反映在資料上：報廢寫成刪除 → 報廢那列不見；編號格式錯 → 編號長得不對；篩選壞掉 → 一筆都篩不出來
   function visibleRows(m) {
     let rows = m.rows.map(r => [...r]);
+    // 劇本寫的 bug：那一列（沒寫是第一列）的那幾格換成寫錯時的樣子
+    for (const n of m.bugNotes || []) { const r = rows[n.row || 0]; if (r) for (const [f, v] of Object.entries(n.cells || {})) { const i = m.fields.indexOf(f); if (i >= 0) r[i] = v; } }
     if (m.effects.scrapGone) rows = rows.filter(r => !r.includes('報廢'));
     if (m.effects.serialWrong) rows = rows.map(r => { const [no, ...rest] = r; const p = String(no).split('-'); return [p.length === 3 ? `${p[1]}-${p[0]}-${Number(p[2])}` : no, ...rest]; });
     if (m.effects.filterBroken && m.components.filter) rows = [];
@@ -161,9 +185,28 @@
     page.append(banner, products, countdown, form, submit);
     return page;
   }
+  // 新增表單：每個欄位照 fieldLooks 畫——正解是下拉（自由填的欄位是空的文字框、sample 當提示字）、做錯是輸入框底下一行紅字、漏做是輸入框裡填著怪東西
+  function formBox(m, el) {
+    const box = el('div', 'mock-form'); box.append(el('h4', '', `新增${m.app.split('・').pop()}`));
+    for (const f of m.fields) {
+      const look = m.fieldLooks[f]; const row = el('label', 'mock-field'); row.append(el('span', '', f));
+      row.dataset.region = f;   // 三機找碴點的就是這一列
+      if (look && look.look === 'right') { const s = el('select', 'mock-select'); s.append(new Option(look.text)); row.append(s); }
+      else {
+        const input = el('input', `mock-input${look && look.look === 'junk' ? ' mock-junk' : ''}`);
+        if (look && look.look === 'junk') input.value = look.text;
+        if (look && look.look === 'free') input.placeholder = look.text;
+        row.append(input);
+      }
+      box.append(row);
+      if (look && look.look === 'red') box.append(el('p', 'mock-red', look.text));
+    }
+    box.append(el('button', 'mock-btn primary', '存檔'));
+    return box;
+  }
   function render(m, device = 'pc') {
     const el = (tag, cls, text) => { const n = document.createElement(tag); if (cls) n.className = cls; if (text !== undefined) n.textContent = text; return n; };
-    const page = el('div', `mock mock-${m.template} mock-${device}`);
+    const page = el('div', `mock mock-${m.template} mock-${device}${m.form ? ' mock-has-form' : ''}`);
     if (m.theme && m.template !== 'plain') { page.style.setProperty('--mock-bg', m.theme.bg); page.style.setProperty('--mock-fg', m.theme.fg); page.style.setProperty('--mock-accent', m.theme.accent); }
     if (!m.built) { page.append(el('div', 'mock-404', '404'), el('p', 'mock-empty', '還沒有這個頁面。')); return page; }
     if (m.campaign) return renderCampaign(m, device, page, el);
@@ -237,6 +280,8 @@
       if (!rows.length) { const tr = el('tr'); const td = el('td', 'mock-empty', '沒有資料'); td.colSpan = m.fields.length + (actions ? 1 : 0); tr.append(td); table.append(tr); }
       page.append(table);
     }
+    // 版型 plain 也畫：沒做前端設計的成品就是一排什麼都收的輸入框
+    if (m.form) page.append(formBox(m, el));
     // 匯出：用 Excel 打開長什麼樣子（UTF-8 沒加 BOM，中文就變亂碼）
     if (m.exportPreview) page.append(exportBox(m, el));
     if (m.erpPreview) page.append(erpBox(m, el));
@@ -315,6 +360,7 @@
     if (m.effects.brokenImages) says.push('商品圖都是破的，這是賣什麼？');
     if (m.effects.bannerOverButton) says.push('手機上送出鈕被橫幅蓋住，按不到。');
     if (m.effects.formOverflow) says.push('平板上表單要左右捲，Email 欄在螢幕外面。');
+    says.push(...(m.annoyed || []), ...(m.bugNotes || []).map(n => n.voice));   // 員工看到紅字的惱怒、劇本寫的 bug
     if (!says.length) says.push(PRAISE_LINE);
     if (ref && styleOf(m) !== ref) says.push(STYLE_LINE);
     return says;

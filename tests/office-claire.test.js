@@ -78,12 +78,12 @@ test('問題各自的條件：收到阿賢的信之前問不出「這兩台哪�
   assert.deepStrictEqual(topic(e, 'toner').asks.map(a => a.id), ['better', 'model', 'kinds', 'inkjot']);
 });
 
-test('speedrun 有 Pedia：5 格、一天一次；問個別設備先說查不到、不記 B8964；hybrid 沒有 Pedia', () => {
+test('speedrun 有 Pedia：問一句 3 格、一天一次；問個別設備先說查不到、不記 B8964；hybrid 沒有 Pedia', () => {
   const e = play('speedrun'); const got = answers(e);
   tickTo(e, at(9, 51));
   const left = e.ai.left;
   e.askClaire('toner', 'model', 'Pedia');
-  assert.strictEqual(e.ai.left, left - 5);
+  assert.strictEqual(e.ai.left, left - 3);
   tickTo(e, e.clock.minute + 3);
   assert.deepStrictEqual(got[0].lines.slice(0, 2), ['條目「印表機」', '本百科不收錄個別設備之資料。以下為相關條目。']);
   assert.ok(!e.knows.has('toner:b8964'));
@@ -91,7 +91,7 @@ test('speedrun 有 Pedia：5 格、一天一次；問個別設備先說查不到
   assert.ok(!play('hybrid').aiModel('Pedia'));
 });
 
-test('檢討報告可以交給 AI 寫（童童：AI 很會寫檢討報告）；Pedia 也能交辦單件（5 格），跟問一句共用一天一次', () => {
+test('檢討報告可以交給 AI 寫；Pedia 也能交辦單件（3 格），跟問一句共用一天一次', () => {
   const reportCard = (mode) => {
     const e = play(mode);
     tickTo(e, at(13, 31));
@@ -108,8 +108,8 @@ test('檢討報告可以交給 AI 寫（童童：AI 很會寫檢討報告）；P
   const fast = reportCard('speedrun');
   const before = fast.e.ai.left;
   assert.ok(fast.e.delegate(fast.card.id, 'report', 'Pedia'));
-  assert.strictEqual(fast.e.ai.left, before - 5);
-  assert.strictEqual(fast.e.pediaUsed, `#${fast.card.no} 寫檢討報告`);
+  assert.strictEqual(fast.e.ai.left, before - 3);
+  assert.deepStrictEqual(fast.e.modelUses.Pedia, [`#${fast.card.no} 寫檢討報告`]);
   assert.match(fast.e.askClaire('toner', 'kinds', 'Pedia').error, /一天只能用一次/, '交辦過就不能再問');
   assert.strictEqual(fast.e.delegate(fast.card.id, 'report', 'Pedia'), null, '也不能再交辦');
 });

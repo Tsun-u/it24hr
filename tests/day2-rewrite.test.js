@@ -45,15 +45,16 @@ test('一定要拍照：QC 照過，使用者評價多一句空桌面', () => {
   assert.match(e.userReview()[0].text, /只好拍我的空桌面/);
 });
 
-test('報表頁是加分項：勾了不算多勾、開發多三個 function、評價多一句；AI 開發一定做成儀表板', () => {
+test('報表頁是加分項：勾了不算多勾、開發多三個 function、評價多一句；AI 開發的版面照前端設計（也勾了儀表板才跟著錯）', () => {
   const q = DAY2.make().cards[0].subtasks.find(s => s.work === 'ui_design').question;
   assert.strictEqual(Works.grade(q, [[0, 2], ...uiRight().slice(1)]).score, q.items.length);
   const code = DAY2.make().cards[0].subtasks.find(s => s.work === 'code').question;
   const names = (picks) => Works.functionsToFill(code, 'all', picks).map(i => code.functions[i].name);
   assert.ok(!names({ ui_design: [[0]] }).includes('summaryView'));
   assert.ok(['summaryView', 'summaryExport', 'exportCheckResults'].every(n => names({ ui_design: [[0, 2]] }).includes(n)));
-  const ai = Works.aiAnswers(code, { picks: { ui_design: [[0, 2]] }, accuracy: 1, seed: 's' });
-  assert.strictEqual(ai.answers[code.functions.findIndex(f => f.name === 'summaryView')].layout, 1, '儀表板');
+  const layout = (template, accuracy) => Works.aiAnswers(code, { picks: { ui_design: [template] }, accuracy, seed: 's' }).answers[code.functions.findIndex(f => f.name === 'summaryView')].layout;
+  assert.strictEqual(layout([0, 2], 0), 0, '前端設計對了，正確率再低也做成報表版面');
+  assert.strictEqual(layout([0, 2, 3], 1), 1, '前端設計也勾了儀表板，它跟著做成儀表板');
   const ui = uiRight(); ui[0] = [0, 2];
   const { e } = platform({ ui_design: ui });
   assert.match(e.userReview()[0].text, /主任和財務都說很方便/);

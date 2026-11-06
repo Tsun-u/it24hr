@@ -109,7 +109,7 @@ ${AI_CLAIM}`;
           { text: '資產狀態____才改', options: ['阿賢簽核過', '持有人送出', '月底一起'], answer: 0, ai: { pick: 1, kind: 'logic' }, why: '簽核過才算數',
             tags: APPROVE_TAGS, fixes: APPROVE_FIXES },
         ] } },
-      // 交給 AI 的話它全圈、每題都選「好。」（polite 預設最後一個）
+      // 交給 AI 的話它全圈，每題照正確率骰，骰錯選「好。」（polite 預設最後一個）
       { work: 'discuss', question: { kind: 'discuss',
         segments: original.split('\n'),
         asks: {
@@ -180,7 +180,7 @@ ${AI_CLAIM}`;
         ] }] } },
       // 昨天登入是陷阱（只有兩個人用），今天是需求（每個人上來填）：同一個選項，對錯看需求
       { work: 'ui_design', question: { items: [
-          // 報表頁是加分項：勾了主任和財務覺得很方便、老闆卡變版本二，但開發多三個 function；交給 AI 開發的話它會做成儀表板
+          // 報表頁是加分項：勾了主任和財務覺得很方便、老闆卡變版本二，但開發多三個 function
           { role: 'template', text: '版型', options: ['清單頁＋盤點表單', '只有一張表單', '報表頁', '儀表板'], keys: ['list', 'form', 'report', 'dashboard'], answer: [0], bonus: [2],
             ai: { pick: [3], kind: 'extra' }, why: '持有人要的是自己那幾筆和勾選，不是圖表；報表是給主任和財務的加分' },
           { role: 'components', text: '元件', options: ['登入框', '搜尋列', '狀態篩選', '盤點回報（每列勾還在／不見了／壞了）', '簽核按鈕', '匯出 Excel', '權限設定頁', '深色模式', '聊天機器人'],
@@ -270,9 +270,10 @@ ${AI_CLAIM}`;
               answer: 0, ai: { pick: 1 }, tags: { 0: 'auth:api', 1: 'auth:front', 3: 'auth:axian' },
               // 三派人類的三句：情緒化（AI 從此不碰權限）、過於細節（寫死阿賢，主任、財務、持有人都被擋）、原則
               fixes: [{ say: '你權限根本亂做', set: { auth: 'skip' } }, { say: '權限檢查最好做在後端', set: { auth: 'api' } }, { say: 'API 應該要檢查是不是阿賢', set: { auth: 'axian' } }] } } },
-          // 前端設計勾了報表頁才有的三個 function（onlyIf）；交給 AI 的話報表一定做成儀表板（ai.always）
+          // 前端設計勾了報表頁才有的三個 function（onlyIf）；交給 AI 的話版面照前端設計的版型題寫，那題也勾了儀表板才跟著做成儀表板
           { onlyIf: REPORT, name: 'summaryView', does: '報表頁的前端樣式',
-            fields: { layout: { label: '版面', options: ['報表版面，除了明細外，有簡易的樞紐分析', '儀表板版面，用現在最潮的卡片顯示已盤點數和已填寫數', '清單版面，跟財務看到的一樣'], answer: 0, ai: { pick: 1, kind: 'extra', always: true } } } },
+            fields: { layout: { label: '版面', options: ['報表版面，除了明細外，有簡易的樞紐分析', '儀表板版面，用現在最潮的卡片顯示已盤點數和已填寫數', '清單版面，跟財務看到的一樣'], answer: 0,
+              follows: { work: 'ui_design', item: 0, wrong: { 3: 1 } } } } },
           { onlyIf: REPORT, name: 'summaryExport', does: '報表頁的匯出功能',
             fields: { format: { label: '匯出', options: ['匯出 pdf，資料無誤後就能直接交給稽核', '匯出 Excel，讓主管可以隨時修改', '匯出 docx，讓主任可以隨意調整'], answer: 0 } } },
           { onlyIf: REPORT, name: 'exportCheckResults', does: '匯出盤點結果',
@@ -586,7 +587,7 @@ ${AI_CLAIM}`;
   const hints = [
     { after: 'card:arrived:asset_platform', text: '怡君把阿賢的平台開成卡了。今天開始有 AI 同事 Claire Code：卡上每件工作旁邊的「AI」可以交給它，它做的時候你也可以自己寫。先把「整理需求」交給 AI 試試。', until: [`ai:started:${P}:read_req`, `work:done:${P}:read_req`] },
     ...viaAi('read_req', '它交件了。在終端機按「看一下」打開它填好的答案。沒問題就完成；不對就按「退回」，圈出錯的、跟它說要怎麼改——送出去寫的是你的名字。'),
-    { after: 'work:done:asset_platform:read_req', text: '需求討論自己來。交給 AI 的話，它會很有禮貌地全部答應。', until: 'work:done:asset_platform:discuss' },
+    { after: 'work:done:asset_platform:read_req', text: '需求討論自己來。交給 AI 的話，它常會很有禮貌地一口答應。', until: 'work:done:asset_platform:discuss' },
     { after: 'work:done:asset_platform:discuss', text: '估時。AI 估的時間通常很樂觀。', until: 'work:done:asset_platform:estimate' },
     { after: 'work:done:asset_platform:estimate', text: '開發計畫文件。自己寫或交給 AI 再看都行；額度在右下角，14:00 才補。', until: 'work:done:asset_platform:doc_plan' },
     { after: 'work:done:asset_platform:doc_plan', text: '規格文件。', until: 'work:done:asset_platform:doc_spec' },

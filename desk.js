@@ -238,6 +238,23 @@
       layer.addEventListener('click', (ev) => { if (ev.target === layer) putDown(); });
       this.root.querySelector('.desk').append(layer);
     }
+    // 整個螢幕的燈箱：上面一條標題和關閉鈕，內容可以上下捲。fill(close) 回傳內容，close＝收起燈箱、什麼都不送出。
+    // 配色跟著電腦的深色／淺色；術語照視窗層一樣自動標
+    lightbox({ title, icon, fill }) {
+      this.root.querySelectorAll('.lightbox').forEach(b => b.remove());
+      const box = h('div', 'lightbox'); box.dataset.theme = this.desktop.dataset.theme;
+      const panel = h('section', 'lightbox-panel'); panel.setAttribute('role', 'dialog'); panel.setAttribute('aria-label', title);
+      const name = h('span', 'lightbox-title'); if (icon) name.append(Icons.el(icon)); name.append(document.createTextNode(title));
+      const shut = h('button', 'lightbox-close', '×'); shut.title = '關閉'; shut.setAttribute('aria-label', '關閉');
+      const bar = h('header', 'lightbox-bar'); bar.append(name, shut);
+      const body = h('div', 'lightbox-body');
+      panel.append(bar, body); box.append(panel);
+      this.root.querySelector('.desk').append(box);
+      const terms = Handbook.watch(body);
+      const close = () => { terms.disconnect(); box.remove(); };
+      shut.addEventListener('click', close);
+      body.append(fill(close));
+    }
     // 點電腦螢幕跳出來的 devtools：選要模擬哪個尺寸
     devtools(pick) {
       if (this.root.querySelector('.devtools')) return;
@@ -369,7 +386,9 @@
       e.on('ai:asking', () => this.refreshTerminal());   // 問句帶按鈕顯示在最下面（aiAskingNode），回答了才連同回答寫進紀錄
       e.on('ai:answered', ({ lines }) => aiLines(lines));
       e.on('ai:deploying', ({ card, lines }) => { aiLines(lines); this.refreshCard(card.id); });
-      e.on('ai:notes', () => { this.refreshTerminal(); this.refreshDocs(); });
+      // 筆記變了：開著的卡也重畫（寫了部署流程，「整張交給 Pedia」就多做部署）
+      e.on('ai:notes', () => { this.refreshTerminal(); this.refreshDocs(); for (const c of e.board.cards) this.refreshCard(c.id); });
+      e.on('ai:used', () => { for (const c of e.board.cards) this.refreshCard(c.id); });   // Pedia 用掉了（問一句、交辦、整張都算）：開著的卡上「整張交給 Pedia」都反灰
       e.on('ai:quota', () => { this.updateQuota(); aiLines([{ text: '— AI 額度補滿了 —', kind: 'note' }]); });
       // 問 Claire（能問問題的關卡）：問的那句、等多久、回答都寫進終端機
       e.on('claire:asked', ({ say, model, wait }) => {
@@ -389,6 +408,7 @@
       e.on('meeting:start', (m) => this.enterMeeting(m));
       e.on('meeting:line', (line) => this.fly(line));
       e.on('meeting:silent', (s) => { if (s.text) this.toast(s.text, '會議'); });
+      e.on('meeting:cutoff', (c) => this.toast(`${c.who}：「${c.text}」`, '會議'));
       e.on('meeting:end', () => this.exitMeeting());
       e.on('home:arrived', () => this.enterHome());
       e.on('home:vpn', (hm) => { if (hm.vpn === 'off' && hm.drops > (this.homeDrops || 0)) { this.homeDrops = hm.drops; this.toast('VPN 斷了，要重連。', 'VPN'); } this.refreshHome(); this.refreshTerminal(); });
@@ -510,7 +530,7 @@
       if (this.meetingRoom) this.closeMeetingRoom({ nextMeeting: true });   // 上一場的彈幕還沒飛完就接著開會：先收掉
       this.engine.holdHints(true);   // 會議室收掉之前不跳提示（提示會暫停時鐘，把會議凍住）
       const desk = this.root.querySelector('.desk'); desk.classList.add('in-meeting');
-      const room = h('div', 'meeting-room');
+      const room = h('div', spec.kind === 'vendor' ? 'meeting-room vendor' : 'meeting-room');   // vendor 要在 fitClip 前就有：手機上筆電的大小跟著它變
       room.innerHTML = `<div class="projector"><h2 class="projector-title"></h2></div><div class="danmaku"></div>
         <div class="people"><span></span><span></span><span></span><span></span></div><div class="raise" hidden></div>`;
       room.querySelector('.projector-title').textContent = spec.title;
@@ -520,7 +540,23 @@
       this.root.querySelector('.screen.laptop').prepend(this.desktop);
       this.meetingRoom = room; this.lane = 0;
       this.wm.fitClip();
+      if (spec.kind === 'vendor') {   // 廠商需求會議：投影幕放客戶的訴求、旁邊是開場兩句；提問視窗開在筆電上，沒有彈幕也不舉手
+        const intro = h('div', 'vendor-intro'); for (const l of spec.intro) intro.append(h('p', '', `${l.who}：「${l.text}」`));
+        const ask = h('button', 'btn primary vendor-ask', '打開提問視窗'); ask.addEventListener('click', () => Quiz.openMeeting(this, this.engine, spec));   // 視窗收起來後再打開
+        intro.append(ask);
+        room.querySelector('.projector').append(h('div', 'proj-page'));
+        room.append(intro);
+        Quiz.openMeeting(this, this.engine, spec);
+        return;
+      }
       this.firstMeetingHint();
+    }
+    // 廠商需求會議的投影幕換到那一頁：頁首寫模組和誰講的，原文一句一行（時程那頁沒有原文，放 lines）；
+    // aside 是原話之外旁邊的人插的話（不是要問的需求），排在原文下面、標說話的人
+    showProjector(page) {
+      const box = this.meetingRoom && this.meetingRoom.querySelector('.proj-page'); if (!box) return;
+      box.replaceChildren(h('h3', '', `${page.title}（${page.who}）`), ...(page.lines || page.question.segments).map(text => h('p', '', text)),
+        ...(page.aside || []).map(l => h('p', 'proj-aside', `${l.who}：「${l.text}」`)));
     }
     // 第一次開會才講規則，之後不再講
     firstMeetingHint() {
@@ -536,6 +572,8 @@
       if (!this.meetingRoom) return;
       this.engine.clock.resume('raise');
       this.refreshDocs();   // 散會了：LIME 的「走過去」可以按了
+      // 廠商需求會議沒有彈幕：提問視窗收掉、會議室直接收
+      if (this.meetingRoom.classList.contains('vendor')) { this.wm.close('meeting:vendor'); this.closeMeetingRoom(); return; }
       if (this.leavingMeeting || !this.meetingRoom.querySelector('.dm')) this.closeMeetingRoom();
       else this.meetingRoom.classList.add('ending');
     }
@@ -1165,7 +1203,7 @@
       this.hintEl.classList.remove('folded');
       const fold = h('button', 'hint-fold', '收起');   // 手機上便條壓在筆電螢幕上，可以收成一行
       fold.addEventListener('click', () => { fold.textContent = this.hintEl.classList.toggle('folded') ? '展開' : '收起'; });
-      if (hint.pause !== false) { const pass = h('button', 'hint-pass', '略過此提示'); pass.addEventListener('click', () => this.engine.passHint()); this.hintEl.append(pass); }
+      const pass = h('button', 'hint-pass', '略過此提示'); pass.addEventListener('click', () => this.engine.passHint()); this.hintEl.append(pass);   // 暫停時鐘的（黃色）、不暫停的（水藍色）都關得掉
       this.hintEl.append(fold);
       this.hintEl.classList.remove('pop'); void this.hintEl.offsetWidth; this.hintEl.classList.add('pop');   // 新提示：抖一下
     }
@@ -1572,7 +1610,7 @@
       const meta = h('dl', 'card-meta');
       const row = (k, v) => { meta.append(h('dt', '', k), h('dd', '', v)); };
       row('來源', card.from || '—'); row('負責人', card.assignee);
-      if (card.parent) { const p = e.board.get(card.parent); row('母議題', p ? `#${p.no} ${p.title}（這張是它的追加需求）` : card.parent); }
+      if (card.parent) { const p = e.board.get(card.parent); row('母議題', p ? `#${p.no} ${p.title}（這張是它的${card.type === 'sub' ? '子議題' : '追加需求'}）` : card.parent); }
       row('估時', card.estimate ? `${card.estimate} 小時` : '未估'); row('實際工時', `${card.actualMin} 分鐘`);
       wrap.append(meta);
       // hybrid 的 SA 卡：「和 AI 討論的結果」那句是紅字大標，語氣和格式都突然變了
@@ -1613,8 +1651,8 @@
         for (const work of Object.keys(card.wordy || {}).filter(w => card.wordy[w])) {
           const fix = h('button', 'btn', `${Works.label(work)}還有 ${card.wordy[work].length} 行廢話`); fix.addEventListener('click', () => this.onOpenWork(card, work)); foot.append(fix);
         }
-        // 不交 QC 的卡（POC 母議題）：部署完就算完成，沒有「交給 QC」這一步
-        if (card.noQC) foot.append(h('span', 'muted', '這張不交 QC：子議題驗過、部署到 POC 就算完成。'));
+        // 不交 QC 的卡（母議題）：POC 母議題部署完就算完成；closeWith children 的子議題都結案就跟著結案。沒有「交給 QC」這一步
+        if (card.noQC) foot.append(h('span', 'muted', card.closeWith === 'children' ? '這張不交 QC：子議題都結案，這張就跟著結案。' : '這張不交 QC：子議題驗過、部署到 POC 就算完成。'));
         // 沒有人驗（劇本沒有 QC）：「交給 QC」換成「結案」，什麼時候結案玩家自己決定（IT 的模糊邊界都在需求單位旁邊處理，不用另外通知）
         else if (!reviewer) { const close = h('button', 'btn primary', '結案'); close.addEventListener('click', () => { e.closeCard(card.id); this.refreshBoard(); this.refreshCard(card.id); }); foot.append(close); }
         else { const ok = h('button', 'btn primary', `完成，交給 ${handTo}`); ok.addEventListener('click', () => e.submit(card.id)); foot.append(ok); }
@@ -1629,6 +1667,8 @@
         btn.addEventListener('click', () => e.notifyDone(card.id));
         const said = card.notifyGroup
           ? (card.notified ? '上 POC 了，群組裡也說了。' : `上 POC 了。在「${card.notifyGroup}」說一聲他們才知道能登入。`)
+          : card.closeWith === 'children'
+            ? (card.notified ? '子議題都結案了，也跟需求單位說了。' : '子議題都結案了。跟需求單位說一聲。')
           : card.reviewer
             ? (card.notified ? `${card.reviewer.who}看過了，也跟需求單位說了。` : `${card.reviewer.who}看過了。跟需求單位說一聲。`)
             : (card.notified ? '阿姿驗過、也跟需求單位說了。' : '阿姿驗過了。跟需求單位說一聲他們才知道能用。');
@@ -1649,23 +1689,47 @@
       const box = h('div', 'ops'); box.append(h('h4', '', '雜事'), h('p', 'muted', `${chore.title}：${CHORE_STAGE[chore.stage] || chore.stage}`));
       return box;
     }
-    // speedrun 交給 AI 時挑模型（Verse 快但錯多、Essay 中間、Novel 慢又吃兩格）
+    // speedrun 交給 AI 時挑模型（Verse 快但錯多、Essay 中間、Novel 慢又吃兩格）；price(名稱) 是這次交出去要幾格（整組交辦跟單件不同價）
     // 選單展開在「你可以做的事」最底下一排（浮在按鈕旁邊會被卡片視窗的捲動範圍切掉）；再按一次 AI 或按別的地方就收起來
-    pickModel(anchor, onPick) {
+    pickModel(anchor, onPick, price = (name) => this.engine.aiCost(name)) {
       const ops = anchor.closest('.ops');
-      const old = ops.querySelector('.model-pick'); if (old) old.remove();
+      const old = ops.querySelector('.model-pick'); if (old) { old.remove(); this.engine.clock.resume('oneshot'); }   // 舊的框可能是交付重點，它開著時時鐘停
       const box = h('div', 'model-pick');
       const who = anchor.querySelector('.op:not(.op-ai)');
       box.append(h('span', 'muted', `${who ? who.textContent.replace(' ✓', '') : ''}交給哪個模型？`));
       for (const [name, m] of Object.entries(this.engine.script.ai.models)) {
-        const b = h('button', 'op', `${m.label}　${m.turnaround[0]}～${m.turnaround[1]} 分鐘・${m.cost} 格`);
-        if (name === 'Pedia' && this.engine.pediaUsed) { b.disabled = true; b.title = 'Pedia 一天只能用一次。'; }   // 問一句和交辦共用一次
+        const b = h('button', 'op', `${m.label}　${m.turnaround[0]}～${m.turnaround[1]} 分鐘・${price(name)} 格`);
+        if (this.engine.usedUp(name)) { b.disabled = true; b.title = this.engine.modelLack(name); }   // 一天有次數上限的（Pedia）用完了
         b.addEventListener('click', (ev) => { ev.stopPropagation(); box.remove(); onPick(name); });
         box.append(b);
       }
       ops.append(box);
       this.engine.emit('ai:picking');   // 提示鏈：第一次挑模型時說三個模型的取捨
       const off = (ev) => { if (!box.contains(ev.target)) { box.remove(); document.removeEventListener('click', off, true); } };
+      setTimeout(() => document.addEventListener('click', off, true), 0);
+    }
+    // 整張交給 Pedia 之前問交付重點（C.ONE_SHOT_FOCUS，三句順序打散）：小框展開在「你可以做的事」最底下，開著時時鐘停；
+    // 選了才交，按取消或按別的地方就收起來、不交
+    pickFocus(anchor, card, onPick) {
+      const ops = anchor.closest('.ops');
+      const clock = this.engine.clock;
+      const old = ops.querySelector('.model-pick'); if (old) { old.remove(); clock.resume('oneshot'); }   // 舊的那個框可能是這個題目，暫停一起收掉
+      const box = h('div', 'model-pick focus-pick');
+      const { question, options } = C.ONE_SHOT_FOCUS;
+      box.append(h('span', 'muted', question));
+      clock.pause('oneshot');
+      let open = true;
+      const close = () => { if (!open) return; open = false; box.remove(); document.removeEventListener('click', off, true); clock.resume('oneshot'); };
+      for (const i of Works.displayOrder(options.length, `${this.engine.shuffleSeed}:${card.id}:oneshot:focus`)) {
+        const b = h('button', 'op', options[i].text);
+        b.addEventListener('click', (ev) => { ev.stopPropagation(); close(); onPick(options[i].id); });
+        box.append(b);
+      }
+      const cancel = h('button', 'op focus-cancel', '取消');
+      cancel.addEventListener('click', (ev) => { ev.stopPropagation(); close(); });
+      box.append(cancel);
+      ops.append(box);
+      const off = (ev) => { if (!box.contains(ev.target)) close(); };
       setTimeout(() => document.addEventListener('click', off, true), 0);
     }
     opsNode(card) {
@@ -1679,7 +1743,7 @@
         b.addEventListener('click', () => this.onOpenWork(card, item.id));
         // 部署有門檻的卡（POC 母議題要等三張子議題驗過）：門沒開就反灰，滑上去寫原因
         if (item.id === 'deploy' && card.deployGate && !card.deployGate(e)) { b.disabled = true; b.title = card.gateText || '還不能部署'; return b; }
-        if (!e.ai || item.id === 'manual_test') return b;
+        if (!e.ai || !e.delegable(card, item.id)) return b;   // 手動測試、廠商需求會議上做掉的（唯讀）、接手或重來，不能交給 AI
         const cell = h('span', 'op-cell');
         const ai = h('button', 'op op-ai', 'AI'); ai.title = '交給 AI（可以叫它跑好幾份，每份扣一次額度）';
         const send = (model) => { if (!e.delegate(card.id, item.id, model)) this.toast(e.aiLack(model) || '這件現在交不出去。', 'AI'); };
@@ -1703,13 +1767,13 @@
           sub.hidden = !open; toggle.setAttribute('aria-expanded', String(open));
         });
         group.append(toggle);
-        // speedrun 的主按鈕可以整組交給 AI：依序跑、時間打七折、額度少 1 格，做過的跳過
+        // speedrun 的主按鈕可以整組交給 AI：依序跑、時間打七折、額度比一件一件交少（groupCost），做過的跳過
         if (e.ai && e.aiPicksModel() && children.some(c => e.delegable(card, c.id))) {
           const cell = h('span', 'op-cell');
           const all = h('button', 'op op-ai', 'AI'); all.title = `整組交給 AI：${children.map(c => c.label || Works.label(c.id)).join('、')}依序做，比一份一份交快（做過的跳過）`;
           all.addEventListener('click', () => this.pickModel(cell, (model) => {
             if (!e.delegateGroup(card.id, item.id, model)) this.toast(e.ai.left <= 0 ? '這個時段的 AI 額度用完了。' : '額度不夠整組，或這組都做完了。', 'AI');
-          }));
+          }, (name) => e.groupCost(name, item.id, Math.max(1, e.groupWorks(card, item.id).length))));
           toggle.replaceWith(cell); cell.append(toggle, all);
         }
         group.append(sub); row.append(group);
@@ -1717,6 +1781,14 @@
       // 這張卡特有的工作（不在一般選單裡的，例如寫檢討報告、找舊資料、手動補救）排在後面
       const menuIds = new Set(Works.MENU.flatMap(m => [m.id, ...(m.children || []).map(c => c.id)]));
       for (const s of card.subtasks || []) if (!menuIds.has(s.work)) row.append(btn({ id: s.work }));
+      // Pedia one shot（正式上班 speedrun）：卡上還有能交辦的工作就有這顆；Pedia 用過了、額度不夠反灰，滑上去看原因
+      if (e.ai && e.aiModel('Pedia') && e.oneShotWorks(card).length) {
+        const all = h('button', 'op op-oneshot', `整張交給 Pedia（${e.oneShotCost(card)} 格）`);
+        all.title = `${e.oneShotWorks(card).map(w => Works.label(w)).join('、')}，照順序一份接一份做（一天一次）`;
+        const lack = e.oneShotLack(card); if (lack) { all.disabled = true; all.title = lack; }
+        all.addEventListener('click', () => this.pickFocus(all, card, (focus) => { if (!e.oneShot(card.id, focus)) this.toast(e.oneShotLack(card) || '這張現在交不出去。', 'AI'); }));
+        row.append(all);
+      }
       bar.append(row);
       return bar;
     }

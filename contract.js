@@ -15,9 +15,10 @@ const C = {
   AI_ASK_GAP_MIN: 5,                // 矯枉過正的 AI：回答它一題之後，它再做多久才問下一題（或交件）
   AI_FORGET_BACKUP: 0.3,            // AI 部署（Accept Edits、Auto）：沒人教過流程時，它忘了先備份的機率
   AI_GROUP_TIME: 0.7,               // 整組交給 AI：交件時間＝單件加總打七折（額度＝單件加總 −1）
+  AI_RECONCILE: [1 / 6, 1 / 3],     // AI 部署的資料轉換有轉不過去的：對回去只要人工（一筆一分鐘）的這個比例，照種子在範圍裡抽
   DANMAKU_FLY_MIN: 9,               // 會議彈幕從右飛到左要幾分鐘（畫面動畫照這個）；可以舉手的那句飛完前不散會
   WORKS: ['read_req', 'discuss', 'estimate', 'ui_design', 'code', 'test', 'device_test',
-          'review_front', 'review_back', 'debug', 'deploy', 'doc_plan', 'doc_spec', 'doc_accept', 'reply', 'reject'],
+          'review_front', 'review_back', 'debug', 'deploy', 'doc_plan', 'doc_spec', 'doc_accept', 'reply', 'reject', 'route'],
   CARD_STATUS: ['new', 'open', 'to_qc', 'rejected_to_sa', 'returned', 'archived'],
   PRIORITY: 'Priority',             // 每張卡都是這個，永遠一樣
 };
@@ -33,6 +34,16 @@ C.HTTP_NOTE = [
   '502 前面的機器找不到後面的程式，程式剛換上去、還沒啟動好時最常見',
   '503 忙不過來，等一下再試',
 ].join('\n');
+// 整張交給 Pedia 之前問的交付重點（每張卡同一組，畫面上順序打散）：答案只當這一次的暫時筆記，不寫進 CLAIRE.md。
+// kinds 是選錯時 Pedia 往哪種寫法做到底（題目、function 欄位 outcome 的 kind，照順序找第一個有的；都沒有就照正解）；site 是正解，照原本的 one shot
+C.ONE_SHOT_FOCUS = {
+  question: '這張要 Pedia 把重點放在哪？',
+  options: [
+    { id: 'site', text: '照現場的習慣：跟著他們平常的講法和做法，不合格式的也收得進去、事後補得回來' },
+    { id: 'strict', text: '資料一定要對：格式不對就擋下來', kinds: ['annoy', 'stuck'] },
+    { id: 'loose', text: '越彈性越好：現場怎麼打都收', kinds: ['miss', 'late'] },
+  ],
+};
 // 結算卡分享的網址
 C.SHARE_URL = 'https://tsun-u.github.io/it24hr/';
 // 首頁底部的連結

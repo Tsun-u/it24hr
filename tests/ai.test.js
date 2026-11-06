@@ -25,7 +25,9 @@ test('AI 的答案照種子固定；judgment 一律填它自己的主張；正�
   const est = Works.aiAnswers(estimate.question, { accuracy: 1, seed: 's' });
   assert.deepStrictEqual([est.answers, est.errors], [[2], []], '估時沒有對錯：AI 照它樂觀的估，不算錯');
   assert.deepStrictEqual(Works.aiSpots(estimate.question, [2]), [], '沒有對錯的題沒得圈');
-  const polite = Works.aiAnswers(discuss.question, { accuracy: 1, seed: 's' });   // 需求討論它會很有禮貌地全部答應
+  // 需求討論它全圈，每題照正確率骰，骰錯才很有禮貌地答應
+  assert.deepStrictEqual(Works.aiAnswers(discuss.question, { accuracy: 1, seed: 's' }).answers, { circled: [1], asks: { 1: [0] } });
+  const polite = Works.aiAnswers(discuss.question, { accuracy: 0, seed: 's' });
   assert.deepStrictEqual(polite.answers, { circled: [1], asks: { 1: [1] } }); assert.deepStrictEqual(polite.errors, ['miss']);
   assert.strictEqual(Works.aiAnswers({ kind: 'manual' }, { accuracy: 1, seed: 's' }), null);
 });

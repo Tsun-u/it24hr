@@ -37,7 +37,8 @@
     const toFill = Works.functionsToFill(q, covered, card.picks);
     if (card.draft && card.draft.noSource) wrap.append(h('p', 'quiz-intro no-source', '這張卡沒附原文。你記得他說什麼嗎？'));
     const job = aiReady(card, work, opts), by = byOf(card, work, opts);
-    const prev = job ? job.answers : (card.picks && card.picks[work]) || [];
+    // 還沒寫過的開發：規格連動的 function 先填好規格選的寫法
+    const prev = job ? job.answers : (card.picks && card.picks[work]) || Works.prefill(q, card.picks);
     const answers = q.functions.map((_, i) => ({ ...(prev[i] || {}) }));   // 上次填的留著
     q.functions.forEach((f, i) => {
       if (!Works.activeFunction(f, card.picks)) return;   // 前面沒勾那個選項，就沒有這個 function（例如報表頁）
@@ -52,8 +53,8 @@
       if (!pulled) for (const [key, field] of Object.entries(f.fields || {})) {
         const row = h('label', 'fn-field'); row.append(h('span', '', `${field.label || key}：`));
         const sel = h('select'); sel.append(new Option('—', ''));
-        // 選項等事件才解鎖（志豪的 AD 信來之前，登入方式只能選 TODO）：鎖著時只剩那一個選項，旁邊寫在等什麼
-        const locked = engine.fieldLocked(field);
+        // 選項等事件才解鎖（志豪的 AD 信來之前，登入方式只能選 TODO；接手別人的版本，檢閱沒挑出來的照原本那版）：鎖著時只剩那一個選項，旁邊寫原因
+        const locked = engine.fieldLocked(field, card);
         const keys = locked ? [field.lockedTo] : Works.displayOrder(field.options.length, `${engine.shuffleSeed}:${card.id}:${work}:${f.name}:${key}`);
         for (const k of keys) sel.append(new Option(field.options[k], String(k)));
         if (locked) { sel.value = String(field.lockedTo); answers[i][key] = field.lockedTo; row.append(h('small', 'muted', field.lockedText || '等資料來才能選')); }
@@ -75,12 +76,26 @@
     return wrap;
   }
 
-  // 需求討論兩頁：第一頁在原話上圈出講不清楚的地方，第二頁只對圈起來的選要問什麼。沒圈到的這裡不提
-  function discussForm(engine, card, work, q, wrap, close, opts) {
-    const job = aiReady(card, work, opts), by = byOf(card, work, opts);
-    const prev = job ? job.answers : (card.picks && card.picks[work]) || {};
+  // 需求討論的對話紀錄：圈了、問了什麼，對方怎麼回（SA 退回時問過的段落 saAsked，對方說已經被問過了）；empty 是什麼都沒問時那行
+  function discussLog(q, answers, who, saAsked = [], empty = '沒問什麼。') {
+    const log = h('div', 'discuss-log'); const asks = (answers && answers.asks) || {};
+    for (const i of [...((answers && answers.circled) || [])].sort((a, b) => a - b)) {
+      if (!q.asks[i]) { log.append(h('p', 'muted', `${who}：「這個我有講清楚吧？」`)); continue; }
+      [].concat(q.asks[i]).forEach((ask, k) => {
+        const j = [].concat(asks[i] ?? [])[k];
+        if (j === undefined) { log.append(h('p', 'muted', `（${q.segments[i]}——圈了但沒問）`)); return; }
+        const reply = saAsked.includes(i) ? '「這個怡君剛剛也問了。」' : (ask.replies && ask.replies[j]) || '「嗯。」';
+        log.append(h('p', 'me', `你：${ask.options[j]}`), h('p', 'them', `${who}：${reply}`));
+      });
+    }
+    if (!log.children.length) log.append(h('p', 'muted', empty));
+    return log;
+  }
+  // 需求討論的兩頁，畫在 host 裡：第一頁在原話上圈出講不清楚的地方，第二頁只對圈起來的選要問什麼（沒圈到的這裡不提）；
+  // 按完成鈕呼叫 onDone({ circled, asks })。卡上的需求討論和廠商需求會議的每一頁都用這個。
+  // extraFoot(current) 回第二頁按鈕列多放的鈕（AI 那份的「退回」），current() 是現在選的答案；card 給選項的帶入、隱藏判斷用。
+  function discussPages({ host, q, prev = {}, who, card = null, seed, onDone, extraFoot = null, doneLabel = '問完了', askLabel = '去找他問' }) {
     const circled = new Set(prev.circled || []);   // 上次圈的留著
-    const who = card.requester;   // 去問提需求的人；SA 開的卡 from 是怡君，但原話和回答都是需求單位的
     const page1 = h('div', 'discuss-page');
     page1.append(h('p', 'muted', `${who}的原話。覺得講不清楚的地方，點一下圈起來。`));
     const transcript = h('div', 'transcript');
@@ -90,8 +105,8 @@
       transcript.append(seg);
     });
     page1.append(transcript);
-    const next = h('button', 'btn primary', '去找他問'); const foot1 = h('div', 'quiz-foot'); foot1.append(next); page1.append(foot1);
-    next.addEventListener('click', () => { wrap.replaceChildren(page2()); });
+    const next = h('button', 'btn primary', askLabel); const foot1 = h('div', 'quiz-foot'); foot1.append(next); page1.append(foot1);
+    next.addEventListener('click', () => { host.replaceChildren(page2()); });
     const page2 = () => {
       const page = h('div', 'discuss-page'); const asks = { ...(prev.asks || {}) };
       const picked = [...circled].sort((a, b) => a - b);
@@ -100,35 +115,124 @@
         if (q.asks[i]) {   // 標題是你圈的那句原話；他被問到時的回應放在選項前面。一段可以掛好幾題
           const holder = asks[i] = [].concat(asks[i] ?? []);
           [].concat(q.asks[i]).forEach((ask, k) => {
-            const fs = itemNode({ ...ask, text: k === 0 ? q.segments[i] : '（接著問）', key: `d${i}_${k}` }, k, holder, work, card, `${engine.shuffleSeed}:${card.id}:${work}`);
+            const fs = itemNode({ ...ask, text: k === 0 ? q.segments[i] : '（接著問）', key: `d${i}_${k}` }, k, holder, 'discuss', card, seed);
             fs.insertBefore(h('p', 'muted reply-line', ask.text), fs.children[1]); page.append(fs);
           });
         }
         else { const fs = h('fieldset', 'item'); fs.append(h('legend', '', q.segments[i]), h('p', 'muted', `${who}：「這個我有講清楚吧？」`)); page.append(fs); }
       }
-      const done = h('button', 'btn primary', '問完了'); const foot = h('div', 'quiz-foot');
-      const back = reviseBtn(engine, card, work, q, job, () => ({ circled: picked, asks }), wrap, close);
-      if (back) foot.append(back); foot.append(done); page.append(foot);
-      done.addEventListener('click', () => {
-        const result = engine.doWork(card.id, work, { circled: picked, asks }, { version: versionOf(work, card), ...by }); if (!result) return;
-        // 問完了要看得到他怎麼回：一頁對話紀錄
-        const log = h('div', 'discuss-log');
-        for (const i of picked) {
-          if (!q.asks[i]) { log.append(h('p', 'muted', `${who}：「這個我有講清楚吧？」`)); continue; }
-          [].concat(q.asks[i]).forEach((ask, k) => {
-            const j = (asks[i] || [])[k];
-            if (j === undefined) { log.append(h('p', 'muted', `（${q.segments[i]}——圈了但沒問）`)); return; }
-            const reply = (card.saAsked || []).includes(i) ? '「這個怡君剛剛也問了。」' : (ask.replies && ask.replies[j]) || '「嗯。」';
-            log.append(h('p', 'me', `你：${ask.options[j]}`), h('p', 'them', `${who}：${reply}`));
-          });
-        }
-        if (!log.children.length) log.append(h('p', 'muted', '沒問什麼，就回座位了。'));
-        wrap.replaceChildren(log, resultNode(q, result), closeBtn(close));
-      });
+      const done = h('button', 'btn primary', doneLabel); const foot = h('div', 'quiz-foot');
+      const extra = extraFoot && extraFoot(() => ({ circled: picked, asks }));
+      if (extra) foot.append(extra); foot.append(done); page.append(foot);
+      done.addEventListener('click', () => onDone({ circled: picked, asks }));
       return page;
     };
-    wrap.append(page1);
+    host.append(page1);
+  }
+  function discussForm(engine, card, work, q, wrap, close, opts) {
+    const who = card.requester;   // 去問提需求的人；SA 開的卡 from 是 SA，但原話和回答都是需求單位的
+    if (q.fromMeeting) {   // 廠商需求會議問的：卡上只看得到對話結果，不能改；漏問的要退回 SA
+      wrap.replaceChildren(h('p', 'quiz-intro', '廠商需求會議上問的，這裡只能看。漏問的，按「需求不明，退回 SA」請怡君去問。'),
+        discussLog(q, card.picks && card.picks.discuss, who, card.saAsked || []), closeBtn(close));
+      return wrap;
+    }
+    const job = aiReady(card, work, opts), by = byOf(card, work, opts);
+    discussPages({ host: wrap, q, prev: job ? job.answers : (card.picks && card.picks[work]) || {}, who, card, seed: `${engine.shuffleSeed}:${card.id}:${work}`,
+      extraFoot: (current) => reviseBtn(engine, card, work, q, job, current, wrap, close),
+      onDone: (answers) => {
+        const result = engine.doWork(card.id, work, answers, { version: versionOf(work, card), ...by }); if (!result) return;
+        // 問完了要看得到他怎麼回：一頁對話紀錄
+        wrap.replaceChildren(discussLog(q, answers, who, card.saAsked || [], '沒問什麼，就回座位了。'), resultNode(q, result), closeBtn(close));
+      } });
     return wrap;
+  }
+
+  // 廠商需求會議的時程那段：要回答的題目（m.schedule.card 那張卡的估時）、回答後的對話紀錄
+  function scheduleItem(m) {
+    const card = m.schedule && m.cards.find(c => c.id === m.schedule.card);
+    const sub = card && (card.subtasks || []).find(s => s.work === 'estimate');
+    return sub ? sub.question.items[0] : null;
+  }
+  function scheduleLog(s, hours) {
+    const log = h('div', 'discuss-log');
+    log.append(h('p', 'them', `${s.who}：「${s.text}」`), h('p', 'me', `你：「大概 ${hours} 小時。」`));
+    return log;
+  }
+  // 廠商需求會議的提問視窗（筆電上）：客戶一段講一個模組（engine.vendorStep），講完怡君問要不要問；按提問（engine.vendorStartAsk）
+  // 時鐘才走，用 discussPages 問、存進 engine.vendorAsk，看完對方怎麼回再換下一段（engine.vendorNext）；
+  // 有 AI 的時代每段多一排「請 Claire 問」（engine.vendorDelegate）：它把要圈的句子和問法預選好，玩家看過、可以改，送出還是自己按。
+  // 模組講完是怡君問時程，回答存進 engine.vendorEstimate，再按一下就散會。
+  // 視窗開著、沒在問的時候時鐘停（engine.vendorWindow）；按 × 收起來時鐘照走、會議還沒散，從會議室的鈕再打開，接著講到的那段
+  function openMeeting(desk, engine, m) {
+    const id = 'meeting:vendor';
+    if (desk.wm.windows.has(id)) { engine.vendorWindow(true); return desk.wm.open({ id }); }
+    const first = engine.vendorStep(); if (!first) return null;
+    engine.vendorWindow(true);
+    const wrap = h('div', 'quiz meeting-ask'); const head = h('h4', 'meeting-step'); const body = h('div', 'meeting-page');
+    const foot = (...buttons) => { const f = h('div', 'quiz-foot'); f.append(...buttons); return f; };
+    // 換段的鈕寫下一段是什麼：還有模組就是下一個模組，模組講完是時程，時程之後散會
+    const nextBtn = (step) => {
+      const following = step.page && (m.pages[step.index + 1] || (m.schedule && { title: '時程' }));
+      const b = h('button', 'btn primary', following ? `下一段：${following.title}` : '散會');
+      b.addEventListener('click', () => { const next = engine.vendorNext(); if (next) render(next); });
+      return b;
+    };
+    const showPage = (step) => {
+      const { page } = step; const asked = engine.meeting.notes[page.id];
+      head.textContent = `${page.title}（第 ${step.index + 1} 段，共 ${step.total} 段）`;
+      desk.showProjector(page);
+      const answered = (answers) => body.replaceChildren(discussLog(page.question, answers, page.who), foot(nextBtn(step)));
+      if (asked) { answered(asked); return; }   // 問完了還沒換段，視窗收起來又打開
+      // 圈句子、選問法：自己問從空白開始；請 Claire 擬的話帶著它預選的（draft），上面寫是哪個模型擬的
+      const asking = (draft = null, by = null) => {
+        const host = h('div');
+        const note = by && h('p', 'muted', `${engine.aiName(by)}擬好了要問的：圈的句子和問法都預選了，看過再送出。不滿意可以再請它擬一次，或自己改。`);
+        body.replaceChildren(...[claireRow(), note, host].filter(Boolean));
+        discussPages({ host, q: page.question, prev: draft || {}, who: page.who, seed: `${engine.shuffleSeed}:meeting:${page.id}`, doneLabel: '這段問完了', askLabel: '問圈起來的這幾句',
+          onDone: (answers) => { if (engine.vendorAsk(page.id, answers)) answered(answers); } });
+      };
+      // 有 AI 的時代多一排「請 Claire 問」：它只擬不問，一按就等同提問、時鐘開始走；可以一直重擬，每次扣額度；額度不夠的反灰
+      const claireRow = () => {
+        if (!engine.ai) return null;
+        const row = h('div', 'quiz-foot meeting-claire');
+        for (const [model, spec] of Object.entries(engine.script.ai.models || {})) {
+          const b = h('button', 'btn small', `請 ${spec.label} 問（${spec.cost} 格）`);
+          const lack = engine.modelLack(model); if (lack) { b.disabled = true; b.title = lack; }
+          b.addEventListener('click', () => {
+            const draft = engine.vendorDelegate(page.id, model); if (!draft) return;
+            if (draft.error) { b.disabled = true; b.title = draft.error; return; }
+            asking(draft, model);
+          });
+          row.append(b);
+        }
+        return row;
+      };
+      // 怡君問要不要問：時鐘停著；按提問才開始走，問多久算多久
+      const ask = h('button', 'btn primary', '提問'); const skip = h('button', 'btn', '沒有問題');
+      ask.addEventListener('click', () => { if (engine.vendorStartAsk()) asking(); });
+      skip.addEventListener('click', () => { const next = engine.vendorNext(); if (next) render(next); });
+      const said = h('div', 'discuss-log'); said.append(h('p', 'them', `${m.prompt.who}：「${m.prompt.text}」`));
+      body.replaceChildren(...[said, claireRow(), foot(skip, ask)].filter(Boolean));
+    };
+    // 時程：怡君問、玩家填幾小時（估時題的現實參考不在這裡講，留在結算卡）；「回去估好再說」就散會，估時留給卡上
+    const showSchedule = (step) => {
+      const s = step.schedule;
+      head.textContent = '時程';
+      desk.showProjector({ title: '時程', who: s.who, lines: [s.text] });
+      const answered = (hours) => body.replaceChildren(scheduleLog(s, hours), foot(nextBtn(step)));
+      if (engine.meeting.estimate != null) { answered(engine.meeting.estimate); return; }
+      const answers = [undefined];
+      const answer = h('button', 'btn primary', '回答'); const later = h('button', 'btn', '回去估好再說');
+      answer.addEventListener('click', () => { if (engine.vendorEstimate(answers[0]) != null) answered(answers[0]); });
+      later.addEventListener('click', () => engine.vendorNext());
+      const page = h('div', 'discuss-page'); page.append(h('p', 'muted', `${s.who}：「${s.text}」`), hoursNode(scheduleItem(m), 0, answers), foot(later, answer));
+      body.replaceChildren(page);
+    };
+    const render = (step) => (step.page ? showPage(step) : showSchedule(step));
+    wrap.append(h('p', 'quiz-intro', '客戶一段講一個模組。怡君問要不要問的時候時間是停的；按「提問」才開始算，問多久就算多久。'), head, body);
+    const win = desk.wm.open({ id, title: m.title, icon: 'square-kanban', x: 180, y: 60, w: 600, h: 480, cls: 'win-work', content: wrap, onClose: () => engine.vendorWindow(false) });
+    render(first);
+    return win;
   }
 
   // opts.fromAi：從終端機「看一下」打開 AI 那份（跟卡上的版本是兩個視窗）
@@ -141,10 +245,13 @@
       return desk.trip(pre.question.tripText, () => { engine.restoreTrip(card.id); open(desk, engine, card, work, opts); });
     const aiJob = aiReady(card, work, opts);
     const fromAi = !!aiJob;
+    const title = `${work === 'reject' ? '退回 SA' : Works.label(work)}${fromAi ? `（AI 第 ${aiJob.id} 份）` : ''} — ${card.title}`;
+    const icon = fromAi ? 'square-terminal' : 'square-kanban';
+    // 三機找碴要三台裝置一起看，開在整個螢幕的燈箱
+    if (pre && pre.question.kind === 'spot') return desk.lightbox({ title, icon, fill: (close) => build(desk, engine, card, work, close, opts) });
     const id = `work:${card.id}:${work}${fromAi ? `:ai${aiJob.id}` : ''}`;
     const cls = work === 'code' ? 'win-code' : work === 'reject' ? 'win-reject' : 'win-work';
-    const title = `${work === 'reject' ? '退回 SA' : Works.label(work)}${fromAi ? `（AI 第 ${aiJob.id} 份）` : ''} — ${card.title}`;
-    const win = desk.wm.open({ id, title, icon: fromAi ? 'square-terminal' : 'square-kanban', x: fromAi ? 210 : 180, y: fromAi ? 90 : 60, w: 600, h: 480, cls, content: h('div') });
+    const win = desk.wm.open({ id, title, icon, x: fromAi ? 210 : 180, y: fromAi ? 90 : 60, w: 600, h: 480, cls, content: h('div') });
     desk.wm.setContent(id, build(desk, engine, card, work, () => desk.wm.close(id), opts));
     return win;
   }
@@ -182,6 +289,11 @@
       wrap.append(h('p', '', `這張卡沒有「${Works.label(work)}」要做。`), closeBtn(close));
       return wrap;
     }
+    if (work === 'route' && card.route != null) {   // 接手或重來只選一次：選過了只看得到選了哪條
+      const item = sub.question.items[0];
+      wrap.append(h('p', 'quiz-intro', '接手或重來只能選一次，這裡只能看。'), h('p', '', item.text), h('p', '', `已選：${item.options[card.route]}`), closeBtn(close));
+      return wrap;
+    }
     if (card.done(work)) wrap.append(h('p', 'muted', `上次：${card.latest(work) || '做過了'}。再做一次會記成新版本。`));
     const runs = runsOf(card, work);
     if (aiReady(card, work, opts)) wrap.append(h('p', 'ai-banner', `${card.done(work) ? 'AI 的版本，完成就會蓋過卡上的版本。' : 'AI 填好了。'}沒問題就完成，不對就退回請它改——送出去寫的是你的名字。`));
@@ -205,6 +317,10 @@
     if (q.kind === 'entry') return entryForm(engine, card, work, q, wrap, close, opts);
     if (q.kind === 'spot') return spotForm(engine, card, work, q, wrap, close, opts);
     if (q.kind === 'diff') return diffForm(engine, card, work, q, wrap, close, opts);
+    if (engine.fromMeeting(card, work)) {   // 廠商需求會議上回答的估時：卡上只能看（會議問的需求討論在 discussForm 處理）
+      wrap.replaceChildren(h('p', 'quiz-intro', '廠商需求會議上回答怡君的，這裡只能看。'), h('p', '', `${q.items[0].text}${card.estimate} 小時`), closeBtn(close));
+      return wrap;
+    }
     if (q.points) { const ul = h('ul', 'points'); for (const p of q.points) ul.append(h('li', '', p)); wrap.append(ul); }
 
     // 寫過的文件再點進來，停在最後一次的樣子（上次的答案記在 card.picks）
@@ -244,7 +360,8 @@
     const off = h('button', 'btn small ghost', '取消'); off.addEventListener('click', (ev) => { ev.stopPropagation(); state.marks.delete(String(key)); redraw(); });
     menu.append(off); anchor.append(menu);
   }
-  function reviewFoot(engine, card, work, q, state, wrap, close, opts, { lgtm = false, redraw }) {
+  // closeOnSend：交出後直接關掉（燈箱），不留結果那句；那句照樣記在卡片的紀錄裡
+  function reviewFoot(engine, card, work, q, state, wrap, close, opts, { lgtm = false, closeOnSend = false, redraw }) {
     const foot = h('div', 'quiz-foot review-foot');
     const hintBtn = h('button', 'btn ghost', '提示');
     const hintBox = h('p', 'review-hint'); hintBox.hidden = true;
@@ -256,6 +373,7 @@
     });
     const send = (answers) => {
       const result = engine.doWork(card.id, work, answers, { version: versionOf(work, card), ...byOf(card, work, opts) }); if (!result) return;
+      if (closeOnSend) { close(); return; }
       wrap.replaceChildren(h('p', '', Works.summarize(q, answers, result)), closeBtn(close));
     };
     const go = h('button', 'btn primary', '交出檢閱'); go.addEventListener('click', () => send({ ...state.answers(), hintsUsed: state.hintsUsed }));
@@ -264,10 +382,14 @@
     foot.append(go);
     return { foot, hintBox };
   }
-  // 前端「三機找碴」：PC、開發平板、開發手機三台並排，畫的是 AI 做出來的版本（含瑕疵）；點區塊畫紅圈、選原因
+  // 前端「三機找碴」：PC、開發平板、開發手機三台一起看（開在燈箱裡），畫的是要檢閱的那一版——AI 做的活動頁（瑕疵都在），
+  // 或接手別人的表單（q.screen 'form'：前端設計照 q.inherited、資料照 q.rows）；點區塊畫紅圈、選原因
   function spotForm(engine, card, work, q, wrap, close, opts) {
     const state = reviewState(engine, card, work, q, opts);
-    const model = Screen.model({ ...card, screen: { ...(card.screen || {}), campaign: true, defects: Object.fromEntries(q.defects.map(d => [d, null])) }, history: [{ work: 'code', result: { toFill: [], bugs: [] } }] });
+    const built = { history: [{ work: 'code', result: { toFill: [], bugs: [] } }] };   // 一定要有一筆 code，不然三台都畫成 404
+    const model = q.screen === 'form'
+      ? Screen.model({ ...card, ...built, picks: { ...card.picks, ui_design: q.inherited }, screen: { ...card.screen, rows: q.rows || card.screen.rows } })
+      : Screen.model({ ...card, ...built, screen: { ...(card.screen || {}), campaign: true, defects: Object.fromEntries(q.defects.map(d => [d, null])) } });
     const board = h('div', 'spot-devices');
     const names = { pc: 'PC', tablet: '開發平板', phone: '開發手機' };
     const reasons = h('div', 'spot-reasons');   // 原因選單放在裝置外：手機畫面太窄，塞進去會擋住要看的東西，三台也會各跳一份
@@ -278,7 +400,7 @@
         const frame = h('div', `spot-frame spot-${device}${state.hint === 1 && q.spots.some(s => !s.trap && s.devices.includes(device) && s.devices.length === 1) ? ' spot-lit' : ''}`);
         const page = Screen.render(model, device);
         for (const node of page.querySelectorAll('[data-region]')) {
-          const key = node.dataset.region;
+          const key = node.dataset.region; node.classList.add('mock-region');   // 表單的欄位列也當成點得到的區塊
           if (state.marks.has(key)) { node.classList.add('spot-hit'); node.classList.toggle('spot-pending', !state.marks.get(key)); node.classList.toggle('spot-active', key === active); }
           node.addEventListener('click', (ev) => { ev.stopPropagation(); if (!state.marks.has(key)) state.marks.set(key, null); active = key; redraw(); });
         }
@@ -289,7 +411,7 @@
       if (state.marks.has(active)) { reasons.append(h('p', 'spot-reasons-title', '這一塊的問題是：')); reasonMenu(q, active, state, reasons, redraw); }
     };
     redraw();
-    const { foot, hintBox } = reviewFoot(engine, card, work, q, state, wrap, close, opts, { redraw });
+    const { foot, hintBox } = reviewFoot(engine, card, work, q, state, wrap, close, opts, { closeOnSend: true, redraw });
     wrap.append(board, reasons, hintBox, foot);
     return wrap;
   }
@@ -329,7 +451,11 @@
     const chosen = new Map();   // 圈的題目 → 第幾句補充說明（null＝只說這題不對）
     const go = h('button', 'btn primary', `請 AI 改（扣 ${engine.aiCost(job.model)} 格額度）`); go.disabled = true;
     const lack = h('p', 'no-source');   // 額度不夠跑這個模型：打開就說，不用按了才知道
-    const sync = () => { const short = engine.aiLack(job.model); go.disabled = !chosen.size || !!short; lack.hidden = !short; lack.textContent = short ? `${short}這件只能自己改，或等額度補滿再退回。` : ''; };
+    // 模型一天的上限到了（Pedia）：只說那句，等額度補滿也沒用
+    const sync = () => {
+      const short = engine.aiLack(job.model); go.disabled = !chosen.size || !!short; lack.hidden = !short;
+      lack.textContent = !short ? '' : engine.capReached(job.model) ? short : `${short}這件只能自己改，或等額度補滿再退回。`;
+    };
     wrap.replaceChildren(h('p', 'ai-banner', '圈出它錯的或漏的，跟它說要怎麼改。你說的話它會記進 AI 筆記，之後同類的題目都照著做。'));
     if (engine.isWordy(job, work)) {   // Novel 寫的太長：不用圈題目也能退，請它用人話寫（記進筆記，之後都短）
       const row = h('fieldset', 'item revise-spot'); const pick = h('label', 'revise-pick'); const cb = h('input'); cb.type = 'checkbox';
@@ -448,6 +574,14 @@
   // seed：這一題選項顯示順序的種子（Works.displayOrder）；有 values 的（估時）照原順序
   function itemNode(item, i, answers, work, card, seed) {
     if (item.type === 'hours') return hoursNode(item, i, answers);
+    // 照原本那版的題（onlyIf 沒成立，例：檢閱沒挑出來）：看得到、不能改，旁邊寫為什麼
+    if (card && !Works.activeItem(item, card.picks)) {
+      answers[i] = item.inherit;
+      const box = h('fieldset', 'item'); box.append(h('legend', '', item.text));
+      const row = h('label', 'opt given'); const input = h('input'); input.type = 'radio'; input.checked = true; input.disabled = true;
+      row.append(input, h('span', '', `${item.options[item.inherit]}（${item.lockedText || '照原本的版本'}）`)); box.append(row);
+      return box;
+    }
     const box = h('fieldset', 'item');
     const order = Works.displayOrder(item.options.length, `${seed}:${item.key || i}`, item.keepOrder || !!item.values);
     // item.given：前面的文件寫到的選項直接帶進來，勾好鎖住（Works.givenOptions）。
@@ -647,5 +781,5 @@
     desk.wm.open({ id, title: `回訊息 — ${doc.group || doc.from}`, icon: doc.origin === 'line' ? 'message-circle' : 'mail', x: 260, y: 120, w: 440, h: 300, cls: 'win-work', content: wrap });
   }
 
-  root.Quiz = { open, openReply };
+  root.Quiz = { open, openReply, openMeeting };
 })(window);

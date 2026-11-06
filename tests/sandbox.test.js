@@ -118,6 +118,19 @@ test('人在同事座位時被趕下班：先回到自己座位，畫面跟著�
   assert.deepStrictEqual(places, ['desk']);
 });
 
+test('同一間公司共用的小事件、Claire 方案、茶几設定在 Sandbox 上，第一關照用', () => {
+  assert.deepStrictEqual(Sandbox.ERRANDS.map(x => x.id), ['water', 'aircon', 'font', 'projector']);
+  assert.ok(Sandbox.ERRANDS.every(x => x.who && x.text && x.trip && x.tripText && x.decline));
+  assert.strictEqual(Sandbox.AI.hybrid.quota, 6); assert.strictEqual(Sandbox.AI.speedrun.models.Pedia.cost, 3);
+  assert.strictEqual(Sandbox.AI.legacy, undefined);
+  for (const mode of ['legacy', 'hybrid', 'speedrun']) {
+    const s = Sandbox.make('blur', mode);
+    assert.strictEqual(s.errands.pool, Sandbox.ERRANDS);
+    assert.deepStrictEqual(s.home, Sandbox.HOME);
+  }
+  assert.strictEqual(Sandbox.make('blur', 'hybrid').ai.quota, Sandbox.AI.hybrid.quota);
+});
+
 test('正式上班整天：早會、開卡、走一趟、結案、下班回家睡到隔天 08:00 結算', () => {
   const e = play('hybrid');
   tickTo(e, at(9, 21));
