@@ -135,14 +135,16 @@
         answer: [0, 1, 2, 3, 4, 5, 6, 7], before: [[1, 2], [2, 3], [2, 4], [2, 5], [3, 7], [4, 7], [5, 7], [6, 7]],
         why: '登入打卡不在需求裡；人情味是背景，不是欄位',
         given: [
-          { work: 'read_req', options: [3], when: { item: 0, picked: 0 } }, { work: 'read_req', options: [5], when: { item: 2, picked: 0 } },
+          { work: 'read_req', options: [3], when: { item: 0, picked: 0 } }, { work: 'read_req', options: [1, 5], when: { item: 2, picked: 0 } },
           { work: 'discuss', options: [3], when: { item: 2, picked: 0 } }, { work: 'discuss', options: [4], when: { item: 1, picked: 0 } },
           { work: 'reject', options: [3], when: { item: 0, picked: 0 } }, { work: 'reject', options: [4], when: { item: 0, picked: 1 } },   // 退回 SA 問回來的視同會議問過
         ] }] } },
-      // 規格：流程彈性的五題，只負責預填開發（規格連動的 function）
+      // 規格：流程彈性的五題，只負責預填開發（規格連動的 function）；前面的文件寫到的那題帶入、鎖住（given）
       { work: 'doc_spec', question: { items: [
-        { text: '拍賣前還不知道實重', options: ['先記估計重量，過磅後補實重，兩個都留著', '一定要填實重才能存'], answer: 0 },
-        { text: '颱風天價錢還沒定', options: ['可以先收貨、單價標「待補」，補了才進成本，待補的單每天提醒秀琴姐', '單價沒填不能存'], answer: 0 },
+        { text: '拍賣前還不知道實重', options: ['先記估計重量，過磅後補實重，兩個都留著', '一定要填實重才能存'], answer: 0,
+          given: [{ work: 'doc_plan', options: [0], when: { item: 0, picked: 1 } }] },
+        { text: '颱風天價錢還沒定', options: ['可以先收貨、單價標「待補」，補了才進成本，待補的單每天提醒秀琴姐', '單價沒填不能存'], answer: 0,
+          given: [{ work: 'read_req', options: [0], when: { item: 2, picked: 0 } }, { work: 'doc_plan', options: [0], when: { item: 0, picked: 5 } }] },
         { text: '熟客價', options: ['客戶等級下拉帶出價錢，手動改價照改，程式記誰改、什麼時候改、改前改後', '熟客價直接改單價欄、不留紀錄'], answer: 0 },
         { text: '休漁', options: ['收購記捕撈日期和來源，照收不擋、不用誰確認；捕撈日期落在法定休漁、來源又是本地漁船的，單子自動標「休漁期捕撈」，月底報表一查就有（進口的和冷凍庫存不標）。業界不捕的月份（鯖魚 2～5 月）只在收購畫面提醒「這時候進來的量會很少」',
                                  '休漁期跳出來要主管確認', '休漁月份整個擋掉這種魚', '不管休漁'], answer: 0 },
@@ -282,18 +284,26 @@
         answer: [0, 1, 2, 3, 4, 5, 6, 7], before: [[0, 3], [1, 2], [2, 3], [3, 4], [3, 5], [4, 7], [5, 7], [6, 7]],
         why: '得率要照紀錄算，不是讓師傅自己填；滿意度問卷不在需求裡',
         given: [
+          { work: 'read_req', options: [2], when: { item: 0, picked: 0 } }, { work: 'read_req', options: [3], when: { item: 1, picked: 0 } },
           { work: 'read_req', options: [4], when: { item: 2, picked: 0 } },
           { work: 'discuss', options: [0], when: { item: 1, picked: 0 } }, { work: 'discuss', options: [5], when: { item: 3, sub: 1, picked: 0 } },
           { work: 'reject', options: [0], when: { item: 0, picked: 0 } }, { work: 'reject', options: [5], when: { item: 0, picked: 2 } },   // 退回 SA 問回來的視同會議問過
         ] }] } },
       { work: 'doc_spec', question: { items: [
         { text: '估量要先報、實重後來才有', options: ['先用收購估重報量，過磅、加工完自動換成實際的數字，差太多提醒業務', '一定要加工完才能報量'], answer: 0 },
-        { text: '做完比估的少', options: ['可以部分出貨、剩的延後補，或改量後重新報價，客戶確認前原單照留', '訂單成立後不能改'], answer: 0 },
+        { text: '做完比估的少', options: ['可以部分出貨、剩的延後補，或改量後重新報價，客戶確認前原單照留', '訂單成立後不能改'], answer: 0,
+          given: [{ work: 'read_req', options: [0], when: { item: 2, picked: 0 } }, { work: 'doc_plan', options: [0], when: { item: 0, picked: 4 } }] },
         { text: '做完比估的多', options: ['多的先分給其他有訂的客戶，再來入庫（記入庫日和效期）、轉二次加工（罐頭、魚鬆）、最後做凍乾寵物食品；每轉一次原料批號和成本都帶過去，魚鬆再照它自己的得率估量',
-                                     '多的只能入庫', '轉二次加工不留紀錄', '多的沒地方記'], answer: 0 },
-        { text: '產季的起訖', options: ['每個品種的產季做成設定，每年可以調；過渡期兩邊的得率都列出來給人選；休漁有照農曆算的（鯖魚農曆年前後、鎖管農曆二月十月），設定要能填農曆', '照月份寫死'], answer: 0 },
-        { text: '報量的保守比例', options: ['做成設定，建宏可以調，預設值寫在設定頁上', '寫死九折在程式裡'], answer: 0 },
-        { text: '放越久越不值錢', options: ['每次轉下去都記日期和成本，報表看得到一批從入庫到做成什麼、中間放了幾天、毛利掉在哪；入庫放到設定的天數就提醒該不該轉', '轉作只記去向、不記日期'], answer: 0 },
+                                     '多的只能入庫', '轉二次加工不留紀錄', '多的沒地方記'], answer: 0,
+          given: [{ work: 'discuss', options: [0], when: { item: 3, sub: 1, picked: 0 } }, { work: 'reject', options: [0], when: { item: 0, picked: 2 } },
+                  { work: 'doc_plan', options: [0], when: { item: 0, picked: 5 } }] },
+        { text: '產季的起訖', options: ['每個品種的產季做成設定，每年可以調；過渡期兩邊的得率都列出來給人選；休漁有照農曆算的（鯖魚農曆年前後、鎖管農曆二月十月），設定要能填農曆', '照月份寫死'], answer: 0,
+          given: [{ work: 'discuss', options: [0], when: { item: 2, picked: 0 } }, { work: 'reject', options: [0], when: { item: 0, picked: 1 } }] },
+        { text: '報量的保守比例', options: ['做成設定，建宏可以調，預設值寫在設定頁上', '寫死九折在程式裡'], answer: 0,
+          given: [{ work: 'discuss', options: [0], when: { item: 3, sub: 0, picked: 0 } }, { work: 'reject', options: [0], when: { item: 0, picked: 2 } },
+                  { work: 'doc_plan', options: [0], when: { item: 0, picked: 3 } }] },
+        { text: '放越久越不值錢', options: ['每次轉下去都記日期和成本，報表看得到一批從入庫到做成什麼、中間放了幾天、毛利掉在哪；入庫放到設定的天數就提醒該不該轉', '轉作只記去向、不記日期'], answer: 0,
+          given: [{ work: 'discuss', options: [0], when: { item: 3, sub: 1, picked: 0 } }, { work: 'reject', options: [0], when: { item: 0, picked: 2 } }] },
       ] } },
       { work: 'ui_design', question: { items: [
         { role: 'field', field: '處理方式', text: '處理方式', sample: '去頭去內臟（當季建議）', answer: 0, ifSkipped: 2,
@@ -407,6 +417,7 @@
         answer: [0, 1, 2, 3, 4, 5, 6], before: [[0, 1], [0, 2], [0, 4], [1, 3], [3, 6], [4, 6], [5, 6]],
         why: '指紋打卡機不在需求裡；請假三層簽核會讓流程卡死',
         given: [
+          { work: 'read_req', options: [1], when: { item: 0, picked: 0 } }, { work: 'read_req', options: [2], when: { item: 1, picked: 0 } },
           { work: 'read_req', options: [3], when: { item: 2, picked: 0 } },
           { work: 'discuss', options: [1], when: { item: 0, picked: 0 } }, { work: 'discuss', options: [3, 4], when: { item: 1, picked: 0 } },
           { work: 'discuss', options: [2], when: { item: 2, picked: 0 } },
@@ -414,8 +425,12 @@
           { work: 'reject', options: [2], when: { item: 0, picked: 2 } },
         ] }] } },
       { work: 'doc_spec', question: { items: [
-        { text: '凌晨進港，組長忙到找不到人', options: ['不用等誰簽，登記了就算數；程式記誰登記、什麼時候登記，組長忙完再看，看過的打勾', '改成副組長代簽才算數', '停在組長那邊等他簽'], answer: 0 },
-        { text: '忘了報、事後才補', options: ['可以補，日期能選過去的，標「補單」', '只能選今天以後'], answer: 0 },
+        { text: '凌晨進港，組長忙到找不到人', options: ['不用等誰簽，登記了就算數；程式記誰登記、什麼時候登記，組長忙完再看，看過的打勾', '改成副組長代簽才算數', '停在組長那邊等他簽'], answer: 0,
+          given: [{ work: 'read_req', options: [0], when: { item: 2, picked: 0 } }, { work: 'discuss', options: [0], when: { item: 1, picked: 0 } },
+                  { work: 'reject', options: [0], when: { item: 0, picked: 1 } }, { work: 'doc_plan', options: [0], when: { item: 0, picked: 3 } }] },
+        { text: '忘了報、事後才補', options: ['可以補，日期能選過去的，標「補單」', '只能選今天以後'], answer: 0,
+          given: [{ work: 'discuss', options: [0], when: { item: 1, picked: 0 } }, { work: 'reject', options: [0], when: { item: 0, picked: 1 } },
+                  { work: 'doc_plan', options: [0], when: { item: 0, picked: 4 } }] },
       ] } },
       { work: 'ui_design', question: { items: [
         { role: 'field', field: '時數', text: '加班時數', sample: '4.5（22:30～03:00 自動算）', answer: 0, ifSkipped: 2,
@@ -504,12 +519,13 @@
         answer: [0, 1, 2, 3, 4, 5, 6, 7], before: [[0, 1], [1, 2], [1, 3], [2, 4], [3, 4], [4, 7], [5, 7], [6, 7]],
         why: '區塊鏈溯源、消費者掃碼查產地都不在需求裡',
         given: [
-          { work: 'read_req', options: [1], when: { item: 0, picked: 0 } },
+          { work: 'read_req', options: [1], when: { item: 0, picked: 0 } }, { work: 'read_req', options: [2, 4], when: { item: 1, picked: 0 } },
           { work: 'discuss', options: [3], when: { item: 2, picked: 0 } },
           { work: 'reject', options: [3], when: { item: 0, picked: 0 } },   // 退回 SA 問回來的視同會議問過
         ] }] } },
       { work: 'doc_spec', question: { items: [
-        { text: '從成品往回查', options: ['從成品批號一路查回原料、哪天進、哪個來源，一個畫面看完', '只能從原料往下查'], answer: 0 },
+        { text: '從成品往回查', options: ['從成品批號一路查回原料、哪天進、哪個來源，一個畫面看完', '只能從原料往下查'], answer: 0,
+          given: [{ work: 'read_req', options: [0], when: { item: 1, picked: 0 } }, { work: 'doc_plan', options: [0], when: { item: 0, picked: 4 } }] },
         { text: '二次加工', options: ['轉魚鬆、罐頭、凍乾時，新批號掛在原批號下面，成本跟著帶', '轉過去重新開批號'], answer: 0 },
       ] } },
       { work: 'ui_design', question: { items: [
@@ -671,13 +687,18 @@
         answer: [0, 1, 2, 3, 4, 5, 6], before: [[0, 1], [0, 3], [0, 4], [1, 2], [2, 6], [3, 6], [4, 6], [5, 6]],
         why: '冷凍庫沒有溫度感測器；3D 地圖不在需求裡',
         given: [
+          { work: 'read_req', options: [0], when: { item: 0, picked: 0 } }, { work: 'read_req', options: [2], when: { item: 1, picked: 0 } },
+          { work: 'read_req', options: [3], when: { item: 2, picked: 0 } },
           { work: 'discuss', options: [0], when: { item: 0, picked: 0 } }, { work: 'discuss', options: [1], when: { item: 1, picked: 0 } },
           { work: 'reject', options: [0], when: { item: 0, picked: 0 } }, { work: 'reject', options: [1], when: { item: 0, picked: 1 } },   // 退回 SA 問回來的視同會議問過
         ] }] } },
       { work: 'doc_spec', question: { items: [
-        { text: '放越久越不值錢', options: ['放到設定天數提醒「要不要轉魚鬆」，轉了照批號追溯掛回原批', '只記數量不記入庫日'], answer: 0 },
-        { text: '休漁靠庫存', options: ['休漁前一個月提醒「這種魚的庫存還夠撐幾天」（用去年同期的出貨量估）', '沒有提醒'], answer: 0 },
-        { text: '先進先出', options: ['出貨預設帶最早入庫的那批，可以改，程式記誰改；原因選填（客人指定新貨）', '讓人自己挑哪一箱'], answer: 0 },
+        { text: '放越久越不值錢', options: ['放到設定天數提醒「要不要轉魚鬆」，轉了照批號追溯掛回原批', '只記數量不記入庫日'], answer: 0,
+          given: [{ work: 'read_req', options: [0], when: { item: 2, picked: 0 } }, { work: 'doc_plan', options: [0], when: { item: 0, picked: 3 } }] },
+        { text: '休漁靠庫存', options: ['休漁前一個月提醒「這種魚的庫存還夠撐幾天」（用去年同期的出貨量估）', '沒有提醒'], answer: 0,
+          given: [{ work: 'doc_plan', options: [0], when: { item: 0, picked: 4 } }] },
+        { text: '先進先出', options: ['出貨預設帶最早入庫的那批，可以改，程式記誰改；原因選填（客人指定新貨）', '讓人自己挑哪一箱'], answer: 0,
+          given: [{ work: 'doc_plan', options: [0], when: { item: 0, picked: 2 } }] },
       ] } },
       { work: 'ui_design', question: { items: [
         { role: 'field', field: '重量（公斤）', text: '重量', sample: '毛重 10.0／淨重 8.6（冰衣 14%，自動算）', answer: 0, ifSkipped: 2,
@@ -754,10 +775,15 @@
                   '寫測試', '部署到測試機', '串接物流公司的理賠 API', '做客訴聊天機器人'],
         answer: [0, 1, 2, 3, 4, 5], before: [[0, 1], [0, 2], [1, 3], [2, 5], [3, 5], [4, 5]],
         why: '物流公司沒有理賠 API；客訴聊天機器人不在需求裡',
-        given: [{ work: 'read_req', options: [2], when: { item: 1, picked: 0 } }] }] } },
+        given: [
+          { work: 'read_req', options: [1], when: { item: 0, picked: 0 } }, { work: 'read_req', options: [2], when: { item: 1, picked: 0 } },
+          { work: 'read_req', options: [3], when: { item: 2, picked: 0 } },
+        ] }] } },
       { work: 'doc_spec', question: { items: [
-        { text: '先退錢、後理賠', options: ['退款和理賠分兩張單，理賠還沒下來不影響退款，各自追到結案', '理賠核准才能退款'], answer: 0 },
-        { text: '退回的貨', options: ['可以選報廢或轉加工；轉加工照批號追溯掛回原批，報廢記重量和原因', '只能報廢'], answer: 0 },
+        { text: '先退錢、後理賠', options: ['退款和理賠分兩張單，理賠還沒下來不影響退款，各自追到結案', '理賠核准才能退款'], answer: 0,
+          given: [{ work: 'read_req', options: [0], when: { item: 1, picked: 0 } }, { work: 'doc_plan', options: [0], when: { item: 0, picked: 2 } }] },
+        { text: '退回的貨', options: ['可以選報廢或轉加工；轉加工照批號追溯掛回原批，報廢記重量和原因', '只能報廢'], answer: 0,
+          given: [{ work: 'read_req', options: [0], when: { item: 2, picked: 0 } }, { work: 'doc_plan', options: [0], when: { item: 0, picked: 3 } }] },
       ] } },
       { work: 'ui_design', question: { items: [
         { role: 'field', field: '退貨原因', text: '退貨原因', sample: '解凍 ▾（選「其他」才開文字框）', answer: 0, ifSkipped: 2,

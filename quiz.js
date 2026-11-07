@@ -571,22 +571,25 @@
     return work.startsWith('doc_') ? `v${n}` : undefined;
   }
 
+  // 定好、不能改的單選題：只列定下來的那個選項，旁邊寫為什麼
+  function lockedNode(item, picked, why) {
+    const box = h('fieldset', 'item'); box.append(h('legend', '', item.text));
+    const row = h('label', 'opt locked'); const input = h('input'); input.type = 'radio'; input.checked = true; input.disabled = true;
+    row.append(input, h('span', '', `${item.options[picked]}（${why}）`)); box.append(row);
+    return box;
+  }
   // seed：這一題選項顯示順序的種子（Works.displayOrder）；有 values 的（估時）照原順序
   function itemNode(item, i, answers, work, card, seed) {
     if (item.type === 'hours') return hoursNode(item, i, answers);
-    // 照原本那版的題（onlyIf 沒成立，例：檢閱沒挑出來）：看得到、不能改，旁邊寫為什麼
-    if (card && !Works.activeItem(item, card.picks)) {
-      answers[i] = item.inherit;
-      const box = h('fieldset', 'item'); box.append(h('legend', '', item.text));
-      const row = h('label', 'opt given'); const input = h('input'); input.type = 'radio'; input.checked = true; input.disabled = true;
-      row.append(input, h('span', '', `${item.options[item.inherit]}（${item.lockedText || '照原本的版本'}）`)); box.append(row);
-      return box;
-    }
+    // 照原本那版的題（onlyIf 沒成立，例：檢閱沒挑出來）
+    if (card && !Works.activeItem(item, card.picks)) { answers[i] = item.inherit; return lockedNode(item, item.inherit, item.lockedText || '照原本的版本'); }
+    // item.given：前面的文件寫到的選項直接帶進來，勾好鎖住（Works.givenOptions）；單選題就是那題定好、只列那個選項。
+    // 排序題（開發計畫）帶進來的步驟接在清單後面、照畫面上的順序，先後還是玩家自己排（排順序是開發計畫的功課）
+    const multi = Array.isArray(item.answer) && item.type !== 'order';
+    const given = card ? Works.givenOptions(item, card.picks, (w) => card.done(w)) : [];
+    if (given.length && !multi && item.type !== 'order') { answers[i] = given[0]; return lockedNode(item, given[0], '前面的文件寫了'); }
     const box = h('fieldset', 'item');
     const order = Works.displayOrder(item.options.length, `${seed}:${item.key || i}`, item.keepOrder || !!item.values);
-    // item.given：前面的文件寫到的選項直接帶進來，勾好鎖住（Works.givenOptions）。
-    // 排序題（開發計畫）帶進來的步驟接在清單後面、照畫面上的順序，先後還是玩家自己排（排順序是開發計畫的功課）
-    const given = card ? Works.givenOptions(item, card.picks, (w) => card.done(w)) : [];
     const prev = Array.isArray(answers[i]) ? answers[i] : [];
     if (given.length) answers[i] = item.type === 'order' ? [...prev, ...order.filter(j => given.includes(j) && !prev.includes(j))] : [...new Set([...given, ...prev])];
     const init = answers[i];   // 上次選的（或帶入的），重新打開要停在那個樣子
@@ -597,7 +600,6 @@
       blank = h('span', 'blank', '________');
       legend.append(item.text.slice(0, blankAt), blank, item.text.slice(blankAt + 4));
     } else legend.textContent = item.text;
-    const multi = Array.isArray(item.answer) && item.type !== 'order';
     const hidden = Works.hiddenOptions(item, card && card.picks);   // 前面沒問到的（showIf）、怡君已經刪掉的（hideIf），這個選項就不會出現
     if (item.type === 'order') return orderNode(item, i, answers, box, order, given, hidden);
     const name = item.key || `q${i}`;

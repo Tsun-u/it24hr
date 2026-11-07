@@ -226,3 +226,29 @@ test('交給 AI 寫前端設計（speedrun、Essay）：單選的欄位不是正
   assert.ok(fields.length > 0);
   for (const [it, i] of fields) assert.ok([it.answer, it.ai.pick].includes(job.answers[i]), it.field);
 });
+
+// 文件往後流（開發計畫 ← 整理需求、需求討論；開發規格 ← 整理需求、需求討論、開發計畫）
+const READ_REQ_PLAN = { buy: [1, 3, 5], yield: [2, 3, 4], shift: [1, 2, 3], trace: [1, 2, 4], stock: [0, 2, 3], claim: [1, 2, 3] };
+// 會議什麼都沒問，只靠整理需求和開發計畫：規格裡被帶入、鎖住的題
+const SPEC_FROM_DOCS = { buy: [0, 1], yield: [1, 2, 4], shift: [0, 1], trace: [0], stock: [0, 1, 2], claim: [0, 1] };
+for (const [id, steps] of Object.entries(READ_REQ_PLAN)) {
+  test(`文件往後流 ${id}：整理需求答對帶進開發計畫，計畫排了的步驟帶進規格（單選題選好鎖住）`, () => {
+    const e = opened(id === 'claim' ? { pool: ['claim', 'stock'] } : undefined); const card = e.board.get(id);
+    const q = (w) => card.subtasks.find(s => s.work === w).question;
+    const done = (w) => card.done(w);
+    e.doWork(id, 'read_req', right(q('read_req')));
+    const plan = q('doc_plan').items[0];
+    assert.deepStrictEqual(Works.givenOptions(plan, card.picks, done).filter(o => steps.includes(o)).sort(), steps);
+    e.doWork(id, 'doc_plan', right(q('doc_plan')));
+    const locked = q('doc_spec').items.map((item, i) => (Works.givenOptions(item, card.picks, done).includes(0) ? i : -1)).filter(i => i >= 0);
+    assert.deepStrictEqual(locked, SPEC_FROM_DOCS[id]);
+  });
+}
+test('文件往後流：整理需求答錯不帶，開發計畫沒做也不帶進規格', () => {
+  const e = opened(); const card = e.board.get('shift');
+  const q = (w) => card.subtasks.find(s => s.work === w).question;
+  const wrong = right(q('read_req')).map(() => 1);
+  e.doWork('shift', 'read_req', wrong);
+  assert.deepStrictEqual(Works.givenOptions(q('doc_plan').items[0], card.picks, (w) => card.done(w)), []);
+  assert.ok(q('doc_spec').items.every(item => !Works.givenOptions(item, card.picks, (w) => card.done(w)).length));
+});

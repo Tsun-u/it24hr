@@ -58,7 +58,8 @@
   }
   // 條件可以是一串：其中一個成立就算（例如財務那項：需求討論問到，或怡君退回時問回來）
   const met = (picks, cond) => [].concat(cond).some(c => pickedIn(picks, c.work, c).includes(c.picked));
-  // item.given：前面某個工作做過了（而且 when 那題選了 picked），這幾個選項從它的文件帶進來、勾好鎖住。
+  const isSingle = (item) => !Array.isArray(item.answer) && item.type !== 'order';
+  // item.given：前面某個工作做過了（而且 when 那題選了 picked），這幾個選項從它的文件帶進來、勾好鎖住（單選題就是那題選好、整題鎖住）。
   // 規則是一條或一串 { work, options, when?: { item, sub?, picked } }；done(work) 回答那件工作做了沒。文件往後流跟誰寫無關，AI 寫的也帶
   function givenOptions(item, picks, done) {
     const out = [];
@@ -394,15 +395,16 @@
       const item = question.items[i];
       if (!activeItem(item, picks)) return item.inherit;   // 筆記、交付重點都改不動
       const filled = withGiven(item, focusPick(item, focus) ?? a, givenOptions(item, picks, isDone));
-      if (!Array.isArray(filled)) return filled;
-      // 前面文件沒寫到的它也不知道，CLAIRE.md 點名要的照寫
+      // 前面文件沒寫到的它也不知道，CLAIRE.md 點名要的照寫；單選題就照它自己的錯法寫（前面的文件錯，後面跟著錯）
       const drop = unbacked(item, picks, isDone).filter(o => !noteKept(item, notes || {}).includes(o));
+      if (!Array.isArray(filled)) return drop.includes(filled) && item.ai && 'pick' in item.ai ? item.ai.pick : filled;
       return filled.filter(v => !drop.includes(v));
     }), errors };
   }
   // 帶進來的選項 AI 不會漏：多選併進去；排序題照正解的先後插進它排的清單
   function withGiven(item, answer, given) {
     if (!given.length) return answer;
+    if (isSingle(item)) return given[0];   // 單選：前面文件寫到的那個選項直接選好
     const list = Array.isArray(answer) ? [...answer] : [];
     if (item.type === 'order') return given.reduce((acc, g) => (acc.includes(g) ? acc : insertInOrder(item, acc, g)), list);
     return [...new Set([...list, ...given])];

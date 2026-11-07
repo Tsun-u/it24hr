@@ -4,6 +4,8 @@ const DAY1 = require('../day1.js');
 const DAY2 = require('../day2.js');
 const DAY3 = require('../day3.js');
 const Works = require('../works.js');
+const { Sandbox } = require('../sandbox.js');
+require('../sandbox-scenery.js');
 const L = (w) => (Works.LABELS && Works.LABELS[w]) || w;
 
 function cardsOf(script) {
@@ -18,6 +20,7 @@ function cardsOf(script) {
   }
   for (const c of script.cards || []) if (c.onNoBackup && c.onNoBackup.card) out.push({ where: '資料遺失事件', id: c.onNoBackup.card.id, title: c.onNoBackup.card.title, subtasks: c.onNoBackup.card.subtasks });
   for (const em of (script.home && script.home.emergencies) || []) if (em.card) out.push({ where: '半夜緊急', id: em.card.id, title: em.card.title, subtasks: em.card.subtasks });
+  for (const m of script.meetings || []) for (const c of m.cards || []) out.push({ where: '會議後開的卡', id: c.id, title: c.title, subtasks: c.subtasks });
   return out;
 }
 const opt = (item, i) => `「${(item.options || [])[i]}」`;
@@ -32,7 +35,8 @@ function dump(name, script) {
         for (const g of [].concat(item.given || [])) {
           const unit = g.work === 'discuss' ? '段' : '題';
           const cond = g.when ? `第 ${g.when.item + 1} ${unit}${g.when.sub != null ? `第 ${g.when.sub + 1} 問` : ''}選了第 ${g.when.picked + 1} 個` : '有做就帶';
-          rows.push(`- ${L(s.work)}${q.items.length > 1 ? `（${item.text}）` : ''} ← ${L(g.work)}（${cond}）：自動勾 ${g.options.map(o => opt(item, o)).join('、')}`);
+          const verb = Array.isArray(item.answer) || item.type === 'order' ? '自動勾' : '直接選好鎖住';
+          rows.push(`- ${L(s.work)}${q.items.length > 1 ? `（${item.text}）` : ''} ← ${L(g.work)}（${cond}）：${verb} ${g.options.map(o => opt(item, o)).join('、')}`);
         }
         for (const [o, cond] of Object.entries(item.showIf || {}))
           rows.push(`- ${L(s.work)}：${opt(item, +o)} 只有 ${[].concat(cond).map(c => `${L(c.work)} 第 ${c.item + 1} 段／題選了第 ${c.picked + 1} 個`).join('，或 ')}才出現（showIf）`);
@@ -67,3 +71,8 @@ function dump(name, script) {
 console.log(dump('第一天', DAY1));
 console.log('\n' + dump('第二天', DAY2.make()));
 console.log('\n' + dump('第三天', DAY3.make()));
+// 正式上班第二關：模組卡是廠商需求會議散會後開的；模組池三抽二，抽兩組湊滿六張
+const scenery = (pool) => Sandbox.make('scenery', 'legacy', { pool });
+const scene = scenery(['trace', 'stock']);
+const claim = scenery(['claim', 'stock']).meetings[1].cards.filter(c => c.id === 'claim');
+console.log('\n' + dump('正式上班第二關（最美的風景）', { cards: [], meetings: [{ cards: [...scene.meetings[1].cards, ...claim] }] }));

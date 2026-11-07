@@ -135,3 +135,14 @@ test('文件沒寫到、但 CLAIRE.md 點名要的選項照寫：筆記一定遵
   assert.deepStrictEqual(Works.aiAnswers(multi, { ...ctx, notes: { auth: 'api' } }).answers[0], [0, 1], '筆記寫了，照筆記');
   assert.deepStrictEqual(Works.aiAnswers(multi, { ...ctx, notes: { auth: 'front' } }).answers[0], [0], '筆記是別的做法，照樣不寫');
 });
+
+// 單選題也能被前面的文件帶入：那題直接選好；AI 照前面的文件寫，前面文件做了卻沒寫到，照它自己的錯法寫
+const sq = { items: [{ text: '颱風天價錢還沒定', options: ['可以先收貨', '單價沒填不能存'], answer: 0, ai: { pick: 1, kind: 'logic' },
+  given: [{ work: 'read_req', options: [0], when: { item: 2, picked: 0 } }] }] };
+test('單選題的 given：前面文件寫到就選好那個；做了沒寫到，AI 照它的錯法；沒做的照骰', () => {
+  const done = (w) => w === 'read_req';
+  assert.deepStrictEqual(Works.givenOptions(sq.items[0], { read_req: [0, 0, 0] }, done), [0]);
+  assert.deepStrictEqual(Works.aiAnswers(sq, { accuracy: 0, seed: 's', picks: { read_req: [0, 0, 0] }, done: ['read_req'] }).answers, [0], '前面寫到：正確率再低也選對');
+  assert.deepStrictEqual(Works.aiAnswers(sq, { accuracy: 1, seed: 's', picks: { read_req: [0, 0, 1] }, done: ['read_req'] }).answers, [1], '前面寫錯：跟著錯');
+  assert.deepStrictEqual(Works.aiAnswers(sq, { accuracy: 1, seed: 's', picks: {}, done: [] }).answers, [0], '前面沒做：照正確率');
+});
