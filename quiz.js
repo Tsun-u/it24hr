@@ -383,7 +383,7 @@
     return { foot, hintBox };
   }
   // 前端「三機找碴」：PC、開發平板、開發手機三台一起看（開在燈箱裡），畫的是要檢閱的那一版——AI 做的活動頁（瑕疵都在），
-  // 或接手別人的表單（q.screen 'form'：前端設計照 q.inherited、資料照 q.rows）；點區塊畫紅圈、選原因
+  // 或接手別人的表單（q.screen 'form'：前端程式照 q.inherited、資料照 q.rows）；點區塊畫紅圈、選原因
   function spotForm(engine, card, work, q, wrap, close, opts) {
     const state = reviewState(engine, card, work, q, opts);
     const built = { history: [{ work: 'code', result: { toFill: [], bugs: [] } }] };   // 一定要有一筆 code，不然三台都畫成 404
@@ -586,7 +586,7 @@
     // item.given：前面的文件寫到的選項直接帶進來，勾好鎖住（Works.givenOptions）；單選題就是那題定好、只列那個選項。
     // 排序題（開發計畫）帶進來的步驟接在清單後面、照畫面上的順序，先後還是玩家自己排（排順序是開發計畫的功課）
     const multi = Array.isArray(item.answer) && item.type !== 'order';
-    const given = card ? Works.givenOptions(item, card.picks, (w) => card.done(w)) : [];
+    const given = card ? Works.givenOptions(item, card.picks, (w) => card.done(w), card.draft ? card.draft.covered : 'all') : [];
     if (given.length && !multi && item.type !== 'order') { answers[i] = given[0]; return lockedNode(item, given[0], '前面的文件寫了'); }
     const box = h('fieldset', 'item');
     const order = Works.displayOrder(item.options.length, `${seed}:${item.key || i}`, item.keepOrder || !!item.values);

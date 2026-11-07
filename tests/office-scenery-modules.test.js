@@ -35,7 +35,7 @@ test('#402 得率寫「看師傅」也收：QC 退件', () => {
   const y = shipped(e, 'yield', { ui_design: swapped(sub(e, 'yield', 'ui_design'), 1, 2) });
   assert.match(y.comments.at(-1).text, /得率寫『看師傅』也送得出去/);
 });
-test('#402 處理方式只列當季建議（前端設計也會卡住）：通知後秀琴姐催', () => {
+test('#402 處理方式只列當季建議（前端程式也會卡住）：通知後秀琴姐催', () => {
   const e = opened();
   shipped(e, 'yield', { ui_design: swapped(sub(e, 'yield', 'ui_design'), 0, 1) }); e.notifyDone('yield');
   tickTo(e, e.clock.minute + 16);
@@ -217,7 +217,7 @@ test('母議題內文寫出這個時代的現場和行情', () => {
   const body = (mode) => Sandbox.make('scenery', mode, { pool: ['trace', 'stock'] }).meetings[1].cards.find(c => c.id === 'erp').body;
   assert.match(body('legacy'), /磅秤旁一台共用電腦/); assert.match(body('hybrid'), /下載行情表匯入/); assert.match(body('speedrun'), /戴手套點大按鈕/);
 });
-test('交給 AI 寫前端設計（speedrun、Essay）：單選的欄位不是正解就是這個時代的錯法', () => {
+test('交給 AI 寫前端程式（speedrun、Essay）：單選的欄位不是正解就是這個時代的錯法', () => {
   const e = play('speedrun'); skipMeeting(e);
   const job = e.delegate('buy', 'ui_design', 'Essay');
   tickTo(e, job.doneAt + 1);
@@ -251,4 +251,49 @@ test('文件往後流：整理需求答錯不帶，開發計畫沒做也不帶�
   e.doWork('shift', 'read_req', wrong);
   assert.deepStrictEqual(Works.givenOptions(q('doc_plan').items[0], card.picks, (w) => card.done(w)), []);
   assert.ok(q('doc_spec').items.every(item => !Works.givenOptions(item, card.picks, (w) => card.done(w)).length));
+});
+test('加工估量前端程式：估出貨量正解是程式算預設、業務可改；不給手打是流程卡住；貨損三個正解的多選', () => {
+  const ui = Sandbox.make('scenery', 'legacy', { pool: ['trace', 'stock'] }).meetings[1].cards.find(c => c.id === 'yield').subtasks.find(s => s.work === 'ui_design').question;
+  const est = ui.items.findIndex(i => i.text === '估出貨量'), loss = ui.items.findIndex(i => i.text === '貨損');
+  assert.match(ui.items[est].options[ui.items[est].answer], /業務也可以自己填/);
+  const ans = right(ui);
+  const full = Works.grade(ui, ans); assert.strictEqual(full.score, full.max, '照正解全對');
+  const noOverride = Works.outcomes(ui, swapped(ui, est, 2)).find(o => o.item === est);
+  assert.strictEqual(noOverride.kind, 'stuck'); assert.match(noOverride.say, /系統不給我改/);
+  assert.deepStrictEqual(ui.items[loss].answer, [0, 3, 4]);
+  assert.deepStrictEqual(Works.grade(ui, swapped(ui, loss, [0, 3])).wrong, [loss], '漏勾「選填不擋存檔」那題不算全對');
+  assert.strictEqual(Works.outcomes(ui, swapped(ui, loss, [0, 1, 3, 4])).find(o => o.item === loss).kind, 'annoy');
+});
+test('開發計畫、規格帶入前端程式：計畫排了單價那一步，單價那題定好；卡上沒那句需求就不帶', () => {
+  const card = Sandbox.make('scenery', 'legacy', { pool: ['trace', 'stock'] }).meetings[1].cards.find(c => c.id === 'buy');
+  const ui = card.subtasks.find(s => s.work === 'ui_design').question;
+  const done = (w) => w === 'doc_plan';
+  const plan = { doc_plan: [[3]] };   // 排了「單價帶入前一交易日中價、改價自動記錄」
+  assert.deepStrictEqual(Works.givenOptions(ui.items[0], plan, done), [0], 'SA 開的卡全部算有寫');
+  assert.deepStrictEqual(Works.givenOptions(ui.items[0], plan, done, [0, 2, 3]), [], '卡上沒有「單價每天不一樣」那句，不帶');
+  assert.deepStrictEqual(Works.givenOptions(ui.items[0], plan, done, [1]), [0]);
+});
+test('AI 寫前端程式照先寫好的測試：配方的測試寫「主原料記了就好」，AI 前端也只記主原料', () => {
+  const card = Sandbox.make('scenery', 'hybrid', { pool: ['trace', 'stock'] }).meetings[1].cards.find(c => c.id === 'trace');
+  const q = (w) => card.subtasks.find(s => s.work === w).question;
+  const tests = q('test'), ui = q('ui_design');
+  const picked = tests.functions.map(f => ({ assert: f.name === 'testRecipe' ? 1 : Object.values(f.fields)[0].answer }));
+  const drives = Works.testDrives(tests, picked, { covered: 'all', picks: {} });
+  assert.deepStrictEqual(drives.ui_design[2], [1]);
+  assert.deepStrictEqual(drives.mixRecipe, { how: 1 }, '後端照樣帶');
+  const ai = Works.aiAnswers(ui, { accuracy: 1, seed: 's', drives }).answers;
+  assert.strictEqual(ai[2], 1, '配方只記主原料');
+  const ok = Works.aiAnswers(ui, { accuracy: 1, seed: 's', drives: Works.testDrives(tests, tests.functions.map(f => ({ assert: Object.values(f.fields)[0].answer })), { covered: 'all', picks: {} }) }).answers;
+  assert.strictEqual(ok[2], 0, '測試寫對，前端也對');
+});
+test('物流理賠的退回數量：計畫排了退貨單，前端帶「原數量帶出」和「退貨數量自己打」；測試寫「等於出貨的 20 箱」AI 後端就寫成整張退', () => {
+  const card = Sandbox.make('scenery', 'hybrid', { pool: ['claim', 'stock'] }).meetings[1].cards.find(c => c.id === 'claim');
+  const q = (w) => card.subtasks.find(s => s.work === w).question;
+  assert.deepStrictEqual(Works.givenOptions(q('ui_design').items[1], { doc_plan: [[1]] }, (w) => w === 'doc_plan'), [0, 1]);
+  const tests = q('test');
+  const drives = Works.testDrives(tests, tests.functions.map(f => ({ assert: f.name === 'testFromShipment' ? 1 : Object.values(f.fields)[0].answer })), { covered: 'all', picks: {} });
+  assert.deepStrictEqual(drives.linkShipment, { how: 2 });
+  const link = q('code').functions.find(f => f.name === 'linkShipment').fields.how;
+  assert.match(link.options[link.answer], /退貨數量自己打/);
+  assert.strictEqual(link.outcome[2].kind, 'stuck');
 });

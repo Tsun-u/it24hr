@@ -53,7 +53,7 @@ test('老闆講的是阿賢那張卡的追加需求：掛對母議題沒事，�
   assert.strictEqual(e3.board.get('boss:sa').body, '・資產清單新增唯讀頁（財務用）\n・唯讀頁也具有匯出 Excel 功能\n・老闆原話如附檔。');
 });
 
-test('防呆是 QC 亂打才翻出來的：跳過前端設計交 QC 會被退、理由是漏掉的防呆；做滿就沒事', () => {
+test('防呆是 QC 亂打才翻出來的：跳過前端程式交 QC 會被退、理由是漏掉的防呆；做滿就沒事', () => {
   const run = (ui) => {
     const e = new Engine(day1); e.tick(C.MS_PER_GAME_MIN * 11); e.openCard('asset_crud');
     const card = e.board.get('asset_crud'); const fn = card.subtasks.find(s => s.work === 'code').question.functions;

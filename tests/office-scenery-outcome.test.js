@@ -10,7 +10,7 @@ const swapped = (q, i, v) => { const a = right(q); a[i] = v; return a; };
 // 開發照規格預填（玩家沒改）：做到開發那一刻才算，這時規格已經寫了
 const followSpec = (e, card) => { const q = card.subtasks.find(s => s.work === 'code').question; return Works.prefill(q, card.picks, right(q)); };
 
-test('cardOutcomes：前端設計和開發都看，沒做的那件照 ifSkipped', () => {
+test('cardOutcomes：前端程式和開發都看，沒做的那件照 ifSkipped', () => {
   const e = play(); skipMeeting(e);
   const kinds = e.cardOutcomes(e.board.get('buy')).map(o => `${o.work}:${o.kind}`);
   assert.ok(kinds.includes('ui_design:miss') && kinds.includes('code:stuck'), kinds.join());
@@ -25,7 +25,7 @@ test('單價選「什麼都收」：阿姿亂打翻出來退件，理由是劇�
   assert.strictEqual(buy.status, 'returned');
   assert.match(buy.comments.at(-1).text, /單價寫『時價』也送得出去，月底算不出成本/);
 });
-test('沒做前端設計：每個欄位照最直覺的做法，四個欄位收了怪東西一起退', () => {
+test('沒做前端程式：每個欄位照最直覺的做法，四個欄位收了怪東西一起退', () => {
   const e = play(); skipMeeting(e);
   const buy = shipped(e, 'buy', { ui_design: null });
   assert.match(buy.comments.at(-1).text, /驗到 4 個問題/);

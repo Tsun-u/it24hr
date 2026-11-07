@@ -107,7 +107,7 @@
       { text: '單價可以空著嗎？', right: false, why: '秀琴姐會上講過了，颱風天先收貨、晚點補' },
       { text: '一簍大概幾公斤？', right: false, why: '看魚，秀琴姐也說不準' },
     ] }],
-    // form：成品多一張新增收購單（欄位照前端設計畫）；bugs 直接寫開發寫錯時那一格變成什麼、用的人講什麼
+    // form：成品多一張新增收購單（欄位照前端程式畫）；bugs 直接寫開發寫錯時那一格變成什麼、用的人講什麼
     screen: { app: '源裕水產 ERP・收購單', form: true, fields: ['日期', '來源', '品種', '規格', '重量（公斤）', '單價（元／公斤）', '備註'],
       rows: [['11/04', '魚市場拍賣', '鯖魚（花腹鯖）', '每公斤 6 尾', '估 120.0／實 117.9', '86', ''],
              ['11/04', '養殖池邊', '虱目魚', '大', '估 300.0／實 297.0', '待補', '颱風天先收'],
@@ -128,7 +128,7 @@
           { text: '「我們很有人情味」是____', options: ['背景，不是要做的功能', '要做一個「人情味」欄位', '要把防呆拿掉'], answer: 0 },
         ] } },
       meetingDiscuss('buy'),
-      { work: 'estimate', question: { items: [{ type: 'hours', free: true, text: '收購計價這個模組連測試、驗收、部署，你估：', real: { manual: '4 天', ai: '1.5 天' } }] } },
+      { work: 'estimate', question: { items: [{ type: 'hours', free: true, text: '收購計價這個模組連測試、驗收、部署，你估：', ai: { pick: 3 }, real: { manual: '4 天', ai: '1.5 天' } }] } },
       { work: 'doc_plan', question: { items: [{ text: '步驟（挑該做的，照順序排）', type: 'order',
         options: ['跟建宏、雄哥對品種別名表', '設計收購單資料表（估重、實重、單價待補）', '做收購單的新增與查詢', '單價帶入前一交易日中價、改價自動記錄',
                   '重量單位下拉、換算公斤', '單價待補的單每天提醒秀琴姐', '寫測試', '部署到測試機', '做員工登入打卡', '做一個「人情味」欄位'],
@@ -149,15 +149,17 @@
         { text: '休漁', options: ['收購記捕撈日期和來源，照收不擋、不用誰確認；捕撈日期落在法定休漁、來源又是本地漁船的，單子自動標「休漁期捕撈」，月底報表一查就有（進口的和冷凍庫存不標）。業界不捕的月份（鯖魚 2～5 月）只在收購畫面提醒「這時候進來的量會很少」',
                                  '休漁期跳出來要主管確認', '休漁月份整個擋掉這種魚', '不管休漁'], answer: 0 },
         { text: '鯖魚大小（2026 年 9 月的新規：體長 20 公分以上或每公斤 10 尾以下）', options: ['規格填每公斤幾尾，照收，記下每公斤幾尾，超過 10 尾的批次在報表上標「小魚」', '照舊規格只分大中小'], answer: 0 },
+        { text: '品種、單位、品項怎麼存', options: ['每種魚用固定代碼存，畫面上的名字和別名都對到代碼；新增的單位、品項 trim 過後系統已經有的，視同修改', '照畫面上選的名字直接存，新增的單位、品項同名也另開一筆'], answer: 0 },
+        { text: '系統日誌', options: ['所有的系統操作都要有審計表紀錄資料變更，且前端能追溯是何人何時操作的。', '所有的系統操作要紀錄成文字檔案，可以直接下載。'], answer: 0 },
       ] } },
-      // 前端設計：每題是成品畫面上的一個欄位（field），sample 是正解時那一格的樣子；outcome 是選錯的寫法上線後的後果，
-      // ifSkipped 是沒做前端設計時那一格的樣子（沒人想過時最直覺的做法）
+      // 前端程式：每題是成品畫面上的一個欄位（field），sample 是正解時那一格的樣子；outcome 是選錯的寫法上線後的後果，
+      // ifSkipped 是沒做前端程式時那一格的樣子（沒人想過時最直覺的做法）
       { work: 'ui_design', question: { items: [
-        { role: 'field', field: '單價（元／公斤）', text: '單價', sample: '86（前一交易日中價，可改）', answer: 0, ifSkipped: 2,
-          options: ['預設帶入前一個交易日該市場的中價，可以改，程式自動記誰改、改前改後；原因用下拉選填（熟客價、颱風價、品質差），不選也存得了', '文字框，不是數字就跳紅字「請輸入正確的單價」', '文字框，什麼都收'],
+        { role: 'field', field: '單價（元／公斤）', text: '單價', given: [{ work: 'doc_plan', options: [0], when: { item: 0, picked: 3 }, sentence: 1 }, { work: 'doc_spec', options: [0], when: { item: 2, picked: 0 }, sentence: 2 }], sample: '86（前一交易日中價，可改）', answer: 0, ifSkipped: 2,
+          options: ['預設帶入前一個交易日該市場的中價，可以改；原因用下拉選填（熟客價、颱風價、品質差），不選也存得了', '文字框，不是數字就跳紅字「請輸入正確的單價」', '文字框，什麼都收'],
           outcome: { 1: { kind: 'annoy', say: '時價哪裡不正確？', red: '請輸入正確的單價' },
                      2: { kind: 'miss', say: '單價寫『時價』也送得出去，月底算不出成本', junk: '時價' } } },
-        { role: 'field', field: '重量（公斤）', text: '重量', sample: '200 台斤 → 120.0 公斤', answer: 0, ifSkipped: 2,
+        { role: 'field', field: '重量（公斤）', text: '重量', given: [{ work: 'doc_plan', options: [0], when: { item: 0, picked: 4 }, sentence: 0 }], sample: '200 台斤 → 120.0 公斤', answer: 0, ifSkipped: 2,
           options: ['數字，單位下拉，旁邊一個唯讀輸入框顯示換算後的公斤值', '數字，單位讓人自己打', '文字框，什麼都收'],
           outcome: { 1: { kind: 'annoy', say: '我打『斤』它說單位不正確', red: '單位不正確' },
                      2: { kind: 'miss', say: '重量寫『一簍』也送得出去', junk: '一簍' } } },
@@ -165,25 +167,23 @@
           options: ['下拉：魚市場拍賣（再選哪個市場）、漁船直送、養殖池邊、進口', '文字框，查無此來源跳紅字', '文字框，什麼都收'],
           outcome: { 1: { kind: 'annoy', say: '就跟阿伯買的啊，哪裡查無此來源？', red: '查無此來源' },
                      2: { kind: 'miss', say: '來源寫『阿伯』也送得出去，出事查不到是哪一船', junk: '阿伯' } } },
-        { role: 'field', field: '品種', text: '品種', sample: '花飛 → 鯖魚（花腹鯖）／鯖魚（白腹鯖）', answer: 0, ifSkipped: 4,
-          options: ['下拉，打本土名字也找得到：打「花飛」跳出鯖魚，選項寫成「鯖魚（花飛）」。同一個俗名對到兩種魚時兩種都列出來讓人選（花飛 → 花腹鯖、白腹鯖）。分到現場分得出來的那一層就好（黑鯊只開到「黑鯊（真鯊類）」，串仔、烏甕串也是一類一種）。系統裡每種魚用固定代碼存，別名表在需求討論時跟建宏、雄哥對一次。',
+        { role: 'field', field: '品種', text: '品種', given: [{ work: 'doc_plan', options: [0], when: { item: 0, picked: 0 }, sentence: 0 }, { work: 'doc_spec', options: [0], when: { item: 5, picked: 0 }, sentence: 0 }], sample: '花飛 → 鯖魚（花腹鯖）／鯖魚（白腹鯖）', answer: 0, ifSkipped: 4,
+          options: ['下拉，打本土名字也找得到：打「花飛」跳出鯖魚，選項寫成「鯖魚（花飛）」。同一個俗名對到兩種魚時兩種都列出來讓人選（花飛 → 花腹鯖、白腹鯖）。分到現場分得出來的那一層就好（黑鯊只開到「黑鯊（真鯊類）」，串仔、烏甕串也是一類一種）',
                     '下拉只列華語名', '下拉硬要分到種（黑鯊開七種）', '別名只對一種魚', '文字框'],
           outcome: { 1: { kind: 'annoy', say: '花飛是哪一個？', red: '查無此品種：花飛' },
                      2: { kind: 'annoy', say: '長得都一樣，你叫我選哪一個？', red: '請從 7 種黑鯊中選一種' },
                      3: { kind: 'late', say: '這批花飛到底是花腹鯖還是白腹鯖？單子上只寫花飛，月底兩種的數量都對不上' },
                      4: { kind: 'miss', say: '同一種魚記成花飛、鯖魚、青花魚，月底報表變三列', junk: '青花魚' } } },
-        { role: 'field', field: '規格', text: '規格', sample: '鯖魚：每公斤 6 尾', answer: [0, 1, 2], ifSkipped: [3],
+        { role: 'field', field: '規格', text: '規格', given: [{ work: 'doc_spec', options: [0], when: { item: 4, picked: 0 }, sentence: 0 }, { work: 'doc_spec', options: [1,2], when: { item: 5, picked: 0 }, sentence: 0 }], sample: '鯖魚：每公斤 6 尾', answer: [0, 1, 2], ifSkipped: [3],
           options: ['照品種換選項：魚大中小；鯖魚每公斤幾尾；蝦每磅、每公斤或每台斤幾隻，連單位一起選；烏魚子幾兩；烏魚分正頭烏、回頭烏；青蟳分沙公、處女蟳、紅蟳，選項旁邊標公母',
-                    '可隨時新增新單位，新增單位時如果trim過後發現系統已經存在視同修改。', '可隨時新增新品項，新增品項如果trim過後發現系統已經存在視同修改。',
+                    '可隨時新增新單位', '可隨時新增新品項',
                     '規格一個文字框通用', '青蟳的規格只有大中小', '蝦只寫 31/40 不寫單位'],
           outcome: { 3: { kind: 'annoy', say: '烏魚子是講兩的，你叫我填公斤？', red: '規格請填公斤' },
                      4: { kind: 'late', say: '紅蟳跟沙公算同一個價，這批成本整個算錯' },
                      5: { kind: 'late', say: '魚市場的 31/40 是每台斤，客人要的是每磅，整批大小不對' } } },
-        // 沒做前端設計就是選填的文字框，剛好是正解，所以不寫 ifSkipped；input 'free'：正解那一格畫成自由填的文字框（沒寫是下拉）
+        // 沒做前端程式就是選填的文字框，剛好是正解，所以不寫 ifSkipped；input 'free'：正解那一格畫成自由填的文字框（沒寫是下拉）
         { role: 'field', field: '備註', text: '備註', sample: '（選填）', input: 'free', answer: 0, options: ['選填、什麼都收、不擋', '必填'],
           outcome: { 1: { kind: 'annoy', say: '沒什麼好備註的也要寫？', red: '備註為必填' } } },
-        { role: 'field', field: null, text: '系統日誌', answer: 0,
-          options: ['所有的系統操作都要有審計表紀錄資料變更，且前端能追溯是何人何時操作的。', '所有的系統操作要紀錄成文字檔案，可以直接下載。'] },
       ] } },
       { work: 'doc_accept', question: { items: [{ text: '案例',
         options: ['新增一筆收購：估重、實重都留著', '單價帶入前一交易日中價，改價自動記下誰改、改前改後', '重量選台斤，換算成公斤正確', '單價待補也能存，補了才進成本',
@@ -230,14 +230,14 @@
             outcome: { 1: { kind: 'late', say: '新規上路了，系統還讓小魚一路收進來' } } } } },
       ] } },
       { work: 'test', question: { kind: 'functions', functions: [
-        { needs: { work: 'doc_accept', picked: 0 }, name: 'testKeepsEstimate', does: '估重、實重都留著', code: 'expect(row.estKg).toBe(120); expect(row.kg).toBe(117.9);',
+        { needs: { work: 'doc_accept', picked: 0 }, name: 'testKeepsEstimate', does: '估重、實重都留著', drives: { fn: 'saveBuy', field: 'keep', map: { 0: 0 } }, code: 'expect(row.estKg).toBe(120); expect(row.kg).toBe(117.9);',
           fields: { assert: { label: '檢查', options: ['存完估重、實重兩欄都有值', '存完至少有一個重量', '存得進去就好'], answer: 0 } } },
-        { needs: { work: 'doc_accept', picked: 1 }, name: 'testDefaultPrice', does: '單價預設是中價', code: "expect(defaultPrice('鯖魚', '魚市場拍賣')).toBe(86);",
+        { needs: { work: 'doc_accept', picked: 1 }, name: 'testDefaultPrice', does: '單價的預設值', drives: [{ fn: 'defaultPrice', field: 'from', map: { 0: 0, 2: 1 } }, { ui: 0, map: { 0: 0 } }], code: "expect(defaultPrice('鯖魚', '魚市場拍賣')).toBe(86);",
           fields: { assert: { label: '檢查', options: ['預設是前一交易日、同市場的中價', '預設不是空的', '預設是今天最高價'], answer: 0 } } },
         { needs: { work: 'doc_accept', picked: 2 }, name: 'testTaijinToKg', does: '台斤換公斤', code: "expect(toKg(10, '台斤')).toBe(6);",
-          drives: { fn: 'toKg', field: 'rate', map: { 0: 0, 1: 1 } },
+          drives: [{ fn: 'toKg', field: 'rate', map: { 0: 0, 1: 1 } }, { ui: 1, map: { 0: 0 } }],
           fields: { assert: { label: '檢查', options: ['10 台斤換成 6 公斤', '10 台斤換成 5 公斤', '換算結果是數字就好'], answer: 0 } } },
-        { needs: { work: 'doc_accept', picked: 3 }, name: 'testPendingNotCosted', does: '待補的單補了才進成本', code: 'expect(costOf(row)).toBeNull(); fillPrice(row, 90); expect(costOf(row)).toBe(26730);',
+        { needs: { work: 'doc_accept', picked: 3 }, name: 'testPendingNotCosted', does: '待補的單補了才進成本', drives: { fn: 'fillPrice', field: 'when', map: { 0: 0, 1: 1 } }, code: 'expect(costOf(row)).toBeNull(); fillPrice(row, 90); expect(costOf(row)).toBe(26730);',
           fields: { assert: { label: '檢查', options: ['待補的單不算成本，補了才算', '待補的單用 0 元算', '待補的單不能存'], answer: 0 } } },
         { name: 'testHundredThousand', does: '十萬筆一秒內存完',
           fields: { assert: { label: '檢查', options: ['源裕一天幾十張單，不用測', '十萬筆一秒內存完', '一萬筆一秒內存完'], answer: 0 } } },
@@ -277,7 +277,7 @@
           { text: '「看師傅」是____', options: ['要問清楚的地方，不是需求本身', '需求：讓師傅自己填得率', '可以忽略'], answer: 0 },
         ] } },
       meetingDiscuss('yield'),
-      { work: 'estimate', question: { items: [{ type: 'hours', free: true, text: '加工估量與報價這個模組連測試、驗收、部署，你估：', real: { manual: '5 天', ai: '2 天' } }] } },
+      { work: 'estimate', question: { items: [{ type: 'hours', free: true, text: '加工估量與報價這個模組連測試、驗收、部署，你估：', ai: { pick: 4 }, real: { manual: '5 天', ai: '2 天' } }] } },
       { work: 'doc_plan', question: { items: [{ text: '步驟（挑該做的，照順序排）', type: 'order',
         options: ['整理得率表（品種×產季×處理方式）', '設計加工批資料表（加工前後重量、成品、邊角料）', '做加工單（前後秤重、貨損）', '估出貨量與報量（保守比例做成設定）',
                   '做完比估的少：部分出貨、改量重新報價', '多的轉二次加工，批號和成本帶過去', '寫測試', '部署到測試機', '讓師傅自己填得率', '做客戶滿意度問卷'],
@@ -304,28 +304,32 @@
                   { work: 'doc_plan', options: [0], when: { item: 0, picked: 3 } }] },
         { text: '放越久越不值錢', options: ['每次轉下去都記日期和成本，報表看得到一批從入庫到做成什麼、中間放了幾天、毛利掉在哪；入庫放到設定的天數就提醒該不該轉', '轉作只記去向、不記日期'], answer: 0,
           given: [{ work: 'discuss', options: [0], when: { item: 3, sub: 1, picked: 0 } }, { work: 'reject', options: [0], when: { item: 0, picked: 2 } }] },
+        { text: '改了預設值', options: ['得率、估出貨量改了預設值，程式記誰改、什麼時候改、改前改後；估出貨量另外記原本的預設值和原因', '改了直接蓋掉，不留紀錄'], answer: 0 },
+        { text: '沒填完的單', options: ['照樣存得進去，建宏查得到哪些單缺紀錄、是誰填報的', '沒填完的就算了，不追'], answer: 0 },
       ] } },
       { work: 'ui_design', question: { items: [
-        { role: 'field', field: '處理方式', text: '處理方式', sample: '去頭去內臟（當季建議）', answer: 0, ifSkipped: 2,
+        { role: 'field', field: '處理方式', text: '處理方式', given: [{ work: 'doc_plan', options: [0], when: { item: 0, picked: 0 }, sentence: 1 }, { work: 'doc_spec', options: [0], when: { item: 3, picked: 0 }, sentence: 1 }], sample: '去頭去內臟（當季建議）', answer: 0, ifSkipped: 2,
           options: ['下拉，照品種和現在是不是產季排順序，當季建議的排最前面、標「當季建議」；其他做法還是選得到', '只列當季建議那一個', '文字框，什麼都收'],
           outcome: { 1: { kind: 'stuck', say: '客戶就是要整尾的，你不給我選？' },
                      2: { kind: 'miss', say: '處理方式寫『照舊』也送得出去，得率帶不出來', junk: '照舊' } } },
-        { role: 'field', field: '得率', text: '得率（加工後剩幾成）', sample: '58%（去年冬季平均，可改）', answer: 0, ifSkipped: 2,
-          options: ['照品種×產季×處理方式（去頭去殼、切片、整尾急凍、魚鬆、罐頭）帶出預設值，預設值用過去同一季實際的平均；誰都能改，程式記誰改、改前改後，報表看得到哪一批用的是改過的得率',
+        { role: 'field', field: '得率', text: '得率（加工後剩幾成）', given: [{ work: 'doc_plan', options: [0], when: { item: 0, picked: 0 }, sentence: 1 }, { work: 'doc_spec', options: [0], when: { item: 3, picked: 0 }, sentence: 1 }, { work: 'doc_spec', options: [0], when: { item: 6, picked: 0 }, sentence: 1 }], sample: '58%（去年冬季平均，可改）', answer: 0, ifSkipped: 2,
+          options: ['照品種×產季×處理方式（去頭去殼、切片、整尾急凍、魚鬆、罐頭）帶出預設值，預設值用過去同一季實際的平均；誰都能改',
                     '文字框，不是百分比跳紅字', '文字框，什麼都收'],
           outcome: { 1: { kind: 'annoy', say: '八成就八成，你要我打 0.8 還是 80%？', red: '請輸入 0～1 之間的數字' },
                      2: { kind: 'miss', say: '得率寫『看師傅』也送得出去，估量整個算不出來', junk: '看師傅' } } },
-        { role: 'field', field: '估出貨量（公斤）', text: '估出貨量', sample: '69.6（自動算）', answer: 0, ifSkipped: 1,
-          options: ['程式算：收購（估或實）重量 × 得率，不給手打', '讓業務自己填'],
-          outcome: { 1: { kind: 'late', say: '報了 500 公斤，估量其實只有 380', kg: { short: 120 } } } },
-        { role: 'field', field: '貨損（公斤）', text: '貨損', sample: '11.4（自動算，原因選填）', answer: 0, ifSkipped: 2,
-          options: ['加工前後各秤一次，加工後分成品、邊角料（頭尾骨，可以轉凍乾寵物食品）兩項秤，貨損程式算；差太多跳出原因下拉（去頭去殼、解凍失水、挑掉不良品、冷凍乾耗），選填、不擋存檔',
-                    '原因用文字框', '只記加工後重量'],
+        { role: 'field', field: '估出貨量（公斤）', text: '估出貨量', given: [{ work: 'doc_plan', options: [0], when: { item: 0, picked: 3 }, sentence: 1 }, { work: 'doc_spec', options: [0], when: { item: 6, picked: 0 }, sentence: 1 }], sample: '69.6（預設，業務可改）', answer: 0, ifSkipped: 1,
+          options: ['程式算出預設值：收購（估或實）重量 × 得率，業務也可以自己填，但也填原因', '讓業務自己填',
+                    '程式算：收購（估或實）重量 × 得率，不給手打'],
+          outcome: { 1: { kind: 'late', say: '報了 500 公斤，估量其實只有 380', kg: { short: 120 } },
+                     2: { kind: 'stuck', say: '老客戶要多留一點，系統不給我改，我是要怎麼跟人家喬？' } } },
+        { role: 'field', field: '貨損（公斤）', text: '貨損', given: [{ work: 'doc_plan', options: [0], when: { item: 0, picked: 2 }, sentence: 0 }, { work: 'doc_spec', options: [4], when: { item: 7, picked: 0 }, sentence: 0 }], sample: '11.4（自動算，原因選填）', answer: [0, 3, 4], ifSkipped: [2],
+          options: ['三個輸入框：加工前量，加工後分成品量、邊角料量，貨損由程式計算', '原因用文字框', '只記加工後重量',
+                    '貨損太多跳出原因下拉（去頭去殼、解凍失水、挑掉不良品、冷凍乾耗）', '所有欄位皆選填，不擋存檔'],
           outcome: { 1: { kind: 'annoy', say: '就少了啊，還要寫為什麼？', red: '請輸入貨損原因' },
                      2: { kind: 'late', say: '貨損無從查起，月底對不出成本' } } },
       ] } },
       { work: 'doc_accept', question: { items: [{ text: '案例',
-        options: ['加工前後各秤一次，貨損自動算', '估出貨量＝收購重量×得率，不能手打', '報量照設定的保守比例打折', '做完比估的少：可以部分出貨、原單照留',
+        options: ['加工前後各秤一次，貨損自動算', '估出貨量預設＝收購重量×得率，業務改了要填原因，記下誰改、預設值多少', '報量照設定的保守比例打折', '做完比估的少：可以部分出貨、原單照留',
                   '多的轉魚鬆，原料批號和成本帶過去', '改過的得率報表看得到是誰改的', '一次估一萬批的效能'],
         answer: [0, 1, 2, 3, 4, 5], why: '源裕一天幾批',
         given: [
@@ -333,6 +337,7 @@
           { work: 'doc_plan', options: [3], when: { item: 0, picked: 4 } }, { work: 'doc_plan', options: [4], when: { item: 0, picked: 5 } },
           { work: 'doc_plan', options: [5], when: { item: 0, picked: 0 } },
           { work: 'doc_spec', options: [3], when: { item: 1, picked: 0 } }, { work: 'doc_spec', options: [4], when: { item: 2, picked: 0 } },
+          { work: 'doc_spec', options: [2], when: { item: 4, picked: 0 } },
         ] }] } },
       { work: 'code', question: { kind: 'functions', functions: [
         { sentence: 0, needs: { work: 'doc_plan', picked: 2 }, accept: 0, name: 'lossOf', does: '算貨損',
@@ -340,7 +345,7 @@
           fields: { how: { label: '貨損怎麼算', options: ['加工前 −（成品＋邊角料）', '加工前 − 成品', '成品 − 加工前'], answer: 0 } } },
         { sentence: 1, needs: { work: 'doc_plan', picked: 3 }, accept: 1, name: 'estimateOutput', does: '估出貨量',
           code: 'return buyKg * yieldRate(species, season, method);',
-          fields: { how: { label: '怎麼估', options: ['收購重量 × 得率', '收購重量 × 0.8', '業務填的數字'], answer: 0 } } },
+          fields: { how: { label: '預設值怎麼估', options: ['收購重量 × 得率', '收購重量 × 0.8', '業務填的數字'], answer: 0 } } },
         { spec: { item: 0 }, name: 'quoteEarly', does: '先報量', code: 'quote(estimateFrom(buy.estKg)); onWeighed(batch, requote);',
           fields: { flow: { label: '估量先報', options: ['先用估重報量，過磅、加工完換成實際的數字，差太多提醒業務', '一定要加工完才能報量'], answer: 0, ifSkipped: 1,
             outcome: { 1: { kind: 'stuck', say: '客戶今天就要報價，你叫我等明天？' } } } } },
@@ -363,14 +368,14 @@
             outcome: { 1: { kind: 'late', say: '這批怎麼做成狗零食了？從哪天開始放的都查不到', kg: { petFood: 35 } } } } } },
       ] } },
       { work: 'test', question: { kind: 'functions', functions: [
-        { needs: { work: 'doc_accept', picked: 0 }, name: 'testLoss', does: '算貨損', code: 'expect(lossOf(120, 58, 40)).toBe(22);',
+        { needs: { work: 'doc_accept', picked: 0 }, name: 'testLoss', does: '算貨損', drives: [{ fn: 'lossOf', field: 'how', map: { 0: 0, 1: 1 } }, { ui: 3, map: { 0: [0] } }], code: 'expect(lossOf(120, 58, 40)).toBe(22);',
           fields: { assert: { label: '檢查', options: ['120 公斤做成 58 成品＋40 邊角料，貨損 22', '貨損 62', '貨損是正數就好'], answer: 0 } } },
         { needs: { work: 'doc_accept', picked: 1 }, name: 'testEstimate', does: '估出貨量', code: "expect(estimateOutput(200, '鯖魚', '冬', '去頭去內臟')).toBe(116);",
-          drives: { fn: 'estimateOutput', field: 'how', map: { 0: 0, 1: 1 } },
+          drives: [{ fn: 'estimateOutput', field: 'how', map: { 0: 0, 1: 1 } }, { ui: 2, map: { 0: 0 } }],
           fields: { assert: { label: '檢查', options: ['200 公斤 × 58% 估 116', '估 160', '估出來不是 0 就好'], answer: 0 } } },
-        { needs: { work: 'doc_accept', picked: 2 }, name: 'testQuoteRatio', does: '報量打折', code: 'expect(quoteOf(116, { quoteRatio: 0.9 })).toBe(104.4);',
+        { needs: { work: 'doc_accept', picked: 2 }, name: 'testQuoteRatio', does: '報量的比例', code: 'expect(quoteOf(116, { quoteRatio: 0.9 })).toBe(104.4);',
           fields: { assert: { label: '檢查', options: ['保守比例 0.9 時報 104.4', '報 116', '報量小於估量就好'], answer: 0 } } },
-        { needs: { work: 'doc_accept', picked: 4 }, name: 'testCarryCost', does: '轉魚鬆帶批號', code: "expect(floss.parent).toBe('B1104-01'); expect(floss.cost).toBe(batch.cost);",
+        { needs: { work: 'doc_accept', picked: 4 }, name: 'testCarryCost', does: '轉作的成本', drives: { fn: 'surplus', field: 'flow', map: { 0: 0, 1: 2 } }, code: "expect(floss.parent).toBe('B1104-01'); expect(floss.cost).toBe(batch.cost);",
           fields: { assert: { label: '檢查', options: ['魚鬆批號掛在原批號下、成本帶過去', '魚鬆是新的一批', '魚鬆存得進去就好'], answer: 0 } } },
         { name: 'testTenThousand', does: '一萬批一秒內估完',
           fields: { assert: { label: '檢查', options: ['源裕一天幾批，不用測', '一萬批一秒內估完', '一千批一秒內估完'], answer: 0 } } },
@@ -382,7 +387,7 @@
     ],
   };
 
-  // ── #403 加班請假：會議那頁只有原話、沒有題庫（ASKS 沒有 shift），所以也沒有退回 SA 的勾選 ──
+  // ── #403 加班請假：秀琴姐轉述雄哥的話，會議問的、退回 SA 問回來的都帶進計畫和規格 ──
   const SHIFT = {
     id: 'shift', title: '加班請假', from: SA, assignee: '玩家', requester: XIUQIN, type: 'sub', parent: 'erp', relatedTo: 'erp',
     body: bodyOf(['記加班的開工、收工時間', '請假選日期、幾點到幾點，最少半小時，時數程式算', '組長忙到找不到人的時候，加班照樣登記得進去'],
@@ -410,7 +415,7 @@
           { text: '「看漁獲啦」是____', options: ['背景，不是需求', '要做一個漁獲預測', '加班時數填「看漁獲」'], answer: 0 },
         ] } },
       meetingDiscuss('shift'),
-      { work: 'estimate', question: { items: [{ type: 'hours', free: true, text: '加班請假這個模組連測試、驗收、部署，你估：', real: { manual: '2 天', ai: '半天' } }] } },
+      { work: 'estimate', question: { items: [{ type: 'hours', free: true, text: '加班請假這個模組連測試、驗收、部署，你估：', ai: { pick: 1 }, real: { manual: '2 天', ai: '半天' } }] } },
       { work: 'doc_plan', question: { items: [{ text: '步驟（挑該做的，照順序排）', type: 'order',
         options: ['設計加班與請假資料表', '做加班登記（開工、收工）', '做請假登記（日期、開始、結束，時數程式算）', '登記就存：記誰、什麼時候，組長看過打勾',
                   '補單：日期可以選過去、標「補單」', '寫測試', '部署到測試機', '串接指紋打卡機', '請假三層簽核'],
@@ -433,11 +438,11 @@
                   { work: 'doc_plan', options: [0], when: { item: 0, picked: 4 } }] },
       ] } },
       { work: 'ui_design', question: { items: [
-        { role: 'field', field: '時數', text: '加班時數', sample: '4.5（22:30～03:00 自動算）', answer: 0, ifSkipped: 2,
+        { role: 'field', field: '時數', text: '加班時數', given: [{ work: 'doc_plan', options: [0], when: { item: 0, picked: 1 }, sentence: 0 }], sample: '4.5（22:30～03:00 自動算）', answer: 0, ifSkipped: 2,
           options: ['開工、收工時間各一個時間選擇器，預設現在，時數程式算', '文字框，不是數字跳紅字', '文字框，什麼都收'],
           outcome: { 1: { kind: 'annoy', say: '看漁獲就看漁獲，你叫我填數字？', red: '請輸入數字' },
                      2: { kind: 'miss', say: '時數寫『看漁獲』也送得出去，薪水算不出來', junk: '看漁獲' } } },
-        { role: 'field', field: '類別', text: '請假時數', sample: '請假 13:00～16:00（3 小時，自動算）', answer: 0, ifSkipped: 2,
+        { role: 'field', field: '類別', text: '請假時數', given: [{ work: 'doc_plan', options: [0], when: { item: 0, picked: 2 }, sentence: 1 }], sample: '請假 13:00～16:00（3 小時，自動算）', answer: 0, ifSkipped: 2,
           options: ['下拉選日期、開始時間、結束時間（每半小時一格），時數程式算，結束不能早於開始', '文字框，填錯跳紅字', '文字框，什麼都收', '下拉：上午／下午／全天'],
           outcome: { 1: { kind: 'annoy', say: '我寫4小時哪裡不正確？', red: '格式不正確' },
                      2: { kind: 'miss', say: '時數寫『看情況』也送得出去', junk: '看情況' },
@@ -467,11 +472,11 @@
             outcome: { 1: { kind: 'stuck', say: '那昨天凌晨那班怎麼辦？' } } } } },
       ] } },
       { work: 'test', question: { kind: 'functions', functions: [
-        { needs: { work: 'doc_accept', picked: 0 }, name: 'testOvernight', does: '跨午夜的加班', code: "expect(overtimeHours('22:30', '03:00')).toBe(4.5);",
+        { needs: { work: 'doc_accept', picked: 0 }, name: 'testOvernight', does: '跨午夜的加班', drives: [{ fn: 'overtimeHours', field: 'how', map: { 0: 0, 1: 1 } }, { ui: 0, map: { 0: 0 } }], code: "expect(overtimeHours('22:30', '03:00')).toBe(4.5);",
           fields: { assert: { label: '檢查', options: ['22:30 到 03:00 算 4.5 小時', '22:30 到 03:00 算 −19.5 小時', '時數是數字就好'], answer: 0 } } },
-        { needs: { work: 'doc_accept', picked: 1 }, name: 'testLeaveHours', does: '請 3 小時算 3 小時', code: "expect(leaveHours('13:00', '16:00')).toBe(3);",
+        { needs: { work: 'doc_accept', picked: 1 }, name: 'testLeaveHours', does: '算請假時數', drives: [{ fn: 'leaveHours', field: 'how', map: { 0: 0, 1: 1 } }, { ui: 1, map: { 0: 0 } }], code: "expect(leaveHours('13:00', '16:00')).toBe(3);",
           fields: { assert: { label: '檢查', options: ['13:00 到 16:00 算 3 小時', '13:00 到 16:00 算 1 天', '有扣假就好'], answer: 0 } } },
-        { needs: { work: 'doc_accept', picked: 2 }, name: 'testLoggedWithoutLeader', does: '組長沒看也存得進去', code: "expect(saveShift({ ...form, leaderSeen: false })).toMatchObject({ by: '雄哥' });",
+        { needs: { work: 'doc_accept', picked: 2 }, name: 'testLoggedWithoutLeader', does: '組長沒看也存得進去', drives: { fn: 'leaderAway', field: 'flow', map: { 0: 0, 1: 2 } }, code: "expect(saveShift({ ...form, leaderSeen: false })).toMatchObject({ by: '雄哥' });",
           fields: { assert: { label: '檢查', options: ['沒簽也存得進去，記下誰、何時登記', '沒簽就存不進去', '存得進去就好'], answer: 0 } } },
         { name: 'testThousandPunch', does: '一千人同時打卡',
           fields: { assert: { label: '檢查', options: ['源裕現場二十幾個人，不用測', '一千人同時打卡', '一百人同時打卡'], answer: 0 } } },
@@ -512,7 +517,7 @@
           { text: '「比較Q啦」是____', options: ['背景，不是需求', '要做一個「Q度」欄位', '配方一律加虱目魚'], answer: 0 },
         ] } },
       meetingDiscuss('trace'),
-      { work: 'estimate', question: { items: [{ type: 'hours', free: true, text: '批號追溯這個模組連測試、驗收、部署，你估：', real: { manual: '4 天', ai: '1.5 天' } }] } },
+      { work: 'estimate', question: { items: [{ type: 'hours', free: true, text: '批號追溯這個模組連測試、驗收、部署，你估：', ai: { pick: 3 }, real: { manual: '4 天', ai: '1.5 天' } }] } },
       { work: 'doc_plan', question: { items: [{ text: '步驟（挑該做的，照順序排）', type: 'order',
         options: ['設計批號規則與標籤格式', '收購存檔自動編批號、印標籤', '拆部位：子批號掛在原批號下', '配方：多種原料各記批號、比例程式算',
                   '從成品往回查的畫面', '黑鮪魚一尾一筆、標籤號', '寫測試', '部署到測試機', '做區塊鏈溯源', '做消費者掃碼查產地的網頁'],
@@ -529,19 +534,19 @@
         { text: '二次加工', options: ['轉魚鬆、罐頭、凍乾時，新批號掛在原批號下面，成本跟著帶', '轉過去重新開批號'], answer: 0 },
       ] } },
       { work: 'ui_design', question: { items: [
-        { role: 'field', field: '批號', text: '批號', sample: 'B1104-01（存檔自動編、印標籤）', answer: 0, ifSkipped: 2,
-          options: ['收購單存檔時程式自動編批號，印成標籤貼在籃子上；之後的單子用點選或刷條碼，不用打', '批號讓人自己打', '沒有批號'],
+        { role: 'field', field: '批號', text: '批號', given: [{ work: 'doc_plan', options: [0], when: { item: 0, picked: 1 }, sentence: 0 }], sample: 'B1104-01（存檔自動編、印標籤）', answer: 0, ifSkipped: 2,
+          options: ['批號不用打，存檔後顯示編好的批號、印成標籤貼在籃子上；之後的單子用點選或刷條碼', '批號讓人自己打', '沒有批號'],
           outcome: { 1: { kind: 'annoy', say: '這串數字誰記得住？我寫『早上那船』不行喔？', red: '批號格式不正確' },
                      2: { kind: 'late', say: '客人說魚丸有怪味，又要翻三天的單子' } } },
-        { role: 'field', field: '部位', text: '拆部位（一進多出）', sample: '魚肚、魚皮、魚頭、碎肉（勾選，各秤各的）', answer: 0, ifSkipped: 1,
-          options: ['選原料批號，再勾這批拆成哪些部位（魚肚、魚皮、魚頭、碎肉），各秤各的重，子批號自動掛在原批號下面', '部位用文字框', '每個部位當新的一批重新收貨'],
+        { role: 'field', field: '部位', text: '拆部位（一進多出）', given: [{ work: 'doc_plan', options: [0], when: { item: 0, picked: 2 }, sentence: 1 }], sample: '魚肚、魚皮、魚頭、碎肉（勾選，各秤各的）', answer: 0, ifSkipped: 1,
+          options: ['選原料批號，再勾這批拆成哪些部位（魚肚、魚皮、魚頭、碎肉），各秤各的重', '部位用文字框', '每個部位當新的一批重新收貨'],
           outcome: { 1: { kind: 'miss', say: '同一個部位記成魚肚、肚仔、腹肉三種', junk: '肚仔' },
                      2: { kind: 'late', say: '魚肚查不回是哪天哪個魚塭的' } } },
-        { role: 'field', field: '配方', text: '配方摻原料', sample: '鯊魚漿 70%＋虱目魚漿 30%（各選批號）', answer: 0, ifSkipped: 1,
+        { role: 'field', field: '配方', text: '配方摻原料', given: [{ work: 'doc_plan', options: [0], when: { item: 0, picked: 3 }, sentence: 2 }], sample: '鯊魚漿 70%＋虱目魚漿 30%（各選批號）', answer: 0, ifSkipped: 1,
           options: ['配方一種原料一列，各自選批號，比例程式算', '只記主原料'],
           outcome: { 1: { kind: 'late', say: '鯊魚丸摻了虱目魚漿，出事時只查得到鯊魚那批', sample: '鯊魚漿' } } },
-        { role: 'field', field: '標籤號', text: '黑鮪魚標籤', sample: '1 尾｜標籤號必填', answer: 0, ifSkipped: 1,
-          options: ['品種選黑鮪魚（烏甕串）時，數量鎖成 1 尾、標籤號必填，一尾一筆', '黑鮪魚也論公斤一整批收'],
+        { role: 'field', field: '標籤號', text: '黑鮪魚標籤', given: [{ work: 'doc_plan', options: [0], when: { item: 0, picked: 5 }, sentence: 3 }], sample: '1 尾｜標籤號必填', answer: 0, ifSkipped: 1,
+          options: ['品種選黑鮪魚（烏甕串）時，數量鎖成 1 尾、標籤號必填', '黑鮪魚也論公斤一整批收'],
           outcome: { 1: { kind: 'late', say: '漁業署來查，這尾的標籤號對不到哪張單', sample: '（論公斤一整批收，不用填）' } } },
       ] } },
       { work: 'doc_accept', question: { items: [{ text: '案例',
@@ -572,13 +577,13 @@
             outcome: { 1: { kind: 'late', say: '魚鬆的成本算不出來' } } } } },
       ] } },
       { work: 'test', question: { kind: 'functions', functions: [
-        { needs: { work: 'doc_accept', picked: 0 }, name: 'testBatchNo', does: '存檔就有批號', code: 'expect(saveBuy(form).batch).toMatch(/^B\\d{4}-\\d{2}$/);',
+        { needs: { work: 'doc_accept', picked: 0 }, name: 'testBatchNo', does: '存檔就有批號', drives: [{ fn: 'newBatchNo', field: 'how', map: { 0: 0, 2: 2 } }, { ui: 0, map: { 0: 0 } }], code: 'expect(saveBuy(form).batch).toMatch(/^B\\d{4}-\\d{2}$/);',
           fields: { assert: { label: '檢查', options: ['存檔後批號是 B1104-01 的格式', '批號不是空的', '批號是數字'], answer: 0 } } },
-        { needs: { work: 'doc_accept', picked: 1 }, name: 'testSplit', does: '拆部位掛回原批', code: "expect(splitParts(batch, ['魚肚'])[0].parent).toBe('B1104-01');",
+        { needs: { work: 'doc_accept', picked: 1 }, name: 'testSplit', does: '拆部位', drives: [{ fn: 'splitParts', field: 'how', map: { 0: 0, 2: 1 } }, { ui: 1, map: { 0: 0, 2: 2 } }], code: "expect(splitParts(batch, ['魚肚'])[0].parent).toBe('B1104-01');",
           fields: { assert: { label: '檢查', options: ['魚肚的上層批號是原料那批', '魚肚有批號就好', '魚肚是新的一批'], answer: 0 } } },
-        { needs: { work: 'doc_accept', picked: 2 }, name: 'testTraceBack', does: '從成品往回查', code: "expect(traceBack('P1104-02').map(b => b.no)).toEqual(['B1101-03', 'B1104-01']);",
+        { needs: { work: 'doc_accept', picked: 2 }, name: 'testTraceBack', does: '從成品往回查', drives: { fn: 'traceBack', field: 'flow', map: { 0: 0 } }, code: "expect(traceBack('P1104-02').map(b => b.no)).toEqual(['B1101-03', 'B1104-01']);",
           fields: { assert: { label: '檢查', options: ['魚丸查得回虱目魚和鯊魚兩批原料', '魚丸查得回一批原料', '魚丸查得到就好'], answer: 0 } } },
-        { needs: { work: 'doc_accept', picked: 3 }, name: 'testRecipe', does: '配方兩種原料都記', code: "expect(mixOf('P1104-02').map(m => m.ratio)).toEqual([0.7, 0.3]);",
+        { needs: { work: 'doc_accept', picked: 3 }, name: 'testRecipe', does: '記配方', drives: [{ fn: 'mixRecipe', field: 'how', map: { 0: 0, 1: 1 } }, { ui: 2, map: { 0: 0, 1: 1 } }], code: "expect(mixOf('P1104-02').map(m => m.ratio)).toEqual([0.7, 0.3]);",
           fields: { assert: { label: '檢查', options: ['兩種原料的批號和比例都記了', '主原料記了就好', '比例加起來是 1'], answer: 0 } } },
         { name: 'testHundredThousand', does: '一天十萬個批號',
           fields: { assert: { label: '檢查', options: ['源裕一天幾十批，不用測', '一天十萬個批號', '一天一萬個批號'], answer: 0 } } },
@@ -593,7 +598,7 @@
   // ── speedrun 的批號追溯：建宏用 AI 做過一版的爛尾樓。卡上先選路：接手（多檢閱，沒挑出來的照建宏那版）或從頭規劃（部署多資料轉換）──
   const ROUTE = { work: 'route', question: { items: [{ text: '建宏那版要怎麼處理？', free: true,
     options: ['接手建宏的版本（多一件檢閱程式碼，挑出來的才改）', '從頭規劃（照一般做，部署時把他那兩個月的資料轉過來）'] }] } };
-  // 建宏那版前端設計每題選的，和檢閱前端挑出哪個 fix 才改得到
+  // 建宏那版前端程式每題選的，和檢閱前端挑出哪個 fix 才改得到
   const TAKEOVER_UI = [[1, 'fixBatchNo'], [1, 'fixParts'], [1, 'fixRecipe'], [1, 'fixTag']];
   // 建宏那版程式裡的寫法：function → 檢閱後端挑出哪個 fix 才改得到（approveFlow 是建宏那版才有的：每一步都要主管按）
   const TAKEOVER_CODE = { traceBack: 'fixTraceBack', carryBatch: 'fixCarry', approveFlow: 'fixApprove' };
@@ -601,7 +606,7 @@
   const APPROVE_FN = { name: 'approveFlow', does: '存批號要不要等主管', code: 'await supervisorApprove(batch);',
     fields: { flow: { label: '存批號', options: ['不用等誰確認，存了就算，程式記誰存、什麼時候存', '每一步都要主管按確認'], answer: 0,
       outcome: { 1: { kind: 'stuck', say: '雄哥在碼頭，批號單要等主管按確認才存得進去？' } } } } };
-  // 檢閱程式碼：前端是建宏那版的批號表單（screen 'form'：inherited 是他前端設計每題選的、rows 是他那版用了兩個月的資料），後端是 batch.js 的 diff
+  // 檢閱程式碼：前端是建宏那版的批號表單（screen 'form'：inherited 是他前端程式每題選的、rows 是他那版用了兩個月的資料），後端是 batch.js 的 diff
   const TRACE_REVIEW = {
     front: { kind: 'spot', screen: 'form', inherited: TAKEOVER_UI.map(([pick]) => pick), devices: ['pc', 'tablet', 'phone'], defects: [],
       rows: [['早上那船', '—', '虱目魚（整尾）', '—', '—', '297.0', '養殖池邊', ''],
@@ -632,7 +637,7 @@
   const REBUILD_DEPLOY = { work: 'deploy', question: { roles: { backup: 0, upload: 1, replace: 2, migrate: 3, smoke: 4, notify: 5 },
     items: [{ text: '步驟', type: 'order', options: ['備份測試機上的源裕 ERP', '上傳新版', '替換', '把建宏那版的資料轉過來', '開網址從一顆魚丸往回查試試', '通知秀琴姐'], answer: [0, 1, 2, 3, 4],
       why: '資料轉換在替換之後、冒煙測試之前；通知秀琴姐要等 QC 驗過' }] } };
-  // 接手那條路：前端設計每題照建宏選的（inherit），檢閱前端挑出那個 fix 才改得到（onlyIf）；
+  // 接手那條路：前端程式每題照建宏選的（inherit），檢閱前端挑出那個 fix 才改得到（onlyIf）；
   // 程式裡建宏那版的寫法鎖住（lockedTo），檢閱後端挑出那行才解開（lockedUnless）；多一個建宏才有的 approveFlow
   const lockToJianhong = (field, fix) => ({ ...field, lockedUnless: { work: 'review_back', item: 0, picked: fix }, lockedTo: 1, ifSkipped: 1, lockedText: TAKEOVER_LOCKED });
   function inherits(s) {
@@ -642,13 +647,13 @@
       ? { ...f, fields: Object.fromEntries(Object.entries(f.fields).map(([k, field]) => [k, lockToJianhong(field, TAKEOVER_CODE[f.name])])) } : f)) } };
     return s;
   }
-  // 接手：開發計畫前面插兩件檢閱，前端設計、程式照建宏那版
+  // 接手：開發計畫前面插兩件檢閱，前端程式、程式照建宏那版
   function takeoverSubtasks(card) {
     const i = card.subtasks.findIndex(s => s.work === 'doc_plan');
     return [...card.subtasks.slice(0, i), { work: 'review_front', question: TRACE_REVIEW.front }, { work: 'review_back', question: TRACE_REVIEW.back }, ...card.subtasks.slice(i)].map(inherits);
   }
   const rebuildSubtasks = (card) => card.subtasks.map(s => (s.work === 'deploy' ? REBUILD_DEPLOY : s));
-  // 兩條路照傳進來那張卡的工作算（先套時代再包，兩條路的前端設計才有這個時代的 AI 錯法）。
+  // 兩條路照傳進來那張卡的工作算；時代的 AI 錯法由 forEra 連兩條路一起套。
   // migrate：從頭規劃時建宏那兩個月的資料轉不過去的（接手那條路的部署沒有資料轉換，用不到）
   const withTakeover = (card) => ({ ...card, subtasks: [ROUTE], routes: [{ subtasks: takeoverSubtasks(card) }, { subtasks: rebuildSubtasks(card) }],
     migrate: { rows: '1,247', left: 37, sample: '批號寫「早上那船」「阿伯的」「同上」' } });
@@ -680,7 +685,7 @@
           { text: '「我看一下就知道」是____', options: ['雄哥在說他就是系統，不是需求', '要做一個「問雄哥」的按鈕', '不用做庫存'], answer: 0 },
         ] } },
       meetingDiscuss('stock'),
-      { work: 'estimate', question: { items: [{ type: 'hours', free: true, text: '冷凍庫庫存這個模組連測試、驗收、部署，你估：', real: { manual: '3 天', ai: '1 天' } }] } },
+      { work: 'estimate', question: { items: [{ type: 'hours', free: true, text: '冷凍庫庫存這個模組連測試、驗收、部署，你估：', ai: { pick: 2 }, real: { manual: '3 天', ai: '1 天' } }] } },
       { work: 'doc_plan', question: { items: [{ text: '步驟（挑該做的，照順序排）', type: 'order',
         options: ['設計入庫資料表（毛重、淨重、入庫日、批號）', '入庫與抽驗淨重', '出貨單印淨重、預設先進先出', '入庫天數提醒、轉魚鬆掛回原批',
                   '休漁前的庫存夠撐幾天', '寫測試', '部署到測試機', '串接冷凍庫溫度感測器', '做 3D 冷凍庫地圖'],
@@ -701,11 +706,11 @@
           given: [{ work: 'doc_plan', options: [0], when: { item: 0, picked: 2 } }] },
       ] } },
       { work: 'ui_design', question: { items: [
-        { role: 'field', field: '重量（公斤）', text: '重量', sample: '毛重 10.0／淨重 8.6（冰衣 14%，自動算）', answer: 0, ifSkipped: 2,
-          options: ['入庫記毛重；冷凍蝦另外記抽驗解凍後的淨重，冰衣比例程式算；出貨單印淨重', '冰衣比例是文字框，不是數字跳紅字', '只有一個重量欄，毛重淨重自己決定'],
+        { role: 'field', field: '重量（公斤）', text: '重量', given: [{ work: 'doc_plan', options: [0], when: { item: 0, picked: 1 }, sentence: 1 }], sample: '毛重 10.0／淨重 8.6（冰衣 14%，自動算）', answer: 0, ifSkipped: 2,
+          options: ['入庫記毛重；冷凍蝦另外記抽驗解凍後的淨重，冰衣比例程式算', '冰衣比例是文字框，不是數字跳紅字', '只有一個重量欄，毛重淨重自己決定'],
           outcome: { 1: { kind: 'annoy', say: '每家都說包得很薄，你要我寫多少？', red: '冰衣比例請輸入數字' },
                      2: { kind: 'late', say: '同一箱蝦，入庫 10 公斤，出貨變 8 公斤半，差的去哪了？' } } },
-        { role: 'field', field: '入庫日', text: '入庫日', sample: '11/04（今天，可改成過去）', answer: 0, ifSkipped: 1,
+        { role: 'field', field: '入庫日', text: '入庫日', given: [{ work: 'doc_plan', options: [0], when: { item: 0, picked: 3 }, sentence: 2 }, { work: 'doc_spec', options: [0], when: { item: 0, picked: 0 }, sentence: 2 }], sample: '11/04（今天，可改成過去）', answer: 0, ifSkipped: 1,
           options: ['預設今天，可以改成過去（補登），放到設定的天數就變色', '入庫日文字框'],
           outcome: { 1: { kind: 'miss', say: '入庫日寫『上禮拜』', junk: '上禮拜' } } },
       ] } },
@@ -717,6 +722,7 @@
           { work: 'doc_plan', options: [0], when: { item: 0, picked: 1 } }, { work: 'doc_plan', options: [1, 4], when: { item: 0, picked: 2 } },
           { work: 'doc_plan', options: [2], when: { item: 0, picked: 3 } }, { work: 'doc_plan', options: [3], when: { item: 0, picked: 4 } },
           { work: 'doc_spec', options: [2], when: { item: 0, picked: 0 } }, { work: 'doc_spec', options: [4], when: { item: 2, picked: 0 } },
+          { work: 'doc_spec', options: [3], when: { item: 1, picked: 0 } },
         ] }] } },
       { work: 'code', question: { kind: 'functions', functions: [
         { sentence: 1, needs: { work: 'doc_plan', picked: 1 }, accept: 0, name: 'netWeight', does: '算淨重',
@@ -733,13 +739,13 @@
             outcome: { 1: { kind: 'late', say: '新的先出、舊的一直放，最後全部變凍乾', kg: { petFood: 30 } } } } } },
       ] } },
       { work: 'test', question: { kind: 'functions', functions: [
-        { needs: { work: 'doc_accept', picked: 0 }, name: 'testNetWeight', does: '冷凍蝦算淨重', code: 'expect(netWeight(10, 0.14)).toBeCloseTo(8.6);',
+        { needs: { work: 'doc_accept', picked: 0 }, name: 'testNetWeight', does: '冷凍蝦算淨重', drives: [{ fn: 'netWeight', field: 'how', map: { 0: 0, 1: 1 } }, { ui: 0, map: { 0: 0 } }], code: 'expect(netWeight(10, 0.14)).toBeCloseTo(8.6);',
           fields: { assert: { label: '檢查', options: ['10 公斤、冰衣 14%，淨重 8.6', '淨重 10', '淨重小於毛重就好'], answer: 0 } } },
-        { needs: { work: 'doc_accept', picked: 1 }, name: 'testFifo', does: '出貨預設最早的那批', code: "expect(fifoPick('白蝦').no).toBe('B0712-03');",
+        { needs: { work: 'doc_accept', picked: 1 }, name: 'testFifo', does: '出貨預設最早的那批', drives: { fn: 'fifoPick', field: 'flow', map: { 0: 0 } }, code: "expect(fifoPick('白蝦').no).toBe('B0712-03');",
           fields: { assert: { label: '檢查', options: ['預設是 07/12 那批', '預設是 11/01 那批', '有帶出一批就好'], answer: 0 } } },
-        { needs: { work: 'doc_accept', picked: 2 }, name: 'testAgeAlert', does: '放久了提醒', code: 'expect(ageAlert({ inAt: daysAgo(90) }, { alertDays: 90 })).toBe(true);',
+        { needs: { work: 'doc_accept', picked: 2 }, name: 'testAgeAlert', does: '放久了提醒', drives: [{ fn: 'ageAlert', field: 'flow', map: { 0: 0 } }, { ui: 1, map: { 0: 0 } }], code: 'expect(ageAlert({ inAt: daysAgo(90) }, { alertDays: 90 })).toBe(true);',
           fields: { assert: { label: '檢查', options: ['放 90 天就提醒', '放一年才提醒', '有提醒就好'], answer: 0 } } },
-        { needs: { work: 'doc_accept', picked: 3 }, name: 'testStockDays', does: '休漁前算撐幾天', code: 'expect(stockDays(80, 5)).toBe(16);',
+        { needs: { work: 'doc_accept', picked: 3 }, name: 'testStockDays', does: '休漁前算撐幾天', drives: { fn: 'stockDays', field: 'flow', map: { 0: 0 } }, code: 'expect(stockDays(80, 5)).toBe(16);',
           fields: { assert: { label: '檢查', options: ['80 箱、去年每天出 5 箱，撐 16 天', '撐 30 天', '算得出數字就好'], answer: 0 } } },
         { name: 'testColdChain', does: '冷凍庫溫度',
           fields: { assert: { label: '檢查', options: ['冷凍庫沒有感測器，不用測', '溫度每秒更新', '溫度每分鐘更新'], answer: 0 } } },
@@ -769,9 +775,9 @@
           { text: '「藍色的那本」是____', options: ['現在的系統，不是需求', '要做一個藍色的介面', '要把那本掃描進來'], answer: 0 },
         ] } },
       meetingDiscuss('claim'),
-      { work: 'estimate', question: { items: [{ type: 'hours', free: true, text: '物流理賠與退貨報銷這個模組連測試、驗收、部署，你估：', real: { manual: '2 天', ai: '半天' } }] } },
+      { work: 'estimate', question: { items: [{ type: 'hours', free: true, text: '物流理賠與退貨報銷這個模組連測試、驗收、部署，你估：', ai: { pick: 1 }, real: { manual: '2 天', ai: '半天' } }] } },
       { work: 'doc_plan', question: { items: [{ text: '步驟（挑該做的，照順序排）', type: 'order',
-        options: ['設計退貨與理賠資料表', '退貨單：從出貨單帶出原數量', '退款單和理賠單分開、各自結案', '退回的貨轉加工或報廢',
+        options: ['設計退貨與理賠資料表', '退貨單：選出貨單、帶出原出貨數量，退貨數量自己打', '退款單和理賠單分開、各自結案', '退回的貨轉加工或報廢',
                   '寫測試', '部署到測試機', '串接物流公司的理賠 API', '做客訴聊天機器人'],
         answer: [0, 1, 2, 3, 4, 5], before: [[0, 1], [0, 2], [1, 3], [2, 5], [3, 5], [4, 5]],
         why: '物流公司沒有理賠 API；客訴聊天機器人不在需求裡',
@@ -791,12 +797,12 @@
           outcome: { 1: { kind: 'annoy', say: '就是壞掉了啊，還要寫作文？', red: '請填寫退貨原因' },
                      2: { kind: 'late', say: '這個月退了十二張，不知道幾張是物流的錯' } } },
         // 退貨量大於出貨量要打原因才存得了：流程不卡節點的例外，是正解
-        { role: 'field', field: '退回數量', text: '退回數量', sample: '出貨 20 箱，退 6 箱（可換算公斤）', answer: [0, 1, 3, 4, 5],
+        { role: 'field', field: '退回數量', text: '退回數量', given: [{ work: 'doc_plan', options: [0,1], when: { item: 0, picked: 1 }, sentence: 0 }], sample: '出貨 20 箱，退 6 箱（可換算公斤）', answer: [0, 1, 3, 4, 5],
           options: ['從出貨單帶出原數量，不能修改', '退貨數量自己打', '退貨數量只能接受正整數', '退貨量的單位預設跟出貨單一致，可以調整，系統要換算',
                     '退貨量大於出貨量時需要打原因', '退貨量可輸入的數字格式要視單位做檢核', '退貨量可以輸入負值'] },
       ] } },
       { work: 'doc_accept', question: { items: [{ text: '案例',
-        options: ['退貨從出貨單帶出原數量', '先退款、理賠另開一張，各自追到結案', '退回的貨轉加工時掛回原批號', '退貨的單位換算正確，退貨量大於出貨量要打原因', '物流公司 API 自動申請理賠'],
+        options: ['退貨單對得到出貨單，原出貨數量帶出來、退貨數量自己打', '先退款、理賠另開一張，各自追到結案', '退回的貨轉加工時掛回原批號', '退貨的單位換算正確，退貨量大於出貨量要打原因', '物流公司 API 自動申請理賠'],
         answer: [0, 1, 2, 3], why: '物流公司沒有 API',
         given: [
           { work: 'doc_plan', options: [0, 3], when: { item: 0, picked: 1 } }, { work: 'doc_plan', options: [1], when: { item: 0, picked: 2 } },
@@ -805,9 +811,10 @@
         ] }] } },
       { work: 'code', question: { kind: 'functions', functions: [
         { sentence: 0, needs: { work: 'doc_plan', picked: 1 }, accept: 0, name: 'linkShipment', does: '帶出出貨單',
-          code: 'return { shipment: s.no, qty: s.qty, unit: s.unit };',
-          fields: { how: { label: '退貨數量從哪來', options: ['從出貨單帶出原數量，不能改', '數量自己打，不對出貨單', '不記是哪張出貨單'], answer: 0 } } },
-        { spec: { item: 0 }, name: 'refund', does: '先退錢、後理賠', code: "db.insert('refund', { ret: r.no }); db.insert('claim', { ret: r.no, carrier });",
+          code: 'return { shipment: s.no, shippedQty: s.qty, unit: s.unit, returnQty: form.qty };',
+          fields: { how: { label: '退貨單怎麼對出貨單', options: ['選出貨單，帶出原出貨數量當參考，退貨數量自己打', '退貨數量自己打，但不記是哪張出貨單', '退貨數量直接等於出貨數量，不能改'], answer: 0,
+            outcome: { 2: { kind: 'stuck', say: '客人只退 6 箱，系統硬要我退整張 20 箱？' } } } } },
+        { spec: { item: 0 }, name: 'refund', does: '退款和理賠', code: "db.insert('refund', { ret: r.no }); db.insert('claim', { ret: r.no, carrier });",
           fields: { flow: { label: '退款和理賠', options: ['退款和理賠分兩張單，各自追到結案', '理賠核准才能退款'], answer: 0, ifSkipped: 1,
             outcome: { 1: { kind: 'stuck', say: '客人等了兩個禮拜，說以後不跟我們買了' } } } } },
         { spec: { item: 1 }, name: 'returnTo', does: '退回的貨', code: "r.use === '報廢' ? scrap(r) : db.insert('batch', { parent: r.batch, kg: r.kg, use: r.use });",
@@ -815,11 +822,11 @@
             outcome: { 1: { kind: 'stuck', say: '這些明明還能做貓飼料' } } } } },
       ] } },
       { work: 'test', question: { kind: 'functions', functions: [
-        { needs: { work: 'doc_accept', picked: 0 }, name: 'testFromShipment', does: '從出貨單帶數量', code: "expect(linkShipment('S1101-07').qty).toBe(20);",
-          fields: { assert: { label: '檢查', options: ['退貨單帶出出貨 20 箱', '退貨單數量自己打', '有數量就好'], answer: 0 } } },
-        { needs: { work: 'doc_accept', picked: 1 }, name: 'testRefundFirst', does: '先退款', code: "expect(canRefund({ claim: '申請中' })).toBe(true);",
+        { needs: { work: 'doc_accept', picked: 0 }, name: 'testFromShipment', does: '從出貨單帶數量', drives: [{ fn: 'linkShipment', field: 'how', map: { 0: 0, 1: 2 } }, { ui: 1, map: { 0: [0, 1] } }], code: "expect(saveReturn({ shipment: 'S1101-07', qty: 6 })).toMatchObject({ shipment: 'S1101-07', shippedQty: 20, returnQty: 6 });",
+          fields: { assert: { label: '檢查', options: ['退貨單對得到 S1101-07，出貨 20 箱、退 6 箱', '退貨數量等於出貨的 20 箱', '有數量就好'], answer: 0 } } },
+        { needs: { work: 'doc_accept', picked: 1 }, name: 'testRefundFirst', does: '先退款', drives: { fn: 'refund', field: 'flow', map: { 0: 0, 1: 1 } }, code: "expect(canRefund({ claim: '申請中' })).toBe(true);",
           fields: { assert: { label: '檢查', options: ['理賠沒下來也能先退款', '理賠下來才退款', '有退款就好'], answer: 0 } } },
-        { needs: { work: 'doc_accept', picked: 2 }, name: 'testReturnBatch', does: '轉加工掛回原批', code: "expect(returnTo({ ...ret, use: '轉加工' }).parent).toBe(ret.batch);",
+        { needs: { work: 'doc_accept', picked: 2 }, name: 'testReturnBatch', does: '退回的貨', drives: { fn: 'returnTo', field: 'flow', map: { 0: 0 } }, code: "expect(returnTo({ ...ret, use: '轉加工' }).parent).toBe(ret.batch);",
           fields: { assert: { label: '檢查', options: ['轉加工的上層批號是原批號', '轉加工是新的一批', '轉加工存得進去就好'], answer: 0 } } },
         { name: 'testCarrierApi', does: '物流理賠 API',
           fields: { assert: { label: '檢查', options: ['物流公司沒有 API，不用測', '理賠 API 一秒內回應', '理賠 API 一分鐘內回應'], answer: 0 } } },
@@ -831,8 +838,8 @@
     ],
   };
 
-  // ── 平行宇宙的新卡：小卡（前端設計兩題、開發兩個 function、手動測試、部署），當天就能做、不做完也沒差 ──
-  // 需求簡單，卡片本身就是文件：開發的 function 只寫 sentence，卡上有那句就從卡片直接拉進來。前端設計沒做時兩題都是什麼都收（ifSkipped 2）
+  // ── 平行宇宙的新卡：小卡（前端程式兩題、開發兩個 function、手動測試、部署），當天就能做、不做完也沒差 ──
+  // 需求簡單，卡片本身就是文件：開發的 function 只寫 sentence，卡上有那句就從卡片直接拉進來。前端程式沒做時兩題都是什麼都收（ifSkipped 2）
   function smallCard({ id, title, body, fields, functions, screen, tryIt }) {
     return { id, title, body, type: 'feature', screen: { form: true, bugs: {}, ...screen }, subtasks: [
       { work: 'ui_design', question: { items: fields.map(f => ({ role: 'field', answer: 0, ifSkipped: 2, ...f })) } },
@@ -858,7 +865,7 @@
     ],
     functions: [
       fnOf(0, 'buyForStaff', '記一筆員工內購', "db.insert('staffBuy', { staff, item, kg, price: staffPrice(item) });", '記什麼', ['記誰、什麼、多少，價錢照員工價', '只記金額', '只記品項']),
-      fnOf(1, 'payrollDeduct', '月底從薪水扣', 'payroll.deduct(sumByStaff(month));', '什麼時候扣', ['月底照員工彙總從薪水扣', '每買一次就扣', '不扣']),
+      fnOf(1, 'payrollDeduct', '薪水扣款', 'payroll.deduct(sumByStaff(month));', '什麼時候扣', ['月底照員工彙總從薪水扣', '每買一次就扣', '不扣']),
     ],
     screen: { app: '源裕水產 ERP・員工內購', fields: ['日期', '員工', '品項', '重量（公斤）', '金額'], rows: [['11/04', '阿忠', '虱目魚（整尾）', '3.0', '240']] } });
 
@@ -913,7 +920,7 @@
         { say: '一盒兩片你要我怎麼填？', red: '請輸入數字' }, { say: '片數寫『跟去年一樣』也送得出去', junk: '跟去年一樣' }),
     ],
     functions: [
-      fnOf(0, 'lastYear', '帶出去年送的', 'return gifts.find({ customer, year: year - 1 });', '去年的', ['帶出去年送的片數', '每年重新填', '只記今年']),
+      fnOf(0, 'lastYear', '去年的紀錄', 'return gifts.find({ customer, year: year - 1 });', '去年的', ['帶出去年送的片數', '每年重新填', '只記今年']),
       fnOf(1, 'giftDecision', '今年要不要送', "db.update('gifts', { customer, year, send, by: user });", '怎麼記', ['用勾的，記誰勾的', '用文字寫', '不記']),
     ],
     screen: { app: '源裕水產 ERP・年節送禮', fields: ['客戶', '去年', '今年', '決定'], rows: [['海產店（阿伯）', '2 盒', '2 盒', '建宏 ✓']] } });
@@ -963,7 +970,7 @@
       schedule: { card: 'erp', who: SA, text: '最後一個，IT 這邊時程大概抓多久？' },
       cards };
   }
-  // 三個時代差在哪：現場用什麼填、行情怎麼進系統（寫在母議題）；AI 寫前端設計骰錯時錯成哪樣——hybrid 改成自由填（什麼都收），
+  // 三個時代差在哪：現場用什麼填、行情怎麼進系統（寫在母議題）；AI 寫前端程式骰錯時錯成哪樣——hybrid 改成自由填（什麼都收），
   // speedrun 做成自由填＋紅字。錯不錯照模型的正確率骰。legacy 沒有 AI
   const ERA_LINE = {
     legacy: '現場：磅秤旁一台共用電腦。行情：秀琴姐每天早上手動輸入。',
@@ -980,8 +987,33 @@
     const pick = opts.find(o => item.outcome[o].kind === kind);
     return { ...item, ai: { pick: Array.isArray(item.answer) ? [pick] : pick, kind: 'flexible' } };
   }
-  const forEra = (card, mode) => ({ ...card, subtasks: card.subtasks.map(s => (s.work === 'ui_design'
-    ? { ...s, question: { ...s.question, items: s.question.items.map(item => withEra(item, mode)) } } : s)) });
+  // 其他題目 AI 怎麼錯（劇本沒寫 ai 的才補）：單選選第一個錯的選項；開發計畫漏第一步、多排一個陷阱步驟；
+  // 驗收漏最後一項、多一個陷阱案例；部署多做通知；開發、測試程式的欄位選第一個錯的（陷阱測試就是真的去測）
+  function missOf(item, work, roles) {
+    if (item.ai || item.free || item.type === 'hours') return item;
+    const traps = item.options.map((_, i) => i).filter(i => ![].concat(item.answer).includes(i));
+    if (item.type === 'order') {
+      if (work === 'deploy') return roles && roles.notify != null ? { ...item, ai: { pick: [...item.answer, roles.notify], kind: 'extra' } } : item;
+      return { ...item, ai: { pick: [...item.answer.slice(1), ...traps.slice(0, 1)], kind: 'extra' } };
+    }
+    if (Array.isArray(item.answer)) return { ...item, ai: { pick: [...item.answer.slice(0, -1), ...traps.slice(0, 1)], kind: 'miss' } };
+    return traps.length ? { ...item, ai: { pick: traps[0], kind: work === 'read_req' ? 'miss' : 'logic' } } : item;
+  }
+  function fieldMiss(field) {
+    if (field.ai) return field;
+    const wrong = field.options.findIndex((_, i) => i !== field.answer);
+    return wrong < 0 ? field : { ...field, ai: { pick: wrong, kind: 'logic' } };
+  }
+  function withMisses(s, mode) {
+    const q = s.question; if (!q || !ERA_PICK[mode]) return s;   // legacy 沒有 AI
+    if (q.items) return { ...s, question: { ...q, items: q.items.map(item => missOf(s.work === 'ui_design' ? withEra(item, mode) : item, s.work, q.roles)) } };
+    if (q.functions) return { ...s, question: { ...q, functions: q.functions.map(f => ({ ...f,
+      fields: Object.fromEntries(Object.entries(f.fields || {}).map(([k, field]) => [k, fieldMiss(field)])) })) } };
+    return s;
+  }
+  // 有選路的卡（routes），每條路的工作也一起套
+  const forEra = (card, mode) => ({ ...card, subtasks: card.subtasks.map(s => withMisses(s, mode)),
+    ...(card.routes && { routes: card.routes.map(r => ({ ...r, subtasks: r.subtasks.map(s => withMisses(s, mode)) })) }) });
 
   // 母議題：只估整套 ERP 的時間，不交 QC，子議題都結案它就跟著結案
   function motherCard(modules, mode) {
@@ -993,7 +1025,7 @@
       subtasks: [
         { work: 'estimate', question: { items: [{ type: 'hours', free: true,
           text: `整套 ERP（${modules.map(id => TITLES[id]).join('、')}，含跟源裕來回），你估：`,
-          real: { manual: '6 個月～1.5 年', ai: '4～8 個月', note: '其中約有 3 個月在釐清產業 knowhow 和需求單位的工作風格' } }] } },
+          ai: { pick: 160 }, real: { manual: '6 個月～1.5 年', ai: '4～8 個月', note: '其中約有 3 個月在釐清產業 knowhow 和需求單位的工作風格' } }] } },
       ],
     };
   }
@@ -1009,7 +1041,7 @@
     return order(mode === 'speedrun' ? ['trace', pick()] : [pick(), pick()]);
   }
 
-  // 午後秀琴姐追加：手套不能打字（前端設計的提示），後面接一句每天不同的人情味例外；只能回，不能開卡。
+  // 午後秀琴姐追加：手套不能打字（前端程式的提示），後面接一句每天不同的人情味例外；只能回，不能開卡。
   // 講的是怡君開的那幾張卡：14:00 卡還沒開（需求會議開太久），等母議題開了 30 分鐘才來
   const EXCEPTIONS = ['對了，熟客的價錢照舊啦。', '對了，阿伯的魚都是一簍一簍算的。', '對了，颱風天先收貨，價錢下禮拜再說。'];
   const gloves = (pick) => ({
@@ -1034,7 +1066,7 @@
   };
   // 今天的模組卡（#400 的子議題）都上線了；平行宇宙的新卡沒有 parent，不算
   const modulesLive = (e) => { const mods = e.board.cards.filter(c => c.parent === 'erp'); return mods.length > 0 && mods.every(c => c.status === 'archived'); };
-  // 收購計價上線，而且前端設計沒有一題做錯或漏做：小潘拿第一天阿賢那張來對照
+  // 收購計價上線，而且前端程式沒有一題做錯或漏做：小潘拿第一天阿賢那張來對照
   const panCompares = (e) => { const buy = e.board.get('buy'); return !!buy && buy.status === 'archived' && !e.cardOutcomes(buy).some(o => o.work === 'ui_design'); };
   // 建宏那版怎麼收的（speedrun 的批號追溯，上線了才記）：接手數改掉幾個紅字（建宏那版跳紅字、現在不跳的欄位），重來數轉不過去的筆數
   function takeoverLine(e) {
@@ -1049,7 +1081,7 @@
   function make(mode, carry = {}) {
     const modules = [...MODULES, ...drawPool(mode, carry)];
     // speedrun 的批號追溯是建宏做過一版的：先套時代再包選路
-    const cardOf = (id) => (mode === 'speedrun' && id === 'trace' ? withTakeover(forEra(MODULE_CARDS[id], mode)) : forEra(MODULE_CARDS[id], mode));
+    const cardOf = (id) => forEra(mode === 'speedrun' && id === 'trace' ? withTakeover(MODULE_CARDS[id]) : MODULE_CARDS[id], mode);
     const cards = [motherCard(modules, mode), ...modules.map(cardOf)];
     return {
       name: '最美的風景', issueBase: 399, mainCard: 'buy',   // 收購計價是主卡：結算卡的縮圖、跳過的文件、測試風格、四個同事的評語照它
@@ -1072,7 +1104,7 @@
       // 平行宇宙：成品對不上過半的模組卡交 QC，10% 開出那個模組的新卡（依做歪的模組不同，當天就能做）；check 給結算卡的成就
       parallel: { chance: 0.1, over: 0.5, check: (e) => !!e.stats.parallel,
         traits: [{ title: '成功製造需求', text: '交出去的東西跟需求對不上，客戶卻想拿來做別的' }],
-        cards: PARALLEL_CARDS },
+        cards: Object.fromEntries(Object.entries(PARALLEL_CARDS).map(([id, p]) => [id, { ...p, card: forEra(p.card, mode) }])) },
       // 相罵本：22:30（茶几時段）從上線的模組挑一件吵架，at 是時鐘時間
       quarrel: { at: 22 * 60 + 30, cases: QUARRELS, blame: '你們系統沒記，這筆到底算誰的？' },
       // 結算卡多的行（劇本「結算卡多的行」）：數字都從 engine.usageTally 來；有模組上線才列紅字，其他有才列。

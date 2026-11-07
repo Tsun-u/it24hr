@@ -185,7 +185,7 @@ AI服務額度有上限，請各位同仁依照工作類型選擇合適的AI模�
     ],
   };
   const SCREENS = {
-    // 沒有前端設計的卡：畫面就是盤點平台既有的那套（design），bug 照樣看得到
+    // 沒有前端程式的卡：畫面就是盤點平台既有的那套（design），bug 照樣看得到
     login: { app: SAHE_APP, loginRequired: true, loginLabel: SAHE_LOGIN, pwReset: true, fields: SAHE_FIELDS, rows: SAHE_ROWS,
       design: { components: { login: true, check: true, approve: true } }, bugs: { loginWith: 'wrongDomain', forgotPassword: 'wrongReset', guardApi: 'approveVisible' } },
     approve: { app: SAHE_APP, loginRequired: true, loginLabel: SAHE_LOGIN, fields: SAHE_FIELDS, rows: SAHE_ROWS, styleRef: CI_STYLE,
@@ -194,7 +194,7 @@ AI服務額度有上限，請各位同仁依照工作類型選擇合適的AI模�
       bugs: { botScope: 'botChatty', botSource: 'botLeaks' } },
     erp: { app: '盤點結果匯出（莎禾 ERP）', fields: ERP_FIELDS, rows: ERP_ROWS, design: { components: {} }, erpPreview: true,
       bugs: { exportEncoding: 'bomVisible', exportSchedule: 'noSchedule' } },
-    // 合規那張沒有前端設計：畫面就是盤點平台，套件升壞了篩選、匯出按了沒反應（第二天資安卡同一個效果）
+    // 合規那張沒有前端程式：畫面就是盤點平台，套件升壞了篩選、匯出按了沒反應（第二天資安卡同一個效果）
     compliance: { app: SAHE_APP, loginRequired: true, loginLabel: SAHE_LOGIN, fields: SAHE_FIELDS, rows: SAHE_ROWS,
       design: { components: { login: true, check: true, approve: true, filter: true, export: true } }, bugs: { upgradeDeps: 'jqueryBroken' } },
     // 財務的季報表（#128 亂象小卡）：沒有介面要做，手動測試就是打開既有的季報表看新加的那一欄；
@@ -335,22 +335,6 @@ AI服務額度有上限，請各位同仁依照工作類型選擇合適的AI模�
           options: ['各據點的資產管理員簽核，簽過才改狀態', '編號照莎禾的格式', '部門從莎禾的人資系統同步', '區塊鏈存證', '效率提升 300%、成本下降 87%'],
           answer: [0, 1, 2], ai: { pick: [0, 1, 2, 3], kind: 'extra' }, why: 'R4 和效益分析是 Claire 寫的，數字沒有出處',
           tags: { 3: 'readReq:emotional' }, hideIf: { 3: CHAIN_GONE, 4: GAIN_GONE } }] } },
-        // 「做多少」的筆記在元件這題發作：先問派每一項停下來問、全做派把深色模式和權限設定頁都加上
-        { work: 'ui_design', question: { items: [
-          { role: 'template', text: '版型', options: ['清單頁＋盤點表單', '只有一張表單', '報表頁', '儀表板'], keys: ['list', 'form', 'report', 'dashboard'], answer: [0],
-            ai: { pick: [3], kind: 'extra' }, why: '同仁要的是自己那幾筆和勾選' },
-          { role: 'components', text: '元件', options: ['登入框', '盤點回報（每列勾還在／不見了／壞了）', '簽核按鈕', '部門篩選', '匯出 Excel', '深色模式', '權限設定頁'],
-            keys: ['login', 'check', 'approve', 'filter', 'export', 'dark', 'perm'], answer: [0, 1, 2, 3], ai: { pick: [0, 1, 2, 3, 5, 6], kind: 'extra' },
-            why: '卡上沒寫匯出；權限照角色走，不用設定頁', tags: { 4: 'scope:all', 5: 'scope:all,noMfa', 6: 'scope:all,noMfa' },
-            askFirst: { 4: '匯出 Excel 有在需求內嗎？', 5: '要做深色模式嗎？', 6: '要做權限設定頁嗎？' },
-            fixes: [{ say: '你是不是不會做介面？' }, SCOPE_SPEC, 'auto'] },
-          // 防呆照第二天盤點平台那套：漏的自己測不出來，留給阿姿亂打
-          { role: 'validations', text: '防呆', options: ['不見了一定要選原因', '送出前再確認一次', '簽核不同意要寫理由', '只有該據點的資產管理員看得到簽核鈕', '每打一個字就存檔', '簽核要輸入第二組密碼'],
-            keys: ['reason', 'confirmSubmit', 'rejectReason', 'managerOnly', 'autosave', 'secondPw'], answer: [0, 1, 2, 3],
-            ai: { pick: [0, 1, 4, 5], kind: 'miss' }, why: '每字存檔會打爆 API；莎禾用 AD 登入，不用再一組密碼',
-            fails: ['不見了沒選原因也送得出去', '手滑就送出了，改不回來', '管理員按不同意，持有人不知道為什麼', '一般同仁也看得到簽核鈕'] },
-          DAY1.palette('跟盤點平台、莎禾的 CI 走'),
-        ] } },
         { work: 'doc_plan', question: { items: [{ text: '步驟（挑該做的，照順序排）', type: 'order',
           options: ['簽核人改成莎禾各據點的資產管理員', '資產編號改成莎禾的格式', '部門從莎禾人資系統同步', '做盤點回報與簽核', '寫測試', '部署到測試機', '導入區塊鏈存證', '部門選單沿用我們公司的部門表'],
           answer: [0, 1, 2, 3, 4, 5], before: [[0, 3], [4, 5]], ai: { pick: [0, 1, 2, 3, 6, 4, 5], kind: 'extra' },
@@ -373,6 +357,26 @@ AI服務額度有上限，請各位同仁依照工作類型選擇合適的AI模�
             { work: 'reject', options: [0], when: { item: 0, picked: 0 } },
             { work: 'reject', options: [0], when: { item: 0, picked: 1 } },
           ] }] } },
+        // 「做多少」的筆記在元件這題發作：先問派每一項停下來問、全做派把深色模式和權限設定頁都加上
+        { work: 'ui_design', question: { items: [
+          { role: 'template', text: '版型', options: ['清單頁＋盤點表單', '只有一張表單', '報表頁', '儀表板'], keys: ['list', 'form', 'report', 'dashboard'], answer: [0],
+            ai: { pick: [3], kind: 'extra' }, why: '同仁要的是自己那幾筆和勾選',
+            given: [{ work: 'doc_plan', options: [0], when: { item: 0, picked: 3 } }] },   // 計畫排了盤點回報與簽核，清單加盤點表單直接帶進來
+          { role: 'components', text: '元件', options: ['登入框', '盤點回報（每列勾還在／不見了／壞了）', '簽核按鈕', '部門篩選', '匯出 Excel', '深色模式', '權限設定頁'],
+            keys: ['login', 'check', 'approve', 'filter', 'export', 'dark', 'perm'], answer: [0, 1, 2, 3], ai: { pick: [0, 1, 2, 3, 5, 6], kind: 'extra' },
+            why: '卡上沒寫匯出；權限照角色走，不用設定頁', tags: { 4: 'scope:all', 5: 'scope:all,noMfa', 6: 'scope:all,noMfa' },
+            askFirst: { 4: '匯出 Excel 有在需求內嗎？', 5: '要做深色模式嗎？', 6: '要做權限設定頁嗎？' },
+            fixes: [{ say: '你是不是不會做介面？' }, SCOPE_SPEC, 'auto'],
+            given: [{ work: 'doc_plan', options: [1, 2], when: { item: 0, picked: 3 } }] },   // 計畫排了盤點回報與簽核，這兩個元件直接帶進來
+          // 防呆照第二天盤點平台那套：漏的自己測不出來，留給阿姿亂打
+          { role: 'validations', text: '防呆', options: ['不見了一定要選原因', '送出前再確認一次', '簽核不同意要寫理由', '只有該據點的資產管理員看得到簽核鈕', '每打一個字就存檔', '簽核要輸入第二組密碼'],
+            keys: ['reason', 'confirmSubmit', 'rejectReason', 'managerOnly', 'autosave', 'secondPw'], answer: [0, 1, 2, 3],
+            ai: { pick: [0, 1, 4, 5], kind: 'miss' }, why: '每字存檔會打爆 API；莎禾用 AD 登入，不用再一組密碼',
+            fails: ['不見了沒選原因也送得出去', '手滑就送出了，改不回來', '管理員按不同意，持有人不知道為什麼', '一般同仁也看得到簽核鈕'],
+            // 計畫排了簽核人改成據點的資產管理員、規格寫了簽核流程，「只有資產管理員看得到簽核鈕」直接帶進來
+            given: [{ work: 'doc_plan', options: [3], when: { item: 0, picked: 0 } }, { work: 'doc_spec', options: [3], when: { item: 0, picked: 0 } }] },
+          DAY1.palette('跟盤點平台、莎禾的 CI 走'),
+        ] } },
         { work: 'doc_accept', question: { items: [{ text: '案例',
           options: ['資產管理員簽核後狀態才改', '一般同仁直接打簽核 API 回 403', '新增資產的編號是 A- 開頭', '部門選單是莎禾的部門，沒有「資產室」', '阿賢的帳號簽得過'],
           answer: [0, 1, 2, 3], ai: { pick: [0, 1, 2, 3, 4], kind: 'extra' }, why: '阿賢是我們公司的人，莎禾的系統沒有他', tags: { 1: 'auth:api', 4: 'auth:axian' },
@@ -386,7 +390,7 @@ AI服務額度有上限，請各位同仁依照工作類型選擇合適的AI模�
           ] }] } },
         { work: 'test', question: { kind: 'functions', functions: [
           { needs: { work: 'doc_accept', picked: 0 }, name: 'testOnlyManagerApproves', does: '只有據點的資產管理員簽得過', code: "expect(post('/api/approve', { as: staff }).status).toBe(403);",
-            drives: { fn: 'approver', field: 'who', map: { 0: 0, 1: 1 } },
+            drives: [{ fn: 'approver', field: 'who', map: { 0: 0, 1: 1 } }, { ui: 2, map: { 0: [3] } }],
             fields: { assert: { label: '檢查', options: ['資產管理員簽核後狀態才改；一般同仁打簽核 API 回 403', '阿賢的帳號簽得過'], answer: 0, ai: { pick: 1, kind: 'claim' },
               tags: { 0: 'approve:after', 1: 'auth:axian' } } } },
         ] } },

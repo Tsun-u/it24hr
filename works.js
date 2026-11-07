@@ -2,7 +2,7 @@
 //
 // 一題：{ work, minutes, items: [{ text, type?, options, answer, heuristic?, why? }] }
 //   type 省略＝單選（answer 是索引）；answer 是陣列且 type 省略＝多選；type:'order'＝排序
-//   heuristic 只有前端設計用：Nielsen 十原則的第幾條，答錯就記成違反
+//   heuristic 只有前端程式用：Nielsen 十原則的第幾條，答錯就記成違反
 // 答案：每題一個值，單選是索引、多選與排序是索引陣列。
 // 計分：{ score, max, minutes, wrong: [題號], violated: [heuristic] }
 (function (root) {
@@ -27,21 +27,21 @@
     route: '別人做到一半的東西，接下來就是你的了。或者，當它不存在。',
   };
   const LABELS = {
-    read_req: '整理需求', discuss: '需求討論', estimate: '估時', ui_design: '前端設計',
-    code: '開發', test: '寫測試程式', device_test: '跨裝置測試', manual_test: '手動測試', review_front: '檢閱程式碼（前端）', review_back: '檢閱程式碼（後端）',
+    read_req: '整理需求', discuss: '需求討論', estimate: '估時', ui_design: '前端程式',
+    code: '後端程式', test: '寫測試程式', device_test: '跨裝置測試', manual_test: '手動測試', review_front: '檢閱程式碼（前端）', review_back: '檢閱程式碼（後端）',
     debug: 'Debug', deploy: '部署', doc_plan: '開發計畫文件', doc_spec: '開發規格文件',
     doc_accept: '驗收文件', reply: '回訊息', reject: '退回 SA', route: '接手或重來',
     report: '寫檢討報告', dig: '嘗試找舊資料', restore: '手動補救',
   };
 
   // 卡片介面的核心操作列：有 children 的是子選單
-  // 驗收文件也是文件；開發分測試程式、程式本體；檢閱程式碼分前端、後端（第三天才有）；手動測試獨立一顆；
-  // 接手或重來（別人做過一版的卡，選了才知道接下來要做哪些）排最前面
+  // 驗收文件也是文件；檢閱程式碼分前端、後端（第三天才有）；手動測試獨立一顆；
+  // 接手或重來（別人做過一版的卡，選了才知道接下來要做哪些）排最前面；開發分測試程式、前端程式（ui_design，畫面）、後端程式（code）
   const MENU = [
     { id: 'route' },
-    { id: 'read_req' }, { id: 'discuss' }, { id: 'estimate' }, { id: 'ui_design' },
+    { id: 'read_req' }, { id: 'discuss' }, { id: 'estimate' },
     { id: 'docs', label: '文件', children: [{ id: 'doc_plan', short: '計畫' }, { id: 'doc_spec', short: '規格' }, { id: 'doc_accept', short: '驗收' }] },   // short：手機版的按鈕字，上層已經寫了文件
-    { id: 'dev', label: '開發', children: [{ id: 'test', label: '測試程式' }, { id: 'code', label: '程式本體' }] },
+    { id: 'dev', label: '開發', children: [{ id: 'test', label: '測試程式' }, { id: 'ui_design', label: '前端程式' }, { id: 'code', label: '後端程式' }] },
     { id: 'reviews', label: '檢閱程式碼', children: [{ id: 'review_front', label: '前端' }, { id: 'review_back', label: '後端' }] },
     { id: 'manual_test' },
     { id: 'deploy' },
@@ -61,18 +61,20 @@
   const isSingle = (item) => !Array.isArray(item.answer) && item.type !== 'order';
   // item.given：前面某個工作做過了（而且 when 那題選了 picked），這幾個選項從它的文件帶進來、勾好鎖住（單選題就是那題選好、整題鎖住）。
   // 規則是一條或一串 { work, options, when?: { item, sub?, picked } }；done(work) 回答那件工作做了沒。文件往後流跟誰寫無關，AI 寫的也帶
-  function givenOptions(item, picks, done) {
+  // rule.sentence：卡上要有那句需求才帶（covered 'all'＝SA 開的卡或劇本卡，全部算有寫）；跟開發 function 的 sentence 同一個規則
+  function givenOptions(item, picks, done, covered = 'all') {
     const out = [];
     for (const rule of [].concat(item.given || [])) {
       if (!done(rule.work) || (rule.when && !met(picks, { work: rule.work, ...rule.when }))) continue;
+      if (rule.sentence !== undefined && covered !== 'all' && !covered.includes(rule.sentence)) continue;
       out.push(...rule.options);
     }
     return [...new Set(out)];
   }
   // 前面某份文件帶入的選項（given）：那份文件做了、條件沒成立的（例如會議沒問到），AI 也不知道；那份還沒做的不算（沒有文件，照骰）
-  function unbacked(item, picks, done) {
+  function unbacked(item, picks, done, covered = 'all') {
     const rules = [].concat(item.given || []).filter(r => done(r.work));
-    const known = new Set(givenOptions(item, picks, done));
+    const known = new Set(givenOptions(item, picks, done, covered));
     return [...new Set(rules.flatMap(r => r.options))].filter(o => !known.has(o));
   }
   // item.showIf：{ 選項: 條件 }——條件沒達成的選項看不到、也不算在正解裡（例如需求討論有問到財務那段，驗收才會多出「財務只看得到簽核過的」）
@@ -98,7 +100,7 @@
     }
     return { ...item, answer, ai };
   }
-  // f.onlyIf：前面某題選了某個選項才有這個 function（例如前端設計勾了報表頁，開發多三個 function）
+  // f.onlyIf：前面某題選了某個選項才有這個 function（例如前端程式勾了報表頁，開發多三個 function）
   const activeFunction = (f, picks) => !f.onlyIf || met(picks, f.onlyIf);
   // 題目的 onlyIf：前面某題選了某個選項，這題才由玩家決定（例：檢閱挑出這一格，接手別人的版本時才改得到）；
   // 沒成立就照 item.inherit（原本那版），看得到、不能改，照那版的選擇計分（接手了，那版的錯也算你的），AI 也照填
@@ -143,7 +145,7 @@
     return answer === item.answer ? 1 : 0;
   }
 
-  // 選了某個寫法，成品上線後會怎樣：前端設計的題目（item.outcome）、開發 function 的欄位（field.outcome）
+  // 選了某個寫法，成品上線後會怎樣：前端程式的題目（item.outcome）、開發 function 的欄位（field.outcome）
   // 都是 { 選項: { kind, say, red?, junk?, kg? } }，kind 是 annoy（會動、員工看到紅字惱怒）／miss（QC 亂打翻得出來的漏做）／
   // late（QC 驗不出來，上線後月底才出事）／stuck（流程卡住）。這件工作沒做、或這格沒選，照 ifSkipped（沒人想過時最直覺的做法）；
   // 題目的 onlyIf 沒成立（picks 看前面的工作），照 inherit。sample 是那一格在成品畫面上的樣子（沒有紅字、怪東西可畫時用）
@@ -182,8 +184,10 @@
       .map((f, i) => activeFunction(f, picks) && (f.ifStated ? stated(f) : (f.judgment || (!f.carried && (!backed(f) || !stated(f))))) ? i : -1)
       .filter(i => i >= 0);
   }
-  // 測試程式管哪個開發 function：f.drives = { fn, field, map: { 測試選項: 開發選項 } }。卡上的測試選了什麼，AI 開發就照著讓它過
-  // （AI 照先寫好的測試開發，測試沒過就是紅燈它會想辦法變綠）；選的那項沒對應＝測試太鬆，不約束。預填的測試算選正解
+  // 測試程式管哪個 function 或前端程式哪一題：f.drives 是一條或一串，後端寫 { fn, field, map: { 測試選項: 開發選項 } }，
+  // 前端寫 { ui: 第幾題, map: { 測試選項: 選項或選項陣列 } }（多選題是要勾的那幾項）。卡上的測試選了什麼，AI 就照著讓它過
+  // （AI 照先寫好的測試寫，測試沒過就是紅燈它會想辦法變綠）；選的那項沒對應＝測試太鬆，不約束。預填的測試算選正解。
+  // 回傳 { 後端 function 名: { 欄位: 選項 }, ui_design: { 題號: [選項] } }
   function testDrives(question, answers, { covered = 'all', picks = null } = {}) {
     const out = {};
     if (!question || question.kind !== 'functions') return out;
@@ -192,8 +196,12 @@
       if (!f.drives) return;
       const [key, field] = Object.entries(f.fields)[0];
       const picked = toFill.includes(i) ? ((answers && answers[i]) || {})[key] : field.answer;
-      const to = f.drives.map[picked];
-      if (to !== undefined) (out[f.drives.fn] ||= {})[f.drives.field] = to;
+      for (const d of [].concat(f.drives)) {
+        const to = d.map[picked];
+        if (to === undefined) continue;
+        if (d.ui !== undefined) { const ui = (out.ui_design ||= {}); ui[d.ui] = [...new Set([...(ui[d.ui] || []), ...[].concat(to)])]; }
+        else (out[d.fn] ||= {})[d.field] = to;
+      }
     });
     return out;
   }
@@ -391,14 +399,19 @@
       const shown = visibleItem(item, picks);
       return guess(shown.ai, shown.answer, i);
     }), notes);
+    // 跟後端程式同一個先後：前面文件帶入的 → 交付重點（focus，只有掛了後果的欄位題有錯的方向）→ 卡上先寫好的測試（drives.ui_design）
+    const merge = (item, answer, opts) => (isSingle(item) ? opts[0] : [...new Set([...(Array.isArray(answer) ? answer : []), ...opts])]);
     return { answers: answers.map((a, i) => {
       const item = question.items[i];
       if (!activeItem(item, picks)) return item.inherit;   // 筆記、交付重點都改不動
-      const filled = withGiven(item, focusPick(item, focus) ?? a, givenOptions(item, picks, isDone));
+      const filled = withGiven(item, a, givenOptions(item, picks, isDone, covered));
       // 前面文件沒寫到的它也不知道，CLAIRE.md 點名要的照寫；單選題就照它自己的錯法寫（前面的文件錯，後面跟著錯）
-      const drop = unbacked(item, picks, isDone).filter(o => !noteKept(item, notes || {}).includes(o));
-      if (!Array.isArray(filled)) return drop.includes(filled) && item.ai && 'pick' in item.ai ? item.ai.pick : filled;
-      return filled.filter(v => !drop.includes(v));
+      const drop = unbacked(item, picks, isDone, covered).filter(o => !noteKept(item, notes || {}).includes(o));
+      let out = !Array.isArray(filled) ? (drop.includes(filled) && item.ai && 'pick' in item.ai ? item.ai.pick : filled) : filled.filter(v => !drop.includes(v));
+      const focused = focusPick(item, focus);
+      if (focused !== undefined) out = focused;   // 跟後端一樣，交付重點蓋過文件帶入的
+      const tested = drives.ui_design && drives.ui_design[i];
+      return tested && tested.length ? merge(item, out, tested) : out;
     }), errors };
   }
   // 帶進來的選項 AI 不會漏：多選併進去；排序題照正解的先後插進它排的清單
@@ -509,7 +522,7 @@
   // 人類那句戳到的是舊筆記的前提（「阿賢不是莎禾的人」）：新一代的 AI 把那條劃掉、不另寫一條
   const fixDrops = (fix) => Object.entries((fix && fix.set) || {}).filter(([, stance]) => stance === null).map(([topic]) => topic);
   // 只改圈到的題目：有說法而且說法帶答案就照改，不然照正確率重擲；改完整份再套一次筆記（同一份的其他題也跟著筆記走）
-  function reviseAnswers(question, base, requests, { notes = {}, accuracy = 0.5, seed = '', picks = null, done = [], locked = () => false } = {}) {
+  function reviseAnswers(question, base, requests, { notes = {}, accuracy = 0.5, seed = '', picks = null, done = [], covered = 'all', locked = () => false } = {}) {
     const clone = (v) => (v && typeof v === 'object' ? JSON.parse(JSON.stringify(v)) : v);
     const answers = clone(base);
     const redo = (spot, key) => (spot.ai && aiRoll(`${seed}:${key}`) >= accuracy ? spot.ai.pick : spot.answer);
@@ -517,7 +530,7 @@
       const [, kind, a, b] = key.match(/^([ifd])(\d+)(?:\.(.+))?$/) || [];
       if (kind === 'i') {
         const item = visibleItem(question.items[a], picks);
-        answers[a] = withGiven(item, fix && fix.pick !== undefined ? fix.pick : redo(item, key), givenOptions(item, picks, (w) => done.includes(w)));
+        answers[a] = withGiven(item, fix && fix.pick !== undefined ? fix.pick : redo(item, key), givenOptions(item, picks, (w) => done.includes(w), covered));
       }
       if (kind === 'f') {
         const field = question.functions[a].fields[b];

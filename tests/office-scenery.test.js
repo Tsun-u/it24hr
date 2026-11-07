@@ -170,3 +170,58 @@ test('小事件池每關各自一套：第二關不抽第一關的飲水機、�
     assert.ok(!e.docs.some(d => d.errand), mode);
   }
 });
+test('每個 function 都有白話說明（does）：三個時代、三張模組池卡、接手路線、平行宇宙小卡都算', () => {
+  const seen = new Set(), missing = []; let total = 0;
+  const walk = (node) => {
+    if (!node || typeof node !== 'object' || seen.has(node)) return; seen.add(node);
+    for (const f of Array.isArray(node.functions) ? node.functions : []) { total++; if (!f.does) missing.push(f.name); }
+    Object.values(node).forEach(walk);
+  };
+  for (const mode of ['legacy', 'hybrid', 'speedrun']) for (const pool of [['trace', 'stock'], ['claim', 'stock']]) walk(Sandbox.make('scenery', mode, { pool }));
+  assert.ok(total > 60, `只走到 ${total} 個`); assert.deepStrictEqual(missing, []);
+});
+// 走過一關所有的工作（會議開的卡、平行宇宙小卡、選路卡的兩條路），每件工作交給 visit(subtask, 同一張卡的工作)
+function eachWork(script, visit) {
+  const seen = new Set();
+  const walk = (node) => {
+    if (!node || typeof node !== 'object' || seen.has(node)) return; seen.add(node);
+    if (Array.isArray(node.subtasks)) node.subtasks.forEach(s => visit(s, node.subtasks));
+    Object.values(node).forEach(walk);
+  };
+  walk(script);
+}
+const POOLS = [['trace', 'stock'], ['claim', 'stock']];
+test('測試程式的 drives 指到同一張卡真的有的後端 function 欄位或前端程式題目、選項，而且正解帶正解', () => {
+  const bad = []; let back = 0, front = 0;
+  const same = (a, b) => JSON.stringify([].concat(a).sort()) === JSON.stringify([].concat(b).sort());
+  for (const mode of ['legacy', 'hybrid', 'speedrun']) for (const pool of POOLS) eachWork(Sandbox.make('scenery', mode, { pool }), (s, siblings) => {
+    if (s.work !== 'test') return;
+    const code = siblings.find(x => x.work === 'code'), ui = siblings.find(x => x.work === 'ui_design');
+    for (const t of s.question.functions.filter(f => f.drives)) for (const d of [].concat(t.drives)) {
+      const assertField = Object.values(t.fields)[0];
+      // 前端那條：多選題的正解要包含測試正解帶出來的那幾項（其他正解由文件帶）；單選題要等於正解
+      const target = d.ui !== undefined ? ui && ui.question.items[d.ui] : (code && code.question.functions.find(f => f.name === d.fn) || { fields: {} }).fields[d.field];
+      d.ui !== undefined ? front++ : back++;
+      const inRange = target && Object.entries(d.map).every(([from, to]) => assertField.options[from] != null && [].concat(to).every(o => target.options[o] != null));
+      const right = target && (Array.isArray(target.answer) ? [].concat(d.map[assertField.answer]).every(o => target.answer.includes(o)) : same(d.map[assertField.answer], target.answer));
+      if (!inRange || !right) bad.push(`${mode} ${t.name}`);
+    }
+  });
+  assert.ok(back > 60 && front > 30, `只走到後端 ${back}、前端 ${front} 個`); assert.deepStrictEqual(bad, []);
+});
+test('hybrid、speedrun 每個有錯法可選的題和欄位都有 AI 錯法（兩條路、平行宇宙小卡都算）', () => {
+  const missing = []; let total = 0;
+  const hasWrong = (options, answer) => (options || []).some((_, i) => ![].concat(answer).includes(i));
+  for (const mode of ['hybrid', 'speedrun']) for (const pool of POOLS) eachWork(Sandbox.make('scenery', mode, { pool }), (s) => {
+    const q = s.question || {};
+    for (const item of q.items || []) {
+      if (item.free || item.type === 'hours' || !hasWrong(item.options, item.answer)) continue;
+      total++; if (!item.ai) missing.push(`${mode} ${s.work}：${item.text}`);
+    }
+    for (const f of q.functions || []) for (const [key, field] of Object.entries(f.fields || {})) {
+      if (!hasWrong(field.options, field.answer)) continue;
+      total++; if (!field.ai) missing.push(`${mode} ${s.work} ${f.name}.${key}`);
+    }
+  });
+  assert.ok(total > 200, `只走到 ${total} 個`); assert.deepStrictEqual(missing, []);
+});

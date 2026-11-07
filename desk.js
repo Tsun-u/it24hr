@@ -1757,7 +1757,9 @@
         if (!item.children) { if (has(item.id)) row.append(btn(item)); continue; }
         const children = item.children.filter(c => has(c.id)); if (!children.length) continue;
         const group = h('span', 'op-group');
-        const toggle = h('button', 'op has-menu', item.label); toggle.setAttribute('aria-expanded', 'false');
+        // 子項全做完，主項跟著打勾（不用每次點開檢查）
+        const allDone = children.every(c => card.done(c.id));
+        const toggle = h('button', `op has-menu ${allDone ? 'done' : ''}`, item.label + (allDone ? ' ✓' : '')); toggle.setAttribute('aria-expanded', 'false');
         const sub = h('span', 'op-sub'); sub.hidden = true;
         for (const c of children) sub.append(btn(c));
         toggle.addEventListener('click', () => {

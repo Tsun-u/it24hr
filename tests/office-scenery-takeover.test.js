@@ -69,7 +69,7 @@ test('接手、檢閱什麼都沒挑（LGTM）：全照建宏那版——部位�
   const fns = sub(e, 'code').functions;
   for (const name of ['traceBack', 'carryBatch', 'approveFlow']) assert.strictEqual(card.picks.code[fns.findIndex(f => f.name === name)].flow, 1, name);
 });
-test('接手、檢閱什麼都沒挑：前端設計四題照建宏那版計分，玩家選正解也是 0／4', () => {
+test('接手、檢閱什麼都沒挑：前端程式四題照建宏那版計分，玩家選正解也是 0／4', () => {
   const e = pickTakeover(); doAll(e, 'trace');
   const r = e.board.get('trace').history.filter(h => h.work === 'ui_design').at(-1).result;
   assert.deepStrictEqual([r.score, r.max], [0, 4]);
@@ -81,7 +81,7 @@ test('QC 退回後重做檢閱前端、挑出部位：部位那題解開，改�
   e.doWork('trace', 'ui_design', right(sub(e, 'ui_design')));
   assert.ok(!e.cardOutcomes(e.board.get('trace')).some(o => o.kind === 'miss'));
 });
-test('接手、全部挑出來：前端設計、程式照玩家選的正解，沒有後果', () => {
+test('接手、全部挑出來：前端程式、程式照玩家選的正解，沒有後果', () => {
   const e = pickTakeover();
   shipped(e, 'trace', { review_front: { marks: marksOf(sub(e, 'review_front')), lgtm: false, hintsUsed: 0 }, review_back: { marks: marksOf(sub(e, 'review_back')), lgtm: false, hintsUsed: 0 } });
   assert.deepStrictEqual(e.cardOutcomes(e.board.get('trace')), []);
@@ -183,7 +183,7 @@ test('結算卡：接手改掉幾個紅字；打掉重練轉不過去幾筆；�
 });
 test('接手後自己把批號又做成跳紅字：那個不算改掉', () => {
   const e = pickTakeover();
-  const ui = right(sub(e, 'ui_design')); ui[0] = 1;   // 檢閱挑出批號，前端設計卻還是選讓人自己打
+  const ui = right(sub(e, 'ui_design')); ui[0] = 1;   // 檢閱挑出批號，前端程式卻還是選讓人自己打
   shipped(e, 'trace', { review_front: frontMarks(e, ['批號', '部位']), ui_design: ui });
   assert.ok(extra(e).includes('建宏的版本：接手，改掉 0 個紅字'));
 });

@@ -7,7 +7,7 @@ const day1 = require('../day1.js');
 const card = () => makeCard({ ...day1.cards[0] });
 const code = (k, answers) => { k.picks = k.picks || {}; k.record('code', { result: { bugs: answers, max: 1, score: 0 } }); };
 
-test('沒做前端設計：版型 plain、沒有元件；做了就照 keys 讀', () => {
+test('沒做前端程式：版型 plain、沒有元件；做了就照 keys 讀', () => {
   const k = card();
   const m = Screen.model(k);
   assert.strictEqual(m.designed, false); assert.strictEqual(m.template, 'plain'); assert.deepStrictEqual(m.components, {}); assert.strictEqual(m.built, false);
@@ -37,7 +37,7 @@ test('配色、確認方式、提示方式照選的讀；簡易 Lighthouse：對
   const rg = card(); rg.picks = { ui_design: [0, [], [], 2, 0, 0] }; code(rg, []);
   assert.ok(Screen.lighthouse(Screen.model(rg)).notes.some(n => /紅配綠/.test(n)));
   const plain = card(); code(plain, []);
-  assert.ok(Screen.lighthouse(Screen.model(plain)).notes.some(n => /沒做前端設計/.test(n)));
+  assert.ok(Screen.lighthouse(Screen.model(plain)).notes.some(n => /沒做前端程式/.test(n)));
 });
 
 test('老闆的唯讀頁：欄位和資料跟阿賢那頁同一份；寫成能改的頁、或自己加了修改按鈕，財務會講', () => {
@@ -59,7 +59,7 @@ test('追加需求的配色跟母議題不一樣：不管評價好壞，都多�
   assert.ok(!same.includes(Screen.STYLE_LINE)); assert.ok(same.some(s => /不用教/.test(s)));
   const darker = Screen.userVoice(boss(4), Screen.model(parent));   // 深色預設本身對比沒問題
   assert.ok(darker.some(s => /不用教/.test(s))); assert.strictEqual(darker.at(-1), Screen.STYLE_LINE);
-  const plainParent = card();   // 母議題沒做前端設計，子議題做了：一樣不一致
+  const plainParent = card();   // 母議題沒做前端程式，子議題做了：一樣不一致
   assert.ok(Screen.userVoice(boss(0), Screen.model(plainParent)).includes(Screen.STYLE_LINE));
   const k = makeCard({ id: 'boss:card', screen: day1.sources[0].screen, subtasks: day1.sources[0].subtasks });   // 版型照需求走：配色一樣、版型不同不算不一致
   k.picks = { ui_design: [2, [0, 1, 2], 0] }; code(k, []);

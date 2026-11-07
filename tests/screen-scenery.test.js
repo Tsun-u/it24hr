@@ -1,4 +1,4 @@
-// tests/screen-scenery.test.js（node --test）：第二關的成品畫面——欄位照前端設計畫成下拉／紅字／怪東西，劇本寫的 bug 改那一格、使用者講那句
+// tests/screen-scenery.test.js（node --test）：第二關的成品畫面——欄位照前端程式畫成下拉／紅字／怪東西，劇本寫的 bug 改那一格、使用者講那句
 const test = require('node:test');
 const assert = require('node:assert');
 const Screen = require('../screen.js');
@@ -26,7 +26,7 @@ test('漏做：那一格填著怪東西', () => {
   const e = opened(); const a = right(uiOf(e)); a[0] = 2; doAll(e, 'buy', { ui_design: a });
   assert.deepStrictEqual(Screen.model(e.board.get('buy')).fieldLooks[PRICE], { look: 'junk', text: '時價' });
 });
-test('沒做前端設計：每格照 ifSkipped，畫面上還是有新增表單', () => {
+test('沒做前端程式：每格照 ifSkipped，畫面上還是有新增表單', () => {
   const e = opened(); doAll(e, 'buy', { ui_design: null });
   const m = Screen.model(e.board.get('buy'));
   assert.ok(m.form && !m.designed);

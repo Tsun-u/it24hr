@@ -70,7 +70,7 @@ test('估時的實際：第一筆紀錄到最後一次交 QC，跨夜也算；�
   const card = e2.board.get('a'); assert.strictEqual(card.status, 'archived');
   const r = e2.leave();
   assert.strictEqual(r.estimates[0].actual, Verdict.duration(24 * 60), '昨天 09:01 到今天 09:01 交 QC');
-  assert.ok(r.lines.includes('開發：3／3'), '今天重寫的那次');
+  assert.ok(r.lines.includes('後端程式：3／3'), '今天重寫的那次');
   assert.ok(!r.lines.some(l => l.startsWith('估時：')), '估時是昨天做的，不再列一次');
 });
 

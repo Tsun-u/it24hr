@@ -8,13 +8,13 @@ const cardOf = (id, bugs = [], picks = null) => {
   return { title: c.title, screen: c.screen, subtasks: c.subtasks, picks, history: [{ work: 'code', result: { bugs } }] };
 };
 const bug = (fn) => ({ fn, field: 'x' });
-// 前端設計照正解勾（poc_approve、poc_bot 有這件工作，沒勾就是 plain）
+// 前端程式照正解勾（poc_approve、poc_bot 有這件工作，沒勾就是 plain）
 const designed = (id) => {
   const sub = DAY3.make().cards.find(x => x.id === id).subtasks.find(s => s.work === 'ui_design');
   return { ui_design: sub.question.items.map(it => it.answer) };
 };
 
-test('登入與權限：沒有前端設計也照盤點平台的畫面畫；接錯 AD、忘記密碼導錯、簽核鈕一般同仁也看得到', () => {
+test('登入與權限：沒有前端程式也照盤點平台的畫面畫；接錯 AD、忘記密碼導錯、簽核鈕一般同仁也看得到', () => {
   const ok = Screen.model(cardOf('poc_login'));
   assert.ok(ok.designed && ok.components.login && ok.loginRequired && ok.pwReset);
   assert.match(ok.loginLabel, /莎禾 AD/);
@@ -52,7 +52,7 @@ test('財務季報表（#128）：沒有介面要做也有畫面——既有的�
 test('QA 機器人與 ERP 匯出：閒聊、漏資料、BOM、沒排程各有一句使用者的話', () => {
   const bot = Screen.model(cardOf('poc_bot', [bug('botScope'), bug('botSource')], designed('poc_bot')));
   assert.ok(bot.components.chat && bot.effects.botChatty && bot.effects.botLeaks);
-  assert.strictEqual(bot.template, 'list', '前端設計沒有版型那題：預設清單頁，小視窗才畫得出來');
+  assert.strictEqual(bot.template, 'list', '前端程式沒有版型那題：預設清單頁，小視窗才畫得出來');
   assert.ok(Screen.userVoice(bot).some(s => /一首詩/.test(s)) && Screen.userVoice(bot).some(s => /別人名下/.test(s)));
   const erp = Screen.model(cardOf('poc_erp', [bug('exportEncoding'), bug('exportSchedule')]));
   assert.ok(erp.designed && erp.erpPreview && erp.effects.bomVisible && erp.effects.noSchedule);
@@ -60,7 +60,7 @@ test('QA 機器人與 ERP 匯出：閒聊、漏資料、BOM、沒排程各有一
   assert.deepStrictEqual(Screen.userVoice(Screen.model(cardOf('poc_erp'))), [Screen.PRAISE_LINE]);
 });
 
-test('資安與合規：沒有前端設計也照盤點平台畫；套件升錯了篩選、匯出按了沒反應（第二天資安卡同一個效果）', () => {
+test('資安與合規：沒有前端程式也照盤點平台畫；套件升錯了篩選、匯出按了沒反應（第二天資安卡同一個效果）', () => {
   const ok = Screen.model(cardOf('poc_compliance'));
   assert.ok(ok.designed && ok.components.filter && ok.components.export && !ok.effects.jqueryBroken);
   const bad = Screen.model(cardOf('poc_compliance', [bug('upgradeDeps')]));

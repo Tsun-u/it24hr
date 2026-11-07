@@ -15,7 +15,7 @@
 不見了的要寫原因，不然稽核會問。
 下個月就要盤了，拜託🙏`;
 
-  // 主線卡前端設計的版型勾了報表頁（加分項）：開發多三個 function、老闆卡變版本二
+  // 主線卡前端程式的版型勾了報表頁（加分項）：開發多三個 function、老闆卡變版本二
   const REPORT = { work: 'ui_design', item: 0, picked: 2 };
 
   // hybrid 的 SA 卡：人寫的部分整齊，後面接一句 AI 的主張，解法混進需求、而且這句是錯的
@@ -182,11 +182,14 @@ ${AI_CLAIM}`;
       { work: 'ui_design', question: { items: [
           // 報表頁是加分項：勾了主任和財務覺得很方便、老闆卡變版本二，但開發多三個 function
           { role: 'template', text: '版型', options: ['清單頁＋盤點表單', '只有一張表單', '報表頁', '儀表板'], keys: ['list', 'form', 'report', 'dashboard'], answer: [0], bonus: [2],
-            ai: { pick: [3], kind: 'extra' }, why: '持有人要的是自己那幾筆和勾選，不是圖表；報表是給主任和財務的加分' },
+            ai: { pick: [3], kind: 'extra' }, why: '持有人要的是自己那幾筆和勾選，不是圖表；報表是給主任和財務的加分',
+            given: [{ work: 'doc_plan', options: [0], when: { item: 0, picked: 3 } }] },   // 計畫排了盤點回報，清單加盤點表單直接帶進來
           { role: 'components', text: '元件', options: ['登入框', '搜尋列', '狀態篩選', '盤點回報（每列勾還在／不見了／壞了）', '簽核按鈕', '匯出 Excel', '權限設定頁', '深色模式', '聊天機器人'],
             keys: ['login', 'search', 'filter', 'check', 'approve', 'export', 'perm', 'dark', 'bot'],
             answer: [0, 1, 2, 3, 4, 5], ai: { pick: [0, 1, 2, 3, 4, 5, 6, 8], kind: 'extra' }, why: '權限照角色走，不用權限設定頁；聊天機器人沒人要',
             tags: { 1: 'scope:spec', 2: 'scope:spec', 5: 'scope:spec', 6: 'scope:all', 8: ['chatbot:yes', 'scope:all'] },
+            // 計畫排了接 AD、盤點回報、簽核，登入框、盤點回報、簽核按鈕直接帶進來
+            given: [{ work: 'doc_plan', options: [0], when: { item: 0, picked: 1 } }, { work: 'doc_plan', options: [3], when: { item: 0, picked: 3 } }, { work: 'doc_plan', options: [4], when: { item: 0, picked: 4 } }],
             askFirst: { 1: '需不需要加搜尋列？', 2: '狀態篩選要做嗎？', 5: { text: '匯出 Excel 有在規格內嗎？', yes: '有', no: '沒有' }, 6: '要做權限設定頁嗎？', 8: '要不要加聊天機器人？' },
             fixes: [{ say: '你又擅自加東西了。', set: { scope: 'ask' } },
               { say: '資產盤點平台是內部工具，不需要做聊天機器人。', set: { chatbot: 'never' } },   // 第三天的 POC 大企業要簡易 QA 機器人
@@ -197,7 +200,9 @@ ${AI_CLAIM}`;
             answer: [0, 1, 2, 4], alt: { 3: 2 }, conflicts: [[2, 3]],
             conflictFail: '同一台重複回報，畫面擋下來說禁止重複回報，但是資料已經被修改了，請處理。',
             ai: { pick: [0, 1, 5], kind: 'miss' }, why: '每字存檔會打爆 API；原因是用選的，沒有字數；不見了的東西拍不到',
-            fails: ['不見了沒選原因也送得出去', '手滑就送出了，改不回來', '同一台這一季回報了兩次', '同一台這一季回報了兩次', '阿賢按不同意，持有人不知道為什麼'] },
+            fails: ['不見了沒選原因也送得出去', '手滑就送出了，改不回來', '同一台這一季回報了兩次', '同一台這一季回報了兩次', '阿賢按不同意，持有人不知道為什麼'],
+            // 規格寫了盤點狀態與原因、簽核流程，對應的防呆直接帶進來
+            given: [{ work: 'doc_spec', options: [0], when: { item: 0, picked: 1 } }, { work: 'doc_spec', options: [4], when: { item: 0, picked: 2 } }] },
           DAY1.palette('跟昨天的系統、公司 CI 走'),
         ] } },
       { work: 'doc_accept', question: { items: [{ text: '案例',
@@ -230,7 +235,7 @@ ${AI_CLAIM}`;
           { needs: { work: 'doc_accept', picked: 5 }, name: 'testReportView', does: '財務看到的畫面', code: "expect(financeView().every(a => a.approval === '同意')).toBe(true);",
             fields: { assert: { label: '檢查', options: ['跟現行完全一樣，只看得到簽核同意的', '跟主任一樣但是唯讀', '跟現行完全一樣，不用改程式'], answer: 0, ai: { pick: 2, kind: 'edge' } } } },
           { needs: { work: 'doc_accept', picked: 1 }, name: 'testMissingNeedsReason', does: '不見了沒原因送不出去', code: "expect(() => submitCheck({ status: '不見了' })).toThrow();",
-            drives: { fn: 'submitCheck', field: 'guard', map: { 0: 0, 1: 2, 2: 1 } },
+            drives: [{ fn: 'submitCheck', field: 'guard', map: { 0: 0, 1: 2, 2: 1 } }, { ui: 2, map: { 0: [0] } }],
             fields: { assert: { label: '檢查', options: ['沒原因會丟錯', '沒原因會自動填其他', '沒原因也存得進去'], answer: 0, ai: { pick: 1, kind: 'miss' } } } },
           { needs: { work: 'doc_accept', picked: 2 }, name: 'testApproveBeforeStatus', does: '簽核過才改狀態', code: "expect(asset.status).toBe(before); approve(check); expect(asset.status).toBe(check.status);",
             drives: { fn: 'approveCheck', field: 'when', map: { 0: 0, 1: 1 } },
@@ -270,7 +275,7 @@ ${AI_CLAIM}`;
               answer: 0, ai: { pick: 1 }, tags: { 0: 'auth:api', 1: 'auth:front', 3: 'auth:axian' },
               // 三派人類的三句：情緒化（AI 從此不碰權限）、過於細節（寫死阿賢，主任、財務、持有人都被擋）、原則
               fixes: [{ say: '你權限根本亂做', set: { auth: 'skip' } }, { say: '權限檢查最好做在後端', set: { auth: 'api' } }, { say: 'API 應該要檢查是不是阿賢', set: { auth: 'axian' } }] } } },
-          // 前端設計勾了報表頁才有的三個 function（onlyIf）；交給 AI 的話版面照前端設計的版型題寫，那題也勾了儀表板才跟著做成儀表板
+          // 前端程式勾了報表頁才有的三個 function（onlyIf）；交給 AI 的話版面照前端程式的版型題寫，那題也勾了儀表板才跟著做成儀表板
           { onlyIf: REPORT, name: 'summaryView', does: '報表頁的前端樣式',
             fields: { layout: { label: '版面', options: ['報表版面，除了明細外，有簡易的樞紐分析', '儀表板版面，用現在最潮的卡片顯示已盤點數和已填寫數', '清單版面，跟財務看到的一樣'], answer: 0,
               follows: { work: 'ui_design', item: 0, wrong: { 3: 1 } } } } },
@@ -295,7 +300,7 @@ ${AI_CLAIM}`;
 
   // 財務來信：匯出的 CSV 用 Excel 開中文亂碼（台灣的經典坑：UTF-8 要加 BOM Excel 才認得）。轉給 SA 的話她跟 AI 討論出「檔名改英文」
   // 一上班就在信箱裡：是昨天的系統，玩家可以邊開早會邊處理
-  // 信件卡沒有前端設計：改的是昨天那套資產清單，成品畫面照既有的樣子畫，bug 照樣看得到（手動測試裝置不能沒畫面）
+  // 信件卡沒有前端程式：改的是昨天那套資產清單，成品畫面照既有的樣子畫，bug 照樣看得到（手動測試裝置不能沒畫面）
   const LEGACY_LOOK = { template: 'list', components: { search: true, filter: true, add: true, edit: true, scrap: true, export: true },
     validations: { serial: true, required: true, dateSmart: true, unique: true, confirmScrap: true }, theme: { bg: '#ffffff', fg: '#1f2328', accent: '#2563eb' }, confirm: 'dialog', hint: 'inline' };
   // 部門亂打的那幾筆：舊資料對回來以後都是「資產室」
@@ -591,7 +596,7 @@ ${AI_CLAIM}`;
     { after: 'work:done:asset_platform:discuss', text: '估時。AI 估的時間通常很樂觀。', until: 'work:done:asset_platform:estimate' },
     { after: 'work:done:asset_platform:estimate', text: '開發計畫文件。自己寫或交給 AI 再看都行；額度在右下角，14:00 才補。', until: 'work:done:asset_platform:doc_plan' },
     { after: 'work:done:asset_platform:doc_plan', text: '規格文件。', until: 'work:done:asset_platform:doc_spec' },
-    { after: 'work:done:asset_platform:doc_spec', text: '前端設計。昨天登入是陷阱，今天呢？', until: 'work:done:asset_platform:ui_design' },
+    { after: 'work:done:asset_platform:doc_spec', text: '前端程式。昨天登入是陷阱，今天呢？', until: 'work:done:asset_platform:ui_design' },
     { after: 'work:done:asset_platform:ui_design', text: '有 AI 之後先定怎麼驗：文件 ▸ 驗收文件。', until: 'work:done:asset_platform:doc_accept' },
     { after: 'work:done:asset_platform:doc_accept', text: '再寫測試程式。AI 寫的東西要有尺量，尺要先有。', until: 'work:done:asset_platform:test' },
     { after: 'work:done:asset_platform:test', text: '開發交給 AI。等它交件的時候可以處理別的。', until: [`ai:started:${P}:code`, `work:done:${P}:code`] },

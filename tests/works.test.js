@@ -50,7 +50,7 @@ test('部署題（有 roles）也拆兩半算：先後只看 備份→替換、�
   assert.deepStrictEqual(W.deployBefore(q.roles), [[0, 2], [1, 2], [2, 3]]);
 });
 
-test('前端設計：記下違反了哪幾條 heuristic', () => {
+test('前端程式：記下違反了哪幾條 heuristic', () => {
   const q = { work: 'ui_design', minutes: 15, items: [
     { text: 'a', options: ['x', 'y'], answer: 0, heuristic: 3 },
     { text: 'b', options: ['x', 'y'], answer: 1, heuristic: 7 }] };
@@ -82,7 +82,9 @@ test('跨裝置：裝置沒電時「用裝置測」不可選', () => {
 test('核心工作的中文名與子選單', () => {
   assert.strictEqual(W.label('doc_spec'), '開發規格文件');
   assert.deepStrictEqual(W.MENU.find(m => m.id === 'docs').children.map(c => c.id), ['doc_plan', 'doc_spec', 'doc_accept']);
-  assert.deepStrictEqual(W.MENU.find(m => m.id === 'dev').children.map(c => c.id), ['test', 'code']);
+  assert.deepStrictEqual(W.MENU.find(m => m.id === 'dev').children.map(c => c.id), ['test', 'ui_design', 'code']);
+  assert.deepStrictEqual(['ui_design', 'code'].map(W.label), ['前端程式', '後端程式']);
+  assert.ok(!W.MENU.some(m => m.id === 'ui_design'), '前端程式在開發底下，不是獨立一顆');
   assert.deepStrictEqual(W.MENU.find(m => m.id === 'reviews').children.map(c => c.id), ['review_front', 'review_back']);
   assert.ok(W.MENU.some(m => m.id === 'manual_test' && !m.children), '手動測試獨立一顆');
 });

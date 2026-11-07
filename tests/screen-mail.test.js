@@ -1,18 +1,18 @@
-// tests/screen-mail.test.js（node --test）：沒有前端設計的信件卡，成品畫面照既有的資產清單畫（手動測試裝置不能沒畫面）
+// tests/screen-mail.test.js（node --test）：沒有前端程式的信件卡，成品畫面照既有的資產清單畫（手動測試裝置不能沒畫面）
 const test = require('node:test'); const assert = require('node:assert');
 const Screen = require('../screen.js');
 const DAY2 = require('../day2.js');
 
 const source = (id) => DAY2.make().sources.find(s => s.id === id);
-// 開成卡的樣子：信件卡沒有前端設計；code 那筆紀錄帶著 bug
+// 開成卡的樣子：信件卡沒有前端程式；code 那筆紀錄帶著 bug
 const cardOf = (id, bugs = null) => ({ title: source(id).title, screen: source(id).screen, subtasks: source(id).subtasks,
   history: bugs ? [{ work: 'code', result: { bugs } }] : [] });
 
-test('沒有前端設計的信件卡：照既有的資產清單畫，不算沒做設計', () => {
+test('沒有前端程式的信件卡：照既有的資產清單畫，不算沒做設計', () => {
   for (const id of ['dept_select', 'finance_csv', 'sec_jquery']) {
     const m = Screen.model(cardOf(id, []));
     assert.strictEqual(m.designed, true, id); assert.strictEqual(m.template, 'list', id); assert.ok(m.fields.length && m.rows.length, id);
-    assert.ok(!Screen.lighthouse(m).notes.some(n => n.includes('沒做前端設計')), id);
+    assert.ok(!Screen.lighthouse(m).notes.some(n => n.includes('沒做前端程式')), id);
   }
 });
 

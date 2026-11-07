@@ -3,15 +3,15 @@ const test = require('node:test');
 const assert = require('node:assert');
 const { C, JIANHONG, XIUQIN, play, tickTo, meetAll, skipMeeting, doAll, shipped, lime } = require('./scenery-helpers.js');
 const opened = () => skipMeeting(play());
-// 只部署就交 QC：前端設計、規格、開發都沒做
+// 只部署就交 QC：前端程式、規格、開發都沒做
 const ONLY_DEPLOY = { read_req: null, discuss: null, estimate: null, doc_plan: null, doc_spec: null, ui_design: null, doc_accept: null, code: null, test: null, manual_test: null };
 
-test('mismatch：全部做對是 0；前端設計、開發都沒做是 1；卡上沒有這兩件的（母議題）是 0', () => {
+test('mismatch：全部做對是 0；前端程式、開發都沒做是 1；卡上沒有這兩件的（母議題）是 0', () => {
   let e = opened(); doAll(e, 'buy'); assert.strictEqual(e.mismatch(e.board.get('buy')), 0);
   e = opened(); doAll(e, 'buy', ONLY_DEPLOY); assert.strictEqual(e.mismatch(e.board.get('buy')), 1);
   assert.strictEqual(e.mismatch(e.board.get('erp')), 0);
 });
-test('mismatch：只看成品（前端設計＋程式本體）——前端設計沒做、開發照正解是 1/2；規格沒做不算', () => {
+test('mismatch：只看成品（前端程式＋後端程式）——前端程式沒做、開發照正解是 1/2；規格沒做不算', () => {
   let e = opened(); doAll(e, 'buy', { ui_design: null });
   assert.ok(Math.abs(e.mismatch(e.board.get('buy')) - 1 / 2) < 1e-9);
   e = opened(); doAll(e, 'buy', { doc_spec: null });
@@ -56,7 +56,7 @@ test('依做歪的模組不同：加班請假做歪是秀琴姐要排班表，�
   assert.ok(lime(e, XIUQIN).some(t => t.includes('可以改成排班表嗎？')));
   assert.deepStrictEqual([e.board.get('staff_buy').no, e.board.get('roster').no], [406, 407]);
 });
-test('六張新卡都開得出來、照正解做完會結案；成品畫面兩個欄位都畫成正解的樣子；沒做前端設計兩個欄位都收了怪東西', () => {
+test('六張新卡都開得出來、照正解做完會結案；成品畫面兩個欄位都畫成正解的樣子；沒做前端程式兩個欄位都收了怪東西', () => {
   const Screen = require('../screen.js');
   const NEW = { buy: 'staff_buy', yield: 'staff_meal', shift: 'roster', trace: 'regulars', stock: 'gifts', claim: 'gear_loan' };
   for (const pool of [['trace', 'stock'], ['stock', 'claim']]) {

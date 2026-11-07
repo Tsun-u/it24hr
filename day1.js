@@ -111,22 +111,25 @@
                     { work: 'doc_plan', options: [3], when: { item: 0, picked: 3 } },
                     { work: 'doc_plan', options: [6], when: { item: 0, picked: 4 } },
                   ] }] } },
-      // 前端設計：版型和元件決定成品畫面長什麼樣（screen.js 照 keys 畫）；防呆是業界最大的坑：
+      // 前端程式：版型和元件決定成品畫面長什麼樣（screen.js 照 keys 畫）；防呆是業界最大的坑：
       // 漏掉的自己測不會出事，QC 亂打才會，退件理由寫在 fails（跟選項對齊）
       { work: 'ui_design', question: { items: [
           { role: 'template', text: '版型', options: ['清單頁＋編輯表單', '只有一張表單', '報表頁', '儀表板'], keys: ['list', 'form', 'report', 'dashboard'], answer: 0,
-            why: '一筆一筆建、可以查可以改，就是清單加表單' },
+            why: '一筆一筆建、可以查可以改，就是清單加表單',
+            given: [{ work: 'doc_plan', options: [0], when: { item: 0, picked: 2 } }] },
           { role: 'components', text: '元件', options: ['搜尋列', '狀態篩選', '新增按鈕', '每列的修改', '報廢按鈕', '匯出 Excel', '分頁', '登入框', '權限設定', '深色模式'],
             keys: ['search', 'filter', 'add', 'edit', 'scrap', 'export', 'pager', 'login', 'perm', 'dark'],
             answer: [0, 1, 2, 3, 4, 5], why: '幾百筆不用分頁；登入和權限他說不用',
-            // 規格有寫「報廢＝標記」「匯出欄位」的，報廢按鈕和匯出按鈕直接帶進來
-            given: [{ work: 'doc_spec', options: [4], when: { item: 0, picked: 2 } }, { work: 'doc_spec', options: [5], when: { item: 0, picked: 3 } }] },
+            // 計畫排了新增／查詢／修改／報廢、匯出，規格寫了「報廢＝標記」「匯出欄位」的，對應的元件直接帶進來
+            given: [{ work: 'doc_plan', options: [0, 2, 3, 4], when: { item: 0, picked: 2 } }, { work: 'doc_plan', options: [5], when: { item: 0, picked: 3 } },
+              { work: 'doc_spec', options: [4], when: { item: 0, picked: 2 } }, { work: 'doc_spec', options: [5], when: { item: 0, picked: 3 } }] },
           // 日期選擇器是坑：大批輸入的程式叫使用者一筆一筆點日曆是夢魘，打字就收、格式錯才擋才對
           // 日期有兩種對：照格式打（2026-11-23）是好，直接打 20261123 程式自己轉是更好；alt 標「哪個選項可以頂替哪一項正解」
           { role: 'validations', text: '防呆', options: ['編號格式檢查（部門-年份-流水號）', '必填欄位不能空白', '購入日期直接打 20261123，程式自己轉成 2026/11/23，轉不了才把框變紅', '編號不能重複', '報廢前再確認一次', '刪除前再確認一次', '每打一個字就存檔', '購入日期一定要點日曆（日期選擇器）', '購入日期打字就收，要照 2026-11-23 打，格式錯才擋'],
             keys: ['serial', 'required', 'dateSmart', 'unique', 'confirmScrap', 'confirmDelete', 'autosave', 'datePicker', 'dateFormat'],
             answer: [0, 1, 2, 3, 4], alt: { 8: 2 }, why: '沒有刪除這個功能；每個字都存是在幫自己製造 bug；幾百筆資料叫人一筆一筆點日曆是折磨',
-            fails: ['編號亂打也存得進去', '名稱空白也能存', '購入日期打 2024/13/45 也收', '同一個編號建了兩筆', '手滑就報廢了，而且叫不回來'] },
+            fails: ['編號亂打也存得進去', '名稱空白也能存', '購入日期打 2024/13/45 也收', '同一個編號建了兩筆', '手滑就報廢了，而且叫不回來'],
+            given: [{ work: 'doc_spec', options: [0], when: { item: 0, picked: 1 } }] },   // 規格寫了編號規則，編號格式檢查直接帶進來
           // 坑：配色用色票選，對比和紅綠是 Lighthouse 會抓的；提示方式用縮圖選，擋不住手滑的那幾種是最佳做法會扣的
           palette('內網系統跟公司 CI 走，阿賢和主任看得習慣'),
           { role: 'confirm', text: '「報廢前再確認一次」用什麼方式？', options: ['Dialog：跳視窗問你確定嗎', 'Toast：右下角冒一下就消失', 'Tooltip：滑過去才看得到', '按鈕旁邊一行字', 'alert()'],
@@ -297,9 +300,9 @@
     { after: 'work:done:asset_crud:estimate', text: '動手前先寫開發計畫：文件 ▸ 開發計畫文件。', until: 'work:done:asset_crud:doc_plan' },
     { after: 'work:done:asset_crud:doc_plan', text: '再寫規格：文件 ▸ 開發規格文件。', until: 'work:done:asset_crud:doc_spec' },
     // 驗收文件在寫程式之前：先想怎麼驗再動手，案例會流進寫測試程式
-    { after: 'work:done:asset_crud:doc_spec', text: '規格有了，畫面自己先想一遍：按「前端設計」。規格寫過的元件會自己帶進來。', until: 'work:done:asset_crud:ui_design' },
+    { after: 'work:done:asset_crud:doc_spec', text: '規格有了，畫面自己先想一遍：開發 ▸ 前端程式。規格寫過的元件會自己帶進來。', until: 'work:done:asset_crud:ui_design' },
     { after: 'work:done:asset_crud:ui_design', text: '動手前先定怎麼驗：文件 ▸ 驗收文件。規格有寫的案例會自己帶進來。', until: 'work:done:asset_crud:doc_accept' },
-    { after: 'work:done:asset_crud:doc_accept', text: '可以寫程式了。按「開發」。', until: 'work:done:asset_crud:code' },
+    { after: 'work:done:asset_crud:doc_accept', text: '可以寫程式了：開發 ▸ 後端程式。', until: 'work:done:asset_crud:code' },
     { after: 'work:done:asset_crud:code', text: '寫測試程式：開發 ▸ 測試程式。驗收案例已經是 test function 了。', until: 'work:done:asset_crud:test' },
     { after: 'work:done:asset_crud:test', text: '手機上要看得到。桌角的平板快沒電了，把排插的線拉到它上面。', until: 'device:charged:tablet' },
     { after: 'device:charged:tablet', text: '自己先測一輪：按「手動測試」，點平板實機看一下。', until: 'work:done:asset_crud:manual_test' },

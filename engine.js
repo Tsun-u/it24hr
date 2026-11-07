@@ -854,7 +854,7 @@
     }
     testDrives(card, work, ctx = this.aiCtx(card)) {
       const test = this.subtask(card, 'test');
-      if (work !== 'code' || !test || !ctx.done.includes('test')) return {};
+      if (!['code', 'ui_design'].includes(work) || !test || !ctx.done.includes('test')) return {};
       return Works.testDrives(test.question, ctx.picks && ctx.picks.test, ctx);
     }
     // 一份要做幾分鐘：照模型（沒有就照劇本 ai.turnaround）忽快忽慢，但同一份每次一樣
@@ -1139,7 +1139,7 @@
     afterNotify(card) {
       const u = this.script.usage; if (!u) return false;
       const outs = this.cardOutcomes(card);
-      // 程式（或前端設計）是流程卡住的寫法：她一試就卡住，每隔 stuckGap 分鐘催一張
+      // 程式（或前端程式）是流程卡住的寫法：她一試就卡住，每隔 stuckGap 分鐘催一張
       this.scheduleNags(card, outs.filter(o => o.kind === 'stuck').map((o, n) => ({ after: u.stuckGap * (n + 1), who: card.requester, text: o.say })), { whileOpen: false, tag: 'stuck' });
       if (!outs.some(o => o.kind === 'annoy')) return false;
       this.clock.at(this.clock.minute + 2, () => this.addDoc({ id: `${card.id}:tried`, title: card.requester, from: card.requester, module: null, origin: 'line', kind: 'chat', cardId: card.id, text: u.irkReply, sentences: [], subtasks: [] }));
@@ -1184,7 +1184,7 @@
       if (!this.stats.quarrel.logged) this.addDoc({ id: 'quarrel:blame', title: c.loser, from: c.loser, module: null, origin: 'line', kind: 'chat', cardId: card.id, text: `${c.ask}${blame}`, sentences: [], subtasks: [] });
       return this.stats.quarrel;
     }
-    // 相罵本看的那一格：{ work, item } 是那件工作的第幾題，{ fn } 是開發那個 function 唯一的欄位（成品看程式本體，規格只負責預填）。
+    // 相罵本看的那一格：{ work, item } 是那件工作的第幾題，{ fn } 是開發那個 function 唯一的欄位（成品看後端程式，規格只負責預填）。
     // 那件工作沒做，picked 是 undefined，呼叫的人照 ifSkipped；題目照原本那版（onlyIf 沒成立）的，picked 是 inherit
     quarrelSpot(card, logged) {
       if (logged.fn) {
@@ -1196,7 +1196,7 @@
       const picked = !Works.activeItem(item, card.picks) ? item.inherit : card.done(logged.work) ? ((card.picks && card.picks[logged.work]) || [])[logged.item] : undefined;
       return { spot: item, picked };
     }
-    // 成品跟卡上的需求差多少（平行宇宙用，看結果不看手段）：成品是前端設計＋程式本體，兩件最後一次的分數平均，1 減掉它；
+    // 成品跟卡上的需求差多少（平行宇宙用，看結果不看手段）：成品是前端程式＋後端程式，兩件最後一次的分數平均，1 減掉它；
     // 規格只負責預填開發，不另外算。沒做的算 0 分，開發全部從文件拉進來（沒有要自己寫的）算全對；卡上沒有這兩件的回 0
     mismatch(card) {
       const works = ['ui_design', 'code'].filter(w => this.subtask(card, w));
@@ -1398,14 +1398,14 @@
       const bounce = this.qcBounce(card);
       return bounce ? this.qcReject(card, bounce) : this.qcReview(card);
     }
-    // 成品上線後會怎樣（Works.outcomes）：前端設計決定畫面、開發的程式本體決定流程（規格只負責預填開發）；那件工作還沒做就照 ifSkipped
+    // 成品上線後會怎樣（Works.outcomes）：前端程式決定畫面、後端程式決定流程（規格只負責預填開發）；那件工作還沒做就照 ifSkipped
     cardOutcomes(card) {
       return ['ui_design', 'code'].flatMap(work => {
         const sub = this.subtask(card, work); if (!sub) return [];
         return Works.outcomes(sub.question, card.picks && card.picks[work], { done: card.done(work), picks: card.picks }).map(o => ({ ...o, work, cardId: card.id }));
       });
     }
-    // 防呆沒做的地方（業界前端最大的坑）：自己測不會出事，QC 亂打才會。前端設計那題標了 fails 的選項，
+    // 防呆沒做的地方（業界前端最大的坑）：自己測不會出事，QC 亂打才會。前端程式那題標了 fails 的選項，
     // 正解裡沒勾的就是 QC 會退的理由；整關沒做＝全漏。選了 outcome 是 miss 的寫法（欄位收了怪東西），阿姿亂打一樣翻得出來
     validationGaps(card) {
       const gaps = [];

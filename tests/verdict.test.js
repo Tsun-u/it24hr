@@ -33,11 +33,11 @@ test('結算卡固定一行：真正被優先處理 0 件', () => {
 });
 test('結算卡的分數最多一位小數、無條件捨去（差一點也不會顯示成滿分）', () => {
   const card = V.report({ player: { name: '小宇', title: '軟體工程師' }, verdict: V.classify([pick('newest')]), handled: 1, skippedDocs: 0,
-    works: [{ card: '#121 資產管理', items: [{ label: '開發計畫文件', score: (1 + 6 / 7) / 2, max: 1, times: 1 }, { label: '開發規格文件', score: 5 / 6, max: 1, times: 1 }, { label: '前端設計', score: 2, max: 3, times: 1 }] }],
+    works: [{ card: '#121 資產管理', items: [{ label: '開發計畫文件', score: (1 + 6 / 7) / 2, max: 1, times: 1 }, { label: '開發規格文件', score: 5 / 6, max: 1, times: 1 }, { label: '前端程式', score: 2, max: 3, times: 1 }] }],
     unlabeled: {}, leftAt: '18:00' });
   assert.ok(card.lines.includes('開發計畫文件：0.9／1'));
   assert.ok(card.lines.includes('開發規格文件：0.8／1'));
-  assert.ok(card.lines.includes('前端設計：2／3'));
+  assert.ok(card.lines.includes('前端程式：2／3'));
 });
 test('結算卡的分數照卡分組：卡名在前，同一張卡重做的註明次數；便條、平板、習慣與成就排在右欄', () => {
   const card = V.report({ player: { name: '小宇', title: '軟體工程師' }, verdict: V.classify([pick('newest')]), handled: 2, skippedDocs: 0,

@@ -1,11 +1,11 @@
 // screen.js — 成品畫面：那張卡做出來的網頁長什麼樣。
-// model(card) 把前端設計的答案（版型、元件、防呆）、劇本給的欄位與假資料、開發的 bug 併成純資料（node 可測）；
+// model(card) 把前端程式的答案（版型、元件、防呆）、劇本給的欄位與假資料、開發的 bug 併成純資料（node 可測）；
 // render(model, device) 把它畫成 DOM，手動測試的預覽和結算卡縮圖都用它。
 // 卡的 screen：{ app, fields, rows, bugs: { functionName: effect } }；effect 是 serialWrong／scrapGone／filterBroken／editBroken，
 // 第三天 POC 的：wrongDomain／wrongReset／approveVisible（登入與權限）、axianApproves／serialOurs／deptOurs（簽核照客戶的組織）、
 // botChatty／botLeaks（QA 機器人）、bomVisible／noSchedule（匯出給 ERP）；effect 也可以直接寫成 { voice, row?, cells }（正式上班第二關起）。
-// screen.form：多畫一張新增表單，欄位照前端設計的欄位題（role 'field'）畫成下拉、紅字或怪東西。
-// 沒做前端設計：版型 plain（2008 年內網風的裸表格）、什麼元件都沒有。
+// screen.form：多畫一張新增表單，欄位照前端程式的欄位題（role 'field'）畫成下拉、紅字或怪東西。
+// 沒做前端程式：版型 plain（2008 年內網風的裸表格）、什麼元件都沒有。
 (function (root) {
   const Works = typeof require === 'function' ? require('./works.js') : root.Works;
   const flags =(item, answer) => { const idx = [].concat(answer ?? []); return Object.fromEntries((item.keys || []).map((k, i) => [k, idx.includes(i)])); };
@@ -31,10 +31,10 @@
     const designed = !!(sub && answers);
     let template = 'plain', components = {}, validations = {}, theme = null, confirm = null, hint = null;
     let report = false;
-    // 沒有前端設計這件工作的卡（改既有系統的信件卡）：畫面就是既有的那套（劇本 screen.design），bug 照樣看得到
+    // 沒有前端程式這件工作的卡（改既有系統的信件卡）：畫面就是既有的那套（劇本 screen.design），bug 照樣看得到
     const fixed = !sub && spec.design;
     if (fixed) ({ template, components, validations, theme, confirm, hint } = { template: 'list', components: {}, validations: {}, theme: null, confirm: null, hint: null, ...spec.design });
-    // 有做前端設計但那張卡沒有「版型」那題（例如 QA 機器人只挑元件）：版型就是一般的清單頁
+    // 有做前端程式但那張卡沒有「版型」那題（例如 QA 機器人只挑元件）：版型就是一般的清單頁
     if (designed && !sub.question.items.some(item => item.role === 'template')) template = 'list';
     if (designed) sub.question.items.forEach((item, i) => {
       const first = [].concat(answers[i])[0];
@@ -59,7 +59,7 @@
     }
     // 欄位題（role 'field'）：每個欄位最後做成什麼樣子——正解是下拉（sample），題目寫 input 'free' 的正解是自由填的文字框（free，sample 當提示字）、
     // 做錯是跳紅字（red）、漏做是收了怪東西（junk）；其他寫法的後果有寫 sample 的（例：配方只記主原料），那一格照它畫；
-    // 沒做前端設計照每題的 ifSkipped。員工的惱怒（annoy 的 say）給 userVoice
+    // 沒做前端程式照每題的 ifSkipped。員工的惱怒（annoy 的 say）給 userVoice
     const fieldLooks = {}; let annoyed = [];
     if (sub && (sub.question.items || []).some(item => item.role === 'field')) {
       const outs = Works.outcomes(sub.question, answers, { done: designed, picks: card.picks });
@@ -78,7 +78,7 @@
   }
   // 唯讀頁上出現了能改資料的東西：自己放了新增／修改／報廢，或程式寫成能改
   const editableOnReadOnly = (m) => m.readOnly && (m.effects.editable || m.components.add || m.components.edit || m.components.scrap);
-  // 風格＝配色（沒做前端設計就是 plain）；追加需求跟母議題比這個。版型不算：版型照需求走（老闆只要唯讀和匯出，就不用編輯表單）
+  // 風格＝配色（沒做前端程式就是 plain）；追加需求跟母議題比這個。版型不算：版型照需求走（老闆只要唯讀和匯出，就不用編輯表單）
   const styleOf = (m) => (m.designed ? (m.theme ? `${m.theme.bg}/${m.theme.fg}/${m.theme.accent}` : 'designed') : 'plain');
 
   // ── 簡易 Lighthouse：四個分數＋原因。無障礙用真的 WCAG 對比公式算；最佳做法看提示方式；效能看會不會狂打 API ──
@@ -90,7 +90,7 @@
   const NAME = { dialog: 'Dialog', toast: 'Toast', tooltip: 'Tooltip', inline: '一行字', alert: 'alert()' };
   function lighthouse(m) {
     const notes = []; let accessibility = 100, bestPractices = 100, performance = 100;
-    if (!m.designed) { accessibility = 70; bestPractices = 60; notes.push('沒做前端設計，瀏覽器預設樣式撐全場'); }
+    if (!m.designed) { accessibility = 70; bestPractices = 60; notes.push('沒做前端程式，瀏覽器預設樣式撐全場'); }
     if (m.theme) {
       const cr = contrast(m.theme.fg, m.theme.bg);
       if (cr < 3) { accessibility -= 60; notes.push(`文字對比 ${cr.toFixed(1)}:1，看不清楚（至少要 4.5:1）`); }
@@ -280,7 +280,7 @@
       if (!rows.length) { const tr = el('tr'); const td = el('td', 'mock-empty', '沒有資料'); td.colSpan = m.fields.length + (actions ? 1 : 0); tr.append(td); table.append(tr); }
       page.append(table);
     }
-    // 版型 plain 也畫：沒做前端設計的成品就是一排什麼都收的輸入框
+    // 版型 plain 也畫：沒做前端程式的成品就是一排什麼都收的輸入框
     if (m.form) page.append(formBox(m, el));
     // 匯出：用 Excel 打開長什麼樣子（UTF-8 沒加 BOM，中文就變亂碼）
     if (m.exportPreview) page.append(exportBox(m, el));

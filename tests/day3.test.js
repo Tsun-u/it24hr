@@ -562,3 +562,10 @@ test('估時的現實參考：第三天多一個加了 Claire 自主規格的工
   assert.match(line, /加了 Claire 自主規格大約 1～2 年/);
   assert.doesNotMatch(Verdict.realLine({ manual: '3 天', ai: '1 天' }), /Claire/);
 });
+test('POC 盤點與簽核：先寫計畫、規格再做前端程式（卡上的工作順序）', () => {
+  const D3 = require('../day3.js'); const seen = new Set(); let card = null;
+  const walk = (n) => { if (!n || typeof n !== 'object' || seen.has(n)) return; seen.add(n); if (n.id === 'poc_approve' && n.subtasks) card = n; Object.values(n).forEach(walk); };
+  walk(D3.make());
+  const order = card.subtasks.map(s => s.work);
+  assert.ok(order.indexOf('doc_plan') < order.indexOf('ui_design') && order.indexOf('doc_spec') < order.indexOf('ui_design'));
+});

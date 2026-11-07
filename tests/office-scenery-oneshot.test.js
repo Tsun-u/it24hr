@@ -3,7 +3,7 @@ const test = require('node:test');
 const assert = require('node:assert');
 const { C, Engine, Sandbox, play, at, tickTo, meetAll, skipMeeting } = require('./scenery-helpers.js');
 const speed = () => meetAll(play('speedrun'));
-// speedrun 的批號追溯要先選路：選從頭規劃，前端設計、開發跟一般的批號追溯一樣
+// speedrun 的批號追溯要先選路：選從頭規劃，前端程式、開發跟一般的批號追溯一樣
 const rebuild = (e, id) => { if (e.board.get(id).routes) e.doWork(id, 'route', [1]); return e; };
 const ONE_SHOT = ['read_req', 'doc_plan', 'doc_spec', 'ui_design', 'doc_accept', 'code', 'test'];
 const workOf = (card, job) => Object.keys(card.ai).find(w => card.ai[w].includes(job));
@@ -166,7 +166,7 @@ test('選「照現場的習慣」跟原本的 one shot 一樣；終端機只印�
   for (const w of ONE_SHOT) assert.deepStrictEqual(site.board.get('buy').ai[w].at(-1).answers, plain.board.get('buy').ai[w].at(-1).answers, w);
   const minutes = jobs.at(-1).doneAt - jobs[0].startedAt;
   assert.deepStrictEqual(shown, [`$ claire --model pedia --issue 401 --one-shot --focus "${C.ONE_SHOT_FOCUS.options[0].text}"`,
-    `Claire Code（Pedia 5）接手 #401 收購計價整張：整理需求 → 開發計畫文件 → 開發規格文件 → 前端設計 → 驗收文件 → 開發 → 寫測試程式，一份接一份，預計 ${minutes} 分鐘。`]);
+    `Claire Code（Pedia 5）接手 #401 收購計價整張：整理需求 → 開發計畫文件 → 開發規格文件 → 前端程式 → 驗收文件 → 後端程式 → 寫測試程式，一份接一份，預計 ${minutes} 分鐘。`]);
 });
 test('整組交辦也只印一次：指令一行、要做的事一行', () => {
   const e = speed(); const shown = []; e.on('ai:started', ({ lines }) => shown.push(...lines.map(l => l.text)));
@@ -174,7 +174,7 @@ test('整組交辦也只印一次：指令一行、要做的事一行', () => {
   assert.deepStrictEqual(shown, ['$ claire --issue 401 --task docs',
     `Claire Code（Essay 5）接手 #401 文件：開發計畫文件 → 開發規格文件 → 驗收文件，一份接一份，預計 ${jobs.at(-1).doneAt - jobs[0].startedAt} 分鐘。`]);
 });
-test('選錯重點：五張模組卡的前端設計、開發，有那個方向錯法的欄位都選到那個錯法，其他照正解', () => {
+test('選錯重點：五張模組卡的前端程式、開發，有那個方向錯法的欄位都選到那個錯法，其他照正解', () => {
   for (const focus of ['strict', 'loose']) for (const id of ['buy', 'yield', 'shift', 'trace', 'stock']) {
     const e = rebuild(speed(), id); e.oneShot(id, focus); tickTo(e, e.clock.minute + 200);
     const card = e.board.get(id);
@@ -183,7 +183,7 @@ test('選錯重點：五張模組卡的前端設計、開發，有那個方向�
     ui.items.forEach((item, i) => {
       const way = wrongWay(item.outcome, DIRECTION[focus]);
       const want = way === undefined ? item.answer : Array.isArray(item.answer) ? [way] : way;
-      assert.deepStrictEqual(uiAnswers[i], want, `${focus} ${id} 前端設計第 ${i} 題`);
+      assert.deepStrictEqual(uiAnswers[i], want, `${focus} ${id} 前端程式第 ${i} 題`);
     });
     const code = card.subtasks.find(s => s.work === 'code').question;
     const codeAnswers = card.ai.code.at(-1).answers;
