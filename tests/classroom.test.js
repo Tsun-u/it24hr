@@ -12,6 +12,14 @@ test('目錄：登記的頁都在目錄裡；結算卡每個印章都對得到�
   assert.strictEqual(CR.pageForStamp('不存在的印章', V.NAMES), null);
 });
 
+test('用途和核心觀念裡連到別頁的 see，都是目錄裡有的頁', () => {
+  for (const [id, p] of Object.entries(CR.PAGES)) for (const t of [...(p.uses || []), ...(p.concept || [])]) {
+    if (typeof t === 'string') continue;
+    assert.ok(t.text, `${id} 有一段少了 text`);
+    for (const to of [].concat(t.see)) assert.ok(CR.item(to), `${id} 連到不存在的頁 ${to}`);
+  }
+});
+
 test('常見誤解：每條都分成誤解和正解，誤解不帶引號', () => {
   for (const [id, p] of Object.entries(CR.PAGES)) for (const t of p.traps) {
     assert.ok(t.wrong && t.right, `${id} 有一條少了誤解或正解`);

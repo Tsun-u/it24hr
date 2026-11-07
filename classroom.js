@@ -2,7 +2,7 @@
 // 每一頁是 classroom/<id>.js 一個檔：講義內容、沙盒的純函式、畫圖，載入時用 add 登記；登記了就是寫好的頁。
 // 畫面在 classroom-view.js，四種語言的程式碼用 scripts/run-classroom-code.js 真的跑過。
 (function (root) {
-  // 目錄：初階篇照教科書由淺到深，附錄、彩蛋
+  // 目錄：初階篇照教科書由淺到深，附錄、進階篇（研究所範圍）、彩蛋
   const TOC = [
     { group: '初階篇', items: [
       { id: 'array', name: 'Array', zh: '陣列' },
@@ -18,7 +18,18 @@
       { id: 'hashing', name: 'Hashing', zh: '雜湊' },
       { id: 'searching', name: 'Searching', zh: '搜尋' },
       { id: 'sorting', name: 'Sorting', zh: '排序' },
+      { id: 'disjoint_set', name: 'Disjoint Set', zh: '互斥集合' },
       { id: 'complexity', name: 'Big-O', zh: '時間複雜度' },
+    ] },
+    { group: '進階篇', items: [
+      { id: 'heap', name: 'Heap', zh: '堆積' },
+      { id: 'trie', name: 'Trie', zh: '字典樹' },
+      { id: 'avl', name: 'AVL Tree', zh: 'AVL 樹' },
+      { id: 'red_black', name: 'Red-Black Tree', zh: '紅黑樹' },
+      { id: 'b_tree', name: 'B-Tree', zh: 'B 樹' },
+      { id: 'topological_sort', name: 'Topological Sort', zh: '拓樸排序' },
+      { id: 'shortest_path', name: 'Shortest Path', zh: '最短路徑' },
+      { id: 'mst', name: 'MST', zh: '最小生成樹' },
     ] },
     { group: '彩蛋', items: [{ id: 'null', name: 'null', zh: '還沒初始化' }] },
   ];

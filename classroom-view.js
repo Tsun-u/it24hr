@@ -13,7 +13,17 @@
   const kit = { h, svgEl, svgText, rough: root.rough, INK: '#1f2328', FILL: '#9cc3f5', NEW: '#ffd166' };
 
   function section(title, ...children) { const sec = h('section', 'cr-sec'); sec.append(h('h4', '', title), ...children); return sec; }
-  const ul = (arr) => { const l = h('ul'); for (const t of arr) l.append(h('li', '', t)); return l; };
+  // 一段文字；寫成 { text, see } 時後面多幾個翻到別頁的連結，see 是一個頁 id 或一串頁 id
+  function prose(tag, t) {
+    if (typeof t === 'string') return h(tag, '', t);
+    const el = h(tag, '', `${t.text} `);
+    for (const id of [].concat(t.see)) {
+      const link = h('button', 'cr-link cr-see', `→ ${root.Classroom.item(id).zh}`); link.type = 'button';
+      link.addEventListener('click', () => { select(id); window.scrollTo(0, 0); }); el.append(link);
+    }
+    return el;
+  }
+  const ul = (arr) => { const l = h('ul'); for (const t of arr) l.append(prose('li', t)); return l; };
 
   // 常見誤解：一條一張小卡，上面是誤解、下面是正解
   function trapsNode(traps) {
@@ -96,7 +106,7 @@
       section('生活比喻', h('p', 'cr-hook', page.analogy)),
       section('圖解', framesNode(id, page)),
       section('什麼時候會用到', ul(page.uses)),
-      section('核心觀念', ...page.concept.map(t => h('p', '', t))),
+      section('核心觀念', ...page.concept.map(t => prose('p', t))),
       section('怎麼算', ...page.howto.map(howtoNode)),
       section('自己按按看', sandboxNode(page)),
       section('常見誤解', trapsNode(page.traps)),
@@ -118,7 +128,7 @@
       section('生活比喻', h('p', 'cr-hook', page.analogy)),
       section('圖解', framesNode(id, page)),
       section('什麼時候會用到', ul(page.uses)),
-      section('核心觀念', ...page.concept.map(t => h('p', '', t))),
+      section('核心觀念', ...page.concept.map(t => prose('p', t))),
       ...(gameSec ? [gameSec] : []),
       section('自己按按看', sandboxNode(page), ...(page.classic ? [page.classic.node(kit)] : [])),
       section('常見誤解', trapsNode(page.traps)),
