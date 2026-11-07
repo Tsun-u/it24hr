@@ -42,12 +42,32 @@ test('#402 處理方式只列當季建議（前端設計也會卡住）：通知
   assert.ok(lime(e, XIUQIN).includes('客戶就是要整尾的，你不給我選？'));
 });
 
-test('#403 加班請假：投影幕那頁只有原話、沒有題庫；照正解做完、交 QC 結案', () => {
+test('#403 加班請假：投影幕那頁三句都有題（秀琴姐轉述雄哥，問的也是她）；照正解做完、交 QC 結案', () => {
   const e = play(); tickTo(e, at(9, 31));
-  assert.deepStrictEqual(e.meeting.spec.pages.find(p => p.id === 'shift').question.asks, {});
+  const asks = e.meeting.spec.pages.find(p => p.id === 'shift').question.asks;
+  assert.deepStrictEqual(Object.keys(asks).map(Number), [0, 1, 2]);
+  assert.ok(Object.values(asks).every(a => a.text.startsWith('秀琴姐：')));
   skipMeeting(e);
   assert.strictEqual(e.board.get('shift').no, 403);
   assert.strictEqual(shipped(e, 'shift').status, 'archived');
+});
+test('#403 會議問到的帶進開發計畫（加班登記、請假登記、登記就存、補單）；沒問到的退回 SA 勾對也帶', () => {
+  const plan = (card) => card.subtasks.find(s => s.work === 'doc_plan').question.items[0];
+  const Works = require('../works.js');
+  const given = (card) => Works.givenOptions(plan(card), card.picks, (w) => card.done(w)).filter(o => [1, 2, 3, 4].includes(o)).sort();
+  let e = meetAll(play());
+  assert.deepStrictEqual(given(e.board.get('shift')), [1, 2, 3, 4]);
+  e = opened(); const card = e.board.get('shift');
+  assert.deepStrictEqual(given(card), []);
+  e.rejectToSA('shift', [[0, 1, 2]]);
+  tickTo(e, e.clock.minute + C.SA_RECHECK_MIN + 1);
+  assert.deepStrictEqual(given(card), [1, 2, 3, 4]);
+});
+test('#403 請假做成上午／下午／全天的下拉：QC 不退，員工惱怒「我只請 3 小時，要選上午還是下午？」', () => {
+  const e = opened();
+  const card = shipped(e, 'shift', { ui_design: swapped(sub(e, 'shift', 'ui_design'), 1, 3) });
+  assert.strictEqual(card.status, 'archived');
+  assert.ok(e.cardOutcomes(card).some(o => o.kind === 'annoy' && o.say === '我只請 3 小時，要選上午還是下午？'));
 });
 test('#403 程式寫成副組長代簽才算數：流程卡住，秀琴姐催「副組長也在碼頭跑啊」', () => {
   const e = opened();

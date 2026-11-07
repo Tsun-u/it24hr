@@ -163,3 +163,10 @@ test('子議題都結案，母議題 #400 跟著結案，可以通知建宏', ()
   assert.strictEqual(e.board.get('erp').status, 'archived');
   assert.ok(e.notifyDone('erp'));
 });
+test('小事件池每關各自一套：第二關不抽第一關的飲水機、投影機那些', () => {
+  for (const mode of ['legacy', 'hybrid', 'speedrun']) {
+    assert.strictEqual(Sandbox.make('scenery', mode, { pool: ['trace', 'stock'] }).errands, undefined, mode);
+    const e = skipMeeting(play(mode)); tickTo(e, at(17, 0));
+    assert.ok(!e.docs.some(d => d.errand), mode);
+  }
+});

@@ -118,14 +118,14 @@ test('人在同事座位時被趕下班：先回到自己座位，畫面跟著�
   assert.deepStrictEqual(places, ['desk']);
 });
 
-test('同一間公司共用的小事件、Claire 方案、茶几設定在 Sandbox 上，第一關照用', () => {
-  assert.deepStrictEqual(Sandbox.ERRANDS.map(x => x.id), ['water', 'aircon', 'font', 'projector']);
-  assert.ok(Sandbox.ERRANDS.every(x => x.who && x.text && x.trip && x.tripText && x.decline));
+test('同一間公司共用的 Claire 方案、茶几設定在 Sandbox 上；小事件池每關各自一套', () => {
+  assert.strictEqual(Sandbox.ERRANDS, undefined);
   assert.strictEqual(Sandbox.AI.hybrid.quota, 6); assert.strictEqual(Sandbox.AI.speedrun.models.Pedia.cost, 3);
   assert.strictEqual(Sandbox.AI.legacy, undefined);
   for (const mode of ['legacy', 'hybrid', 'speedrun']) {
     const s = Sandbox.make('blur', mode);
-    assert.strictEqual(s.errands.pool, Sandbox.ERRANDS);
+    assert.deepStrictEqual(s.errands.pool.map(x => x.id), ['water', 'aircon', 'font', 'projector']);
+    assert.ok(s.errands.pool.every(x => x.who && x.text && x.trip && x.tripText && x.decline));
     assert.deepStrictEqual(s.home, Sandbox.HOME);
   }
   assert.strictEqual(Sandbox.make('blur', 'hybrid').ai.quota, Sandbox.AI.hybrid.quota);

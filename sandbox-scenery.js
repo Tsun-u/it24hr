@@ -1,5 +1,5 @@
 // sandbox-scenery.js — 正式上班第二關「最美的風景」：源裕水產的 ERP，要讓使用者覺得怎麼填都對（格式要死），流程又不卡任何節點（只忠實記錄）。
-// 內容：早會、廠商需求會議（散會後 SA 開卡）、母議題＋模組子議題、小事件、茶几。
+// 內容：早會、廠商需求會議（散會後 SA 開卡）、母議題＋模組子議題、茶几。
 (function (root) {
   const { Sandbox } = typeof require === 'function' ? require('./sandbox.js') : root;
   const SA = 'SA 怡君';
@@ -67,6 +67,15 @@
         { text: '建宏：「少報就對了啦。」', options: ['「少報的話，多做出來的會變庫存，那些怎麼辦？」', '「好，那就九折。」'], answer: 0,
           replies: ['「做魚鬆啊，罐頭也可以，再賣不完就做凍乾給寵物吃，我們是加工的，不會浪費。不過越後面越不值錢，放越久越虧。上次轉過去也沒記，月底魚鬆的成本算不出來。那保守要抓多少，你們幫我們算？」', '「讚。」'] },
       ],
+    },
+    // 秀琴姐轉述雄哥的話，問的也是她
+    shift: {
+      0: { text: '秀琴姐：「就看船啊，船晚到就做到半夜。」', options: ['「加班是記幾點上工、幾點收工，還是直接寫做了幾小時？」', '「那加班時數讓他們自己估一個數字？」', '「好。」'], answer: 0,
+           replies: ['「他們都寫幾點到幾點啦，我月底再一張一張自己算，跨過半夜的最難算。」', '「可以啊……不過上次有人寫『看漁獲』，薪水我要怎麼算？」', '「讚。」'] },
+      1: { text: '秀琴姐：「組長不在就找我啊。」', options: ['「凌晨進港的時候大家都在忙，加班單是誰登記、誰簽？」', '「那就規定一定要組長簽了才算？」', '「好。」'], answer: 0,
+           replies: ['「凌晨大家都在碼頭忙，組長跑來跑去最找不到人。誰有空誰先登記，組長忙完再補簽，有時候隔天才補。」', '「組長在碼頭跑來跑去，等他簽，人都下工了。」', '「讚。」'] },
+      2: { text: '秀琴姐：「都看得懂啊，我們不會計較。」', options: ['「請假最小可以請多久？有人寫半天、有人寫 3 小時，扣多少是照幾點到幾點算嗎？」', '「那請假就分上午、下午、全天三種？」', '「好。」'], answer: 0,
+           replies: ['「對，最少可以請半小時。我現在都要再問他幾點到幾點，自己算扣多少。」', '「那請 3 小時的人要選哪個？」', '「讚。」'] },
     },
     trace: {
       2: { text: '建宏：「大家都這樣做啦。」', options: ['「摻多少有固定嗎？成本要怎麼算？」', '「那魚丸的原料就寫鯊魚？」', '「長知識了。」'], answer: 0,
@@ -366,32 +375,44 @@
   // ── #403 加班請假：會議那頁只有原話、沒有題庫（ASKS 沒有 shift），所以也沒有退回 SA 的勾選 ──
   const SHIFT = {
     id: 'shift', title: '加班請假', from: SA, assignee: '玩家', requester: XIUQIN, type: 'sub', parent: 'erp', relatedTo: 'erp',
-    body: bodyOf(['記加班的開工、收工時間', '請假可以請上午、下午、全天', '組長忙到找不到人的時候，加班照樣登記得進去'],
+    body: bodyOf(['記加班的開工、收工時間', '請假選日期、幾點到幾點，最少半小時，時數程式算', '組長忙到找不到人的時候，加班照樣登記得進去'],
       'shift', '需求單位：源裕水產管理部 秀琴姐（原話是雄哥講的，秀琴姐轉述）'),
     attachments: ['原文：09:30 廠商需求會議（秀琴姐轉述雄哥）'],
+    saChecks: [{ title: '會議裡沒問清楚的', options: [
+      { text: '加班是記幾點到幾點，還是直接寫幾小時？', right: true, adds: '加班記開工、收工時間，時數程式算，跨過半夜也要算對', asked: 0 },
+      { text: '凌晨進港組長找不到人的時候，加班單誰登記、誰簽？', right: true, adds: '誰有空誰先登記，組長忙完再補簽，可以隔天補單', asked: 1 },
+      { text: '請假最小可以請多久？', right: true, adds: '請假最少半小時，記幾點到幾點，時數程式算', asked: 2 },
+      { text: '請假要不要做三層簽核？', right: false, why: '雄哥說跟組長講一聲就好' },
+    ] }],
     screen: { app: '源裕水產 ERP・加班請假', form: true, fields: ['日期', '姓名', '類別', '開工', '收工', '時數', '登記', '組長看過'],
-      rows: [['11/03', '雄哥', '加班', '22:30', '03:00', '4.5', '雄哥 03:02', '✓'], ['11/04', '阿忠', '請假', '—', '—', '上午', '秀琴姐 08:10', '']],
+      rows: [['11/03', '雄哥', '加班', '22:30', '03:00', '4.5', '雄哥 03:02', '✓'], ['11/04', '阿忠', '請假', '13:00', '16:00', '3', '秀琴姐 08:10', '']],
       bugs: {
         overtimeHours: { voice: '晚上十點半做到凌晨三點，系統說加班 −19.5 小時。', cells: { '時數': '−19.5' } },
-        leaveDays: { voice: '請一個上午，系統扣了我一整天。', row: 1, cells: { '時數': '1 天' } },
+        leaveHours: { voice: '我只請下午三個小時，系統扣了我一整天。', row: 1, cells: { '時數': '1 天' } },
       } },
     subtasks: [
       { work: 'read_req', question: {
-        points: ['加班記開工收工', '請假上午下午全天', '組長找不到人也要登記得進去', '大家寫半天、上午都有'],
+        points: ['加班記開工收工', '請假選日期、幾點到幾點，最少半小時', '組長找不到人也要登記得進去', '大家寫半天、上午都有'],
         items: [
           { text: '加班時數____', options: ['看開工、收工時間算', '自己估一個數字', '看漁獲'], answer: 0 },
-          { text: '請假可以請____', options: ['上午、下午、全天', '只能整天', '幾小時都行，自己寫'], answer: 0 },
+          { text: '請假可以請____', options: ['幾點到幾點，最少半小時，時數程式算', '只能整天', '上午、下午、全天三種'], answer: 0 },
           { text: '組長找不到人的時候，加班____', options: ['照樣登記得進去', '等組長回來', '不能加班'], answer: 0 },
           { text: '「看漁獲啦」是____', options: ['背景，不是需求', '要做一個漁獲預測', '加班時數填「看漁獲」'], answer: 0 },
         ] } },
       meetingDiscuss('shift'),
       { work: 'estimate', question: { items: [{ type: 'hours', free: true, text: '加班請假這個模組連測試、驗收、部署，你估：', real: { manual: '2 天', ai: '半天' } }] } },
       { work: 'doc_plan', question: { items: [{ text: '步驟（挑該做的，照順序排）', type: 'order',
-        options: ['設計加班與請假資料表', '做加班登記（開工、收工）', '做請假登記（上午／下午／全天）', '登記就存：記誰、什麼時候，組長看過打勾',
+        options: ['設計加班與請假資料表', '做加班登記（開工、收工）', '做請假登記（日期、開始、結束，時數程式算）', '登記就存：記誰、什麼時候，組長看過打勾',
                   '補單：日期可以選過去、標「補單」', '寫測試', '部署到測試機', '串接指紋打卡機', '請假三層簽核'],
         answer: [0, 1, 2, 3, 4, 5, 6], before: [[0, 1], [0, 2], [0, 4], [1, 3], [3, 6], [4, 6], [5, 6]],
         why: '指紋打卡機不在需求裡；請假三層簽核會讓流程卡死',
-        given: [{ work: 'read_req', options: [3], when: { item: 2, picked: 0 } }] }] } },
+        given: [
+          { work: 'read_req', options: [3], when: { item: 2, picked: 0 } },
+          { work: 'discuss', options: [1], when: { item: 0, picked: 0 } }, { work: 'discuss', options: [3, 4], when: { item: 1, picked: 0 } },
+          { work: 'discuss', options: [2], when: { item: 2, picked: 0 } },
+          { work: 'reject', options: [1], when: { item: 0, picked: 0 } }, { work: 'reject', options: [3, 4], when: { item: 0, picked: 1 } },   // 退回 SA 問回來的視同會議問過
+          { work: 'reject', options: [2], when: { item: 0, picked: 2 } },
+        ] }] } },
       { work: 'doc_spec', question: { items: [
         { text: '凌晨進港，組長忙到找不到人', options: ['不用等誰簽，登記了就算數；程式記誰登記、什麼時候登記，組長忙完再看，看過的打勾', '改成副組長代簽才算數', '停在組長那邊等他簽'], answer: 0 },
         { text: '忘了報、事後才補', options: ['可以補，日期能選過去的，標「補單」', '只能選今天以後'], answer: 0 },
@@ -401,13 +422,14 @@
           options: ['開工、收工時間各一個時間選擇器，預設現在，時數程式算', '文字框，不是數字跳紅字', '文字框，什麼都收'],
           outcome: { 1: { kind: 'annoy', say: '看漁獲就看漁獲，你叫我填數字？', red: '請輸入數字' },
                      2: { kind: 'miss', say: '時數寫『看漁獲』也送得出去，薪水算不出來', junk: '看漁獲' } } },
-        { role: 'field', field: '類別', text: '請假時數', sample: '請假：上午', answer: 0, ifSkipped: 2,
-          options: ['下拉：上午／下午／全天', '文字框，填錯跳紅字', '文字框，什麼都收'],
+        { role: 'field', field: '類別', text: '請假時數', sample: '請假 13:00～16:00（3 小時，自動算）', answer: 0, ifSkipped: 2,
+          options: ['下拉選日期、開始時間、結束時間（每半小時一格），時數程式算，結束不能早於開始', '文字框，填錯跳紅字', '文字框，什麼都收', '下拉：上午／下午／全天'],
           outcome: { 1: { kind: 'annoy', say: '我寫4小時哪裡不正確？', red: '格式不正確' },
-                     2: { kind: 'miss', say: '時數寫『看情況』也送得出去', junk: '看情況' } } },
+                     2: { kind: 'miss', say: '時數寫『看情況』也送得出去', junk: '看情況' },
+                     3: { kind: 'annoy', say: '我只請 3 小時，要選上午還是下午？', red: '請選擇上午、下午或全天' } } },
       ] } },
       { work: 'doc_accept', question: { items: [{ text: '案例',
-        options: ['晚上十點半上工、凌晨三點收工，時數算 4.5', '請假選上午，算半天', '組長沒看也登記得進去，看過打勾', '補昨天的單，標「補單」', '一千人同時打卡的壓測'],
+        options: ['晚上十點半上工、凌晨三點收工，時數算 4.5', '請假 13:00～16:00 算 3 小時，結束早於開始存不進去', '組長沒看也登記得進去，看過打勾', '補昨天的單，標「補單」', '一千人同時打卡的壓測'],
         answer: [0, 1, 2, 3], why: '源裕現場二十幾個人',
         given: [
           { work: 'doc_plan', options: [0], when: { item: 0, picked: 1 } }, { work: 'doc_plan', options: [1], when: { item: 0, picked: 2 } },
@@ -418,9 +440,9 @@
         { sentence: 0, needs: { work: 'doc_plan', picked: 1 }, accept: 0, name: 'overtimeHours', does: '算加班時數',
           code: 'return (end - start + 24 * 60) % (24 * 60) / 60;',
           fields: { how: { label: '怎麼算', options: ['收工 − 開工，跨過午夜加 24 小時', '收工 − 開工', '開工 − 收工'], answer: 0 } } },
-        { sentence: 1, needs: { work: 'doc_plan', picked: 2 }, accept: 1, name: 'leaveDays', does: '算請假天數',
-          code: "return { 上午: 0.5, 下午: 0.5, 全天: 1 }[part];",
-          fields: { how: { label: '怎麼算', options: ['上午、下午各算半天，全天算一天', '上午、下午都算一天', '一律算半天'], answer: 0 } } },
+        { sentence: 1, needs: { work: 'doc_plan', picked: 2 }, accept: 1, name: 'leaveHours', does: '算請假時數',
+          code: 'return (end - start) / 60;',
+          fields: { how: { label: '怎麼算', options: ['結束 − 開始，換算成小時', '有請就算一整天', '上午、下午各算半天'], answer: 0 } } },
         { spec: { item: 0 }, name: 'leaderAway', does: '組長不在的時候', code: "db.insert('shift', { ...form, by: user, at: now, leaderSeen: false });",
           fields: { flow: { label: '組長不在', options: ['登記了就算數，記誰、什麼時候登記，組長看過打勾', '副組長代簽才算數', '停在組長那邊等他簽'], answer: 0, ifSkipped: 2,
             outcome: { 1: { kind: 'stuck', say: '副組長也在碼頭跑啊' },
@@ -432,8 +454,8 @@
       { work: 'test', question: { kind: 'functions', functions: [
         { needs: { work: 'doc_accept', picked: 0 }, name: 'testOvernight', does: '跨午夜的加班', code: "expect(overtimeHours('22:30', '03:00')).toBe(4.5);",
           fields: { assert: { label: '檢查', options: ['22:30 到 03:00 算 4.5 小時', '22:30 到 03:00 算 −19.5 小時', '時數是數字就好'], answer: 0 } } },
-        { needs: { work: 'doc_accept', picked: 1 }, name: 'testHalfDay', does: '請上午算半天', code: "expect(leaveDays('上午')).toBe(0.5);",
-          fields: { assert: { label: '檢查', options: ['上午算 0.5 天', '上午算 1 天', '有扣假就好'], answer: 0 } } },
+        { needs: { work: 'doc_accept', picked: 1 }, name: 'testLeaveHours', does: '請 3 小時算 3 小時', code: "expect(leaveHours('13:00', '16:00')).toBe(3);",
+          fields: { assert: { label: '檢查', options: ['13:00 到 16:00 算 3 小時', '13:00 到 16:00 算 1 天', '有扣假就好'], answer: 0 } } },
         { needs: { work: 'doc_accept', picked: 2 }, name: 'testLoggedWithoutLeader', does: '組長沒看也存得進去', code: "expect(saveShift({ ...form, leaderSeen: false })).toMatchObject({ by: '雄哥' });",
           fields: { assert: { label: '檢查', options: ['沒簽也存得進去，記下誰、何時登記', '沒簽就存不進去', '存得進去就好'], answer: 0 } } },
         { name: 'testThousandPunch', does: '一千人同時打卡',
@@ -1010,7 +1032,6 @@
       meetings: [MORNING, vendorMeeting(modules, cards, mode)],
       cards: [],   // 卡都是廠商需求會議散會後 SA 開的（vendorMeeting 的 cards）
       sources: [gloves(carry.exception ?? Math.floor(Math.random() * EXCEPTIONS.length))],   // carry.exception 指定哪一句（測試用）
-      errands: { pick: 2, slots: [140, 400], pool: Sandbox.ERRANDS },   // 11:20、15:40 各一件
       ...(Sandbox.AI[mode] ? { ai: { ...Sandbox.AI[mode], notes: carry.notes || {} } } : {}),
       home: Sandbox.HOME,
       // 上線後源裕的人怎麼用（engine 照這個發驗收、晚上的抱怨；結算卡照這個算）。complainAt 是時鐘時間；

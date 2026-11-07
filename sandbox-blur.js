@@ -10,6 +10,13 @@
   const SHUFEN = '行政 淑芬';
   const BOSS_WIFE = '老闆娘';
   const MEILING = '財務 美玲';
+  // 這關的小事件池（每關各自一套）：可接可推，推掉那句進結算卡。trip 是跑一趟的分鐘數，tripText 是黑畫面那句
+  const ERRANDS = [
+    { id: 'water', who: JUNJIE, text: '飲水機沒水了，你們 IT 可以換一下嗎？', trip: 10, tripText: '你扛著一桶水走到茶水間，換好順便把空桶疊回去。', decline: '你們 IT 不是什麼都會？' },
+    { id: 'aircon', who: SHUFEN, text: '冷氣好冷，可以幫忙調高一點嗎？', trip: 5, tripText: '你把冷氣從 22 度調到 26 度，淑芬說終於不用穿外套了。', decline: '冷氣是電器，IT 要負責吧？' },
+    { id: 'font', who: '老闆', text: '手機字太小了，過來幫我弄大一點。', trip: 10, tripText: '你把老闆手機的字調到最大，他說這樣好多了，一個畫面只剩三行。', decline: '手機不是 IT 要處理嗎？' },
+    { id: 'projector', who: MEILING, text: '投影機沒訊號，等一下要開會，可以幫忙看一下嗎？', trip: 15, tripText: '你把投影機後面鬆掉的線插回去，畫面出來了。', decline: 'IT 不幫我們處理投影機我們怎麼開會？' },
+  ];
   // 舊料箱：一定有一條君傑能用的 DDR4 8GB 桌機用，另外隨機 2～3 條（DDR4 4GB 桌機用的插得上、變 12 GB，也算裝好），順序打亂
   const BOX_POOL = [
     { gen: 'DDR4', form: 'DIMM', size: 4 }, { gen: 'DDR3', form: 'DIMM', size: 4 }, { gen: 'DDR3', form: 'DIMM', size: 8 },
@@ -411,7 +418,7 @@
         ...panTalks(mode),
       },
       // 小事件池（每天抽幾件、可接可推，推掉不扣分、對方那句進結算卡同事評語）：10:20／14:40／16:20 各一件，LIME 來
-      errands: { pick: 3, slots: [80, 340, 440], pool: Sandbox.ERRANDS },
+      errands: { pick: 3, slots: [80, 340, 440], pool: ERRANDS },
       // hybrid、speedrun：終端機可以問 Claire（askable），檢討報告也能交給她寫；筆記是全域的 CLAIRE.md
       ...(claireAi ? { ai: { askable: true, ...claireAi, notes: carry.notes || {} }, claire: CLAIRE } : {}),
       // 打電話（公務手機）：語音選單、等候、接通後回答客服；客服問機型時只列玩家查得到的，可以重複訂，每一單各自送到淑芬那邊
