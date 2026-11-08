@@ -327,7 +327,7 @@
     const aiJob = aiReady(card, work, opts), by = byOf(card, work, opts);
     const prev = aiJob ? aiJob.answers : (card.picks && card.picks[work]) || [];
     const answers = q.items.map((_, i) => prev[i]);
-    q.items.forEach((item, i) => wrap.append(itemNode(item, i, answers, work, card, `${engine.shuffleSeed}:${card.id}:${work}`)));
+    q.items.forEach((item, i) => wrap.append(itemNode(item, i, answers, work, card, `${engine.shuffleSeed}:${card.id}:${work}`, engine.otherCard)));
     if (fillerTail) wrap.append(fillerTail);
     const foot = h('div', 'quiz-foot');
     const submit = h('button', 'btn primary', '完成');
@@ -579,14 +579,58 @@
     return box;
   }
   // seed：這一題選項顯示順序的種子（Works.displayOrder）；有 values 的（估時）照原順序
-  function itemNode(item, i, answers, work, card, seed) {
+  // 配色題（type: 'palette'）：勾「做深色主題」就多一組四格；每格從顏色裡挑一個（可以重複）。會議問到的顏色標「★」（提示，不是帶入）。
+  // 每組底下即時預覽那組配色，看不看得清楚由玩家自己判斷（判定在 palette.js）
+  function paletteNode(item, i, answers, card) {
+    const box = h('fieldset', 'item palette'); box.append(h('legend', null, item.text));
+    const hinted = card ? Works.paletteHints(item, card.picks) : [];
+    const ans = answers[i] = answers[i] && typeof answers[i] === 'object' ? { ...answers[i] } : { dark: false, light: {} };
+    const darkRow = h('label', 'opt'); const dark = h('input'); dark.type = 'checkbox'; dark.checked = !!ans.dark;
+    darkRow.append(dark, ' 做深色主題（深淺兩組各四格）'); box.append(darkRow);
+    if (hinted.length) box.append(h('p', 'palette-hint', '★ 會議上老師們算出來的顏色'));
+    const sets = h('div', 'palette-sets'); box.append(sets);
+    const preview = (set) => {
+      const hex = (id) => (item.colors.find(c => c.id === id) || {}).hex;
+      const page = h('div', 'palette-preview'); page.style.background = hex(set.bg) || 'transparent';
+      const title = h('div', 'palette-preview-title', '解憂時代事務所'); title.style.color = hex(set.fg) || 'inherit';
+      const line = h('div', 'palette-preview-line'); line.style.background = hex(set.deco) || 'transparent';
+      const button = h('span', 'palette-preview-button', '預約老師'); button.style.background = hex(set.accent) || 'transparent'; button.style.color = hex(set.bg) || 'inherit';
+      page.append(title, line, button);
+      return page;
+    };
+    const setNode = (key) => {
+      const set = ans[key] = ans[key] || {};
+      const wrap = h('div', 'palette-set');
+      if (ans.dark) wrap.append(h('div', 'palette-set-name', key === 'light' ? '淺色主題' : '深色主題'));
+      for (const slot of item.slots) {
+        const row = h('div', 'palette-row'); row.append(h('span', 'palette-slot', slot.name));
+        for (const c of item.colors) {
+          const pick = h('button', `palette-pick${set[slot.key] === c.id ? ' on' : ''}`); pick.type = 'button';
+          pick.setAttribute('aria-pressed', set[slot.key] === c.id ? 'true' : 'false');
+          const dot = h('span', 'palette-dot'); dot.style.background = c.hex;
+          pick.append(dot, h('span', null, `${c.name}${hinted.includes(c.id) ? '★' : ''}`));
+          pick.onclick = () => { set[slot.key] = c.id; draw(); };
+          row.append(pick);
+        }
+        wrap.append(row);
+      }
+      wrap.append(preview(set));
+      return wrap;
+    };
+    const draw = () => sets.replaceChildren(...(ans.dark ? ['light', 'night'] : ['light']).map(setNode));
+    dark.onchange = () => { ans.dark = dark.checked; if (!ans.dark) delete ans.night; draw(); };
+    draw();
+    return box;
+  }
+  function itemNode(item, i, answers, work, card, seed, others = null) {
     if (item.type === 'hours') return hoursNode(item, i, answers);
+    if (item.type === 'palette') return paletteNode(item, i, answers, card);
     // 照原本那版的題（onlyIf 沒成立，例：檢閱沒挑出來）
     if (card && !Works.activeItem(item, card.picks)) { answers[i] = item.inherit; return lockedNode(item, item.inherit, item.lockedText || '照原本的版本'); }
     // item.given：前面的文件寫到的選項直接帶進來，勾好鎖住（Works.givenOptions）；單選題就是那題定好、只列那個選項。
     // 排序題（開發計畫）帶進來的步驟接在清單後面、照畫面上的順序，先後還是玩家自己排（排順序是開發計畫的功課）
     const multi = Array.isArray(item.answer) && item.type !== 'order';
-    const given = card ? Works.givenOptions(item, card.picks, (w) => card.done(w), card.draft ? card.draft.covered : 'all') : [];
+    const given = card ? Works.givenOptions(item, card.picks, (w) => card.done(w), card.draft ? card.draft.covered : 'all', others) : [];
     if (given.length && !multi && item.type !== 'order') { answers[i] = given[0]; return lockedNode(item, given[0], '前面的文件寫了'); }
     const box = h('fieldset', 'item');
     const order = Works.displayOrder(item.options.length, `${seed}:${item.key || i}`, item.keepOrder || !!item.values);

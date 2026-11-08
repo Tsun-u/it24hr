@@ -228,7 +228,7 @@
       frame.style.width = `${size[0] * scale}px`; frame.style.height = `${size[1] * scale}px`;
       const body = h('div', 'frame-body');
       if (dead) body.append(h('div', 'frame-dead', '沒電。'));
-      else { const page = Screen.render(Screen.model(card), device); page.style.transformOrigin = '0 0'; page.style.transform = `scale(${scale})`; page.style.width = `${size[0]}px`; body.append(page); }
+      else { const page = Screen.render(this.engine.screenOf(card), device); page.style.transformOrigin = '0 0'; page.style.transform = `scale(${scale})`; page.style.width = `${size[0]}px`; body.append(page); }
       frame.append(body);
       // 看完了＝把裝置放下（不再算使用中的耗電）
       const putDown = () => { layer.remove(); this.engine.putDownDevices(); };
@@ -269,7 +269,7 @@
     // 簡易 Lighthouse（screen.js 算的）：四個分數圈＋原因，放在同一塊 devtools 面板裡
     lighthousePanel(panel) {
       const card = this.testing && this.testing.card; if (!card) return;
-      const r = Screen.lighthouse(Screen.model(card));
+      const r = Screen.lighthouse(this.engine.screenOf(card));
       panel.classList.add('tall'); panel.replaceChildren(h('div', 'devtools-bar', 'DevTools — Lighthouse'));
       const scores = h('div', 'lh-scores');
       for (const [label, v] of [['效能', r.performance], ['無障礙', r.accessibility], ['最佳做法', r.bestPractices], ['SEO', r.seo]]) {

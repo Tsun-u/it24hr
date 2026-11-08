@@ -220,6 +220,8 @@
       if (s.usage) (s.usage.complainAt || []).forEach((t, n) => this.clock.at(t, () => this.complain(n)));
       // 相罵本（劇本 quarrel.at 是時鐘時間）
       if (s.quarrel) this.clock.at(s.quarrel.at, () => this.quarrel());
+      // 傍晚需求單位轉述業主看成品的評語（劇本 evening.at 是時鐘時間）
+      if (s.evening) this.clock.at(s.evening.at, () => this.eveningReview());
       // 昨天交了 QC 還沒驗的：07:30 前交的一進公司就有結果，其他的從 09:00 開始算阿姿驗的時間
       for (const card of this.board.cards.filter(c => c.status === 'to_qc')) {
         const submitted = card.events.filter(ev => ev.kind === 'submit').at(-1);
@@ -850,8 +852,10 @@
       return jobs;
     }
     aiCtx(card) {
-      return { covered: card.draft ? card.draft.covered : 'all', picks: card.picks, done: [...new Set(card.history.map(h => h.work))], locked: (field) => this.fieldLocked(field, card) };
+      return { covered: card.draft ? card.draft.covered : 'all', picks: card.picks, done: [...new Set(card.history.map(h => h.work))], locked: (field) => this.fieldLocked(field, card), others: this.otherCard };
     }
+    // 跨卡帶入用：別張卡的 { picks, done }（卡還沒開或不在今天的看板上就是 null）
+    otherCard = (id) => { const c = this.board.get(id); return c ? { picks: c.picks || {}, done: (w) => c.done(w) } : null; };
     testDrives(card, work, ctx = this.aiCtx(card)) {
       const test = this.subtask(card, 'test');
       if (!['code', 'ui_design'].includes(work) || !test || !ctx.done.includes('test')) return {};
@@ -1135,15 +1139,19 @@
       this.emit('card:notified', card); this.emit(`card:notified:${card.id}`, card);
       return card;
     }
-    // 需求單位拿到成品先試一下（劇本 usage）：流程卡住的一張一張催；有跳紅字的欄位，兩分鐘後回 irkReply（取代讚的貼圖）。回傳有沒有回話
+    // 需求單位拿到成品先試一下（劇本 usage）：流程卡住的一張一張催；有跳紅字的欄位，兩分鐘後回 irkReply；
+    // 照常理做、業主不滿意的（displeased），兩分鐘後轉述不滿的那幾句（outcome 帶 who 的寫「誰說」，沒帶的照 usage.displeased 的口氣）。
+    // 這兩種都取代讚的貼圖。回傳有沒有回話
     afterNotify(card) {
       const u = this.script.usage; if (!u) return false;
       const outs = this.cardOutcomes(card);
       // 程式（或前端程式）是流程卡住的寫法：她一試就卡住，每隔 stuckGap 分鐘催一張
       this.scheduleNags(card, outs.filter(o => o.kind === 'stuck').map((o, n) => ({ after: u.stuckGap * (n + 1), who: card.requester, text: o.say })), { whileOpen: false, tag: 'stuck' });
-      if (!outs.some(o => o.kind === 'annoy')) return false;
-      this.clock.at(this.clock.minute + 2, () => this.addDoc({ id: `${card.id}:tried`, title: card.requester, from: card.requester, module: null, origin: 'line', kind: 'chat', cardId: card.id, text: u.irkReply, sentences: [], subtasks: [] }));
-      return true;
+      const tell = (id, text) => this.clock.at(this.clock.minute + 2, () => this.addDoc({ id: `${card.id}:${id}`, title: card.requester, from: card.requester, module: null, origin: 'line', kind: 'chat', cardId: card.id, text, sentences: [], subtasks: [] }));
+      const unhappy = [...new Map(outs.filter(o => o.kind === 'displeased').map(o => [o.say, o])).values()];
+      if (unhappy.length) tell('displeased', unhappy.map(o => (o.who ? `${o.who}說：「${o.say}」` : u.displeased.replace('{say}', o.say))).join('\n'));
+      if (outs.some(o => o.kind === 'annoy')) tell('tried', u.irkReply);
+      return unhappy.length > 0 || outs.some(o => o.kind === 'annoy');
     }
     // 第 n 次抱怨：已結案的卡裡員工惱怒的那幾句（同一句只講一次），照順序取第 n 句，用 usage.complain 的口氣從 usage.who 傳來
     complain(n) {
@@ -1201,7 +1209,10 @@
     mismatch(card) {
       const works = ['ui_design', 'code'].filter(w => this.subtask(card, w));
       if (!works.length) return 0;
-      const ratio = (w) => { const h = [...card.history].reverse().find(x => x.work === w && x.result); return !h ? 0 : h.result.max ? h.result.score / h.result.max : 1; };
+      // 劇本 parallel.ignore 列的後果種類（第三關：老師不滿）不算對不上——太好用是做歪，但跟平行宇宙的歪不一樣
+      const ignore = (this.script.parallel && this.script.parallel.ignore) || [];
+      const forgiven = (w) => this.cardOutcomes(card).filter(o => o.work === w && ignore.includes(o.kind)).length;
+      const ratio = (w) => { const h = [...card.history].reverse().find(x => x.work === w && x.result); return !h ? 0 : h.result.max ? Math.min(h.result.max, h.result.score + forgiven(w)) / h.result.max : 1; };
       return 1 - works.reduce((sum, w) => sum + ratio(w), 0) / works.length;
     }
     // 平行宇宙（劇本 parallel.cards 寫了這張卡）：成品對不上超過 over 的卡交 QC，每交一次 chance 的機率；同一張卡中過就不再擲。
@@ -1220,7 +1231,33 @@
       });
     }
     // 阿姿驗完（退件或結案都一樣）才輪到需求單位看成品
-    afterQC(card) { if (card.parallel === 'rolled') this.spawnParallel(card); }
+    afterQC(card) { this.qcGripe(card); if (card.parallel === 'rolled') this.spawnParallel(card); }
+    // 傍晚評語：已上線的卡（卡上寫了 evening: { good, bad }），前端或後端有業主不滿、漏做、月底出事的講 bad，都對的講 good，合成一則 LIME。
+    // 一張都還沒上線就不講（回傳有沒有講）
+    eveningReview() {
+      const ev = this.script.evening; if (!ev || this.ended) return false;
+      const lines = this.board.cards.filter(c => c.evening && c.status === 'archived').map(c => {
+        const bad = this.cardOutcomes(c).some(o => ['displeased', 'miss', 'late'].includes(o.kind));
+        return bad ? c.evening.bad : c.evening.good;
+      }).filter(Boolean);
+      if (!lines.length) return false;
+      this.addDoc({ id: 'evening-review', title: ev.from, from: ev.from, module: null, origin: 'line', kind: 'chat', text: [ev.intro, ...lines].filter(Boolean).join('\n'), sentences: [], subtasks: [] });
+      return true;
+    }
+    // 正解很難用（outcome kind 'gripe'）：QC 不能退，阿姿驗完在三人群組抱怨，一張卡最多一次。那個後果自己寫了 say 就講它（例：鳥卦要快轉鈕）；
+    // 沒寫的照劇本 qcGripes 依序講，每句一天只講一次。母議題不交 QC，它的前端程式（網站門面）是阿姿驗子議題時看到的，所以也算
+    qcGripe(card) {
+      const lines = this.script.qcGripes; if (!lines) return;
+      const parent = card.parent && this.board.get(card.parent);
+      const target = [card, parent].find(c => c && !c.griped && this.cardOutcomes(c).some(o => o.kind === 'gripe'));
+      if (!target) return;
+      const own = this.cardOutcomes(target).find(o => o.kind === 'gripe' && o.say);
+      const n = this.stats.gripeLines || 0;
+      if (!own && n >= lines.length) return;
+      target.griped = true; this.stats.gripes = (this.stats.gripes || 0) + 1;
+      if (!own) this.stats.gripeLines = n + 1;
+      this.clock.at(this.clock.minute + 1, () => this.addDoc({ id: `${card.id}:gripe`, title: TEAM_GROUP, from: 'QC 阿姿', group: TEAM_GROUP, module: null, origin: 'line', kind: 'chat', text: own ? own.say : lines[n], sentences: [], subtasks: [] }));
+    }
     // 需求單位看了做歪的成品，覺得剛好能拿來做別的：他在 LIME 說那句，怡君開一張新卡給玩家（舊卡掛在附件當參考），當天就能做
     spawnParallel(card) {
       const spec = this.script.parallel.cards[card.id]; card.parallel = 'spawned';
@@ -1399,6 +1436,8 @@
       return bounce ? this.qcReject(card, bounce) : this.qcReview(card);
     }
     // 成品上線後會怎樣（Works.outcomes）：前端程式決定畫面、後端程式決定流程（規格只負責預填開發）；那件工作還沒做就照 ifSkipped
+    // 成品畫面：子議題跟著母議題的網站門面（配色）
+    screenOf(card) { return Screen.model(card, card.parent ? this.board.get(card.parent) : null); }
     cardOutcomes(card) {
       return ['ui_design', 'code'].flatMap(work => {
         const sub = this.subtask(card, work); if (!sub) return [];
@@ -1772,10 +1811,18 @@
     // 用的人對前端的評價：今天所有做出畫面的卡一起看，同一句抱怨只講一次，最多三句；
     // 追加需求的風格跟母議題不一致時，不管前面講了什麼，最後都再加「風格能夠一致會更好」
     userReview() {
+      // 劇本自己定客人的話（userVoice: { who, ritual, plain }）：做了畫面的卡裡有一題照常理做（業主不滿）就講 plain，都做成業主要的講 ritual
+      const voice = this.script.userVoice;
+      if (voice) {
+        const made = this.board.cards.filter(c => c.done('ui_design') || (c.screen && c.done('code')));
+        if (!made.length) return [];
+        const plain = made.some(c => this.cardOutcomes(c).some(o => o.kind === 'displeased'));
+        return [{ who: voice.who, text: `「${plain ? voice.plain : voice.ritual}」` }];
+      }
       const says = [];
       for (const card of this.board.cards) if (card.screen && card.done('code')) {
         const parent = card.relatedTo && this.board.get(card.relatedTo);
-        says.push(...Screen.userVoice(Screen.model(card), parent && parent.screen ? Screen.model(parent) : null));
+        says.push(...Screen.userVoice(this.screenOf(card), parent && parent.screen ? Screen.model(parent) : null));
       }
       if (!says.length) return [];
       const uniq = [...new Set(says)].filter(s => s !== Screen.STYLE_LINE); const bad = uniq.filter(s => s !== Screen.PRAISE_LINE);
@@ -2117,6 +2164,7 @@
       if (!parent || parent.closeWith !== 'children' || parent.status === 'archived') return;
       if (!this.board.cards.filter(c => c.parent === parent.id).every(c => c.status === 'archived')) return;
       parent.archive(this.clock.minute);
+      this.afterNotify(parent);   // 母議題自己的前端程式（例：網站門面）照常理做的，結案時需求單位一樣轉述
       this.emit('card:closed', parent); this.emit(`card:closed:${parent.id}`, parent);
     }
 

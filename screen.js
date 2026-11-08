@@ -8,6 +8,7 @@
 // 沒做前端程式：版型 plain（2008 年內網風的裸表格）、什麼元件都沒有。
 (function (root) {
   const Works = typeof require === 'function' ? require('./works.js') : root.Works;
+  const { Palette } = typeof require === 'function' ? require('./palette.js') : root;
   const flags =(item, answer) => { const idx = [].concat(answer ?? []); return Object.fromEntries((item.keys || []).map((k, i) => [k, idx.includes(i)])); };
 
   // 行銷部用 AI 做的活動頁（第三天，檢閱程式碼前端「三機找碴」）：卡的 screen 是 { app, campaign: true, defects: { 瑕疵: 修它的 function } }。
@@ -23,7 +24,30 @@
       fields: [], rows: [], effects, fixed, readOnly: false, loginRequired: false, report: false, styleRef: null, aliases: null, deptOptions: null, exportPreview: false, loginLabel: '', pwReset: false, erpPreview: false,
       form: false, fieldLooks: {}, annoyed: [], bugNotes: [] };
   }
-  function model(card) {
+  // 一張卡的配色題（type: 'palette'，網站門面）選出來的三色；子議題自己沒挑配色就照母議題那組，母議題的首頁照自己的
+  function paletteTheme(card) {
+    const sub = card && (card.subtasks || []).find(s => s.work === 'ui_design'); if (!sub) return null;
+    const i = sub.question.items.findIndex(item => item.type === 'palette');
+    return i < 0 ? null : Palette.theme(sub.question.items[i], card.picks && card.picks.ui_design && card.picks.ui_design[i]);
+  }
+  // 儀式感的畫面：前端程式題目寫 ritual: { 選項: 種類 }（一個選項畫好幾塊就寫陣列），選了那個選項，成品畫面在表格上方多畫那幾塊（種類見 RITUALS）
+  function ritualsOf(card) {
+    const sub = card && (card.subtasks || []).find(s => s.work === 'ui_design');
+    const answers = card && card.picks && card.picks.ui_design;
+    if (!sub || !answers) return [];
+    return sub.question.items.flatMap((item, i) => [].concat(answers[i] ?? []).flatMap(p => [].concat((item.ritual || {})[p] ?? [])));
+  }
+  // 首頁的選單長法（nav：wheel／bar）和老師排法（order：center／strokes），題目用 keys 對到這幾個字
+  function homeOf(spec, sub, answers) {
+    const keyOf = (role) => {
+      const items = sub ? sub.question.items : []; const i = items.findIndex(it => it.role === role);
+      if (i < 0) return null;
+      const picked = answers ? [].concat(answers[i] ?? [])[0] : undefined;
+      return items[i].keys[picked ?? items[i].ifSkipped];
+    };
+    return { menu: spec.menu || [], teachers: spec.teachers, big: spec.big, looks: spec.looks || {}, titles: spec.titles || {}, nav: keyOf('nav') || 'bar', order: keyOf('teachers') || 'strokes' };
+  }
+  function model(card, parent = null) {
     const spec = card.screen || { app: card.title, fields: [], rows: [], bugs: {} };
     if (spec.campaign) return campaignModel(card, spec);
     const sub = (card.subtasks || []).find(s => s.work === 'ui_design');
@@ -50,6 +74,10 @@
       if (item.role === 'confirm') confirm = item.thumb[first] || null;
       if (item.role === 'hint') hint = item.thumb[first] || null;
     });
+    if (!theme) theme = paletteTheme(card) || paletteTheme(parent);
+    // 網站首頁（screen.home，第三關的母議題）：沒有後端程式也有這一頁；選單和老師的排法照前端程式 role 'nav'／'teachers' 那兩題（沒做照 ifSkipped）
+    const home = spec.home && homeOf(spec.home, sub, designed ? answers : null);
+    if (home && designed) template = 'home';
     const code = [...(card.history || [])].reverse().find(h => h.work === 'code' && h.result);
     // 開發的 bug：效果名稱（字串，畫面照名稱畫），或劇本直接寫長怎樣 { voice, row?, cells: { 欄位: 顯示的值 } }
     const effects = {}; const bugNotes = [];
@@ -57,6 +85,17 @@
       const eff = (spec.bugs || {})[fn];
       if (typeof eff === 'string') effects[eff] = true; else if (eff) bugNotes.push(eff);
     }
+    // 有後果的寫法也改成品畫面：前端程式、後端程式的 outcome 寫了 cells／column／addRows 的，跟 bug 一樣畫上去（沒做的照 ifSkipped）
+    for (const work of ['ui_design', 'code']) {
+      const s = (card.subtasks || []).find(t => t.work === work); if (!s) continue;
+      const done = typeof card.done === 'function' ? card.done(work) : !!(card.picks && card.picks[work]);
+      for (const o of Works.outcomes(s.question, card.picks && card.picks[work], { done, picks: card.picks }))
+        if (o.cells || o.column || o.addRows || o.a11y) bugNotes.push({ row: o.row, cells: o.cells, column: o.column, addRows: o.addRows, a11y: o.a11y });
+    }
+    // 網站門面（母議題的前端程式）扣的無障礙分數，每一頁都算（例：選單藏在要轉的圓盤裡）
+    const siteUi = parent && (parent.subtasks || []).find(t => t.work === 'ui_design');
+    if (siteUi && parent.picks && parent.picks.ui_design)
+      for (const o of Works.outcomes(siteUi.question, parent.picks.ui_design, { done: true, picks: parent.picks })) if (o.a11y) bugNotes.push({ a11y: o.a11y });
     // 欄位題（role 'field'）：每個欄位最後做成什麼樣子——正解是下拉（sample），題目寫 input 'free' 的正解是自由填的文字框（free，sample 當提示字）、
     // 做錯是跳紅字（red）、漏做是收了怪東西（junk）；其他寫法的後果有寫 sample 的（例：配方只記主原料），那一格照它畫；
     // 沒做前端程式照每題的 ifSkipped。員工的惱怒（annoy 的 say）給 userVoice
@@ -71,10 +110,12 @@
       }
       annoyed = outs.filter(o => o.kind === 'annoy').map(o => o.say);
     }
-    return { app: spec.app, designed: designed || !!fixed, template, components, validations, theme, confirm, hint, fields: spec.fields || [], rows: spec.rows || [], effects, built: !!code, readOnly: !!spec.readOnly, loginRequired: !!spec.loginRequired, report, styleRef: spec.styleRef || null,
+    return { app: spec.app, designed: designed || !!fixed, template, components, validations, theme, confirm, hint, fields: spec.fields || [], rows: spec.rows || [], effects, built: !!code || !!home, home, readOnly: !!spec.readOnly, loginRequired: !!spec.loginRequired, report, styleRef: spec.styleRef || null,
       aliases: spec.aliases || null, deptOptions: spec.deptOptions || null, exportPreview: !!spec.exportPreview,
       loginLabel: spec.loginLabel || '公司帳號 ▢　密碼 ▢　[用公司 AD 登入]', pwReset: !!spec.pwReset, erpPreview: !!spec.erpPreview,
-      form: !!spec.form, fieldLooks, annoyed, bugNotes };
+      form: !!spec.form, fieldLooks, annoyed, bugNotes,
+      // 母議題選的是整個網站的門面（例：選單藏在八卦星盤裡），子議題的畫面也有
+      siteRituals: ritualsOf(parent), rituals: ritualsOf(card) };
   }
   // 唯讀頁上出現了能改資料的東西：自己放了新增／修改／報廢，或程式寫成能改
   const editableOnReadOnly = (m) => m.readOnly && (m.effects.editable || m.components.add || m.components.edit || m.components.scrap);
@@ -97,6 +138,8 @@
       else if (cr < 4.5) { accessibility -= 30; notes.push(`文字對比 ${cr.toFixed(1)}:1，不到 4.5:1`); }
       if ((reddish(m.theme.bg) && greenish(m.theme.fg)) || (greenish(m.theme.bg) && reddish(m.theme.fg))) { accessibility -= 25; notes.push('紅配綠，色弱的人看不出哪個是狀態'); }
     }
+    // 有後果的寫法帶 a11y（例：圖片沒有替代文字、選單藏在要轉的圓盤裡）：照它扣無障礙分數
+    for (const n of m.bugNotes || []) if (n.a11y) { accessibility -= n.a11y.minus; notes.push(n.a11y.note); }
     if (m.confirm === 'toast' || m.confirm === 'tooltip') { bestPractices -= 40; notes.push(`不可逆的操作用 ${NAME[m.confirm]} 確認，擋不住手滑`); }
     if (m.confirm === 'alert' || m.hint === 'alert') { bestPractices -= 25; notes.push('用了 alert()，瀏覽器會問使用者要不要封鎖這個網站的對話框'); }
     if (m.hint === 'dialog') { bestPractices -= 20; notes.push('每個欄位錯誤都跳視窗'); }
@@ -124,8 +167,13 @@
   // 開發的 bug 反映在資料上：報廢寫成刪除 → 報廢那列不見；編號格式錯 → 編號長得不對；篩選壞掉 → 一筆都篩不出來
   function visibleRows(m) {
     let rows = m.rows.map(r => [...r]);
-    // 劇本寫的 bug：那一列（沒寫是第一列）的那幾格換成寫錯時的樣子
-    for (const n of m.bugNotes || []) { const r = rows[n.row || 0]; if (r) for (const [f, v] of Object.entries(n.cells || {})) { const i = m.fields.indexOf(f); if (i >= 0) r[i] = v; } }
+    // 劇本寫的 bug 和有後果的寫法：那一列（沒寫是第一列）的那幾格換成寫錯時的樣子；column 整欄都換、addRows 多出幾列
+    const setCell = (r, f, v) => { const i = m.fields.indexOf(f); if (r && i >= 0) r[i] = v; };
+    for (const n of m.bugNotes || []) {
+      for (const [f, v] of Object.entries(n.cells || {})) setCell(rows[n.row || 0], f, v);
+      for (const [f, v] of Object.entries(n.column || {})) rows.forEach(r => setCell(r, f, v));
+      rows.push(...(n.addRows || []).map(r => [...r]));
+    }
     if (m.effects.scrapGone) rows = rows.filter(r => !r.includes('報廢'));
     if (m.effects.serialWrong) rows = rows.map(r => { const [no, ...rest] = r; const p = String(no).split('-'); return [p.length === 3 ? `${p[1]}-${p[0]}-${Number(p[2])}` : no, ...rest]; });
     if (m.effects.filterBroken && m.components.filter) rows = [];
@@ -204,6 +252,108 @@
     box.append(el('button', 'mock-btn primary', '存檔'));
     return box;
   }
+  // 儀式感的畫面（簡易版）：一種一塊，顏色跟著網站門面（--mock-*）。會動的部分在 styles.css，系統設定減少動態時停住
+  const ring = (el, labels, radius, cls = '') => {
+    const wheel = el('div', `mock-rt-wheel ${cls}`); wheel.style.setProperty('--r', `${radius}px`);
+    labels.forEach((t, i) => { const s = el('span', 'mock-rt-mark', t); s.style.setProperty('--a', `${i * 360 / labels.length}deg`); wheel.append(s); });
+    return wheel;
+  };
+  const BAGUA = ['☰ 乾', '☱ 兌', '☲ 離', '☳ 震', '☴ 巽', '☵ 坎', '☶ 艮', '☷ 坤'];
+  const BRANCHES = ['子', '丑', '寅', '卯', '辰', '巳', '午', '未', '申', '酉', '戌', '亥'];
+  const STEMS = ['甲', '乙', '丙', '丁', '戊', '己', '庚', '辛', '壬', '癸'];
+  const SIGNS = ['牡羊', '金牛', '雙子', '巨蟹', '獅子', '處女', '天秤', '天蠍', '射手', '摩羯', '水瓶', '雙魚'];
+  const RITUALS = {
+    // 母議題版面：選單藏在八卦和星盤合起來的圓盤裡
+    bagua: (el) => { const box = el('div', 'mock-rt mock-rt-bagua'); const w = ring(el, BAGUA, 54, 'spin-slow'); w.append(el('b', 'mock-rt-hub', '解憂')); box.append(w, el('p', 'mock-rt-cap', '請轉動星盤，尋找屬於您的入口')); return box; },
+    // 六大排盤：羅盤轉完才出盤，一次只看一張
+    compass: (el) => { const box = el('div', 'mock-rt mock-rt-compass'); const w = ring(el, BRANCHES, 58, 'spin'); w.append(ring(el, STEMS, 34, 'spin-back'), el('b', 'mock-rt-needle')); box.append(w, el('p', 'mock-rt-cap', '羅盤正在為您推算，請靜候'), el('p', 'mock-rt-pager', '八字　‹ 1／6 ›　轉動羅盤看下一張盤')); return box; },
+    // 本月星座運勢：十二星座排成星盤
+    zodiac: (el) => { const box = el('div', 'mock-rt mock-rt-zodiac'); const w = ring(el, SIGNS, 58, 'spin-slow'); w.append(el('b', 'mock-rt-hub', '本月')); box.append(w, el('p', 'mock-rt-cap', '請在星盤上點選您的星座')); return box; },
+    // 解說、牌義、結果：前半看得到，後半霧掉，接預約（say 是那張卡的預約鈕寫什麼）
+    fog: (el, r) => { const box = el('div', 'mock-rt mock-rt-fog'); for (let i = 0; i < 5; i += 1) box.append(el('i', `mock-rt-line${i >= 2 ? ' fogged' : ''}`)); box.append(el('button', 'mock-btn primary', r.say || '預約老師，看完整解說')); return box; },
+    // 宇宙能量專欄：每段開頭一個看起來很厲害的公式和圖表
+    formula: (el) => { const box = el('div', 'mock-rt mock-rt-formula'); box.append(el('p', 'mock-rt-eq', 'Ψ(t) = ∮ ε·dφ ／ ħν')); const bars = el('div', 'mock-rt-bars'); [40, 72, 55, 90, 63].forEach(h => { const b = el('i'); b.style.height = `${h}%`; bars.append(b); }); box.append(bars); return box; },
+    // 每日一籤：擲筊要點三下才擲出去，聖筊才能抽
+    jiao: (el) => {
+      const box = el('div', 'mock-rt mock-rt-jiao'); const pair = el('div', 'mock-rt-blocks'); pair.append(el('i', 'mock-rt-block'), el('i', 'mock-rt-block flip'));
+      const cap = el('p', 'mock-rt-cap', '請誠心點三下擲筊（還要 3 下）'); const btn = el('button', 'mock-btn primary', '擲筊'); let n = 0;
+      btn.addEventListener('click', () => { n += 1; cap.textContent = n < 3 ? `請誠心點三下擲筊（還要 ${3 - n} 下）` : '一正一反，聖筊！請抽籤'; if (n >= 3) box.classList.add('thrown'); });
+      box.append(pair, btn, cap); return box;
+    },
+    // 線上鳥卦：文鳥出籠、繞一圈、叼牌的影片播完才翻牌，不能快轉
+    bird: (el) => { const box = el('div', 'mock-rt mock-rt-bird'); const v = el('div', 'mock-rt-video', '▶ 文鳥正在為您叼牌'); v.append(el('i', 'mock-rt-progress')); box.append(v, el('p', 'mock-rt-cap', '請靜候文鳥叼牌，中途無法快轉'), el('div', 'mock-rt-drawn', '文鳥為您叼到：瀞玄六十四張・第 12 張')); return box; },
+    // 今日幸運方針：刮開的幸運卡
+    scratch: (el) => { const box = el('div', 'mock-rt mock-rt-scratch'); const card = el('div', 'mock-rt-ticket', '今日幸運色・幸運數字・幸運方位'); card.append(el('span', 'mock-rt-foil', '刮開今日幸運方針')); card.addEventListener('click', () => card.classList.add('open')); box.append(card); return box; },
+    // 每日塔羅：洗牌、切牌，從攤開的 78 張裡點一張，翻開前停兩秒
+    tarot: (el) => { const box = el('div', 'mock-rt mock-rt-tarot'); const fan = el('div', 'mock-rt-fan'); for (let i = 0; i < 11; i += 1) { const c = el('i', 'mock-rt-card'); c.style.setProperty('--i', i - 5); c.addEventListener('click', () => c.classList.add('picked')); fan.append(c); } box.append(fan, el('p', 'mock-rt-cap', '請靜心洗牌、切牌，從 78 張中點選一張')); return box; },
+    // 代點光明燈：報名表是一張疏文，每填一欄，書法字一筆一筆寫上去
+    shuwen: (el) => { const box = el('div', 'mock-rt mock-rt-shuwen'); const paper = el('div', 'mock-rt-paper'); ['信士　施宛臻', '生於　甲子年九月廿七', '籍貫　嘉義縣', '敬點　光明燈一盞'].forEach((t, i) => { const line = el('span', 'mock-rt-brush', t); line.style.setProperty('--i', i); paper.append(line); }); box.append(paper, el('p', 'mock-rt-cap', '請逐欄填寫，疏文將為您書寫')); return box; },
+    // 情境漫畫：四格一格一格往下滑，最後一格霧掉接預約（say）
+    comic: (el, r) => { const box = el('div', 'mock-rt mock-rt-comic'); const strip = el('div', 'mock-rt-strip'); for (let i = 1; i <= 4; i += 1) strip.append(el('div', `mock-rt-panel${i === 4 ? ' fogged' : ''}`, `第 ${i} 格`)); box.append(strip); if (r.say) box.append(el('button', 'mock-btn primary', r.say)); box.append(el('p', 'mock-rt-cap', '請往下滑動閱讀')); return box; },
+  };
+  // 題目的 ritual 值是種類名稱，或 { kind, say }（say 是那一塊要寫的字，例：預約鈕）
+  const ritualBlocks = (list, el) => {
+    const box = el('div', 'mock-rituals');
+    for (const r of list.map(k => (typeof k === 'string' ? { kind: k } : k))) if (RITUALS[r.kind]) box.append(RITUALS[r.kind](el, r));
+    return box.children.length ? box : null;
+  };
+
+  // 老師的沙龍照（照片是現實裡拍的，所以用 rough.js 手繪）：照算命網站的慣例去背，人站在卡片的漸層背景上（背景色在 homeBlock），造型照劇本 home.looks 的
+  // hair（bun 盤髮／long 長捲髮／short 短髮）、outfit（mandarin 立領／dress 圓領／blazer 西裝外套，顏色 outfitColor，淺色衣服寫 outfitFill: 'solid' 才不會透出背板）、extra（glasses 眼鏡／stars 星星耳環）、
+  // prop（背板上的 bagua 八卦／stars 星星／wave 頻率波，顏色 propColor）、backdrop（背板顏色）。沒載 rough.js（node）或沒寫造型的，用名字的第一個字代替
+  const SKIN = '#f3d3b8', INK = '#2b2b2b';
+  function portrait(name, look, seed) {
+    const rough = root.rough;
+    if (!rough || !look) { const face = document.createElement('div'); face.className = 'mock-teacher-face'; face.textContent = name[0]; return face; }
+    const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+    svg.setAttribute('viewBox', '0 0 100 120'); svg.setAttribute('class', 'mock-teacher-photo'); svg.setAttribute('role', 'img'); svg.setAttribute('aria-label', `${name}的沙龍照`);
+    const rc = rough.svg(svg); const o = (more) => ({ seed, roughness: 1.1, stroke: INK, strokeWidth: 1.2, ...more });
+    const add = (node) => svg.append(node);
+    const propColor = look.propColor || INK;
+    if (look.prop === 'bagua') add(rc.polygon([[13, 38], [21, 38], [26, 43], [26, 51], [21, 56], [13, 56], [8, 51], [8, 43]], o({ stroke: propColor })));
+    if (look.prop === 'stars') for (const [x, y] of [[14, 14], [86, 14], [12, 40]]) add(rc.linearPath([[x - 5, y], [x + 5, y], [x, y], [x, y - 5], [x, y + 5]], o({ stroke: propColor, strokeWidth: 1.8 })));
+    if (look.prop === 'wave') add(rc.curve([[10, 24], [20, 16], [30, 30], [40, 18], [50, 28]], o({ stroke: propColor })));
+    const outfit = look.outfitColor || { mandarin: '#7a1f2b', dress: '#3b2a6b', blazer: '#4b5563' }[look.outfit];
+    add(rc.path('M14 120 Q18 90 50 87 Q82 90 86 120 Z', o({ fill: outfit, fillStyle: look.outfitFill || 'hachure', hachureGap: 2.5 })));
+    // 長捲髮：兩束垂到肩膀前面，畫在衣服上、臉底下
+    if (look.hair === 'long') for (const d of ['M35 48 Q27 70 30 96 Q36 99 41 92 Q36 72 39 52 Z', 'M65 48 Q73 70 70 96 Q64 99 59 92 Q64 72 61 52 Z'])
+      add(rc.path(d, o({ fill: look.hairColor, fillStyle: 'solid' })));
+    add(rc.rectangle(44, 74, 12, 14, o({ fill: SKIN, fillStyle: 'solid' })));
+    if (look.outfit === 'mandarin') add(rc.rectangle(40, 84, 20, 6, o({ fill: '#d4af37', fillStyle: 'solid' })));
+    // 西裝：V 領從肩膀內側收到胸口，V 裡面露出襯衫和領帶
+    if (look.outfit === 'blazer') {
+      add(rc.polygon([[42, 88], [58, 88], [50, 108]], o({ fill: '#dbe7f5', fillStyle: 'solid' })));
+      add(rc.line(50, 89, 50, 104, o({ stroke: '#8b1e2d', strokeWidth: 2.4, roughness: 0.6 })));
+    }
+    if (look.outfit === 'dress') add(rc.arc(50, 87, 20, 12, 0, Math.PI, false, o()));
+    add(rc.ellipse(50, 56, 32, 38, o({ fill: SKIN, fillStyle: 'solid' })));
+    if (look.hair === 'bun') { add(rc.path('M34 54 Q34 34 50 34 Q66 34 66 54 Q60 42 50 42 Q40 42 34 54 Z', o({ fill: look.hairColor, fillStyle: 'solid' }))); add(rc.circle(50, 28, 16, o({ fill: look.hairColor, fillStyle: 'solid' }))); add(rc.line(38, 22, 64, 32, o({ stroke: '#d4af37', strokeWidth: 2 }))); }
+    if (look.hair === 'long') add(rc.path('M34 56 Q32 36 50 35 Q68 36 66 56 Q62 44 50 44 Q38 44 34 56 Z', o({ fill: look.hairColor, fillStyle: 'solid' })));
+    if (look.hair === 'short') add(rc.path('M34 54 Q32 36 50 35 Q68 36 66 54 Q64 46 56 44 Q46 46 34 54 Z', o({ fill: look.hairColor, fillStyle: 'solid' })));
+    add(rc.circle(44, 57, 2.5, o({ fill: INK, fillStyle: 'solid', strokeWidth: 0.6 }))); add(rc.circle(56, 57, 2.5, o({ fill: INK, fillStyle: 'solid', strokeWidth: 0.6 })));
+    add(rc.path('M44 65 Q50 70 56 65', o({ strokeWidth: 1, roughness: 0.4 })));
+    if (look.extra === 'glasses') { add(rc.circle(44, 57, 9, o())); add(rc.circle(56, 57, 9, o())); add(rc.line(48.5, 57, 51.5, 57, o())); }
+    if (look.extra === 'stars') for (const x of [34, 66]) add(rc.linearPath([[x - 3, 66], [x + 3, 66], [x, 66], [x, 63], [x, 69]], o({ stroke: '#b8860b' })));
+    return svg;
+  }
+  // 網站首頁：一般導覽列（選單藏在圓盤裡的話選單就是上面那塊儀式畫面），下面是駐站老師；center 是主角在中間大一號，strokes 是一樣大照筆畫排
+  function homeBlock(h, el) {
+    const box = el('div', 'mock-home-body');
+    if (h.nav === 'bar') { const nav = el('nav', 'mock-home-nav'); for (const t of h.menu) nav.append(el('span', '', t)); box.append(nav); }
+    const row = el('div', `mock-teachers mock-teachers-${h.order}`);
+    for (const name of h.teachers[h.order]) {
+      const look = (h.looks || {})[name];
+      const card = el('div', `mock-teacher${h.order === 'center' && name === h.big ? ' big' : ''}`);
+      if (look && look.backdrop) card.style.setProperty('--photo-bg', look.backdrop);
+      const label = el('div', 'mock-teacher-label');
+      label.append(el('b', '', name));
+      if ((h.titles || {})[name]) label.append(el('span', '', h.titles[name]));
+      card.append(portrait(name, look, [...name].reduce((s, ch) => s + ch.charCodeAt(0), 0)), label);
+      row.append(card);
+    }
+    box.append(el('p', 'mock-home-title', '駐站老師'), row);
+    return box;
+  }
   function render(m, device = 'pc') {
     const el = (tag, cls, text) => { const n = document.createElement(tag); if (cls) n.className = cls; if (text !== undefined) n.textContent = text; return n; };
     const page = el('div', `mock mock-${m.template} mock-${device}${m.form ? ' mock-has-form' : ''}`);
@@ -218,6 +368,9 @@
       return d;
     };
     page.append(el('header', 'mock-top', m.app));
+    // 儀式感的畫面：網站門面的（母議題選的）在最上面，這張卡自己的在工具列下面；沒做前端程式的裸頁面沒有
+    const designedPage = m.template !== 'plain';
+    const site = designedPage && ritualBlocks(m.siteRituals || [], el); if (site) page.append(site);
     // jQuery 直接升到最新版：舊寫法被拿掉，按鈕都沒反應
     if (m.effects.jqueryBroken) page.append(el('div', 'mock-error', '篩選、匯出按了沒反應　console：Uncaught TypeError: $(...).live is not a function'));
     // 唯讀頁的程式寫成能改：每列都冒出修改鈕
@@ -241,6 +394,8 @@
       if (c.avatar) bar.append(el('button', 'mock-btn', '頭像換裝'));
       if (bar.children.length) page.append(bar);
     }
+    const own = designedPage && ritualBlocks(m.rituals || [], el); if (own) page.append(own);
+    if (m.home) { page.append(homeBlock(m.home, el)); return page; }
     const rows = visibleRows(m);
     if (m.template === 'dashboard') {
       const tiles = el('div', 'mock-tiles');
@@ -360,13 +515,13 @@
     if (m.effects.brokenImages) says.push('商品圖都是破的，這是賣什麼？');
     if (m.effects.bannerOverButton) says.push('手機上送出鈕被橫幅蓋住，按不到。');
     if (m.effects.formOverflow) says.push('平板上表單要左右捲，Email 欄在螢幕外面。');
-    says.push(...(m.annoyed || []), ...(m.bugNotes || []).map(n => n.voice));   // 員工看到紅字的惱怒、劇本寫的 bug
+    says.push(...(m.annoyed || []), ...(m.bugNotes || []).map(n => n.voice).filter(Boolean));   // 員工看到紅字的惱怒、劇本寫的 bug（只改格子、扣分的後果沒有台詞）
     if (!says.length) says.push(PRAISE_LINE);
     if (ref && styleOf(m) !== ref) says.push(STYLE_LINE);
     return says;
   }
 
-  const api = { model, render, visibleRows, lighthouse, contrast, userVoice, styleOf, PRAISE_LINE, STYLE_LINE };
+  const api = { model, render, visibleRows, lighthouse, contrast, userVoice, styleOf, PRAISE_LINE, STYLE_LINE, RITUAL_KINDS: Object.keys(RITUALS) };
   if (typeof module !== 'undefined') module.exports = api;
   else root.Screen = api;
 })(typeof window !== 'undefined' ? window : globalThis);

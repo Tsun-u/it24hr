@@ -150,6 +150,19 @@ a.btn { display: inline-block; color: inherit; text-decoration: none; }   /* 長
 .item legend.code { font-family: var(--mono); font-weight: 500; font-size: 13px; }
 .opt { display: flex; gap: 8px; align-items: flex-start; cursor: pointer; line-height: 1.5; }
 .opt input { margin-top: 4px; }
+/* 配色題（第三關網站門面）：每格一排顏色鈕，底下是那組配色的即時預覽 */
+.palette-hint { margin: 0; font-size: 13px; color: var(--os-muted); }
+.palette-set { display: flex; flex-direction: column; gap: 4px; }
+.palette-set-name { font-weight: 600; margin-top: 4px; }
+.palette-row { display: flex; flex-wrap: wrap; align-items: center; gap: 4px; }
+.palette-slot { width: 4.5em; font-size: 13px; }
+.palette-pick { display: inline-flex; align-items: center; gap: 4px; padding: 3px 8px; border: 1px solid var(--os-border); border-radius: 999px; background: transparent; color: inherit; font: inherit; font-size: 13px; cursor: pointer; }
+.palette-pick.on { border-color: #5aa0ff; box-shadow: 0 0 0 2px rgba(90, 160, 255, .45); }
+.palette-dot { width: 14px; height: 14px; border-radius: 50%; border: 1px solid var(--os-border); }
+.palette-preview { margin-top: 4px; padding: 10px 12px; border-radius: 8px; border: 1px solid var(--os-border); }
+.palette-preview-title { font-weight: 700; font-size: 16px; }
+.palette-preview-line { height: 3px; margin: 6px 0; border-radius: 2px; }
+.palette-preview-button { display: inline-block; padding: 3px 12px; border-radius: 999px; font-size: 13px; }
 .small { font-size: 12px; margin: 0; }
 .order-seq { margin: 0; padding: 0; list-style: none; display: grid; gap: 2px; }
 .order-step { display: flex; align-items: center; gap: 4px; border-radius: 6px; }
@@ -622,6 +635,70 @@ div:has(> button[aria-label="匯出存檔"]) > button::after { content: attr(ari
 .mock-form h4 { margin: 0 0 4px; } .mock-field { display: flex; align-items: center; gap: 10px; } .mock-field span { width: 72px; color: #4b5563; }
 .mock-red { margin: -4px 0 0 82px; color: #dc2626; font-size: 12px; }   /* 新增表單：欄位填錯跳的紅字 */
 .mock-junk { color: #92400e; background: #fffbeb; }   /* 新增表單：欄位收了怪東西 */
+/* 網站首頁（screen.home，第三關母議題）：導覽列、駐站老師；顏色跟著網站門面 */
+.mock-home-body { padding: 12px 14px 16px; }
+.mock-home-nav { display: flex; flex-wrap: wrap; gap: 6px 14px; padding: 8px 10px; margin-bottom: 12px; border-bottom: 2px solid var(--mock-accent, #2563eb); font-size: 14px; }
+.mock-home-title { margin: 0 0 8px; font-weight: 700; text-align: center; }
+.mock-teachers { display: flex; justify-content: center; align-items: flex-end; gap: 12px; }
+/* 駐站老師卡：照算命網站的慣例，去背的人站在自己顏色的漸層上，下面一條白底寫名字和流派 */
+.mock-teacher { display: flex; flex-direction: column; align-items: center; width: 92px; overflow: hidden; border-radius: 12px; background: linear-gradient(to bottom, color-mix(in srgb, var(--photo-bg, #ddd) 25%, #fff), var(--photo-bg, #ddd)); box-shadow: 0 2px 6px rgba(0, 0, 0, 0.25); }
+.mock-teacher.big { width: 120px; }
+.mock-teacher-label { align-self: stretch; display: flex; flex-direction: column; align-items: center; padding: 4px 2px 6px; background: #fff; color: #222; }
+.mock-teacher-label b { font-size: 13px; }
+.mock-teacher-label span { font-size: 11px; color: #666; }
+.mock-teacher.big .mock-teacher-label b { font-size: 15px; }
+.mock-teacher-face { width: 56px; height: 56px; border-radius: 50%; display: grid; place-items: center; background: color-mix(in srgb, var(--mock-accent, #2563eb) 30%, transparent); border: 2px solid var(--mock-accent, #2563eb); font-size: 20px; }
+.mock-teacher.big { font-size: 15px; font-weight: 700; }
+.mock-teacher.big .mock-teacher-face { width: 80px; height: 80px; font-size: 28px; }
+.mock-teacher-photo { width: 80px; height: 96px; display: block; margin-top: 6px; }
+.mock-teacher.big .mock-teacher-photo { width: 106px; height: 127px; }
+/* 第三關儀式感的成品畫面（簡易版，screen.js 的 RITUALS）：顏色跟著網站門面 */
+.mock-rituals { display: flex; flex-wrap: wrap; gap: 12px; padding: 12px 14px 0; }
+.mock-rt { flex: 1 1 220px; display: flex; flex-direction: column; align-items: center; gap: 8px; padding: 12px; border: 1px solid color-mix(in srgb, var(--mock-accent, #2563eb) 40%, transparent); border-radius: 10px; }
+.mock-rt-cap { margin: 0; font-size: 12px; opacity: .8; text-align: center; }
+.mock-rt-wheel { position: relative; flex: none; width: calc(var(--r) * 2 + 36px); height: calc(var(--r) * 2 + 36px); border-radius: 50%; border: 2px solid var(--mock-accent, #2563eb); }
+.mock-rt-wheel .mock-rt-wheel { position: absolute; inset: 0; margin: auto; border-style: dashed; }
+.mock-rt-mark { position: absolute; left: 50%; top: 50%; font-size: 11px; white-space: nowrap; transform: translate(-50%, -50%) rotate(var(--a)) translateY(calc(var(--r) * -1)); }
+.mock-rt-hub { position: absolute; inset: 0; margin: auto; width: 44px; height: 44px; border-radius: 50%; display: grid; place-items: center; background: var(--mock-accent, #2563eb); color: #fff; font-size: 12px; }
+.mock-rt-needle { position: absolute; left: calc(50% - 1px); top: 14%; width: 2px; height: 36%; background: #b91c1c; }
+.mock-rt-wheel.spin { animation: mock-rt-spin 24s linear infinite; }
+.mock-rt-wheel.spin-slow { animation: mock-rt-spin 60s linear infinite; }
+.mock-rt-wheel.spin-back { animation: mock-rt-spin 30s linear infinite reverse; }
+@keyframes mock-rt-spin { to { transform: rotate(360deg); } }
+.mock-rt-pager { margin: 0; padding: 3px 10px; border-radius: 12px; font-size: 12px; background: color-mix(in srgb, var(--mock-accent, #2563eb) 18%, transparent); }
+.mock-rt-line { display: block; align-self: stretch; height: 8px; border-radius: 4px; background: currentColor; opacity: .28; }
+.mock-rt-line:nth-of-type(3n) { margin-right: 30%; }
+.mock-rt-line.fogged { filter: blur(3px); opacity: .4; }
+.mock-rt-eq { margin: 0; font: italic 600 16px Georgia, "Times New Roman", serif; }
+.mock-rt-bars { display: flex; align-items: flex-end; gap: 6px; width: 120px; height: 48px; }
+.mock-rt-bars i { flex: 1; background: var(--mock-accent, #2563eb); border-radius: 2px 2px 0 0; }
+.mock-rt-blocks { display: flex; gap: 12px; }
+.mock-rt-block { display: block; width: 42px; height: 22px; background: #b91c1c; border-radius: 42px 42px 6px 6px; }
+.mock-rt-block.flip { background: #991b1b; border-radius: 6px 6px 42px 42px; }
+.mock-rt-jiao.thrown .mock-rt-blocks { animation: mock-rt-toss .5s cubic-bezier(.2, 0, 0, 1); }
+@keyframes mock-rt-toss { 40% { transform: translateY(-14px) rotate(-8deg); } }
+.mock-rt-video { position: relative; width: 100%; max-width: 260px; aspect-ratio: 16 / 9; display: grid; place-items: center; border-radius: 6px; overflow: hidden; background: #111827; color: #e5e7eb; font-size: 12px; }
+.mock-rt-progress { position: absolute; left: 0; bottom: 0; width: 0; height: 4px; background: var(--mock-accent, #2563eb); animation: mock-rt-play 6s linear forwards; }
+@keyframes mock-rt-play { to { width: 100%; } }
+.mock-rt-drawn { font-weight: 700; opacity: 0; animation: mock-rt-show .4s ease-out 6s forwards; }
+@keyframes mock-rt-show { to { opacity: 1; } }
+.mock-rt-ticket { position: relative; width: 220px; max-width: 100%; padding: 18px 10px; border: 2px dashed var(--mock-accent, #2563eb); border-radius: 8px; text-align: center; font-weight: 700; cursor: pointer; }
+.mock-rt-foil { position: absolute; inset: 0; display: grid; place-items: center; border-radius: 6px; background: repeating-linear-gradient(45deg, #c0c4cc 0 6px, #d7dbe2 6px 12px); color: #374151; font-weight: 600; transition: opacity .3s; }
+.mock-rt-ticket.open .mock-rt-foil { opacity: 0; }
+.mock-rt-fan { position: relative; width: 200px; height: 86px; margin-bottom: 18px; }
+.mock-rt-card { position: absolute; left: calc(50% - 18px); bottom: 0; width: 36px; height: 60px; border: 2px solid var(--mock-accent, #2563eb); border-radius: 4px; cursor: pointer;
+  background: repeating-linear-gradient(135deg, var(--mock-accent, #2563eb) 0 3px, transparent 3px 7px), var(--mock-bg, #fff); transform-origin: 50% 120%; transform: rotate(calc(var(--i) * 9deg)); transition: transform .3s cubic-bezier(.2, 0, 0, 1); }
+.mock-rt-card.picked { transform: rotate(calc(var(--i) * 9deg)) translateY(-14px); }
+.mock-rt-paper { height: 200px; padding: 12px; writing-mode: vertical-rl; background: #fdf3d8; color: #7f1d1d; border: 1px solid #e3c98a; font: 16px/2 "BiauKai", "DFKai-SB", "Kaiti TC", "STKaiti", serif; }
+.mock-rt-brush { display: block; clip-path: inset(0 0 100% 0); animation: mock-rt-write 1.2s ease-out forwards; animation-delay: calc(var(--i) * 1.2s); }
+@keyframes mock-rt-write { to { clip-path: inset(0 0 0 0); } }
+.mock-rt-strip { display: flex; flex-direction: column; gap: 8px; width: 100%; max-width: 240px; height: 150px; overflow-y: auto; scroll-snap-type: y mandatory; }
+.mock-rt-panel { flex: none; height: 120px; display: grid; place-items: center; border: 2px solid currentColor; border-radius: 4px; font-size: 12px; scroll-snap-align: start; }
+.mock-rt-panel.fogged { filter: blur(2px); opacity: .6; }
+@media (prefers-reduced-motion: reduce) {
+  .mock-rt-wheel, .mock-rt-blocks, .mock-rt-progress, .mock-rt-brush, .mock-rt-drawn { animation: none !important; }
+  .mock-rt-progress { width: 100%; } .mock-rt-drawn { opacity: 1; } .mock-rt-brush { clip-path: none; }
+}
 .report-shot { margin-top: 14px; width: 100%; aspect-ratio: 16 / 10; overflow: hidden; border: 1px solid #e3ddd0; border-radius: 8px; background: #fff; position: relative; }
 .report-shot .mock { position: absolute; left: 0; top: 0; width: 960px; transform-origin: 0 0; pointer-events: none; }
 .report-shot-label { margin-top: 6px; font-size: 12px; color: var(--muted); }

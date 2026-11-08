@@ -16,17 +16,8 @@ const tickTo = (e, minute) => {
     e.tick(C.MS_PER_GAME_MIN);
   }
 };
-// 照正解做一件工作的答案：需求討論全圈、每題選正解；function 填正解；手動測試拿平板；估時填 8 小時；檢閱程式碼什麼都不標（LGTM）
-function right(q) {
-  if (q.kind === 'spot' || q.kind === 'diff') return { marks: [], lgtm: true, hintsUsed: 0 };
-  if (q.kind === 'discuss') {
-    const segs = Object.keys(q.asks).map(Number);
-    return { circled: segs, asks: Object.fromEntries(segs.map(i => [i, [].concat(q.asks[i]).map(a => a.answer)])) };
-  }
-  if (q.kind === 'functions') return q.functions.map(f => Object.fromEntries(Object.entries(f.fields).map(([k, v]) => [k, v.answer])));
-  if (q.kind === 'manual') return [{ target: 'tablet' }];
-  return q.items.map(i => (i.type === 'hours' ? 8 : i.answer));
-}
+// 照正解做一件工作的答案（寫法在 Works.rightAnswers，審卡頁也用它）
+const right = require('../works.js').rightAnswers;
 // 廠商需求會議：09:31 起客戶一段一段講，每段照正解問完再換下一段（swap[頁] 換掉那一段的答案，寫 null 是那段不問）；
 // 時程不回答就散會，等怡君開卡
 function meetAll(e, swap = {}) {

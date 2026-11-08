@@ -23,6 +23,7 @@
       this.noQC = !!spec.noQC;                  // 不交 QC：部署完直接進已完成（第三天的 POC 母議題，子議題驗過視同驗過）
       this.closeWith = spec.closeWith || null;  // 'children'：母議題不交 QC，底下的子議題都結案它就跟著結案（engine.closeParentOf）
       this.mustEstimate = !!spec.mustEstimate;   // 一整天都沒估時，結算卡估時表照樣列出、主管說一句（沒標的卡沒估就不列）
+      this.evening = spec.evening || null;      // 傍晚需求單位轉述業主看成品的評語：{ good, bad }（engine.eveningReview）
       this.closeOn = spec.closeOn || null;      // 做完這個工作就結案（沒部署、沒 QC 的卡，例如看小潘的 PR）
       this.reviewFires = spec.reviewFires || null;   // 檢閱放水的代價：{ work: { at, miss } }，那個時間需求者在 LIME 說那句
       this.deployTarget = spec.deployTarget || 'test';   // 部署到哪：test（測試機）／poc（客戶的 POC 環境）

@@ -15,6 +15,7 @@ const DAY3 = require('../day3.js');
 const { Sandbox } = require('../sandbox.js');
 require('../sandbox-blur.js');
 require('../sandbox-scenery.js');
+require('../sandbox-fate.js');
 const { textKey } = require('../paper-ink.js');
 
 const ROOT = path.resolve(__dirname, '..');

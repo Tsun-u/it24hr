@@ -243,7 +243,12 @@
     engine.on('day:end', (report) => {
       stop();
       const view = reportView(engine, report);
-      if (engine.ai) writeClaire(engine.ai.notes);
+      if (engine.ai && !script.trial) writeClaire(engine.ai.notes);
+      if (script.trial) {   // 單卡試玩：不寫存檔，可以再玩一次同一張或回審卡頁
+        showReport(view, [{ text: '回審卡頁', onClick: () => { location.href = `card-review.html?office=${script.level}#${script.trial}`; } },
+          { text: '再玩一次', cls: 'primary', onClick: () => location.reload() }]);
+        return;
+      }
       if (script.kind === 'sandbox') {   // 正式上班：記這一關、這個時代的結算卡；隔天就是再上一天班
         const now = new Date(); const pad = (n) => String(n).padStart(2, '0');
         const today = `${now.getFullYear()}-${pad(now.getMonth() + 1)}-${pad(now.getDate())}`;   // 玩家自己的日期（toISOString 是 UTC，台灣早上八點前會差一天）
@@ -435,5 +440,14 @@
   // 三天是三堂課：當掉哪一天重來哪一天
   // 瀏覽器要玩家點過畫面或按過鍵才給出聲：每次都確認通知音是開著的
   for (const type of ['pointerdown', 'keydown']) document.addEventListener(type, () => Sound.unlock());
-  badge();
+  // 單卡試玩（審卡頁的連結）：?office=關卡&card=卡&mode=時代&parallel=1，結業過才開，跳過選玩法直接上班
+  function trialFromUrl() {
+    const q = new URLSearchParams(location.search);
+    const level = q.get('office'), card = q.get('card');
+    if (!level || !card || !(loadSave() || {}).graduated) return false;
+    const mode = q.get('mode') || 'legacy';
+    start(loadPlayer(), Sandbox.make(level, mode, { ...officeCarry(mode), only: card, parallel: q.get('parallel') === '1' }));
+    return true;
+  }
+  if (!trialFromUrl()) badge();
 })();

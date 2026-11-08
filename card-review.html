@@ -1,0 +1,80 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>IT24hr 審卡</title>
+<link rel="stylesheet" href="styles.css">
+<style>
+  :root { --rv-bg: #f4f1ea; --rv-card: #fffdf8; --rv-ink: #222; --rv-dim: #666; --rv-line: #d9d2c3; --rv-right: #1d7a3a; --rv-bad: #b3261e; --rv-warn: #8a5a00; --rv-tag: #ece6d8; }
+  @media (prefers-color-scheme: dark) {
+    :root { --rv-bg: #1b1a18; --rv-card: #262421; --rv-ink: #ece8df; --rv-dim: #a8a196; --rv-line: #3d3933; --rv-right: #6fd28e; --rv-bad: #ff8a80; --rv-warn: #f0c060; --rv-tag: #34312c; }
+  }
+  html, body { height: auto; overflow: visible; }
+  body.rv { margin: 0; background: var(--rv-bg); color: var(--rv-ink); font: 15px/1.6 system-ui, "Noto Sans TC", sans-serif; }
+  .rv-top { position: sticky; top: 0; z-index: 5; background: var(--rv-card); border-bottom: 1px solid var(--rv-line); padding: 8px 16px; display: flex; flex-wrap: wrap; gap: 8px 16px; align-items: center; }
+  .rv-top h1 { font-size: 17px; margin: 0; }
+  .rv-top label { font-size: 14px; color: var(--rv-dim); }
+  .rv-top select { font: inherit; }
+  .rv-main { max-width: 1100px; margin: 0 auto; padding: 16px; }
+  .rv-toc { display: flex; flex-wrap: wrap; gap: 6px; margin: 0 0 16px; padding: 0; list-style: none; }
+  .rv-toc a { display: inline-block; padding: 4px 10px; border: 1px solid var(--rv-line); border-radius: 999px; background: var(--rv-card); color: var(--rv-ink); text-decoration: none; font-size: 14px; }
+  .rv-card { background: var(--rv-card); border: 1px solid var(--rv-line); border-radius: 10px; padding: 16px; margin: 0 0 24px; scroll-margin-top: 64px; }
+  .rv-card > h2 { margin: 0 0 4px; font-size: 20px; }
+  .rv-where { color: var(--rv-dim); font-size: 13px; margin: 0 0 8px; }
+  .rv-play { display: flex; flex-wrap: wrap; gap: 6px; margin: 8px 0 12px; }
+  .rv-play a { padding: 4px 10px; border-radius: 6px; background: #2f5fb3; color: #fff; text-decoration: none; font-size: 14px; }
+  .rv-body { white-space: pre-line; background: var(--rv-tag); border-radius: 6px; padding: 8px 12px; margin: 8px 0; font-size: 14px; }
+  .rv-meta { font-size: 14px; margin: 4px 0; }
+  .rv-meta b { color: var(--rv-dim); font-weight: 600; margin-right: 6px; }
+  details.rv-work { border-top: 1px solid var(--rv-line); padding: 8px 0; }
+  details.rv-work > summary { cursor: pointer; font-weight: 700; font-size: 16px; }
+  .rv-item { margin: 10px 0 10px 4px; }
+  .rv-q { margin: 0 0 4px; font-weight: 600; }
+  .rv-type { font-weight: 400; color: var(--rv-dim); font-size: 13px; margin-left: 6px; }
+  ol.rv-opts { margin: 0; padding-left: 26px; }
+  ol.rv-opts li { margin: 2px 0; }
+  .rv-mark { display: inline-block; min-width: 1.6em; margin-right: 4px; font-weight: 700; color: var(--rv-right); }
+  li.rv-right > .rv-text { color: var(--rv-right); font-weight: 600; }
+  .rv-out { display: block; font-size: 13px; color: var(--rv-bad); margin-left: 1.6em; }
+  .rv-out.rv-soft { color: var(--rv-warn); }
+  .rv-note { font-size: 13px; color: var(--rv-dim); margin: 4px 0 0 1.6em; }
+  .rv-reply { display: block; font-size: 13px; color: var(--rv-dim); margin-left: 1.6em; }
+  .rv-links { margin: 6px 0 0; padding-left: 20px; font-size: 13px; color: var(--rv-dim); }
+  .rv-links-title { font-size: 13px; font-weight: 700; color: var(--rv-dim); margin: 8px 0 0; }
+  pre.rv-code { background: var(--rv-tag); padding: 6px 10px; border-radius: 6px; font-size: 13px; overflow-x: auto; margin: 4px 0; }
+  .rv-shots { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, 480px), 1fr)); gap: 12px; margin: 8px 0; }
+  .rv-shot { border: 1px solid var(--rv-line); border-radius: 8px; overflow: hidden; background: #fff; color: #222; }
+  .rv-shot > h4 { margin: 0; padding: 6px 10px; font-size: 13px; background: #222; color: #fff; }
+  .rv-shot.rv-good > h4 { background: #1d5a33; }
+  .rv-shot .rv-voice { margin: 0; padding: 6px 10px; font-size: 13px; border-top: 1px solid #ddd; color: #444; }
+  .rv-frame { max-height: 420px; overflow: auto; }
+  .rv-err { color: var(--rv-bad); white-space: pre-wrap; }
+</style>
+</head>
+<body class="rv">
+<header class="rv-top">
+  <h1>審卡</h1>
+  <label>關卡 <select id="rv-level"></select></label>
+  <label>時代 <select id="rv-mode"><option value="legacy">legacy</option><option value="hybrid">hybrid</option><option value="speedrun">speedrun</option></select></label>
+</header>
+<main class="rv-main" id="rv-root"></main>
+<script src="vendor/rough.js"></script>
+<script src="contract.js"></script>
+<script src="cards.js"></script>
+<script src="palette.js"></script>
+<script src="works.js"></script>
+<script src="screen.js"></script>
+<script src="claire-skills.js"></script>
+<script src="sandbox.js"></script>
+<script src="bench-ram.js"></script>
+<script src="bench-printer.js"></script>
+<script src="wifi-rules.js"></script>
+<script src="mailbox-rules.js"></script>
+<script src="sandbox-blur.js"></script>
+<script src="sandbox-scenery.js"></script>
+<script src="sandbox-fate.js"></script>
+<script src="card-links.js"></script>
+<script src="card-review.js"></script>
+</body>
+</html>

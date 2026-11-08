@@ -838,22 +838,9 @@
     ],
   };
 
-  // ── 平行宇宙的新卡：小卡（前端程式兩題、開發兩個 function、手動測試、部署），當天就能做、不做完也沒差 ──
-  // 需求簡單，卡片本身就是文件：開發的 function 只寫 sentence，卡上有那句就從卡片直接拉進來。前端程式沒做時兩題都是什麼都收（ifSkipped 2）
-  function smallCard({ id, title, body, fields, functions, screen, tryIt }) {
-    return { id, title, body, type: 'feature', screen: { form: true, bugs: {}, ...screen }, subtasks: [
-      { work: 'ui_design', question: { items: fields.map(f => ({ role: 'field', answer: 0, ifSkipped: 2, ...f })) } },
-      { work: 'code', question: { kind: 'functions', functions } },
-      { work: 'manual_test', question: { kind: 'manual' } },
-      { work: 'deploy', question: { roles: { backup: 0, upload: 1, replace: 2, smoke: 3, notify: 4 },
-        items: [{ text: '步驟', type: 'order', options: ['備份測試機上的源裕 ERP', '上傳新版', '替換', `開網址${tryIt}試試`, '通知需求單位'], answer: [0, 1, 2, 3],
-          why: '通知需求單位要等 QC 驗過，從已完成的卡上按' }] } },
-    ] };
-  }
-  // 欄位題的三種答法：正解、跳紅字（annoy）、什麼都收（miss）
-  const fieldOf = (field, text, sample, options, annoy, miss) => ({ field, text, sample, options,
-    outcome: { 1: { kind: 'annoy', say: annoy.say, red: annoy.red }, 2: { kind: 'miss', say: miss.say, junk: miss.junk } } });
-  const fnOf = (sentence, name, does, code, label, options) => ({ sentence, name, does, code, fields: { how: { label, options, answer: 0 } } });
+  // ── 平行宇宙的新卡：小卡（Sandbox.smallCard），部署時備份的是源裕 ERP ──
+  const { fieldOf, fnOf } = Sandbox;
+  const smallCard = (spec) => Sandbox.smallCard({ site: '源裕 ERP', ...spec });
 
   const STAFF_BUY = smallCard({ id: 'staff_buy', title: '員工內購', tryIt: '記一筆內購',
     body: '・記誰買了什麼、多少\n・月底從薪水扣\n\n建宏：「員工每週都會跟老闆買魚回家，現在都記在冰箱上那張紙，月底再從薪水扣。」',
@@ -977,43 +964,9 @@
     hybrid: '現場：共用電腦，組長用手機看紀錄。行情：每天下載行情表匯入。',
     speedrun: '現場：每個人用自己的手機，戴手套點大按鈕。行情：每天自動抓。',
   };
-  // 欄位題 AI 會選哪一種錯法：照這個順序找題目 outcome 裡第一個有的
+  // 前端程式的欄位題 AI 會選哪一種錯法：照這個順序找題目 outcome 裡第一個有的（其他題目照 Sandbox.forEra 的通則）
   const ERA_PICK = { hybrid: ['miss', 'late', 'annoy'], speedrun: ['annoy', 'miss', 'late'] };
-  function withEra(item, mode) {
-    const order = ERA_PICK[mode];
-    if (!order || item.role !== 'field' || !item.outcome) return item;
-    const opts = Object.keys(item.outcome).map(Number);
-    const kind = order.find(k => opts.some(o => item.outcome[o].kind === k)); if (!kind) return item;
-    const pick = opts.find(o => item.outcome[o].kind === kind);
-    return { ...item, ai: { pick: Array.isArray(item.answer) ? [pick] : pick, kind: 'flexible' } };
-  }
-  // 其他題目 AI 怎麼錯（劇本沒寫 ai 的才補）：單選選第一個錯的選項；開發計畫漏第一步、多排一個陷阱步驟；
-  // 驗收漏最後一項、多一個陷阱案例；部署多做通知；開發、測試程式的欄位選第一個錯的（陷阱測試就是真的去測）
-  function missOf(item, work, roles) {
-    if (item.ai || item.free || item.type === 'hours') return item;
-    const traps = item.options.map((_, i) => i).filter(i => ![].concat(item.answer).includes(i));
-    if (item.type === 'order') {
-      if (work === 'deploy') return roles && roles.notify != null ? { ...item, ai: { pick: [...item.answer, roles.notify], kind: 'extra' } } : item;
-      return { ...item, ai: { pick: [...item.answer.slice(1), ...traps.slice(0, 1)], kind: 'extra' } };
-    }
-    if (Array.isArray(item.answer)) return { ...item, ai: { pick: [...item.answer.slice(0, -1), ...traps.slice(0, 1)], kind: 'miss' } };
-    return traps.length ? { ...item, ai: { pick: traps[0], kind: work === 'read_req' ? 'miss' : 'logic' } } : item;
-  }
-  function fieldMiss(field) {
-    if (field.ai) return field;
-    const wrong = field.options.findIndex((_, i) => i !== field.answer);
-    return wrong < 0 ? field : { ...field, ai: { pick: wrong, kind: 'logic' } };
-  }
-  function withMisses(s, mode) {
-    const q = s.question; if (!q || !ERA_PICK[mode]) return s;   // legacy 沒有 AI
-    if (q.items) return { ...s, question: { ...q, items: q.items.map(item => missOf(s.work === 'ui_design' ? withEra(item, mode) : item, s.work, q.roles)) } };
-    if (q.functions) return { ...s, question: { ...q, functions: q.functions.map(f => ({ ...f,
-      fields: Object.fromEntries(Object.entries(f.fields || {}).map(([k, field]) => [k, fieldMiss(field)])) })) } };
-    return s;
-  }
-  // 有選路的卡（routes），每條路的工作也一起套
-  const forEra = (card, mode) => ({ ...card, subtasks: card.subtasks.map(s => withMisses(s, mode)),
-    ...(card.routes && { routes: card.routes.map(r => ({ ...r, subtasks: r.subtasks.map(s => withMisses(s, mode)) })) }) });
+  const forEra = (card, mode) => Sandbox.forEra(card, mode, ERA_PICK);
 
   // 母議題：只估整套 ERP 的時間，不交 QC，子議題都結案它就跟著結案
   function motherCard(modules, mode) {
@@ -1032,9 +985,10 @@
 
   const POOL = ['trace', 'stock', 'claim'];
   // 模組池三抽二放 #404、#405（speedrun 一張固定批號追溯）；照池子的順序排，議題編號才穩定。
-  // 在 make 抽而不是開工後抽：會議的段落要跟著換。carry.pool 指定抽哪兩張（測試用）
+  // 在 make 抽而不是開工後抽：會議的段落要跟著換。carry.pool 指定抽哪兩張（測試用），'all' 是每張都開（審卡頁）
   function drawPool(mode, carry = {}) {
     const order = (ids) => [...ids].sort((a, b) => POOL.indexOf(a) - POOL.indexOf(b));
+    if (carry.pool === 'all') return [...POOL];
     if (carry.pool) return order(carry.pool);
     const rest = POOL.filter(id => mode !== 'speedrun' || id !== 'trace');
     const pick = () => rest.splice(Math.floor(Math.random() * rest.length), 1)[0];
