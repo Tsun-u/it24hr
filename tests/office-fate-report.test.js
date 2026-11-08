@@ -15,6 +15,18 @@ const plain = (q) => right(q).map((a, i) => {
 const motherAnswers = (e, layout) => { const a = right(uiOf(e.board.get('fate'))); a[0] = RIGHT_COLORS; a[1] = layout; return a; };
 const report = (e) => e.script.report(e);
 
+test('結算卡縮圖畫網站首頁（母議題沒有手動測試）；沒有主卡，同事評語不照單張卡算', () => {
+  const e = play(); meetAll(e);
+  assert.equal(e.script.reportShot, 'fate');
+  assert.equal(e.script.mainCard, undefined);
+  e.doWork('fate', 'ui_design', motherAnswers(e, 0));
+  const shot = require('../screen.js').model(e.board.get(e.script.reportShot));   // app.js 的 reportView 照這個畫縮圖
+  assert.equal(shot.built, true);
+  assert.equal(shot.template, 'home');
+  assert.deepEqual(shot.rituals, ['bagua']);
+  assert.equal(shot.theme.bg, '#5B2A86', '首頁照母議題自己的配色');
+});
+
 test('照常理做的子議題結案：結算卡寫老師嫌太好用幾次', () => {
   const e = play(); meetAll(e);
   shipped(e, 'profile', { ui_design: plain(uiOf(e.board.get('profile'))) });

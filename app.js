@@ -276,9 +276,10 @@
 
   function openWork(card, work, opts) { Quiz.open(desk, engine, card, work, opts); }
 
-  // 結算卡要畫的資料：算好的結算＋主線成品縮圖的 model。存檔也存一份，選玩法畫面按「做完了」用目前的版面重畫
+  // 結算卡要畫的資料：算好的結算＋成品縮圖的 model（劇本 reportShot 指定畫哪張卡，沒寫就畫主卡）。存檔也存一份，選玩法畫面按「做完了」用目前的版面重畫
   function reportView(e, report) {
-    const main = e.script.mainCard && e.board.get(e.script.mainCard);
+    const shotId = e.script.reportShot || e.script.mainCard;
+    const main = shotId && e.board.get(shotId);
     return { report, mode: e.script.mode || 'legacy', scriptName: e.script.name,
       shot: main && main.screen ? { model: Screen.model(main), label: `今天交出去的：#${main.no} ${main.title}` } : null };
   }

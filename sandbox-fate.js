@@ -1998,7 +1998,8 @@
     const modules = carry.only ? [carry.only].filter(cardOf) : [...MODULES, ...drawPool(carry)];
     const cards = [motherCard(modules), ...modules.map(cardOf)].map(card => forEra(card, mode));
     return {
-      name: '心領神會', issueBase: 499,
+      // 結算卡的縮圖畫網站首頁（母議題沒有手動測試，玩家只在這裡看到首頁）；沒有主卡，同事評語不照單張卡算
+      name: '心領神會', issueBase: 499, reportShot: 'fate',
       brief: '三位命理老師合開一個網站。問她們要什麼，都說都好。',
       unlabeled: { note: '09:30 解憂時代事務所需求會議（會議室）', devices: { phone: 64, tablet: 100 } },
       meetings: [MORNING, vendorMeeting(modules, cards)],
