@@ -51,15 +51,28 @@
       { id: 'recursion', name: 'Recursion', zh: '遞迴' },
       { id: 'structs', name: 'Structs', zh: '自訂資料型態' },
     ] },
+  ],
+  // 演算法：基礎篇對準 APCS 程式實作的中高級；資料結構已經教過的搜尋、排序、圖的演算法不重複
+  algorithms: [
+    { group: '基礎篇', items: [
+      { id: 'prefix_sum', name: 'Prefix Sum & Two Pointers', zh: '前綴和與雙指標' },
+      { id: 'binary_answer', name: 'Binary Search on Answer', zh: '二分搜尋答案' },
+      { id: 'backtracking', name: 'Backtracking', zh: '暴力枚舉與回溯' },
+      { id: 'divide_conquer', name: 'Divide and Conquer', zh: '分治法' },
+      { id: 'greedy', name: 'Greedy', zh: '貪婪法' },
+      { id: 'dp', name: 'Dynamic Programming', zh: '動態規劃' },
+    ] },
   ] };
   // 結算卡印章（verdict.js 的 kind）→ 資料結構小教室哪一頁
   const STAMP_PAGE = { stack: 'stack', queue: 'queue', deque: 'deque', tree: 'tree', mixed: 'linked_list', null: 'null' };
   // 結算卡上印的是顯示名（例如 Linked List），names 是 verdict.js 的 NAMES
   const pageForStamp = (name, names) => { const kind = Object.keys(names).find(k => names[k].name === name); return kind ? STAMP_PAGE[kind] : null; };
-  // 每門課實作用的語言：資料結構照常用的四種；APCS 程式設計照程式實作能用的四種（C、C++、Java、Python）
+  // 每門課實作用的語言：資料結構照常用的四種；APCS 程式設計和演算法照程式實作能用的四種（C、C++、Java、Python）
+  const APCS_LANGS = [['c', 'C'], ['cpp', 'C++'], ['java', 'Java'], ['python', 'Python']];
   const LANGS = {
     ds: [['python', 'Python'], ['js', 'JavaScript'], ['java', 'Java'], ['cpp', 'C++']],
-    programming: [['c', 'C'], ['cpp', 'C++'], ['java', 'Java'], ['python', 'Python']],
+    programming: APCS_LANGS,
+    algorithms: APCS_LANGS,
   };
 
   // 登記好的頁：PAGES[課程][頁 id]
