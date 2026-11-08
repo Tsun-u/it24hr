@@ -14,7 +14,7 @@
     extra: [
       'C 的指標（pointer）：想在函式裡改到外面的變數，就把變數的位址傳過去。呼叫寫 add_one(&x)，函式寫 void add_one(int *p) { *p = *p + 1; }：p 存的是 x 的位址，*p 就是 x 本人，改了它，外面的 x 就變了。scanf("%d", &n) 要寫 &，也是同一個道理：讓 scanf 知道讀到的數字要放進哪裡。',
       'C++ 的參考（reference）寫起來更省事：void add_one(int &x) { x = x + 1; }，呼叫照樣寫 add_one(x)，函式裡的 x 就是外面那個 x 的另一個名字。實作裡的 vector<int>& 也是參考，所以 fill 改得到外面的陣列。',
-      'Java 和 Python 沒有指標，函式改不到外面的整數變數。常見的做法是改用回傳值：x = add_one(x)；要改好幾個值，就把它們放進陣列、list 或物件裡傳進去，在函式裡改裡面的格子（實作的 fill 就是這樣）。Python 還可以一次回傳好幾個值：return a, b。',
+      'Java 和 Python 沒有指標，函式改不到外面的整數變數。常見的做法是改用回傳值：Java 寫 x = addOne(x)、Python 寫 x = add_one(x)；要改好幾個值，就把它們放進陣列、list 或物件裡傳進去，在函式裡改裡面的格子（實作的 fill 就是這樣）。Python 還可以一次回傳好幾個值：return a, b。',
     ],
     uses: [
       '外送 App 的購物車：加一份、減一份、換大杯、套優惠券，每動一下總價就重算。背後是同一個算總價的函式，每改一次就叫它一次。',
@@ -291,7 +291,7 @@ int main() {
     }
 
     // n 是質數回傳 1，不是回傳 0
-    static int is_prime(int n) {
+    static int isPrime(int n) {
         if (n < 2) {
             return 0;
         }
@@ -306,7 +306,7 @@ int main() {
     }
 
     // 傳值：x 是呼叫時抄過來的複本，改了它，外面的 x 不會變
-    static void add_one(int x) {
+    static void addOne(int x) {
         x = x + 1;
     }
 
@@ -319,12 +319,12 @@ int main() {
 
     public static void main(String[] args) {
         int x = 5;
-        add_one(x);
+        addOne(x);
 
         int[] arr = new int[4];
         fill(arr, 4);
 
-        System.out.println(max3(3, 8, 5) + " " + is_prime(7) + " " + is_prime(9) + " " + x + " " + arr[3]);
+        System.out.println(max3(3, 8, 5) + " " + isPrime(7) + " " + isPrime(9) + " " + x + " " + arr[3]);
     }
 }
 `,
@@ -402,13 +402,13 @@ printf("%d %d\\n", x, y);`,
 int x = 5;
 int y = add_one(x);
 std::cout << x << " " << y << "\\n";`,
-          java: `static int add_one(int x) {
+          java: `static int addOne(int x) {
     x = x + 1;
     return x;
 }
 
 int x = 5;
-int y = add_one(x);
+int y = addOne(x);
 System.out.println(x + " " + y);`,
           python: `def add_one(x):
     x = x + 1
@@ -450,14 +450,14 @@ int main() {
 }
 `,
           java: `public class Main {
-    static int add_one(int x) {
+    static int addOne(int x) {
         x = x + 1;
         return x;
     }
 
     public static void main(String[] args) {
         int x = 5;
-        int y = add_one(x);
+        int y = addOne(x);
         System.out.println(x + " " + y);
     }
 }
