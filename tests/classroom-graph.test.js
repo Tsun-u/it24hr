@@ -1,7 +1,7 @@
 // tests/classroom-graph.test.js（node --test）：小教室 Graph 頁的沙盒與分格圖
 const test = require('node:test'); const assert = require('node:assert');
 const CR = require('../classroom.js');
-const page = CR.PAGES.graph;
+const page = CR.PAGES.ds.graph;
 
 const press = (s, op, times) => { for (let i = 0; i < times; i++) s = page.sandbox.apply(s, op); return s; };
 
@@ -30,7 +30,7 @@ test('圖的沙盒：BFS 走 A B C D E F、DFS 走 A B D E C F；換另一種從
 });
 
 test('分格靜態圖照操作重播：六格 BFS，每格寫出拜訪的點和目前的佇列', () => {
-  const frames = CR.replay('graph', page.frames);
+  const frames = CR.replay('ds', 'graph', page.frames);
   assert.deepStrictEqual(frames.map(f => f.label), [
     'BFS：拜訪 A，佇列 B C',
     'BFS：拜訪 B，佇列 C D E',

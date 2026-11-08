@@ -1,7 +1,7 @@
 // tests/classroom-sorting.test.js（node --test）：小教室 Sorting 頁的沙盒與分格圖
 const test = require('node:test'); const assert = require('node:assert');
 const CR = require('../classroom.js');
-const page = CR.PAGES.sorting;
+const page = CR.PAGES.ds.sorting;
 
 const ALGOS = ['bubble', 'selection', 'insertion', 'merge', 'quick'];
 // 手算的教科書答案：[5, 2, 4, 6, 1, 3] 每一輪之後的陣列、這一輪比了幾次
@@ -89,7 +89,7 @@ test('排序的沙盒：五種每一輪都跟手算的一樣；換另一種從�
 });
 
 test('分格靜態圖照操作重播：插入排序跑完五輪，每格寫出放好哪個數、比了幾次', () => {
-  const frames = CR.replay('sorting', page.frames);
+  const frames = CR.replay('ds', 'sorting', page.frames);
   assert.deepStrictEqual(frames.map(f => f.label), [
     '插入排序：放好 2（比 1 次）',
     '插入排序：放好 4（比 2 次）',

@@ -1,7 +1,7 @@
 // tests/classroom-tree.test.js（node --test）：小教室 Tree 頁的沙盒與分格圖
 const test = require('node:test'); const assert = require('node:assert');
 const CR = require('../classroom.js');
-const page = CR.PAGES.tree;
+const page = CR.PAGES.ds.tree;
 
 // 每個節點都比左子樹全部大、比右子樹全部小
 const isBST = (node, low = -Infinity, high = Infinity) =>
@@ -30,7 +30,7 @@ test('二元搜尋樹沙盒：左小右大、圖說寫出一路比過的節點�
 });
 
 test('分格靜態圖照操作重播：Tree 的六格依序是插入 50、30、70、20、40（寫出一路比過的節點），再中序走訪', () => {
-  const frames = CR.replay('tree', page.frames);
+  const frames = CR.replay('ds', 'tree', page.frames);
   assert.deepStrictEqual(frames.map(f => f.label), [
     'insert(50)',
     'insert(30)：比 50 小往左',

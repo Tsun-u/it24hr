@@ -1,7 +1,7 @@
 // tests/classroom-hashing.test.js（node --test）：小教室 Hashing 頁的沙盒與分格圖
 const test = require('node:test'); const assert = require('node:assert');
 const CR = require('../classroom.js');
-const page = CR.PAGES.hashing;
+const page = CR.PAGES.ds.hashing;
 
 const press = (s, op, times) => { for (let i = 0; i < times; i++) s = page.sandbox.apply(s, op); return s; };
 
@@ -31,7 +31,7 @@ test('雜湊的沙盒：k % 7 放進那一格、碰撞接在串列後面；8 比
 });
 
 test('分格靜態圖照操作重播：插入 15、22、30、8，再找 8', () => {
-  const frames = CR.replay('hashing', page.frames);
+  const frames = CR.replay('ds', 'hashing', page.frames);
   assert.deepStrictEqual(frames.map(f => f.label), [
     'insert(15)：15 % 7 = 1',
     'insert(22)：22 % 7 = 1，碰撞，接在後面',

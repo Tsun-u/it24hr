@@ -1,7 +1,7 @@
 // tests/classroom-searching.test.js（node --test）：小教室 Searching 頁的沙盒與分格圖
 const test = require('node:test'); const assert = require('node:assert');
 const CR = require('../classroom.js');
-const page = CR.PAGES.searching;
+const page = CR.PAGES.ds.searching;
 
 const press = (s, op, times) => { for (let i = 0; i < times; i++) s = page.sandbox.apply(s, op); return s; };
 
@@ -33,7 +33,7 @@ test('搜尋的沙盒：找 96 線性比 15 次、二分比 4 次；換另一種
 });
 
 test('分格靜態圖照操作重播：四格二分，每格寫出看了哪格、往哪邊', () => {
-  const frames = CR.replay('searching', page.frames);
+  const frames = CR.replay('ds', 'searching', page.frames);
   assert.deepStrictEqual(frames.map(f => f.label), [
     '二分：看 a[7] = 45，96 比較大，往右',
     '二分：看 a[11] = 81，96 比較大，往右',

@@ -3,7 +3,7 @@
 (function (root) {
   // 七門課：APCS 的程式設計排第一（讀資料結構之前的那一門），後面是資工所常考的六科；ready 的課有小教室可以讀
   const COURSES = [
-    { id: 'programming', name: 'APCS 程式設計', note: '資料型態、條件與迴圈、函式、遞迴、陣列：考 APCS、讀資料結構之前的第一門課。' },
+    { id: 'programming', name: 'APCS 程式設計', note: '資料型態、條件與迴圈、函式、遞迴、陣列：考 APCS、讀資料結構之前的第一門課。每頁有一行一行跑的程式追蹤器、C／C++／Java／Python 四種語言的程式和試試看。', ready: true },
     { id: 'ds', name: '資料結構', note: '陣列、鏈結串列、堆疊、佇列、樹、圖；附錄是雜湊、搜尋、排序、互斥集合和 Big-O；進階篇是堆積、字典樹、AVL 樹、紅黑樹、B 樹和圖的經典問題。每頁有圖解、可以按的沙盒和四種語言的程式。', ready: true },
     { id: 'algorithms', name: '演算法', note: '分治、貪婪、動態規劃、圖的演算法，還有排序為什麼最快只能到 n log n。' },
     { id: 'os', name: '作業系統', note: 'CPU 排程、記憶體分頁、死結：電腦怎麼同時做好多件事。' },
@@ -34,7 +34,7 @@
       const back = h('a', 'csie-back', '‹ 所有課程'); back.href = '#';
       const room = h('div', 'csie-room');
       main.replaceChildren(back, h('h2', 'csie-course-title', c.name), room);
-      root.ClassroomView.mount(room, { id: page, onSelect: (id) => history.replaceState(null, '', `#${c.id}/${id}`) });
+      root.ClassroomView.mount(room, { course: c.id, id: page, onSelect: (id) => history.replaceState(null, '', `#${c.id}/${id}`) });
     }
     function render() {
       const { course: id, page } = parseHash(location.hash);

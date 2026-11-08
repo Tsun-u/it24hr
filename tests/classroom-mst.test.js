@@ -1,7 +1,7 @@
 // tests/classroom-mst.test.js（node --test）：小教室 MST 頁的沙盒與分格圖
 const test = require('node:test'); const assert = require('node:assert');
 const CR = require('../classroom.js');
-const page = CR.PAGES.mst;
+const page = CR.PAGES.ds.mst;
 
 const press = (s, op, times) => { for (let i = 0; i < times; i++) s = page.sandbox.apply(s, op); return s; };
 const names = (edges) => edges.map(([a, b, w]) => `${a}–${b} ${w}`);
@@ -49,7 +49,7 @@ test('選滿五條再按是錯誤、選的邊不變；按另一種就從頭開�
 });
 
 test('分格靜態圖照操作重播：六格 Kruskal，圖說照決定表', () => {
-  const frames = CR.replay('mst', page.frames);
+  const frames = CR.replay('ds', 'mst', page.frames);
   assert.deepStrictEqual(frames.map(f => f.label), [
     '選 D–E 1',
     '選 B–C 2',

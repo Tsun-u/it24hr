@@ -1,7 +1,7 @@
 // tests/classroom-stack.test.js（node --test）：小教室 Stack 頁的沙盒、分格圖、河內塔
 const test = require('node:test'); const assert = require('node:assert');
 const CR = require('../classroom.js');
-const page = CR.PAGES.stack;
+const page = CR.PAGES.ds.stack;
 
 test('堆疊沙盒：後進先出；空的拿是 underflow、放滿再放是 overflow，狀態不變', () => {
   const box = page.sandbox;
@@ -16,7 +16,7 @@ test('堆疊沙盒：後進先出；空的拿是 underflow、放滿再放是 ove
 });
 
 test('分格靜態圖照操作重播：Stack 的六格依序是 push 1、2、3、pop 拿到 3、push 4、pop 拿到 4', () => {
-  const frames = CR.replay('stack', page.frames);
+  const frames = CR.replay('ds', 'stack', page.frames);
   assert.deepStrictEqual(frames.map(f => f.label), ['push(1)', 'push(2)', 'push(3)', 'pop() → 3', 'push(4)', 'pop() → 4']);
   assert.ok(frames.every(f => !f.state.error));
   assert.deepStrictEqual(frames.at(-1).state.items, [1, 2]);

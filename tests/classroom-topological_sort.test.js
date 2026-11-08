@@ -1,7 +1,7 @@
 // tests/classroom-topological_sort.test.js（node --test）：小教室拓樸排序頁的沙盒、分格圖、常見誤解裡的數字
 const test = require('node:test'); const assert = require('node:assert');
 const CR = require('../classroom.js');
-const page = CR.PAGES.topological_sort;
+const page = CR.PAGES.ds.topological_sort;
 
 // 設計稿的七門課和八條先修 [先修, 後修]
 const COURSES = ['CS101', 'CS102', 'CS103', 'CS201', 'CS202', 'CS301', 'CS302'];
@@ -53,7 +53,7 @@ test('七門修完再按是錯誤「七門課都修完了」，佇列、修過�
 });
 
 test('分格靜態圖照操作重播：七格，每格寫出修哪門課、哪些課可以修了', () => {
-  const frames = CR.replay('topological_sort', page.frames);
+  const frames = CR.replay('ds', 'topological_sort', page.frames);
   assert.deepStrictEqual(frames.map(f => f.label), [
     '修 CS101 計算機概論：程式設計、計算機組織可以修了',
     '修 CS103 離散數學',

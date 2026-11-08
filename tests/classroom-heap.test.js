@@ -1,7 +1,7 @@
 // tests/classroom-heap.test.js（node --test）：小教室 Heap 頁的沙盒與分格圖
 const test = require('node:test'); const assert = require('node:assert');
 const CR = require('../classroom.js');
-const page = CR.PAGES.heap;
+const page = CR.PAGES.ds.heap;
 
 // 每個節點都不比孩子小
 const isMaxHeap = (h) => h.every((v, i) => i === 0 || h[Math.floor((i - 1) / 2)] >= v);
@@ -34,7 +34,7 @@ test('一直拿最大就是堆積排序：拿出來由大到小、每拿一次�
 });
 
 test('分格靜態圖照操作重播：放 30、50、20、70（寫出往上換了誰），再拿一次最大', () => {
-  const frames = CR.replay('heap', page.frames);
+  const frames = CR.replay('ds', 'heap', page.frames);
   assert.deepStrictEqual(frames.map(f => f.label), [
     'insert(30)',
     'insert(50)：跟 30 換',

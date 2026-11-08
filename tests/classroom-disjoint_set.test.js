@@ -1,7 +1,7 @@
 // tests/classroom-disjoint_set.test.js（node --test）：小教室 Disjoint Set 頁的沙盒與分格圖
 const test = require('node:test'); const assert = require('node:assert');
 const CR = require('../classroom.js');
-const page = CR.PAGES.disjoint_set;
+const page = CR.PAGES.ds.disjoint_set;
 
 // 一路往上走到上一層是自己的人
 const leaderOf = (parent, x) => { while (parent[x] !== x) x = parent[x]; return x; };
@@ -63,7 +63,7 @@ test('find(D) 的另外兩種圖說：D 自己是組長、D 本來就直接接�
 });
 
 test('分格靜態圖照操作重播，圖說照決定表原文', () => {
-  const frames = CR.replay('disjoint_set', page.frames);
+  const frames = CR.replay('ds', 'disjoint_set', page.frames);
   assert.deepStrictEqual(frames.map(f => f.label), [
     'union(A, B)：B 接到 A 下面',
     'union(C, D)：D 接到 C 下面',

@@ -1288,6 +1288,8 @@ a.csie-course:hover { border-color: var(--accent); }
 .cr-body { padding: 4px 0 26px 22px; }
 .cr-title { margin: 0 0 6px; font-size: 22px; }
 .cr-hook { font-size: 18px; font-weight: 700; }   /* 生活比喻是一句話的 Hook */
+/* 複習裡讀者自己想到的那句，就是這頁的核心想法：獨立一行、左邊一條粗線 */
+.cr-quote { margin: 4px 0 14px; padding: 6px 0 6px 14px; border-left: 4px solid var(--accent); font-size: 17px; font-weight: 700; line-height: 1.6; }
 .cr-soon { color: var(--muted); }
 .cr-sec { margin-top: 18px; } .cr-sec h4 { margin: 0 0 8px; font-size: 15px; letter-spacing: .08em; color: var(--accent); }
 .cr-sec p, .cr-sec li { line-height: 1.7; } .cr-sec ol, .cr-sec ul { margin: 0; padding-left: 1.4em; }
@@ -1324,6 +1326,39 @@ a.csie-course:hover { border-color: var(--accent); }
 .cr-tab.on { background: var(--accent); border-color: var(--accent); color: #fff; }
 .cr-pre { margin: 0; padding: 12px 14px; background: #1f2328; color: #e6e8ee; border-radius: 8px; font-family: var(--mono); font-size: 13px; line-height: 1.55; overflow-x: auto; }
 .cr-out { margin: 6px 0 0; font-size: 13px; color: var(--muted); }
+.cr-page pre, .cr-page .mono { font-variant-ligatures: none; }   /* 程式字型的連字會把 <= 畫成 ≤，初學者會以為要打那個符號 */
+/* 程式設計課：追蹤器左邊程式、右邊變數和輸出 */
+.cr-sec p.cr-tr-empty { margin: 0; font-size: 13px; color: var(--muted); }
+.cr-tr-inputs { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; margin-bottom: 10px; }
+.cr-sec .cr-tr-label { margin: 0; font-size: 12px; letter-spacing: .1em; color: var(--muted); }
+.cr-tr-body { display: flex; flex-wrap: wrap; gap: 16px; align-items: flex-start; }
+.cr-tr-code { flex: 1 1 320px; min-width: 0; padding: 10px 0; }
+.cr-tr-ln { display: block; padding: 0 14px 0 0; }
+.cr-tr-ln.on { background: rgba(255, 209, 102, .22); box-shadow: inset 3px 0 #ffd166; }   /* 剛跑完的那一行 */
+.cr-tr-no { display: inline-block; width: 2.6em; padding-right: .8em; text-align: right; color: #7d8590; user-select: none; }
+.cr-tr-side { flex: 1 1 240px; min-width: 0; display: grid; gap: 10px; }
+.cr-tr-state { display: grid; gap: 6px; }
+.cr-tr-vars { display: grid; gap: 4px; } .cr-tr-vars svg { max-width: 100%; height: auto; }
+/* 呼叫堆疊：一層一個框，正在跑的那一層框線加粗 */
+.cr-tr-frame { padding: 4px 8px 6px; border: 1px dashed #b5bcc6; border-radius: 6px; }
+.cr-tr-frame.on { border: 2px solid var(--accent); }
+.cr-sec p.cr-tr-fn { margin: 0 0 2px; font-size: 13px; font-weight: 700; }
+/* 程式讀的輸入：讀過的部分變淡 */
+.cr-tr-stdin { margin: 0; padding: 6px 10px; border-radius: 6px; background: #f3f4f6; font-family: var(--mono); font-size: 13px; white-space: pre-wrap; }
+.cr-tr-stdin .used { color: #a0a7b1; text-decoration: line-through; }
+.cr-tr-out { margin: 0; min-height: 2.4em; padding: 6px 10px; border-radius: 6px; background: #1f2328; color: #e6e8ee; font-family: var(--mono); font-size: 13px; white-space: pre-wrap; }
+/* 試試看：一題一張小卡，選了就標出答案（勾）和自己選的（叉） */
+.cr-try { display: grid; gap: 8px; margin-top: 12px; padding: 12px; border: 1px solid #d9d2c4; border-radius: 8px; background: rgba(255, 255, 255, .55); }
+.cr-sec p.cr-try-q { margin: 0; display: grid; gap: 4px; font-weight: 700; }
+.cr-try-kind { justify-self: start; padding: 1px 8px; border-radius: 999px; background: #e6edf9; color: var(--accent); font-size: 12px; font-weight: 700; }
+.cr-try-opts { display: grid; gap: 6px; }
+.cr-try-opt { display: flex; gap: 8px; align-items: flex-start; text-align: left; border: 1px solid #d8cfbd; background: #fff; color: inherit; border-radius: 6px; padding: 7px 10px; font: inherit; cursor: pointer; }
+.cr-try-opt:disabled { cursor: default; color: var(--muted); }
+.cr-try-opt .cr-trap-icon { flex: none; margin-top: 2px; }
+.cr-try-opt.answer { border-color: #2e7d4f; color: var(--ink); font-weight: 700; } .cr-try-opt.answer .cr-trap-icon { color: #2e7d4f; }
+.cr-try-opt.picked .cr-trap-icon { color: #c0392b; }
+.cr-try-why { padding: 8px 12px; border-left: 3px solid #2e7d4f; background: rgba(46, 125, 79, .06); }
+.cr-sec .cr-try-why p { margin: 0 0 4px; } .cr-sec p.cr-try-answer { font-weight: 700; }
 .stamp-link { cursor: pointer; } .stamp-link:hover, .stamp-link:focus-visible { filter: brightness(1.15); outline: 2px dashed #b3261e; outline-offset: 4px; }
 @media (max-width: 699px) {
   .cr-main { grid-template-columns: minmax(0, 1fr); grid-template-rows: auto minmax(0, 1fr); }

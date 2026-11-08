@@ -1,7 +1,7 @@
 // tests/classroom-avl.test.js（node --test）：小教室 AVL 樹頁的沙盒與分格圖
 const test = require('node:test'); const assert = require('node:assert');
 const CR = require('../classroom.js');
-const page = CR.PAGES.avl;
+const page = CR.PAGES.ds.avl;
 
 const inorder = (n) => (n ? [...inorder(n.left), n.value, ...inorder(n.right)] : []);
 // 高度自己從頭數，不看節點上存的 height
@@ -58,7 +58,7 @@ test('七個放完再放是錯誤且樹不變；中序走訪由小到大；空�
 });
 
 test('分格靜態圖照操作重播：插入七個數，圖說照決定表', () => {
-  const frames = CR.replay('avl', page.frames);
+  const frames = CR.replay('ds', 'avl', page.frames);
   assert.deepStrictEqual(frames.map(f => f.label), [
     'insert(70)',
     'insert(50)',

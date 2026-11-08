@@ -1,7 +1,7 @@
 // tests/classroom-trie.test.js（node --test）：小教室 Trie 頁的沙盒與分格圖
 const test = require('node:test'); const assert = require('node:assert');
 const CR = require('../classroom.js');
-const page = CR.PAGES.trie;
+const page = CR.PAGES.ds.trie;
 
 // 從根往下把每個節點的名字（從根走到它的字母）和有沒有字尾標記收起來
 const nodes = (node, id = '') => [[id, node.end], ...Object.keys(node.kids).sort().flatMap(ch => nodes(node.kids[ch], id + ch))];
@@ -43,7 +43,7 @@ test('還沒插字就查字首：不是錯誤，查到的是（沒有）', () =>
 });
 
 test('分格靜態圖照操作重播：插入五個字，再查字首 ca', () => {
-  const frames = CR.replay('trie', page.frames);
+  const frames = CR.replay('ds', 'trie', page.frames);
   assert.deepStrictEqual(frames.map(f => f.label), [
     'insert(cat)',
     'insert(car)：共用 c、a',

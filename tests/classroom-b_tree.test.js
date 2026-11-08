@@ -1,7 +1,7 @@
 // tests/classroom-b_tree.test.js（node --test）：小教室 B 樹頁的沙盒與分格圖
 const test = require('node:test'); const assert = require('node:assert');
 const CR = require('../classroom.js');
-const page = CR.PAGES.b_tree;
+const page = CR.PAGES.ds.b_tree;
 
 // 中序：左邊的孩子、一個鍵、下一個孩子……一路排下來
 const inorder = (node) => (node.kids.length ? node.keys.flatMap((k, i) => [...inorder(node.kids[i]), k]).concat(inorder(node.kids.at(-1))) : node.keys);
@@ -96,7 +96,7 @@ test('找 60：從根往下，圖說列出比過的節點和往哪走；還沒�
 });
 
 test('分格靜態圖照操作重播：依序放 10～70，圖說照決定表原文，最後一格兩層連續分裂、樹長高一層', () => {
-  const frames = CR.replay('b_tree', page.frames);
+  const frames = CR.replay('ds', 'b_tree', page.frames);
   assert.deepStrictEqual(frames.map(f => f.label), SPEC_LABELS);
   assert.ok(frames.every(f => !f.state.error));
 });
@@ -104,7 +104,7 @@ test('分格靜態圖照操作重播：依序放 10～70，圖說照決定表原
 test('常見誤解舉的例子：照 10～70 由小到大插，二元搜尋樹歪成 7 層，B 樹只有 3 層；insert(50) 升上去的是 40', () => {
   const bstHeight = (xs) => { let tree = null, h = 0; const put = (n, x, d) => { if (!n) { h = Math.max(h, d); return { v: x, l: null, r: null }; } return x < n.v ? { ...n, l: put(n.l, x, d + 1) } : { ...n, r: put(n.r, x, d + 1) }; }; for (const x of xs) tree = put(tree, x, 1); return h; };
   assert.strictEqual(bstHeight([10, 20, 30, 40, 50, 60, 70]), 7);
-  const frames = CR.replay('b_tree', page.frames);
+  const frames = CR.replay('ds', 'b_tree', page.frames);
   assert.strictEqual(height(frames.at(-1).state.tree), 3);
   assert.strictEqual(frames[4].state.splits[0].up, 40);
 });

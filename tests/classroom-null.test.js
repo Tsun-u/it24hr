@@ -1,7 +1,7 @@
 // tests/classroom-null.test.js（node --test）：小教室 null 頁的沙盒與分格圖
 const test = require('node:test'); const assert = require('node:assert');
 const CR = require('../classroom.js');
-const page = CR.PAGES.null;
+const page = CR.PAGES.ds.null;
 
 test('null 沙盒：一開始是 null，push 是錯誤、數字不前進；建立後是空的堆疊；push 照 1、2、3；再建立換成新的空堆疊', () => {
   const box = page.sandbox;
@@ -26,7 +26,7 @@ test('null 沙盒：一開始是 null，push 是錯誤、數字不前進；建�
 });
 
 test('分格靜態圖照操作重播：第一格是錯誤示範（對 null push），接著建立、push 1、push 2', () => {
-  const frames = CR.replay('null', page.frames);
+  const frames = CR.replay('ds', 'null', page.frames);
   assert.deepStrictEqual(frames.map(f => f.label), ['s.push(1) → 錯誤：s 是 null', 's = new Stack()', 's.push(1)', 's.push(2)']);
   assert.strictEqual(frames[0].state.error, 'null'); assert.strictEqual(frames[0].state.items, null);
   assert.ok(frames.slice(1).every(f => !f.state.error));

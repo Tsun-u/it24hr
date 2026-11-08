@@ -2,10 +2,10 @@
 const test = require('node:test'); const assert = require('node:assert');
 const C = require('../csie.js');
 
-test('CSIE 課程：七門課，APCS 程式設計排第一；目前只有資料結構可以讀', () => {
+test('CSIE 課程：七門課，APCS 程式設計排第一；目前可以讀的是 APCS 程式設計和資料結構', () => {
   assert.strictEqual(C.COURSES.length, 7);
   assert.strictEqual(C.COURSES[0].id, 'programming');
-  assert.deepStrictEqual(C.COURSES.filter(c => c.ready).map(c => c.id), ['ds']);
+  assert.deepStrictEqual(C.COURSES.filter(c => c.ready).map(c => c.id), ['programming', 'ds']);
 });
 
 test('網址：#課程/頁 拆成課程和頁；沒有 # 是課程目錄', () => {

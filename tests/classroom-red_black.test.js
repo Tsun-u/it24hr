@@ -1,7 +1,7 @@
 // tests/classroom-red_black.test.js（node --test）：小教室紅黑樹頁的沙盒與分格圖
 const test = require('node:test'); const assert = require('node:assert');
 const CR = require('../classroom.js');
-const page = CR.PAGES.red_black;
+const page = CR.PAGES.ds.red_black;
 
 const inorder = (n) => (n ? [...inorder(n.left), n.value, ...inorder(n.right)] : []);
 const isBST = (n) => inorder(n).every((v, i, a) => i === 0 || a[i - 1] < v);
@@ -90,7 +90,7 @@ test('七個放完再放是錯誤且狀態不變；中序走訪由小到大、�
 });
 
 test('分格靜態圖照操作重播：七次插入，圖說照決定表', () => {
-  const frames = CR.replay('red_black', page.frames);
+  const frames = CR.replay('ds', 'red_black', page.frames);
   assert.deepStrictEqual(frames.map(f => f.label), [
     'insert(10)：根變黑',
     'insert(20)',

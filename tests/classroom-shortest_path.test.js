@@ -1,7 +1,7 @@
 // tests/classroom-shortest_path.test.js（node --test）：小教室最短路徑（Dijkstra）頁的沙盒與分格圖
 const test = require('node:test'); const assert = require('node:assert');
 const CR = require('../classroom.js');
-const page = CR.PAGES.shortest_path;
+const page = CR.PAGES.ds.shortest_path;
 
 // 決定表那張圖：跟沙盒用的是同一份邊
 const EDGES = [['A', 'B', 3], ['A', 'C', 7], ['B', 'C', 2], ['B', 'D', 5], ['C', 'D', 4], ['C', 'E', 8], ['D', 'E', 1], ['D', 'F', 6], ['E', 'F', 9]];
@@ -60,7 +60,7 @@ test('六個點都確定了再按是錯誤，距離和確定的順序都不變',
 });
 
 test('分格靜態圖照決定表重播六格', () => {
-  const frames = CR.replay('shortest_path', page.frames);
+  const frames = CR.replay('ds', 'shortest_path', page.frames);
   assert.deepStrictEqual(frames.map(f => f.label), LABELS);
   assert.ok(frames.every(f => !f.state.error));
 });

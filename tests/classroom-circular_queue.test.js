@@ -1,7 +1,7 @@
 // tests/classroom-circular_queue.test.js（node --test）：小教室 Circular Queue 頁的沙盒與分格圖
 const test = require('node:test'); const assert = require('node:assert');
 const CR = require('../classroom.js');
-const page = CR.PAGES.circular_queue;
+const page = CR.PAGES.ds.circular_queue;
 
 test('環狀佇列沙盒：空的拿是 underflow；6 格空一格、放 5 個就滿，再放是 overflow 且狀態不變；叫號後 rear 繞回 0 號格', () => {
   const box = page.sandbox;
@@ -30,7 +30,7 @@ test('環狀佇列沙盒：空的拿是 underflow；6 格空一格、放 5 個�
 });
 
 test('分格靜態圖照操作重播：七格的圖說跟決定表一字不差', () => {
-  const frames = CR.replay('circular_queue', page.frames);
+  const frames = CR.replay('ds', 'circular_queue', page.frames);
   assert.deepStrictEqual(frames.map(f => f.label), [
     'enqueue(1)', 'enqueue(2)', 'enqueue(3)', 'enqueue(4)', 'enqueue(5)：滿了', 'dequeue() → 1', 'enqueue(6)：繞回 0 號格，滿了',
   ]);

@@ -1,7 +1,7 @@
 // tests/classroom-deque.test.js（node --test）：小教室 Deque 頁的沙盒與分格圖
 const test = require('node:test'); const assert = require('node:assert');
 const CR = require('../classroom.js');
-const page = CR.PAGES.deque;
+const page = CR.PAGES.ds.deque;
 
 test('雙向佇列沙盒：兩頭都能放、都能拿；前面放 0、−1、−2…，空的拿是 underflow，滿了放是 overflow 且狀態不變', () => {
   const box = page.sandbox;
@@ -27,7 +27,7 @@ test('雙向佇列沙盒：兩頭都能放、都能拿；前面放 0、−1、�
 });
 
 test('分格靜態圖照操作重播：Deque 的五格依序是後放 1、後放 2、前放 0、前面拿到 0、後面拿到 2', () => {
-  const frames = CR.replay('deque', page.frames);
+  const frames = CR.replay('ds', 'deque', page.frames);
   assert.deepStrictEqual(frames.map(f => f.label), ['pushBack(1)', 'pushBack(2)', 'pushFront(0)', 'popFront() → 0', 'popBack() → 2']);
   assert.ok(frames.every(f => !f.state.error));
   assert.deepStrictEqual(frames[2].state.items, [0, 1, 2]);

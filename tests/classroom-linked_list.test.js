@@ -1,7 +1,7 @@
 // tests/classroom-linked_list.test.js（node --test）：小教室 Linked List 頁的沙盒與分格圖
 const test = require('node:test'); const assert = require('node:assert');
 const CR = require('../classroom.js');
-const page = CR.PAGES.linked_list;
+const page = CR.PAGES.ds.linked_list;
 
 test('鏈結串列沙盒：插到頭不用走、接到尾要走過前面每一個節點；空的刪頭是 underflow；畫面放滿 6 個再放有錯誤、狀態不變', () => {
   const box = page.sandbox;
@@ -28,7 +28,7 @@ test('鏈結串列沙盒：插到頭不用走、接到尾要走過前面每一�
 });
 
 test('鏈結串列分格圖：接 1、接 2 走 1 步、頭插 0、刪頭拿到 0、接 3 走 2 步', () => {
-  const frames = CR.replay('linked_list', page.frames);
+  const frames = CR.replay('ds', 'linked_list', page.frames);
   assert.deepStrictEqual(frames.map(f => f.label), ['append(1)', 'append(2)：走 1 步', 'insertHead(0)', 'removeHead() → 0', 'append(3)：走 2 步']);
   assert.ok(frames.every(f => !f.state.error));
   assert.deepStrictEqual(frames.at(-1).state.items, [1, 2, 3]);
