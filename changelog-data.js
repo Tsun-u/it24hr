@@ -2,6 +2,11 @@
 (function (root) {
   const CHANGELOG = [
   {
+    "hash": "fbfc2b6",
+    "date": "2026-11-09",
+    "subject": "迴圈、輸入與輸出、運算式的課外補充加上範例程式"
+  },
+  {
     "hash": "ec04388",
     "date": "2026-11-09",
     "subject": "程式設計小教室附錄：傳值與傳參考"
