@@ -526,9 +526,9 @@
       { work: 'doc_plan', question: { items: [{ text: '步驟（挑該做的，照順序排）', type: 'order',
         options: ['讀 #501 的資料卡和 #502 的六張盤', '流年運勢：六張盤各一段今年的解說', '合婚：從資料卡挑兩張，各排六張盤比對', '解說後面接預約，帶到那張盤的老師',
                   '寫測試', '部署到測試機', '做 AI 即時解盤聊天', '做合婚結果分享到社群'],
-        answer: [0, 1, 2, 3, 4, 5],
+        answer: [0, 1, 2, 3, 4, 5], bonus: [7],
         before: [[0, 1], [0, 2], [1, 3], [2, 3], [3, 5], [4, 5]],
-        why: 'AI 即時解盤、分享到社群都不在需求裡；解說寫好才接得了預約',
+        why: 'AI 即時解盤不在需求裡；合婚分享到社群是加分項，排了不扣分；解說寫好才接得了預約',
         // 讀資料卡和六張盤前面沒有文件寫到（跨卡）
         given: [
           { work: 'read_req', options: [1], when: { item: 0, picked: 0 } }, { work: 'read_req', options: [2], when: { item: 1, picked: 0 } },
@@ -555,7 +555,7 @@
       ] } },
       { work: 'doc_accept', question: { items: [{ text: '案例',
         options: ['用資料卡排出今年的流年，六張盤各有一段解說', '從帳號底下挑本人和配偶兩張資料卡合婚', '八字那段解說的預約鈕帶到瀞玄、星盤那段帶到莉莉絲', '合婚結果分享到社群的預覽圖正常'],
-        answer: [0, 1, 2], why: '卡上沒有分享',
+        answer: [0, 1, 2], bonus: [3], why: '卡上沒有分享；合婚分享是加分項，驗了不扣分',
         given: [
           { work: 'doc_plan', options: [0], when: { item: 0, picked: 1 } }, { work: 'doc_plan', options: [1], when: { item: 0, picked: 2 } },
           { work: 'doc_plan', options: [2], when: { item: 0, picked: 3 } },
@@ -584,8 +584,9 @@
         { needs: { work: 'doc_accept', picked: 2 }, name: 'testBookTarget', does: '預約帶到對的老師', code: "expect(bookTarget('八字')).toBe('瀞玄'); expect(bookTarget('星盤')).toBe('莉莉絲');",
           drives: { fn: 'bookTarget', field: 'flow', map: { 0: 0, 1: 1 } },
           fields: { assert: { label: '檢查', options: ['八字那段帶到瀞玄、星盤那段帶到莉莉絲', '都帶到瀞玄', '有帶到老師就好'], answer: 0 } } },
+        // 合婚分享是加分項：不測、測預覽圖都算對
         { name: 'testShareImage', does: '分享到社群的預覽圖', code: '// 卡上沒有分享',
-          fields: { assert: { label: '要不要測', options: ['卡上沒有分享，不用測', '預覽圖正常', '預覽圖有標題'], answer: 0 } } },
+          fields: { assert: { label: '要不要測', options: ['卡上沒有分享，不用測', '預覽圖正常', '預覽圖有標題'], answer: 0, accept: [0, 1] } } },
       ] } },
       { work: 'manual_test', question: { kind: 'manual' } },
       deployOf('開網址幫兩張資料卡合婚試試'),

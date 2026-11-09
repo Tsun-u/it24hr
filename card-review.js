@@ -94,9 +94,12 @@
   const meta = (label, text) => { const p = el('p', 'rv-meta'); p.append(el('b', '', label), document.createTextNode(text)); return p; };
   const playUrl = (card, m, extra = '') => `index.html?office=${level}&card=${encodeURIComponent(card)}&mode=${m}${extra}`;
 
+  // 正解標 ✓（排序題標第幾步；accept 裡的都算對），加分項（bonus）標「加分」
   function marksOf(item) {
-    if (item.type === 'order') return new Map([].concat(item.answer || []).map((k, pos) => [k, `第${pos + 1}步`]));
-    return new Map([].concat(item.answer ?? []).map(k => [k, '✓']));
+    const marks = item.type === 'order' ? new Map([].concat(item.answer || []).map((k, pos) => [k, `第${pos + 1}步`]))
+      : new Map([].concat(item.accept ?? item.answer ?? []).map(k => [k, '✓']));
+    for (const k of item.bonus || []) marks.set(k, '加分');
+    return marks;
   }
   // replies：每個選項對方怎麼回（已經寫好「誰：回答」的整行）
   function optionList(item, replies = null) {

@@ -108,3 +108,15 @@ test('首頁老師排序題的線索：會議開場雅雯說事務所是瀞玄�
   assert.deepEqual(s.meetings[1].intro[0], { who: '解憂時代 助理 雅雯', text: '事務所是瀞玄老師開的。為了服務不同的客人，老師另外請了西洋命理的莉莉絲老師、現代命理的熙恩教授來駐站。' });
   assert.ok(![...s.meetings[0].lines.map(l => l.text), s.brief].some(t => t.includes('合開')));
 });
+
+test('合婚分享到社群是加分項：計畫排了、驗收勾了、測試測預覽圖都不扣分；AI 即時解盤照樣扣', () => {
+  const card = Sandbox.make('fate', 'legacy').meetings[1].cards.find(c => c.id === 'reading');
+  const q = (work) => card.subtasks.find(s => s.work === work).question;
+  assert.equal(Works.grade(q('doc_plan'), [[0, 1, 2, 3, 7, 4, 5]]).score, 1);
+  assert.ok(Works.grade(q('doc_plan'), [[0, 1, 2, 3, 6, 4, 5]]).score < 1);
+  assert.equal(Works.grade(q('doc_accept'), [[0, 1, 2, 3]]).score, 1);
+  const test = q('test'); const share = test.functions.findIndex(f => f.name === 'testShareImage');
+  const with_ = (pick) => test.functions.map((f, i) => (i === share ? { assert: pick } : { assert: f.fields.assert.answer }));
+  assert.deepEqual(Works.grade(test, with_(1), { covered: 'all', picks: {} }).bugs, []);
+  assert.deepEqual(Works.grade(test, with_(2), { covered: 'all', picks: {} }).bugs.map(b => b.fn), ['testShareImage']);
+});

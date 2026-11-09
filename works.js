@@ -293,7 +293,7 @@
     return '沒測';
   }
   // 答案：每個 function 一個物件 { 欄位: 選項索引 }；填錯的欄位是 bug，之後 QC 會抓。
-  // 選了有 outcome 的寫法不是 bug：不加分，後果照 outcome 走
+  // 選了有 outcome 的寫法不是 bug：不加分，後果照 outcome 走；欄位寫了 accept 時，裡面每個選項都算對（例：加分項做不做都行）
   function gradeFunctions(question, answers, ctx) {
     const toFill = functionsToFill(question, ctx.covered, ctx.picks);
     let score = 0, max = 0; const bugs = [];
@@ -301,7 +301,7 @@
       const f = question.functions[i], a = (answers && answers[i]) || {};
       for (const [key, field] of Object.entries(f.fields || {})) {
         max++;
-        if (a[key] === field.answer) score++;
+        if (field.accept ? field.accept.includes(a[key]) : a[key] === field.answer) score++;
         else if (!(field.outcome && field.outcome[a[key]])) bugs.push({ fn: f.name, field: key });
       }
     }
