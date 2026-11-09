@@ -12,6 +12,10 @@ const C = {
   SELF_TO_SA: '我先開卡了，分析麻煩你了。',
   QC_TURNAROUND_MIN: 30,            // 交給 QC 之後，多久驗完
   QC_OVERNIGHT_MIN: 7 * 60 + 30,    // 前一晚到隔天 07:30 前交的 QC，一進公司就有結果
+  // 阿姿的加班：19:00 離開辦公室、回家繼續驗（一張要 45 分鐘），22:30 睡覺，沒驗完的隔天早上再驗
+  QC_LEAVE_OFFICE_MIN: 19 * 60,
+  QC_HOME_TURNAROUND_MIN: 45,
+  QC_SLEEP_MIN: 22 * 60 + 30,
   AI_ASK_GAP_MIN: 5,                // 矯枉過正的 AI：回答它一題之後，它再做多久才問下一題（或交件）
   AI_FORGET_BACKUP: 0.3,            // AI 部署（Accept Edits、Auto）：沒人教過流程時，它忘了先備份的機率
   AI_GROUP_TIME: 0.7,               // 整組交給 AI：交件時間＝單件加總打七折（額度＝單件加總 −1）

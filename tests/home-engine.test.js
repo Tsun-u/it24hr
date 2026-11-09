@@ -55,7 +55,7 @@ test('在家沒連 VPN 不能做公司的事；連 5 分鐘；做完一件可能
   assert.deepStrictEqual([e.home.vpn, e.home.drops, e.home.worked], ['off', 1, 1]);
 });
 
-test('在家公司停擺：劇本的新卡不進來、交了 QC 也不驗', () => {
+test('在家：劇本的新卡不進來；阿姿 22:30 睡了之後交的 QC 不驗', () => {
   const e = offWork(); e.goHome({ channel: 'pickup', order: {} });
   e.tick(min(5 * 60));
   assert.strictEqual(e.board.get('late'), undefined, '19:00 的卡不會進來');
@@ -65,6 +65,57 @@ test('在家公司停擺：劇本的新卡不進來、交了 QC 也不驗', () =
   e.sleep({ dnd: true }); assert.ok(e.ended, '睡到 08:00 結算');
   const { cards } = e.carryOver();
   assert.deepStrictEqual(cards.map(c => [c.id, c.status]), [['k', 'to_qc']], '在家交的卡帶到隔天給阿姿驗');
+});
+
+// 時鐘走到某個時間（分鐘）
+const tickTo = (e, minute) => e.tick(min(minute - e.clock.minute));
+const qcGroupSaid = (e, id) => e.docs.some(d => d.id === id && d.group === '精銳三人產線' && d.from === 'QC 阿姿');
+
+test('阿姿加班：19:00 回家繼續驗、一張 45 分鐘；22:30 睡；兩次都在群組說一聲', () => {
+  const e = offWork(); e.goHome({ channel: 'pickup', order: {}, laptop: true });
+  e.board.get('k').noDeploy = true;   // 沒有部署工作的卡，阿姿不會一拿到就退
+  tickTo(e, C.QC_LEAVE_OFFICE_MIN - 1); assert.ok(!qcGroupSaid(e, 'qc_leave_office'));
+  tickTo(e, C.QC_LEAVE_OFFICE_MIN); assert.ok(qcGroupSaid(e, 'qc_leave_office'), '19:00 說回家驗');
+  e.vpnConnect(); e.tick(min(5)); e.submit('k');
+  const card = e.board.get('k');
+  e.tick(min(C.QC_HOME_TURNAROUND_MIN - 1)); assert.strictEqual(card.status, 'to_qc', '在家驗比較慢，44 分鐘還沒好');
+  e.tick(min(2)); assert.notStrictEqual(card.status, 'to_qc', '45 分鐘驗完，玩家在家也收得到');
+  tickTo(e, C.QC_SLEEP_MIN); assert.ok(qcGroupSaid(e, 'qc_sleep'), '22:30 說先睡了');
+});
+
+test('阿姿睡前沒驗完的、睡了才交的：停在交 QC，隔天早上驗', () => {
+  const e = offWork(); e.goHome({ channel: 'pickup', order: {}, laptop: true });
+  for (const id of ['k']) e.board.get(id).noDeploy = true;
+  tickTo(e, C.QC_SLEEP_MIN - 20); e.vpnConnect(); e.tick(min(5)); e.submit('k');   // 22:15 交、要驗到 23:00
+  tickTo(e, C.QC_SLEEP_MIN + C.QC_HOME_TURNAROUND_MIN);
+  assert.strictEqual(e.board.get('k').status, 'to_qc', '驗到一半睡了');
+  e.sleep({ dnd: true });
+  assert.deepStrictEqual(e.carryOver().cards.map(c => [c.id, c.status]), [['k', 'to_qc']], '帶到隔天早上');
+});
+
+test('阿姿睡了才交的卡：結算當作隔天早上驗，會過的算完成，執行時間算到最後一次交 QC', () => {
+  const run = (noDeploy) => {
+    const e = offWork(); const r = report(e); e.goHome({ channel: 'pickup', order: {}, laptop: true });
+    e.vpnConnect(); e.tick(min(5)); e.doWork('k', 'estimate', [3]);   // 18:50 進 IT 處理中
+    const k = e.board.get('k'); k.noDeploy = noDeploy;
+    tickTo(e, C.QC_SLEEP_MIN + 30); if (!e.online()) { e.vpnConnect(); e.tick(min(5)); }
+    e.submit('k'); const submittedAt = e.clock.minute;
+    e.tick(min(60)); e.sleep({ dnd: true });
+    return { k, row: r().estimates[0], spent: submittedAt - k.history[0].at };
+  };
+  const pass = run(true);
+  assert.strictEqual(pass.k.status, 'to_qc', '卡本身還在交 QC，隔天早上才真的驗');
+  assert.strictEqual(pass.row.actual, require('../verdict.js').duration(pass.spent), '從進 IT 處理中算到交 QC');
+  const bounce = run(false);   // 沒部署：阿姿一拿到就會退
+  assert.strictEqual(bounce.row.actual, '還沒完成');
+});
+
+test('玩家留在辦公室：19:00 後阿姿也是在家驗、一張 45 分鐘', () => {
+  const e = new Engine(script()); tickTo(e, 20 * 60);
+  e.board.get('k').noDeploy = true; e.submit('k');
+  const card = e.board.get('k');
+  e.tick(min(C.QC_TURNAROUND_MIN + 1)); assert.strictEqual(card.status, 'to_qc');
+  e.tick(min(C.QC_HOME_TURNAROUND_MIN - C.QC_TURNAROUND_MIN)); assert.notStrictEqual(card.status, 'to_qc');
 });
 
 test('私人電腦做公司的事留機密檔，刪掉就沒事；睡覺時還在就上結算卡', () => {

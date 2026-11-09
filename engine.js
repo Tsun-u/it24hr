@@ -222,6 +222,12 @@
       if (s.quarrel) this.clock.at(s.quarrel.at, () => this.quarrel());
       // 傍晚需求單位轉述業主看成品的評語（劇本 evening.at 是時鐘時間）
       if (s.evening) this.clock.at(s.evening.at, () => this.eveningReview());
+      // 阿姿加班：19:00 離開辦公室、22:30 睡覺，都在群組說一聲（劇本沒有 QC 的關卡不說）
+      if (!s.noQC) {
+        const qcTeamSay = (id, text) => () => { if (!this.ended) this.addDoc({ id, title: TEAM_GROUP, from: QC, group: TEAM_GROUP, module: null, origin: 'line', kind: 'chat', text, sentences: [], subtasks: [] }); };
+        this.clock.at(C.QC_LEAVE_OFFICE_MIN, qcTeamSay('qc_leave_office', '我先離開辦公室了，晚上交的我回家驗，會比較慢喔。'));
+        this.clock.at(C.QC_SLEEP_MIN, qcTeamSay('qc_sleep', '先睡了，剩下明天再驗。'));
+      }
       // 昨天交了 QC 還沒驗的：07:30 前交的一進公司就有結果，其他的從 09:00 開始算阿姿驗的時間
       for (const card of this.board.cards.filter(c => c.status === 'to_qc')) {
         const submitted = card.events.filter(ev => ev.kind === 'submit').at(-1);
@@ -1372,22 +1378,32 @@
       }
       card.submit(this.clock.minute); this.submitted++; this.markActed(id);
       this.emit('card:submitted', card); this.emit(`card:submitted:${id}`, card);
-      if (this.home) return;   // 阿姿下班了：在家交的卡停在交 QC，隔天早上她才驗（schedule 排補驗）
+      if (!this.reviewerOnDuty(card)) return;   // 驗的人睡了／下班了：卡停在交 QC，隔天早上才驗（schedule 排補驗）
       // 有部署就排時間驗（上次退件時沒備份的，這次驗加倍久）
       const bounce = this.qcBounce(card); if (bounce) return this.qcReject(card, bounce);
       this.parallelRoll(card);
-      this.clock.at(this.clock.minute + C.QC_TURNAROUND_MIN * (card.slowQC ? 2 : 1), () => this.qcReview(card));
+      this.clock.at(this.clock.minute + this.qcTurnaround(card), () => this.qcReview(card));
+    }
+    // 驗的人還在不在工作：阿姿照自己的時間加班（19:00 回家繼續驗、22:30 睡），其他驗的人跟玩家一起下班
+    reviewerOnDuty(card) {
+      return this.reviewerOf(card) === QC ? this.clock.minute < C.QC_SLEEP_MIN : !this.home;
+    }
+    // 驗一張要多久：阿姿 19:00 之後在家驗比較慢；上次退件時沒備份的加倍
+    qcTurnaround(card) {
+      const base = this.reviewerOf(card) === QC && this.clock.minute >= C.QC_LEAVE_OFFICE_MIN ? C.QC_HOME_TURNAROUND_MIN : C.QC_TURNAROUND_MIN;
+      return base * (card.slowQC ? 2 : 1);
     }
     // 阿姿一拿到就退的：沒部署（沒東西可驗）、網站 502 中、程式裡還留著 TODO
-    qcBounce(card) {
+    // quiet：只問會不會退，不在群組唸（結算卡預判用）
+    qcBounce(card, { quiet = false } = {}) {
       if (!card.noDeploy && !card.done('deploy')) return '還沒上測試機，我沒東西可以驗。';
       if (card.down != null) return '網站 502，我驗什麼？';
-      return this.wordyBounce(card) || this.todoLeft(card);
+      return this.wordyBounce(card, quiet) || this.todoLeft(card);
     }
     // Novel 寫的驗收文件廢話沒刪完就交 QC：阿姿退「請用人話寫」；第一次退的時候她在群組裡也唸一句
-    wordyBounce(card) {
+    wordyBounce(card, quiet = false) {
       if (!card.wordy.doc_accept) return null;
-      if (!this.wordyTold) {
+      if (!quiet && !this.wordyTold) {
         this.wordyTold = true;
         this.clock.at(this.clock.minute + 3, () => this.addDoc({ id: 'team3_qc_pages', title: TEAM_GROUP, from: 'QC 阿姿', group: TEAM_GROUP, module: null, origin: 'line', kind: 'chat', text: '我今天看了十二頁的驗收文件，裡面有八頁在講為什麼要驗收。', sentences: [], subtasks: [] }));
       }
@@ -1474,21 +1490,30 @@
     }
     // 某張卡某個工作第 when.item 題選了什麼（劇本的條件用，例如老闆卡挑版本）
     picked(cardId, work, when) { const card = this.board.get(cardId); return card ? Works.pickedIn(card.picks, work, when) : []; }
-    // QC 只會退你自己沒測出來的 bug；沒做煙霧測試會多翻一個；防呆漏的她亂打就翻出來；都乾淨就結案
-    qcReview(card) {
-      if (card.status !== 'to_qc' || this.home) return;   // 阿姿也下班了：在家交的卡停在交 QC
+    // 阿姿驗這張會翻出什麼（只看不改卡）：remaining 是要退的問題，deviceMissed 是沒拿實機測、被翻出只有實機才看得到的問題
+    // （她原本的話後面多問一句，非 IT 的玩家不知道要用實機測），junk 是她亂打時填進去的怪東西
+    qcFindings(card) {
       const last = [...card.history].reverse().find(h => h.work === 'code');
       const bugs = ((last && last.result) || {}).bugs || [];
       const remaining = [...new Set(bugs.map(b => b.fn))].filter(fn => !(card.bugsFound || []).includes(fn));
-      // 沒拿實機測、被翻出只有實機才看得到的問題：阿姿原本的話後面多問一句（非 IT 的玩家不知道要用實機測）
       const fns = (this.subtask(card, 'code') || { question: {} }).question.functions || [];
       const device = this.deviceGaps(card);
       const deviceMissed = !card.realTested && (device.length > 0 || remaining.some(fn => (fns.find(f => f.name === fn) || {}).device));
       if (card.noSmoke) remaining.push('新增完頁面白掉');
-      // 阿姿亂打時填進去、翻出來的怪東西（結算卡用）：改好再交也留著
       const junk = this.cardOutcomes(card).filter(o => o.kind === 'miss' && o.junk).map(o => o.junk);
-      if (junk.length) card.junkFound = [...new Set([...(card.junkFound || []), ...junk])];
       remaining.push(...this.validationGaps(card), ...device, ...this.entryGaps(card));
+      return { remaining, deviceMissed, junk };
+    }
+    // 還在交 QC 的卡，阿姿隔天早上驗會不會過（結算卡用，不改卡）
+    wouldPassQC(card) {
+      return !this.qcBounce(card, { quiet: true }) && !this.qcFindings(card).remaining.length;
+    }
+    // QC 只會退你自己沒測出來的 bug；沒做煙霧測試會多翻一個；防呆漏的她亂打就翻出來；都乾淨就結案
+    qcReview(card) {
+      if (card.status !== 'to_qc' || !this.reviewerOnDuty(card)) return;   // 還沒驗完人就睡了／下班了：卡停在交 QC，隔天早上才驗
+      const { remaining, deviceMissed, junk } = this.qcFindings(card);
+      // 阿姿亂打時填進去、翻出來的怪東西（結算卡用）：改好再交也留著
+      if (junk.length) card.junkFound = [...new Set([...(card.junkFound || []), ...junk])];
       if (remaining.length) {
         this.qcReject(card, `驗到 ${remaining.length} 個問題：${remaining.join('、')}。退回。${deviceMissed ? '你是不是沒有用開發用手機測過？' : ''}`);
         return this.afterQC(card);
@@ -1850,20 +1875,28 @@
       }
       return lines;
     }
-    // 估時沒有對錯：有估時的卡列你估的、實際（卡片第一筆紀錄到最後一次交 QC，不交 QC 的卡算到結案，跨夜也算）、主管看兩者差多少的一句，
+    // 估時沒有對錯：有估時的卡列你估的、實際（進「IT 處理中」到最後一次交 QC，不交 QC 的卡算到結案，跨夜也算）、主管看兩者差多少的一句，
     // 再附劇本寫的參考：這張卡在現實中純手工、有 AI 幫忙大約多久（item.real）。還沒完成的沒有實際，主管也不評。
+    // 結算時還在交 QC、等阿姿驗的卡，當作隔天早上她驗過了：會過就算完成，會退就是還沒完成。
     // 卡上標了 mustEstimate 的（例：會議上說「回去估好再說」的母議題），一整天都沒估也列出來（missed），主管照樣說一句
     estimates() {
       const listed = (k) => this.subtask(k, 'estimate') && (k.estimate != null || k.mustEstimate);
       return this.board.cards.filter(listed).map(k => {
         const item = this.subtask(k, 'estimate').question.items[0];
         const submitted = k.events.filter(ev => ev.kind === 'submit').at(-1);
-        const spent = k.closedAt == null ? null : (submitted ? submitted.at : k.closedAt) - k.timeline().find(r => r.at != null).at;
+        const finished = k.closedAt != null || (k.status === 'to_qc' && this.reviewerOf(k) === QC && this.wouldPassQC(k));
+        const end = submitted ? submitted.at : k.closedAt;
+        const spent = finished && end != null ? end - this.startedAt(k) : null;
         const actual = spent == null ? '還沒完成' : Verdict.duration(spent);
         if (k.estimate == null) return { card: `#${k.no} ${k.title}`, yours: '沒估', missed: true, real: item.real || null, actual, boss: Verdict.estimateComment(null) };
         return { card: `#${k.no} ${k.title}`, yours: `${k.estimate} 小時`, real: item.real || null, actual,
           boss: spent == null ? null : Verdict.estimateComment(k.estimate, spent) };
       });
+    }
+    // 卡進「IT 處理中」的時間：第一次動手做工作那時（沒做過工作的卡用第一筆紀錄）
+    startedAt(card) {
+      const first = card.history.find(h => h.at != null) || card.timeline().find(r => r.at != null);
+      return first ? first.at : card.arrivedAt;
     }
     // ── 正式上班：雜事與走動 ──
     // 雜事做完了：規則判定完成才算；沒做完就按結案視同沒做完，規則把它重新打開（下午又出事）也回到沒做完
