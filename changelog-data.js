@@ -2,6 +2,21 @@
 (function (root) {
   const CHANGELOG = [
   {
+    "hash": "45bc941",
+    "date": "2026-11-09",
+    "subject": "演算法小教室：前綴和"
+  },
+  {
+    "hash": "dd040a2",
+    "date": "2026-11-09",
+    "subject": "演算法目錄：前綴和、雙指標拆成兩頁，回溯的標題拿掉暴力枚舉"
+  },
+  {
+    "hash": "5bd0ac5",
+    "date": "2026-11-09",
+    "subject": "Add Search Console site verification tag"
+  },
+  {
     "hash": "96117c6",
     "date": "2026-11-09",
     "subject": "changelog: date entries by commit date"
