@@ -47,6 +47,10 @@ if (require.main === module) {
     (page.tryit || []).forEach((q, k) => {
       for (const [lang] of CR.LANGS[course]) check(key, `${id} 試試看 ${k + 1} ${lang}`, q.program[lang], lang, q.output, q.stdin);
     });
+    // 課外補充帶的範例程式
+    (page.extra || []).forEach((t, k) => {
+      if (t.code) for (const [lang] of CR.LANGS[course]) check(key, `${id} 課外補充 ${k + 1} ${lang}`, t.code[lang], lang, t.code.output, t.code.stdin);
+    });
   }
   process.exit(bad ? 1 : 0);
 }

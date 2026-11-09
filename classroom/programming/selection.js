@@ -11,8 +11,82 @@
     summary: '可以：讓程式讀今天的降雨機率，寫「如果超過 50% 就印出記得帶傘，不然就不印」。下次發現自己每天都在做「如果…就…」的決定，你就知道：這種判斷可以交給程式。',   // 總結：回答開頭的問題，再推到之後碰到的每一次
     // 課外補充：考試範圍外、知道了寫程式更順手的東西，放在全頁最後
     extra: [
-      'switch／case：同一個變數要跟好幾個固定的值比，像選單的 1、2、3 各做一件事，C、C++、Java 可以寫 switch (choice) { case 1: … break; case 2: … break; default: … }，比一長串 else if 整齊。每個 case 結尾要寫 break，漏掉的話會一路往下掉（fall-through），把下一個 case 的程式也跑掉。switch 只能比「等於某個值」，score >= 90 這種範圍還是要用 if／else if。',
-      'Python 沒有 switch。3.10 以後有 match／case（APCS 程式實作的環境是 Python 3.10，可以用），寫法跟 switch 很像、結尾不用 break；更常見的寫法是直接用 if／elif，或是把對照表放進字典（dict）用 key 查，例如 name = {1: "A", 2: "B"}[choice]。',
+      'switch／case：同一個變數要跟好幾個固定的值比，像選單的 1、2、3 各做一件事，C、C++、Java 可以寫 switch (choice) { case 1: … break; case 2: … break; default: … }，比一長串 else if 整齊。每個 case 結尾要寫 break，漏掉的話會一路往下掉（fall-through），把下一個 case 的程式也跑掉。幾個值要做同一件事，就把 case 疊在一起不寫 break，像下面的 1 號、2 號都是 30 元。switch 只能比「等於某個值」，score >= 90 這種範圍還是要用 if／else if。',
+      {
+        text: 'Python 沒有 switch。3.10 以後有 match／case（APCS 程式實作的環境是 Python 3.10，可以用），寫法跟 switch 很像、結尾不用 break，幾個值做同一件事寫成 case 1 | 2；更常見的寫法是直接用 if／elif，或是把對照表放進字典（dict）用 key 查，例如 name = {1: "A", 2: "B"}[choice]。下面是飲料店的點餐機：按 1、2 號是紅茶、綠茶 30 元，3 號鮮奶茶 50 元，其他號碼沒有這個品項。C、C++、Java 用 switch，Python 用 match。',
+        code: {
+          c: `#include <stdio.h>
+
+int main(void) {
+    int choice = 3;              // 點餐機上按的號碼
+    int price;
+    switch (choice) {
+        case 1:                  // 紅茶
+        case 2:                  // 綠茶：跟 1 號同價，疊在一起
+            price = 30;
+            break;
+        case 3:                  // 鮮奶茶
+            price = 50;
+            break;
+        default:                 // 沒有這個號碼
+            price = 0;
+    }
+    printf("%d\\n", price);
+    return 0;
+}
+`,
+          cpp: `#include <iostream>
+
+int main() {
+    int choice = 3;              // 點餐機上按的號碼
+    int price;
+    switch (choice) {
+        case 1:                  // 紅茶
+        case 2:                  // 綠茶：跟 1 號同價，疊在一起
+            price = 30;
+            break;
+        case 3:                  // 鮮奶茶
+            price = 50;
+            break;
+        default:                 // 沒有這個號碼
+            price = 0;
+    }
+    std::cout << price << "\\n";
+    return 0;
+}
+`,
+          java: `public class Main {
+    public static void main(String[] args) {
+        int choice = 3;          // 點餐機上按的號碼
+        int price;
+        switch (choice) {
+            case 1:              // 紅茶
+            case 2:              // 綠茶：跟 1 號同價，疊在一起
+                price = 30;
+                break;
+            case 3:              // 鮮奶茶
+                price = 50;
+                break;
+            default:             // 沒有這個號碼
+                price = 0;
+        }
+        System.out.println(price);
+    }
+}
+`,
+          python: `choice = 3                       # 點餐機上按的號碼
+match choice:
+    case 1 | 2:                  # 紅茶、綠茶同價
+        price = 30
+    case 3:                      # 鮮奶茶
+        price = 50
+    case _:                      # 沒有這個號碼
+        price = 0
+print(price)
+`,
+          output: '50',
+        },
+      },
     ],
     uses: [
       '手機的勿擾模式：晚上 11 點以後來電就不響，標成最愛的那幾個人打來例外。',

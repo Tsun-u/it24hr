@@ -29,7 +29,7 @@ function lessonBody(course, id, page) {
   // 一段文字；{ text, see } 的 see 是翻到別頁的連結（同 classroom-view 的 prose）
   const prose = (name, t) => {
     if (typeof t === 'string') return text(name, '', t);
-    const links = [].concat(t.see).map((to) => {
+    const links = [].concat(t.see || []).map((to) => {
       const [c, pid] = to.includes('/') ? to.split('/') : [course, to];
       return `<a class="cr-link cr-see" href="${Classroom.href(course, c, pid)}">→ ${esc(Classroom.item(c, pid).zh)}</a>`;
     });
@@ -60,7 +60,8 @@ function lessonBody(course, id, page) {
     ];
   }
   if (page.layout === 'program') {
-    const code = langs.map(([v, label]) => text('p', 'cr-sub', label) + pre(page.code[v])).join('');
+    // 四種語言的程式一份接一份，加上輸入、輸出（實作和課外補充的範例共用）
+    const program = (c) => tag('div', 'cr-code', langs.map(([v, label]) => text('p', 'cr-sub', label) + pre(c[v])).join('') + stdin(c.stdin) + output(c.output));
     // 試試看只放題目和選項：答案和解析留給互動版，搜尋結果的摘要才不會直接印出答案
     const tryit = page.tryit.map((q, k) => tag('div', 'cr-try',
       tag('p', 'cr-try-q', text('span', 'cr-try-kind', q.kind) + text('span', '', `${k + 1}. ${q.prompt}`))
@@ -72,11 +73,11 @@ function lessonBody(course, id, page) {
       sec('核心觀念', ...page.concept.map(t => prose('p', t))),
       sec('什麼時候會用到', ul(page.uses)),
       sec('常見誤解', traps),
-      sec('實作', tag('div', 'cr-code', code + stdin(page.code.stdin) + output(page.code.output))),
+      sec('實作', program(page.code)),
       ...(page.cost ? [sec('跑幾步', table(page.cost.rows), prose('p', page.cost.note))] : []),
       sec('試試看', ...tryit),
       sec('總結', hook(page.summary)),
-      ...(page.extra ? [sec('課外補充', ...page.extra.map(t => prose('p', t)))] : []),
+      ...(page.extra ? [sec('課外補充', ...page.extra.map(t => prose('p', t) + (t.code ? program(t.code) : '')))] : []),
     ];
   }
   const stamp = page.stamp && NAMES[page.stamp];

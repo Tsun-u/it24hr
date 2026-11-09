@@ -20,7 +20,7 @@
   function prose(tag, t) {
     if (typeof t === 'string') return h(tag, '', t);
     const el = h(tag, '', `${t.text} `);
-    for (const to of [].concat(t.see)) {
+    for (const to of [].concat(t.see || [])) {
       const [c, id] = to.includes('/') ? to.split('/') : [course, to];
       el.append(pageLink('cr-link cr-see', `→ ${root.Classroom.item(c, id).zh}`, c, id));
     }
@@ -285,7 +285,8 @@
       ...(page.cost ? [section('跑幾步', ...costNode(page.cost))] : []),
       section('試試看', h('p', 'cr-hint', '選一個，就會看到答案和解析。'), ui.tabs(), ...page.tryit.map((q, k) => tryNode(q, k + 1, ui))),
       section('總結', h('p', 'cr-hook', page.summary)),
-      ...(page.extra ? [section('課外補充', ...page.extra.map(t => prose('p', t)))] : []),
+      // 課外補充的一段可以帶一份範例程式（{ text, code }），跟實作一樣四種語言連動
+      ...(page.extra ? [section('課外補充', ...page.extra.flatMap(t => (t.code ? [prose('p', t), ui.tabs(), programCodeNode(t.code, ui)] : [prose('p', t)])))] : []),
     ];
   }
 

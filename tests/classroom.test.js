@@ -26,7 +26,7 @@ test('用途、核心觀念、跑幾步裡連到別頁的 see，都是目錄裡�
   for (const [course, id, p] of allPages()) for (const t of [...(p.review || []), ...(p.uses || []), ...(p.concept || []), ...(p.cost ? [p.cost.note] : []), ...(p.extra || [])]) {
     if (typeof t === 'string' || t.quote) continue;
     assert.ok(t.text, `${course}/${id} 有一段少了 text`);
-    for (const to of [].concat(t.see)) {
+    for (const to of [].concat(t.see || [])) {
       const [c, pid] = to.includes('/') ? to.split('/') : [course, to];
       assert.ok(CR.item(c, pid), `${course}/${id} 連到不存在的頁 ${to}`);
     }
@@ -74,7 +74,9 @@ test('程式設計課：實作、追蹤器、試試看的程式四種語言都�
       assert.strictEqual(typeof p.code[lang], 'string', `${where} 實作少了 ${lang}`);
       assert.strictEqual(typeof p.trace.code[lang], 'string', `${where} 追蹤器少了 ${lang}`);
       p.tryit.forEach((q, k) => assert.ok(q.code[lang] && q.program[lang], `${where} 試試看第 ${k + 1} 題少了 ${lang}`));
+      (p.extra || []).forEach((t, k) => assert.ok(!t.code || typeof t.code[lang] === 'string', `${where} 課外補充第 ${k + 1} 段的範例少了 ${lang}`));
     }
+    (p.extra || []).forEach((t, k) => assert.ok(!t.code || t.code.output, `${where} 課外補充第 ${k + 1} 段的範例少了 output`));
     assert.ok(p.code.output, `${where} 實作少了 output`);
     for (const { label } of p.trace.inputs) assert.ok(p.trace.runs[label]?.length, `${where} 追蹤器的 ${label} 還沒產生，跑 node scripts/build-traces.js ${where}`);
   }
