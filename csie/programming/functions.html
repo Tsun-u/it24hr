@@ -255,7 +255,7 @@ for (int i = 0; i &lt; n; i++) {
 <section class="cr-sec"><h4>總結</h4><p class="cr-hook">把算總價的那段寫成一個函式、取名 total，三個地方都叫它；打九折只要改函式裡那一行。下次發現同一段程式寫了好幾次，你就知道：把它寫成函式，要用的時候叫它就好。</p></section>
 <section class="cr-sec"><h4>課外補充</h4><p>C 的指標（pointer）：想在函式裡改到外面的變數，就把變數的位址傳過去。呼叫寫 add_one(&amp;x)，函式寫 void add_one(int *p) { *p = *p + 1; }：p 存的是 x 的位址，*p 就是 x 本人，改了它，外面的 x 就變了。scanf(&quot;%d&quot;, &amp;n) 要寫 &amp;，也是同一個道理：讓 scanf 知道讀到的數字要放進哪裡。</p><p>C++ 的參考（reference）寫起來更省事：void add_one(int &amp;x) { x = x + 1; }，呼叫照樣寫 add_one(x)，函式裡的 x 就是外面那個 x 的另一個名字。實作裡的 vector&lt;int&gt;&amp; 也是參考，所以 fill 改得到外面的陣列。</p><p>Java 和 Python 沒有指標，函式改不到外面的整數變數。常見的做法是改用回傳值：Java 寫 x = addOne(x)、Python 寫 x = add_one(x)；要改好幾個值，就把它們放進陣列、list 或物件裡傳進去，在函式裡改裡面的格子（實作的 fill 就是這樣）。Python 還可以一次回傳好幾個值：return a, b。</p></section></article></div></div></div>
 </main>
-<footer class="seo-foot"><nav aria-label="IT24hr 的其他內容"><a href="../../index.html">玩 IT24hr</a><a href="../../se.html">認識軟體工程</a><a href="../../csie.html">CSIE 課程</a><a href="../../handbook.html">新人手冊</a><a href="../../atlas.html">IT 圖鑑</a></nav></footer>
+<footer class="seo-foot"><nav aria-label="IT24hr 的其他內容"><a href="../../index.html">玩 IT24hr</a><a href="../../se.html">認識軟體工程</a><a href="../../csie/index.html">CSIE 課程</a><a href="../../handbook.html">新人手冊</a><a href="../../atlas.html">IT 圖鑑</a></nav></footer>
 <script src="../../vendor/rough.js"></script>
 <script src="../../icons.js"></script>
 <script src="../../verdict.js"></script>

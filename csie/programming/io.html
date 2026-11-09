@@ -98,7 +98,7 @@ printf(&quot;%d\n&quot;, change);</pre><p class="cr-tr-label">輸入</p><pre cla
 <section class="cr-sec"><h4>總結</h4><p class="cr-hook">刷條碼的時候，條碼上的數字被送進程式，這是輸入；程式查到這個商品多少錢、顯示在螢幕上，這是輸出。下次看到「你給它東西、它回你結果」的機器，你就知道：那是一支讀輸入、印輸出的程式，APCS 的題目也一樣，照格式讀測資、照格式印答案。</p></section>
 <section class="cr-sec"><h4>課外補充</h4><p>讀到輸入結束（EOF，end of file）：有的題目不先給筆數，資料一直給到輸入結束為止。學了迴圈以後可以這樣讀：C 寫 while (scanf(&quot;%d&quot;, &amp;x) != EOF)、C++ 寫 while (std::cin &gt;&gt; x)、Java 寫 while (sc.hasNextInt())、Python 寫 for line in sys.stdin:（要先 import sys），讀不到東西迴圈就停。</p><p>測資很大（幾十萬個數）時，光是讀輸入就會變慢：Python 用 sys.stdin.readline() 代替 input() 快很多（讀到的字串尾巴多一個換行，int() 會自己忽略）；C++ 在 main 的開頭加 std::ios::sync_with_stdio(false); 和 std::cin.tie(nullptr);，cin 會快很多；Java 的 Scanner 也偏慢，可以改用 BufferedReader 一次讀一整行再自己切。C 的 scanf 本來就夠快。</p></section></article></div></div></div>
 </main>
-<footer class="seo-foot"><nav aria-label="IT24hr 的其他內容"><a href="../../index.html">玩 IT24hr</a><a href="../../se.html">認識軟體工程</a><a href="../../csie.html">CSIE 課程</a><a href="../../handbook.html">新人手冊</a><a href="../../atlas.html">IT 圖鑑</a></nav></footer>
+<footer class="seo-foot"><nav aria-label="IT24hr 的其他內容"><a href="../../index.html">玩 IT24hr</a><a href="../../se.html">認識軟體工程</a><a href="../../csie/index.html">CSIE 課程</a><a href="../../handbook.html">新人手冊</a><a href="../../atlas.html">IT 圖鑑</a></nav></footer>
 <script src="../../vendor/rough.js"></script>
 <script src="../../icons.js"></script>
 <script src="../../verdict.js"></script>
