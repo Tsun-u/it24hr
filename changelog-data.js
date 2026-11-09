@@ -2,6 +2,11 @@
 (function (root) {
   const CHANGELOG = [
   {
+    "hash": "a8f7c47",
+    "date": "2026-11-09",
+    "subject": "fate: spell out the paywall meaning of the reading-card secret item"
+  },
+  {
     "hash": "f85900a",
     "date": "2026-11-09",
     "subject": "第三關：合婚分享部署後，下班到家雅雯轉述、結算卡多「社群引流」"
