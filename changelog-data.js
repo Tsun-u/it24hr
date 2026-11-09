@@ -2,6 +2,26 @@
 (function (root) {
   const CHANGELOG = [
   {
+    "hash": "5e35b83",
+    "date": "2026-11-09",
+    "subject": "day1: SA follows up on the QC evening line"
+  },
+  {
+    "hash": "f84710d",
+    "date": "2026-11-09",
+    "subject": "day1: reword QC's evening schedule line"
+  },
+  {
+    "hash": "b571375",
+    "date": "2026-11-09",
+    "subject": "SA leaves at 19:30 on her own clock and says so in the team group"
+  },
+  {
+    "hash": "f95414d",
+    "date": "2026-11-09",
+    "subject": "QC works overtime on her own clock; settlement pre-judges pending QC"
+  },
+  {
     "hash": "a8f7c47",
     "date": "2026-11-09",
     "subject": "fate: spell out the paywall meaning of the reading-card secret item"
