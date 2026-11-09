@@ -12,7 +12,66 @@
     summary: '刷條碼的時候，條碼上的數字被送進程式，這是輸入；程式查到這個商品多少錢、顯示在螢幕上，這是輸出。下次看到「你給它東西、它回你結果」的機器，你就知道：那是一支讀輸入、印輸出的程式，APCS 的題目也一樣，照格式讀測資、照格式印答案。',   // 總結：回答開頭的問題，再推到之後碰到的每一次
     // 課外補充：考試範圍外、知道了寫程式更順手的東西，放在全頁最後
     extra: [
-      '讀到輸入結束（EOF，end of file）：有的題目不先給筆數，資料一直給到輸入結束為止。學了迴圈以後可以這樣讀：C 寫 while (scanf("%d", &x) != EOF)、C++ 寫 while (std::cin >> x)、Java 寫 while (sc.hasNextInt())、Python 寫 for line in sys.stdin:（要先 import sys），讀不到東西迴圈就停。',
+      {
+        text: '讀到輸入結束（EOF，end of file）：有的題目不先給筆數，資料一直給到輸入結束為止。學了迴圈以後可以這樣讀：C 寫 while (scanf("%d", &x) != EOF)、C++ 寫 while (std::cin >> x)、Java 寫 while (sc.hasNextInt())、Python 寫 for line in sys.stdin:（要先 import sys），讀不到東西迴圈就停。下面的程式把讀到的數全部加起來，最後印出總和和一共幾個數：數字可以排在同一行，也可以分好幾行，不知道有幾個也沒關係。',
+        code: {
+          c: `#include <stdio.h>
+
+int main(void) {
+    int x;
+    int total = 0;
+    int count = 0;
+    while (scanf("%d", &x) != EOF) {     // 讀到輸入結束，scanf 回傳 EOF，迴圈就停
+        total += x;
+        count += 1;
+    }
+    printf("%d %d\\n", total, count);
+    return 0;
+}
+`,
+          cpp: `#include <iostream>
+
+int main() {
+    int x;
+    int total = 0;
+    int count = 0;
+    while (std::cin >> x) {              // 讀不到數字，條件就不成立
+        total += x;
+        count += 1;
+    }
+    std::cout << total << " " << count << "\\n";
+    return 0;
+}
+`,
+          java: `import java.util.Scanner;
+
+public class Main {
+    public static void main(String[] args) {
+        Scanner sc = new Scanner(System.in);
+        int total = 0;
+        int count = 0;
+        while (sc.hasNextInt()) {        // 後面還有整數才進迴圈
+            total += sc.nextInt();
+            count += 1;
+        }
+        System.out.println(total + " " + count);
+    }
+}
+`,
+          python: `import sys
+
+total = 0
+count = 0
+for line in sys.stdin:           # 一次拿一行，讀到輸入結束就停
+    for x in line.split():       # 一行可能有好幾個數
+        total += int(x)
+        count += 1
+print(total, count)
+`,
+          stdin: '3 8 5\n10\n',
+          output: '26 4',
+        },
+      },
       '測資很大（幾十萬個數）時，光是讀輸入就會變慢：Python 用 sys.stdin.readline() 代替 input() 快很多（讀到的字串尾巴多一個換行，int() 會自己忽略）；C++ 在 main 的開頭加 std::ios::sync_with_stdio(false); 和 std::cin.tie(nullptr);，cin 會快很多；Java 的 Scanner 也偏慢，可以改用 BufferedReader 一次讀一整行再自己切。C 的 scanf 本來就夠快。',
     ],
     uses: [

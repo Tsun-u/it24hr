@@ -13,7 +13,62 @@
     // 課外補充：考試範圍外、知道了寫程式更順手的東西，放在全頁最後
     extra: [
       'do…while 迴圈：先把本體跑一次，跑完才檢查條件，所以本體至少會跑一次，適合「先讓使用者輸入，輸入錯了再問一次」這種情況。C、C++、Java 都有：do { … } while (條件);（結尾的分號不能少）。',
-      'Python 沒有 do…while，常見的寫法是 while True: 先跑本體，最後寫 if not 條件: break，效果一樣。',
+      {
+        text: 'Python 沒有 do…while，常見的寫法是 while True: 先跑本體，最後寫 if not 條件: break，效果一樣。下面的程式讀分數，讀到不在 0～100 之間的就再讀一次：輸入 120、-5、85，讀到第三次才拿到 85。C、C++、Java 用 do…while，Python 用 while True 加 break。',
+        code: {
+          c: `#include <stdio.h>
+
+int main(void) {
+    int score;
+    int tries = 0;
+    do {                                     // 先讀一次，跑完本體才檢查條件
+        scanf("%d", &score);
+        tries += 1;
+    } while (score < 0 || score > 100);      // 分數不合理就回去再讀；結尾的分號不能少
+    printf("%d %d\\n", score, tries);
+    return 0;
+}
+`,
+          cpp: `#include <iostream>
+
+int main() {
+    int score;
+    int tries = 0;
+    do {                                     // 先讀一次，跑完本體才檢查條件
+        std::cin >> score;
+        tries += 1;
+    } while (score < 0 || score > 100);      // 分數不合理就回去再讀；結尾的分號不能少
+    std::cout << score << " " << tries << "\\n";
+    return 0;
+}
+`,
+          java: `import java.util.Scanner;
+
+public class Main {
+    public static void main(String[] args) {
+        Scanner sc = new Scanner(System.in);
+        int score;
+        int tries = 0;
+        do {                                 // 先讀一次，跑完本體才檢查條件
+            score = sc.nextInt();
+            tries += 1;
+        } while (score < 0 || score > 100);  // 分數不合理就回去再讀；結尾的分號不能少
+        System.out.println(score + " " + tries);
+    }
+}
+`,
+          python: `tries = 0
+while True:                    # 先跑本體，最後才決定要不要離開
+    score = int(input())
+    tries += 1
+    if 0 <= score <= 100:      # do…while 的條件反過來寫：分數合理了就離開
+        break
+print(score, tries)
+`,
+          stdin: '120\n-5\n85\n',
+          output: '85 3',
+        },
+      },
     ],
     uses: [
       '鬧鐘的貪睡：按一下就過五分鐘再響，直到你把它關掉。',

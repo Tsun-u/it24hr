@@ -11,7 +11,54 @@
     summary: '兩杯鮮奶茶和一杯紅茶寫成 2 * 50 + 30：乘號是 *，程式跟我們一樣先乘後加，算出 130。下次想讓程式幫你算錢、算時間，你就知道：照數學把算式寫下來，順序拿不準就加括號。',   // 總結：回答開頭的問題，再推到之後碰到的每一次
     // 課外補充：考試範圍外、知道了寫程式更順手的東西，放在全頁最後
     extra: [
-      '三元運算子 ? :：寫成 條件 ? a : b，條件成立拿 a、不成立拿 b，一行就能依條件挑一個值，例如 max = a > b ? a : b。C、C++、Java 都有；Python 沒有 ? :，寫成 a if a > b else b。',
+      {
+        text: '三元運算子 ? :：寫成 條件 ? a : b，條件成立拿 a、不成立拿 b，一行就能依條件挑一個值，例如 bigger = a > b ? a : b。C、C++、Java 都有；Python 沒有 ? :，寫成 a if a > b else b。下面的程式用它挑出 7 和 12 裡比較大的，再依 58 分挑出 pass 或 fail。',
+        code: {
+          c: `#include <stdio.h>
+
+int main(void) {
+    int a = 7;
+    int b = 12;
+    int bigger = a > b ? a : b;          // a > b 成立拿 a，不成立拿 b
+    int score = 58;
+    printf("%d %s\\n", bigger, score >= 60 ? "pass" : "fail");
+    return 0;
+}
+`,
+          cpp: `#include <iostream>
+#include <string>
+
+int main() {
+    int a = 7;
+    int b = 12;
+    int bigger = a > b ? a : b;          // a > b 成立拿 a，不成立拿 b
+    int score = 58;
+    std::string result = score >= 60 ? "pass" : "fail";
+    std::cout << bigger << " " << result << "\\n";
+    return 0;
+}
+`,
+          java: `public class Main {
+    public static void main(String[] args) {
+        int a = 7;
+        int b = 12;
+        int bigger = a > b ? a : b;      // a > b 成立拿 a，不成立拿 b
+        int score = 58;
+        String result = score >= 60 ? "pass" : "fail";
+        System.out.println(bigger + " " + result);
+    }
+}
+`,
+          python: `a = 7
+b = 12
+bigger = a if a > b else b      # a > b 成立拿 a，不成立拿 b
+score = 58
+result = "pass" if score >= 60 else "fail"
+print(bigger, result)
+`,
+          output: '12 fail',
+        },
+      },
       '整數除法碰到負數，各語言不一樣：C、C++、Java 往零的方向捨去，-7 / 2 是 -3、-7 % 2 是 -1；Python 往下取整，-7 // 2 是 -4、-7 % 2 是 1。考試的題目多半避開負數，自己寫程式時要留意。',
     ],
     uses: [

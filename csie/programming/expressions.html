@@ -94,7 +94,41 @@ int b = 90;
 int avg = a + b / 2;
 printf(&quot;%d\n&quot;, avg);</pre><ol class="cr-try-opts"><li>把 a + b / 2 改成 a + (b / 2)</li><li>把 a + b / 2 改成 (a + b) / 2</li><li>把 / 2 改成 * 2</li><li>把 a + b / 2 改成 b + a / 2</li></ol></div></section>
 <section class="cr-sec"><h4>總結</h4><p class="cr-hook">兩杯鮮奶茶和一杯紅茶寫成 2 * 50 + 30：乘號是 *，程式跟我們一樣先乘後加，算出 130。下次想讓程式幫你算錢、算時間，你就知道：照數學把算式寫下來，順序拿不準就加括號。</p></section>
-<section class="cr-sec"><h4>課外補充</h4><p>三元運算子 ? :：寫成 條件 ? a : b，條件成立拿 a、不成立拿 b，一行就能依條件挑一個值，例如 max = a &gt; b ? a : b。C、C++、Java 都有；Python 沒有 ? :，寫成 a if a &gt; b else b。</p><p>整數除法碰到負數，各語言不一樣：C、C++、Java 往零的方向捨去，-7 / 2 是 -3、-7 % 2 是 -1；Python 往下取整，-7 // 2 是 -4、-7 % 2 是 1。考試的題目多半避開負數，自己寫程式時要留意。</p></section></article></div></div></div>
+<section class="cr-sec"><h4>課外補充</h4><p>三元運算子 ? :：寫成 條件 ? a : b，條件成立拿 a、不成立拿 b，一行就能依條件挑一個值，例如 bigger = a &gt; b ? a : b。C、C++、Java 都有；Python 沒有 ? :，寫成 a if a &gt; b else b。下面的程式用它挑出 7 和 12 裡比較大的，再依 58 分挑出 pass 或 fail。 </p><div class="cr-code"><p class="cr-sub">C</p><pre class="cr-pre">#include &lt;stdio.h&gt;
+
+int main(void) {
+    int a = 7;
+    int b = 12;
+    int bigger = a &gt; b ? a : b;          // a &gt; b 成立拿 a，不成立拿 b
+    int score = 58;
+    printf(&quot;%d %s\n&quot;, bigger, score &gt;= 60 ? &quot;pass&quot; : &quot;fail&quot;);
+    return 0;
+}</pre><p class="cr-sub">C++</p><pre class="cr-pre">#include &lt;iostream&gt;
+#include &lt;string&gt;
+
+int main() {
+    int a = 7;
+    int b = 12;
+    int bigger = a &gt; b ? a : b;          // a &gt; b 成立拿 a，不成立拿 b
+    int score = 58;
+    std::string result = score &gt;= 60 ? &quot;pass&quot; : &quot;fail&quot;;
+    std::cout &lt;&lt; bigger &lt;&lt; &quot; &quot; &lt;&lt; result &lt;&lt; &quot;\n&quot;;
+    return 0;
+}</pre><p class="cr-sub">Java</p><pre class="cr-pre">public class Main {
+    public static void main(String[] args) {
+        int a = 7;
+        int b = 12;
+        int bigger = a &gt; b ? a : b;      // a &gt; b 成立拿 a，不成立拿 b
+        int score = 58;
+        String result = score &gt;= 60 ? &quot;pass&quot; : &quot;fail&quot;;
+        System.out.println(bigger + &quot; &quot; + result);
+    }
+}</pre><p class="cr-sub">Python</p><pre class="cr-pre">a = 7
+b = 12
+bigger = a if a &gt; b else b      # a &gt; b 成立拿 a，不成立拿 b
+score = 58
+result = &quot;pass&quot; if score &gt;= 60 else &quot;fail&quot;
+print(bigger, result)</pre><p class="cr-out mono">輸出：12 fail</p></div><p>整數除法碰到負數，各語言不一樣：C、C++、Java 往零的方向捨去，-7 / 2 是 -3、-7 % 2 是 -1；Python 往下取整，-7 // 2 是 -4、-7 % 2 是 1。考試的題目多半避開負數，自己寫程式時要留意。</p></section></article></div></div></div>
 </main>
 <footer class="seo-foot"><nav aria-label="IT24hr 的其他內容"><a href="../../index.html">玩 IT24hr</a><a href="../../se.html">認識軟體工程</a><a href="../../csie/index.html">CSIE 課程</a><a href="../../handbook.html">新人手冊</a><a href="../../atlas.html">IT 圖鑑</a></nav></footer>
 <script src="../../vendor/rough.js"></script>

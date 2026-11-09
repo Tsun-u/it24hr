@@ -121,7 +121,50 @@ for (int i = 0; i &lt; n; i++) {
     }
 }</pre><ol class="cr-try-opts"><li>100</li><li>45</li><li>55</li><li>90</li></ol></div></section>
 <section class="cr-sec"><h4>總結</h4><p class="cr-hook">下次把喜歡的歌設成重複播放，你就知道：那是一個迴圈，同一件事寫一次，讓它一直重複跑，不用把同一行程式寫 10 次。</p></section>
-<section class="cr-sec"><h4>課外補充</h4><p>do…while 迴圈：先把本體跑一次，跑完才檢查條件，所以本體至少會跑一次，適合「先讓使用者輸入，輸入錯了再問一次」這種情況。C、C++、Java 都有：do { … } while (條件);（結尾的分號不能少）。</p><p>Python 沒有 do…while，常見的寫法是 while True: 先跑本體，最後寫 if not 條件: break，效果一樣。</p></section></article></div></div></div>
+<section class="cr-sec"><h4>課外補充</h4><p>do…while 迴圈：先把本體跑一次，跑完才檢查條件，所以本體至少會跑一次，適合「先讓使用者輸入，輸入錯了再問一次」這種情況。C、C++、Java 都有：do { … } while (條件);（結尾的分號不能少）。</p><p>Python 沒有 do…while，常見的寫法是 while True: 先跑本體，最後寫 if not 條件: break，效果一樣。下面的程式讀分數，讀到不在 0～100 之間的就再讀一次：輸入 120、-5、85，讀到第三次才拿到 85。C、C++、Java 用 do…while，Python 用 while True 加 break。 </p><div class="cr-code"><p class="cr-sub">C</p><pre class="cr-pre">#include &lt;stdio.h&gt;
+
+int main(void) {
+    int score;
+    int tries = 0;
+    do {                                     // 先讀一次，跑完本體才檢查條件
+        scanf(&quot;%d&quot;, &amp;score);
+        tries += 1;
+    } while (score &lt; 0 || score &gt; 100);      // 分數不合理就回去再讀；結尾的分號不能少
+    printf(&quot;%d %d\n&quot;, score, tries);
+    return 0;
+}</pre><p class="cr-sub">C++</p><pre class="cr-pre">#include &lt;iostream&gt;
+
+int main() {
+    int score;
+    int tries = 0;
+    do {                                     // 先讀一次，跑完本體才檢查條件
+        std::cin &gt;&gt; score;
+        tries += 1;
+    } while (score &lt; 0 || score &gt; 100);      // 分數不合理就回去再讀；結尾的分號不能少
+    std::cout &lt;&lt; score &lt;&lt; &quot; &quot; &lt;&lt; tries &lt;&lt; &quot;\n&quot;;
+    return 0;
+}</pre><p class="cr-sub">Java</p><pre class="cr-pre">import java.util.Scanner;
+
+public class Main {
+    public static void main(String[] args) {
+        Scanner sc = new Scanner(System.in);
+        int score;
+        int tries = 0;
+        do {                                 // 先讀一次，跑完本體才檢查條件
+            score = sc.nextInt();
+            tries += 1;
+        } while (score &lt; 0 || score &gt; 100);  // 分數不合理就回去再讀；結尾的分號不能少
+        System.out.println(score + &quot; &quot; + tries);
+    }
+}</pre><p class="cr-sub">Python</p><pre class="cr-pre">tries = 0
+while True:                    # 先跑本體，最後才決定要不要離開
+    score = int(input())
+    tries += 1
+    if 0 &lt;= score &lt;= 100:      # do…while 的條件反過來寫：分數合理了就離開
+        break
+print(score, tries)</pre><p class="cr-tr-label">輸入</p><pre class="cr-tr-stdin">120
+-5
+85</pre><p class="cr-out mono">輸出：85 3</p></div></section></article></div></div></div>
 </main>
 <footer class="seo-foot"><nav aria-label="IT24hr 的其他內容"><a href="../../index.html">玩 IT24hr</a><a href="../../se.html">認識軟體工程</a><a href="../../csie/index.html">CSIE 課程</a><a href="../../handbook.html">新人手冊</a><a href="../../atlas.html">IT 圖鑑</a></nav></footer>
 <script src="../../vendor/rough.js"></script>
