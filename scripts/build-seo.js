@@ -68,7 +68,7 @@ function head({ file, title, description, type = 'website', jsonld }) {
 }
 
 // 每頁底部互相連結（搜尋引擎靠站內連結找頁面）
-const FOOT_LINKS = [['index.html', '玩 IT24hr'], ['se.html', '認識軟體工程'], ['csie.html', 'CSIE 課程'], ['handbook.html', '新人手冊'], ['atlas.html', 'IT 圖鑑']];
+const FOOT_LINKS = [['index.html', '玩 IT24hr'], ['se.html', '認識軟體工程'], ['csie/index.html', 'CSIE 課程'], ['handbook.html', '新人手冊'], ['atlas.html', 'IT 圖鑑']];
 
 // 整頁：頂端列（回首頁、頁名、開始玩）、預先寫好的內文、頁面要載的 JS
 function page({ file, heading, main, mainId, mainClass = 'csie-main', scripts = [], ...meta }) {
@@ -167,8 +167,8 @@ function classroomPages() {
   }));
 }
 
-// 首頁和 csie.html 的 <head> 是手寫的，sitemap 照樣列
-const HAND_WRITTEN = ['index.html', 'csie.html'];
+// 首頁的 <head> 是手寫的，sitemap 照樣列（csie.html 只是轉址到 csie/ 的頁，不列）
+const HAND_WRITTEN = ['index.html'];
 
 function build() {
   const pages = [sePage(), handbookPage(), atlasPage(), ...classroomPages()];

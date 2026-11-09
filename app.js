@@ -35,13 +35,13 @@
   const atlasButton = (cls) => ghostButton(cls, 'IT 圖鑑', () => Atlas.openOverlay());
   // 認識軟體工程、CSIE 課程是坐下來慢慢讀的長篇，開新分頁
   const seButton = (cls) => ghostButton(cls, '認識軟體工程', () => window.open('se.html', '_blank', 'noopener'));
-  const csieButton = (cls) => ghostButton(cls, 'CSIE 課程', () => window.open('csie.html', '_blank', 'noopener'));
+  const csieButton = (cls) => ghostButton(cls, 'CSIE 課程', () => window.open('csie/index.html', '_blank', 'noopener'));
   // 首頁四顆鈕，照順序
   const learnButtons = (cls) => [atlasButton(cls), seButton(cls), handbookButton(cls), csieButton(cls)];
   // 結算卡、三天總結算上的印章：點了開 CSIE 課程、直接翻到資料結構小教室的那一頁
   const stampLink = (node, name) => {
     const id = Classroom.pageForStamp(name, Verdict.NAMES); if (!id) return node;
-    const go = () => window.open(`csie.html#ds/${id}`, '_blank', 'noopener');
+    const go = () => window.open(`csie/ds/${id}.html`, '_blank', 'noopener');
     Object.assign(node, { tabIndex: 0, title: '到 CSIE 課程的資料結構小教室看看這是什麼' }); node.setAttribute('role', 'button'); node.classList.add('stamp-link');
     node.addEventListener('click', go);
     node.addEventListener('keydown', (e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); go(); } });
