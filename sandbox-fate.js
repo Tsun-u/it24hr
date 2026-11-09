@@ -1966,6 +1966,14 @@
     { who: LILITH, text: '都好呀～拿來排我們三個的時段剛好。' },
     { who: XIEN, text: '從營運的角度，這是一套非常優秀的內部系統。' },
   ];
+  // 合婚結果分享到社群（加分項）：開發計畫排了分享，而且合婚卡已經部署——下班後雅雯轉述、結算卡拿「社群引流」
+  const SHARE_STEP = 7;   // 合婚卡開發計畫的「做合婚結果分享到社群」
+  const sharedReading = (e) => {
+    const card = e.board.get('reading');
+    return !!card && card.done('deploy') && Works.pickedIn(card.picks, 'doc_plan', { item: 0 }).includes(SHARE_STEP);
+  };
+  const SHARE_SAYS = { id: 'share-reading', from: YAWEN, when: sharedReading,
+    text: '今天有客人把合婚結果分享到社群，晚上好幾個朋友跑來說也想排排看。瀞玄老師說：「都好。緣分自己會找上門。」' };
   function report(e) {
     const shipped = shippedOf(e), outs = judgedOf(e).flatMap(c => e.cardOutcomes(c));
     const score = siteAccessibility(e), leads = bookingLeads(shipped), tool = internalTool(e);
@@ -1982,6 +1990,7 @@
         ...(e.stats.gripes ? [{ title: '水逆', text: '阿姿在群組抱怨過這個案子' }] : []),
         ...paletteTraits(e),
         ...(tool ? [{ title: '開源精神', text: '你為什麼要把產品本身該收費的部份攤在陽光下呢？' }] : []),
+        ...(sharedReading(e) ? [{ title: '社群引流', text: '合婚結果分享出去，客人的朋友也跑來排盤' }] : []),
       ],
       peers: [
         ...(tool ? INTERNAL_TOOL_SAYS : []),
@@ -2019,6 +2028,7 @@
       qcGripes: ['這個案子做到我想去問算命師這陣子是不是水逆。', '我覺得整個宇宙都在跟我作對', '今年是不是流年不利'],
       // 傍晚雅雯轉述老師們看成品的評語：上線的卡各一句（卡上的 evening）
       evening: { at: 18 * 60, from: YAWEN },
+      afterWork: [SHARE_SAYS],
       // 平行宇宙：成品跟卡上需求對不上過半的卡交 QC，10% 開出新卡；照常理做（老師不滿）不算對不上
       parallel: { chance: 0.1, over: 0.5, ignore: ['displeased'], check: (e) => !!e.stats.parallel,
         traits: [{ title: '成功製造需求', text: '交出去的東西跟需求對不上，老師們卻想拿來做別的' }],

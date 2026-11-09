@@ -2199,6 +2199,11 @@
       h.phase = 'table';
       if (channel === 'pickup') serve();
       this.emit('home:arrived', h);
+      // 下班後才傳的 LIME（劇本 afterWork）：到家 after 分鐘後，when(engine) 成立才傳
+      for (const m of this.script.afterWork || []) this.clock.at(this.clock.minute + (m.after ?? 10), () => {
+        if (this.ended || (m.when && !m.when(this))) return;
+        this.addDoc({ id: m.id, title: m.from, from: m.from, module: null, origin: 'line', kind: 'chat', text: m.text, sentences: [], subtasks: [] });
+      });
       return h;
     }
     // 在家處理公司的事要先掛 VPN；還在公司就一直是通的

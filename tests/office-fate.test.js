@@ -120,3 +120,20 @@ test('合婚分享到社群是加分項：計畫排了、驗收勾了、測試�
   assert.deepEqual(Works.grade(test, with_(1), { covered: 'all', picks: {} }).bugs, []);
   assert.deepEqual(Works.grade(test, with_(2), { covered: 'all', picks: {} }).bugs.map(b => b.fn), ['testShareImage']);
 });
+
+test('合婚分享到社群：計畫排了而且合婚卡部署了，下班到家雅雯才轉述、結算卡多「社群引流」；沒部署或沒排分享都沒有', () => {
+  const { tickTo, doAll } = require('./scenery-helpers.js');
+  const SHARE_PLAN = [[0, 1, 2, 3, 7, 4, 5]];
+  const SAID = '今天有客人把合婚結果分享到社群';
+  const day = (swap) => {
+    const e = play(); meetAll(e); doAll(e, 'reading', swap);
+    tickTo(e, 18 * 60 + 5);
+    const before = lime(e).some(t => t.includes(SAID));
+    e.leave(); tickTo(e, e.clock.minute + 1); tickTo(e, e.clock.minute + 15);   // 先到家（通勤會跳時鐘），再等雅雯的訊息
+    return { before, after: lime(e).some(t => t.includes(SAID)), trait: e.script.report(e).traits.some(t => t.title === '社群引流') };
+  };
+  const lime = (e) => e.docs.filter(d => d.from === '解憂時代 助理 雅雯' && d.origin === 'line').map(d => d.text);
+  assert.deepEqual(day({ doc_plan: SHARE_PLAN }), { before: false, after: true, trait: true });
+  assert.deepEqual(day({ doc_plan: SHARE_PLAN, deploy: null }), { before: false, after: false, trait: false });
+  assert.deepEqual(day({}), { before: false, after: false, trait: false });
+});
