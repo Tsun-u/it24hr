@@ -1,0 +1,229 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Pass by Value &amp; Reference　傳值與傳參考｜APCS 程式設計｜CSIE 課程｜IT24hr</title>
+<meta name="description" content="傳值與傳參考（Pass by Value &amp; Reference）：你把一份企劃書傳給同事修改。寄附件的話，他改完你手上這份不會變；分享雲端文件的連結，他一改你就看到了。程式把變數交給函式的時候，給的是附件，還是連結？">
+<link rel="canonical" href="https://tsun-u.github.io/it24hr/csie/programming/parameter_passing.html">
+<meta property="og:type" content="article">
+<meta property="og:site_name" content="IT24hr">
+<meta property="og:locale" content="zh_TW">
+<meta property="og:url" content="https://tsun-u.github.io/it24hr/csie/programming/parameter_passing.html">
+<meta property="og:title" content="Pass by Value &amp; Reference　傳值與傳參考｜APCS 程式設計｜CSIE 課程｜IT24hr">
+<meta property="og:description" content="傳值與傳參考（Pass by Value &amp; Reference）：你把一份企劃書傳給同事修改。寄附件的話，他改完你手上這份不會變；分享雲端文件的連結，他一改你就看到了。程式把變數交給函式的時候，給的是附件，還是連結？">
+<meta property="og:image" content="https://tsun-u.github.io/it24hr/assets/og-image.jpg">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta name="twitter:card" content="summary_large_image">
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"Article","headline":"Pass by Value & Reference 傳值與傳參考","description":"傳值與傳參考（Pass by Value & Reference）：你把一份企劃書傳給同事修改。寄附件的話，他改完你手上這份不會變；分享雲端文件的連結，他一改你就看到了。程式把變數交給函式的時候，給的是附件，還是連結？","inLanguage":"zh-Hant-TW","author":[{"@type":"Person","name":"Tsun-u"},{"@type":"Person","name":"ATone"}],"image":"https://tsun-u.github.io/it24hr/assets/og-image.jpg","isPartOf":{"@type":"Course","name":"APCS 程式設計","url":"https://tsun-u.github.io/it24hr/csie/programming/index.html"},"url":"https://tsun-u.github.io/it24hr/csie/programming/parameter_passing.html"}</script>
+<link rel="icon" href="../../assets/favicon.svg" type="image/svg+xml">
+<link rel="icon" href="../../assets/favicon-32.png" sizes="32x32" type="image/png">
+<link rel="apple-touch-icon" href="../../assets/apple-touch-icon.png">
+<link rel="stylesheet" href="../../styles.css">
+</head>
+<body class="csie-body">
+<header class="csie-head">
+  <a class="csie-logo" href="../../index.html">IT24hr</a>
+  <h1>CSIE 課程</h1>
+  <a class="btn csie-play" href="../../index.html">開始玩</a>
+</header>
+<main id="csie" class="csie-main">
+<a class="csie-back" href="index.html">‹ APCS 程式設計</a>
+<h2 class="csie-course-title">APCS 程式設計</h2>
+<div class="csie-room"><div class="cr-main"><nav class="cr-nav"><p class="cr-group">基礎</p><a class="cr-item" href="variables.html"><span class="mono">Variables</span><small>變數與資料型態</small></a><a class="cr-item" href="expressions.html"><span class="mono">Expressions</span><small>運算式</small></a><a class="cr-item" href="io.html"><span class="mono">Input &amp; Output</span><small>輸入與輸出</small></a><a class="cr-item" href="selection.html"><span class="mono">if / else</span><small>條件判斷</small></a><a class="cr-item" href="loops.html"><span class="mono">Loops</span><small>迴圈</small></a><p class="cr-group">陣列與字串</p><a class="cr-item" href="arrays.html"><span class="mono">Arrays</span><small>陣列與串列</small></a><a class="cr-item" href="strings.html"><span class="mono">Strings</span><small>字元與字串</small></a><p class="cr-group">函式</p><a class="cr-item" href="functions.html"><span class="mono">Functions</span><small>函式</small></a><a class="cr-item" href="recursion.html"><span class="mono">Recursion</span><small>遞迴</small></a><a class="cr-item" href="structs.html"><span class="mono">Structs</span><small>自訂資料型態</small></a><p class="cr-group">附錄</p><a class="cr-item on" href="parameter_passing.html"><span class="mono">Pass by Value &amp; Reference</span><small>傳值與傳參考</small></a></nav><div class="cr-body"><article class="cr-page"><h3 class="cr-title">Pass by Value &amp; Reference　傳值與傳參考</h3>
+<section class="cr-sec"><h4>生活應用</h4><p class="cr-hook">你把一份企劃書傳給同事修改。寄附件的話，他改完你手上這份不會變；分享雲端文件的連結，他一改你就看到了。程式把變數交給函式的時候，給的是附件，還是連結？</p></section>
+<section class="cr-sec"><h4>複習</h4><p>我們在函式那頁看過：add_one(x) 在函式裡把 x 加 1，外面的 x 沒有變；可是把陣列交給函式、改它的第一格，外面的陣列卻跟著變了。同樣是交給函式，為什麼一個改不到、一個改得到？</p><blockquote class="cr-quote">要看函式拿到的是值的複本，還是找得到原本那一份的地址。</blockquote></section>
+<section class="cr-sec"><h4>核心觀念</h4><p>傳值（pass by value）：呼叫函式的時候，參數拿到的是抄過去的一份複本，就像寄附件。C、Java、Python 的參數都是這樣傳，C++ 沒有特別寫的時候也是。所以追蹤器裡 change 把 x 加 1，改的是函式那一層的 x，主程式那一層的 x 還是原本的值。</p><p>那陣列為什麼改得到？陣列可以很大，變數裡放的其實是它在記憶體裡的位置，叫地址（address），就像雲端文件的連結。抄過去的是這個地址，兩份地址指著同一個陣列，函式照著地址改 arr[0]，主程式看到的也是改過的那個。C 的陣列參數就是第一格的地址；Java 的陣列和物件變數存的是參考（reference），也是一個地址；Python 的變數都是指著某個物件的名字，list 傳過去，指的是同一個 list。</p><p>複本終究是複本：在函式裡把 arr 換成一個新的陣列，只是讓函式手上那份地址指到別的地方，主程式的 arr 還指著原本那個。所以記一句就夠：改「裡面」（arr[0] = 99），外面看得到；換掉「整個」（arr = 新的陣列），外面看不到。</p><p>傳參考（pass by reference）是函式直接拿到本人：C++ 的參數寫成 int &amp;x，函式裡的 x 就是外面那個變數的另一個名字，指定新的值，外面也跟著變。四種語言裡只有 C++ 有傳參考。C 用指標（pointer）做到一樣的事：呼叫寫 increase(&amp;x)，把 x 的地址傳過去，函式寫 void increase(int *p)，*p 就是 x 本人。Java 和 Python 沒有這兩樣，想改外面的整數，就把新的值回傳、讓外面自己接：x = increase(x)。</p></section>
+<section class="cr-sec"><h4>什麼時候會用到</h4><ul><li>遊戲裡的角色升級：把角色的資料交給「升級」函式，函式要改得到那一個角色，等級和血量才會真的變；要是交過去的是複本，升級完角色還是原本的樣子。</li><li>內建的排序：Python 寫 arr.sort()、Java 寫 Arrays.sort(arr)、C++ 寫 sort(arr.begin(), arr.end())，都不用接回傳值，排完你的陣列就是排好的，因為函式拿到的是你那個陣列的地址。</li><li>C 的 scanf(&quot;%d&quot;, &amp;n)：scanf 要把讀到的數字放進 n，所以要給它 n 的地址 &amp;n，它才知道放進哪裡。</li><li>電腦內部：十萬筆成績交給函式，要是每呼叫一次就複製十萬格，又慢又吃記憶體；傳地址只要抄一個地址。比賽和考試的 C++ 程式常把大陣列寫成 vector&lt;int&gt;&amp; 傳，就是為了不複製。</li></ul></section>
+<section class="cr-sec"><h4>常見誤解</h4><div class="cr-traps"><div class="cr-trap"><p class="cr-trap-line wrong"><span class="cr-sr">誤解：</span><span>Java 的陣列和物件是傳參考（pass by reference）</span></p><p class="cr-trap-line right"><span class="cr-sr">正解：</span><span>Java 一律傳值。陣列、物件變數裡放的是地址，傳過去的是地址的複本：照著地址改 arr[0]，外面看得到；在方法裡寫 arr = new int[]{0, 0}，只是讓這份複本指到新的陣列，外面的變數還指著原本那個（試試看第一題）。真的是傳參考的話，換掉參數，外面也會跟著換掉。</span></p></div><div class="cr-trap"><p class="cr-trap-line wrong"><span class="cr-sr">誤解：</span><span>寫一個 swap(a, b) 函式，就能交換外面的兩個整數</span></p><p class="cr-trap-line right"><span class="cr-sr">正解：</span><span>函式拿到的是 a、b 的複本，交換的只是複本（試試看第二題）。C 要把地址傳過去：呼叫寫 swap(&amp;a, &amp;b)、參數寫 int *a, int *b；C++ 的參數寫成 int &amp;a, int &amp;b；Java 改不到外面的 int，要把它們放進陣列或物件；Python 直接在外面寫 a, b = b, a。</span></p></div><div class="cr-trap"><p class="cr-trap-line wrong"><span class="cr-sr">誤解：</span><span>Python 什麼都是物件，所以把整數交給函式，函式也改得到</span></p><p class="cr-trap-line right"><span class="cr-sr">正解：</span><span>Python 的整數是改不了的（immutable）：x = x + 1 是算出一個新的整數，讓函式裡的 x 指過去，外面的 x 還指著原本那個。改得到的是 list、dict 這種可以改裡面的東西，而且要改裡面（arr[0] = 99、arr.append(3)），不是把 arr 換掉。</span></p></div><div class="cr-trap"><p class="cr-trap-line wrong"><span class="cr-sr">誤解：</span><span>C++ 的 vector 跟 C 的陣列一樣，交給函式就改得到</span></p><p class="cr-trap-line right"><span class="cr-sr">正解：</span><span>C++ 的參數沒寫 &amp;，vector 會整個複製一份，函式改的是複本，外面不變，而且十萬格就要抄十萬格（實作的 replace）。要改得到、或只是不想複製，參數寫成 vector&lt;int&gt;&amp; arr；只讀不改的寫 const vector&lt;int&gt;&amp; arr。</span></p></div><div class="cr-trap"><p class="cr-trap-line wrong"><span class="cr-sr">誤解：</span><span>C 的函式裡寫 sizeof(arr)，就能算出陣列有幾格</span></p><p class="cr-trap-line right"><span class="cr-sr">正解：</span><span>C 的陣列交給函式，函式拿到的只是第一格的地址，sizeof(arr) 算的是地址本身的大小（常見是 8 個位元組），不是整個陣列。所以陣列要連同格數一起傳：void fill(int arr[], int n)。</span></p></div><div class="cr-trap"><p class="cr-trap-line wrong"><span class="cr-sr">誤解：</span><span>scanf(&quot;%d&quot;, n) 少寫 &amp;，只是編譯時多一個警告</span></p><p class="cr-trap-line right"><span class="cr-sr">正解：</span><span>scanf 要知道讀到的數字放進哪裡，所以要給它地址 &amp;n。少了 &amp;，scanf 會把 n 裡面原本的值當成地址去寫，程式可能直接當掉，也可能悄悄寫壞別的記憶體。讀字串的 char s[100] 寫 scanf(&quot;%s&quot;, s) 不用 &amp;，因為陣列的名字本身就是第一格的地址。</span></p></div></div></section>
+<section class="cr-sec"><h4>實作</h4><div class="cr-code"><p class="cr-sub">C</p><pre class="cr-pre">#include &lt;stdio.h&gt;
+
+// 傳值：x 是呼叫時抄過來的複本，改了它，外面的 x 不會變
+void add_one(int x) {
+    x = x + 1;
+}
+
+// 指標：p 存的是 x 的地址，*p 就是 x 本人，改了它外面的 x 就變了
+void increase(int *p) {
+    *p = *p + 1;
+}
+
+// 陣列傳過來的是第一格的地址，照著地址改裡面的格子，外面看得到
+void set_first(int arr[]) {
+    arr[0] = 99;
+}
+
+// arr 是地址的複本：讓它指到另一個陣列，外面的 arr 還指著原本那個
+void replace(int arr[]) {
+    int other[2] = {0, 0};
+    arr = other;
+}
+
+int main(void) {
+    int x = 5;
+    add_one(x);
+    printf(&quot;%d\n&quot;, x);
+
+    increase(&amp;x);
+    printf(&quot;%d\n&quot;, x);
+
+    int arr[2] = {1, 2};
+    set_first(arr);
+    replace(arr);
+    printf(&quot;%d %d\n&quot;, arr[0], arr[1]);
+    return 0;
+}</pre><p class="cr-sub">C++</p><pre class="cr-pre">#include &lt;iostream&gt;
+#include &lt;vector&gt;
+
+// 傳值：x 是呼叫時抄過來的複本，改了它，外面的 x 不會變
+void add_one(int x) {
+    x = x + 1;
+}
+
+// 參考：int &amp;x 的 x 就是外面那個變數的另一個名字，改了外面也變
+void increase(int &amp;x) {
+    x = x + 1;
+}
+
+// vector&lt;int&gt;&amp; 是參考：函式裡的 arr 就是外面那一個
+void set_first(std::vector&lt;int&gt;&amp; arr) {
+    arr[0] = 99;
+}
+
+// 沒寫 &amp;：vector 整個複製一份，函式改的是複本，外面不受影響
+void replace(std::vector&lt;int&gt; arr) {
+    arr = {0, 0};
+}
+
+int main() {
+    int x = 5;
+    add_one(x);
+    std::cout &lt;&lt; x &lt;&lt; &quot;\n&quot;;
+
+    increase(x);
+    std::cout &lt;&lt; x &lt;&lt; &quot;\n&quot;;
+
+    std::vector&lt;int&gt; arr = {1, 2};
+    set_first(arr);
+    replace(arr);
+    std::cout &lt;&lt; arr[0] &lt;&lt; &quot; &quot; &lt;&lt; arr[1] &lt;&lt; &quot;\n&quot;;
+    return 0;
+}</pre><p class="cr-sub">Java</p><pre class="cr-pre">public class Main {
+    // 傳值：x 是呼叫時抄過來的複本，改了它，外面的 x 不會變
+    static void addOne(int x) {
+        x = x + 1;
+    }
+
+    // Java 沒有指標和參考：想改外面的整數，就把新的值回傳，讓外面自己接
+    static int increase(int x) {
+        return x + 1;
+    }
+
+    // 陣列傳過來的是地址的複本，照著地址改裡面的格子，外面看得到
+    static void setFirst(int[] arr) {
+        arr[0] = 99;
+    }
+
+    // 讓這份地址指到新的陣列，外面的 arr 還指著原本那個
+    static void replace(int[] arr) {
+        arr = new int[]{0, 0};
+    }
+
+    public static void main(String[] args) {
+        int x = 5;
+        addOne(x);
+        System.out.println(x);
+
+        x = increase(x);
+        System.out.println(x);
+
+        int[] arr = {1, 2};
+        setFirst(arr);
+        replace(arr);
+        System.out.println(arr[0] + &quot; &quot; + arr[1]);
+    }
+}</pre><p class="cr-sub">Python</p><pre class="cr-pre"># 傳值：x = x + 1 只讓函式裡的 x 指到新的整數，外面的 x 不會變
+def add_one(x):
+    x = x + 1
+
+
+# Python 沒有指標和參考：想改外面的整數，就把新的值回傳，讓外面自己接
+def increase(x):
+    return x + 1
+
+
+# list 傳過來的是同一個物件，改裡面的格子，外面看得到
+def set_first(arr):
+    arr[0] = 99
+
+
+# 讓函式裡的 arr 指到新的 list，外面的 arr 還指著原本那個
+def replace(arr):
+    arr = [0, 0]
+
+
+x = 5
+add_one(x)
+print(x)
+
+x = increase(x)
+print(x)
+
+arr = [1, 2]
+set_first(arr)
+replace(arr)
+print(arr[0], arr[1])</pre><p class="cr-out mono">輸出：5
+6
+99 2</p></div></section>
+<section class="cr-sec"><h4>跑幾步</h4><table class="cr-big-o"><tr><td>交給函式一個整數 x</td><td class="mono">抄 1 個值，O(1)</td></tr><tr><td>交給函式 n 格的 C 陣列、Java 陣列、Python list、C++ 的 vector&lt;int&gt;&amp;</td><td class="mono">只抄一個地址，O(1)，跟 n 多大無關</td></tr><tr><td>交給函式 n 格的 C++ vector&lt;int&gt;（沒寫 &amp;）</td><td class="mono">整個複製一份，O(n)</td></tr></table><p>交給函式的東西越大，複製的代價越明顯：十萬格的 vector 沒寫 &amp;，每呼叫一次就抄十萬格，放在迴圈裡呼叫更是倍數放大。Big-O 的意思和怎麼算，在資料結構的附錄。 <a class="cr-link cr-see" href="../ds/complexity.html">→ 時間複雜度</a></p></section>
+<section class="cr-sec"><h4>試試看</h4><div class="cr-try"><p class="cr-try-q"><span class="cr-try-kind">程式運行追蹤</span><span>1. 下面這段程式印出什麼？</span></p><p class="cr-sub">C</p><pre class="cr-pre">void reset(int arr[]) {
+    arr[0] = 7;
+    int other[2] = {0, 0};
+    arr = other;
+    arr[0] = 9;
+}
+
+int arr[2] = {1, 2};
+reset(arr);
+printf(&quot;%d %d\n&quot;, arr[0], arr[1]);</pre><ol class="cr-try-opts"><li>9 0</li><li>7 2</li><li>1 2</li><li>9 2</li></ol></div><div class="cr-try"><p class="cr-try-q"><span class="cr-try-kind">程式測試與除錯</span><span>2. 想交換 a 和 b，跑完卻印出 3 8。問題出在哪？</span></p><p class="cr-sub">C</p><pre class="cr-pre">void swap(int a, int b) {
+    int tmp = a;
+    a = b;
+    b = tmp;
+}
+
+int a = 3;
+int b = 8;
+swap(a, b);
+printf(&quot;%d %d\n&quot;, a, b);</pre><ol class="cr-try-opts"><li>tmp 要先存 b，順序寫反了</li><li>swap 拿到的是 a、b 的複本，交換的只是複本</li><li>swap 是內建函式的名字，呼叫到的不是這一個</li><li>函式裡的 a、b 跟外面同名，名字撞在一起互相蓋掉了</li></ol></div><div class="cr-try"><p class="cr-try-q"><span class="cr-try-kind">程式運行追蹤</span><span>3. 下面這段程式印出什麼？</span></p><p class="cr-sub">C</p><pre class="cr-pre">void bump(int arr[], int n) {
+    n = n + 1;
+    arr[n] = arr[n] + 10;
+}
+
+int arr[3] = {1, 2, 3};
+int n = 0;
+bump(arr, n);
+printf(&quot;%d %d %d\n&quot;, n, arr[0], arr[1]);</pre><ol class="cr-try-opts"><li>1 1 12</li><li>0 11 2</li><li>0 1 12</li><li>1 11 2</li></ol></div></section>
+<section class="cr-sec"><h4>總結</h4><p class="cr-hook">整數這種值，交給函式時寄的是附件，函式怎麼改都不影響你；陣列、串列、物件寄的是連結，函式照著連結改，你這邊也看得到。C 想讓函式改到整數，就自己把地址寄過去（指標）；C++ 可以直接讓函式拿到本人（參考）。下次碰到函式改了東西外面卻沒變，或是不想變卻變了，你就知道：先問它拿到的是附件還是連結。</p></section>
+<section class="cr-sec"><h4>課外補充</h4><p>想把陣列交給函式改，又不想動到原本那一份：先複製一份再交出去。Python 寫 f(list(arr))、Java 寫 f(arr.clone())；C++ 的參數不寫 &amp;，vector 本來就會複製一份；C 的陣列沒有內建的複製，要自己用迴圈一格一格抄到另一個陣列。</p></section></article></div></div></div>
+</main>
+<footer class="seo-foot"><nav aria-label="IT24hr 的其他內容"><a href="../../index.html">玩 IT24hr</a><a href="../../se.html">認識軟體工程</a><a href="../../csie/index.html">CSIE 課程</a><a href="../../handbook.html">新人手冊</a><a href="../../atlas.html">IT 圖鑑</a></nav></footer>
+<script src="../../vendor/rough.js"></script>
+<script src="../../icons.js"></script>
+<script src="../../verdict.js"></script>
+<script src="../../classroom.js"></script>
+<script src="../../classroom/programming/arrays.js"></script>
+<script src="../../classroom/programming/expressions.js"></script>
+<script src="../../classroom/programming/functions.js"></script>
+<script src="../../classroom/programming/io.js"></script>
+<script src="../../classroom/programming/loops.js"></script>
+<script src="../../classroom/programming/parameter_passing.js"></script>
+<script src="../../classroom/programming/recursion.js"></script>
+<script src="../../classroom/programming/selection.js"></script>
+<script src="../../classroom/programming/strings.js"></script>
+<script src="../../classroom/programming/structs.js"></script>
+<script src="../../classroom/programming/variables.js"></script>
+<script src="../../classroom-view.js"></script>
+<script src="../../csie.js"></script>
+</body>
+</html>

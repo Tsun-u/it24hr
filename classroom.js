@@ -51,6 +51,9 @@
       { id: 'recursion', name: 'Recursion', zh: '遞迴' },
       { id: 'structs', name: 'Structs', zh: '自訂資料型態' },
     ] },
+    { group: '附錄', items: [
+      { id: 'parameter_passing', name: 'Pass by Value & Reference', zh: '傳值與傳參考' },
+    ] },
   ],
   // 演算法：基礎篇對準 APCS 程式實作的中高級；資料結構已經教過的搜尋、排序、圖的演算法不重複
   algorithms: [
