@@ -1,4 +1,4 @@
-// sandbox-fate.js — 正式上班第三關「心領神會」：三位命理老師合開「解憂時代事務所」網站。
+// sandbox-fate.js — 正式上班第三關「心領神會」：瀞玄老師開的「解憂時代事務所」（另請兩位不同系統的老師駐站）要做網站。
 // 需求會議裡老師一律「都好」加半句，玩家要自己翻成白話；前端程式的對錯跟常理相反（好用＝老師不滿），資料算錯照樣 QC 退。
 // 劇本：劇本/正式上班_心領神會.md。內容：早會、廠商需求會議（散會後 SA 開卡）、母議題＋子議題、茶几。
 (function (root) {
@@ -1728,15 +1728,17 @@
   }
   const cardOf = (id) => MODULE_CARDS[id] || POOL_CARDS[id];
   const MORNING = { at: 0, end: 10, title: '09:00 公司早會', lines: [
-    { at: 1, text: 'IT 經理：「跟大家說一個好消息：我們接到解憂時代事務所的網站案，三位命理老師合開的。」' },
+    { at: 1, text: 'IT 經理：「跟大家說一個好消息：我們接到解憂時代事務所的網站案，瀞玄老師開的命理事務所，還有兩位老師駐站。」' },
     { at: 5, text: 'IT 經理：「九點半老師們和助理雅雯會過來開需求會議，{玩家名稱}跟怡君一起進去聽。」' },
     { at: 8, text: '同事 小潘：「命理網站喔……記得先問清楚他們要什麼。」' },
   ] };
-  // 廠商需求會議：沿用第二關（一頁一張子議題的原文，每段講完怡君問要不要問，最後問時程、填進母議題的估時）。開場莉莉絲先看一眼專案的星象
+  // 廠商需求會議：沿用第二關（一頁一張子議題的原文，每段講完怡君問要不要問，最後問時程、填進母議題的估時）。
+  // 開場雅雯介紹事務所是瀞玄開的（首頁老師排序題的線索），莉莉絲再看一眼專案的星象
   const ASK_PROMPT = { who: SA, text: '記下來了，IT 有細節想問嗎？' };
   function vendorMeeting(modules, cards) {
     return { kind: 'vendor', at: 30, handover: 10, title: '09:30 廠商需求會議',
-      intro: [{ who: LILITH, text: '現在流年火星落在處女但正要往天秤走，這個專案的團隊現在充滿幹勁但是要注意溝通。' }, ASK_PROMPT], prompt: ASK_PROMPT,
+      intro: [{ who: YAWEN, text: '事務所是瀞玄老師開的。為了服務不同的客人，老師另外請了西洋命理的莉莉絲老師、現代命理的熙恩教授來駐站。' },
+        { who: LILITH, text: '現在流年火星落在處女但正要往天秤走，這個專案的團隊現在充滿幹勁但是要注意溝通。' }, ASK_PROMPT], prompt: ASK_PROMPT,
       cutoff: { at: 300, who: SA, text: '因為大家都沒吃午餐，不如我們今天先到這，之後有需要再電話聯絡。',
         trait: { title: '把客戶關在會議室', text: '需求會議開到下午兩點，大家都還沒吃午餐' } },
       // 第一頁是網站整體（母議題）：請三位老師排盤，配色和吉數都從這裡來
@@ -1797,7 +1799,7 @@
           熙恩教授: { hair: 'short', hairColor: '#2a2a2a', outfit: 'blazer', outfitColor: '#f7f7f2', outfitFill: 'solid', extra: 'glasses', prop: 'wave', propColor: '#ffffff', backdrop: colorOf('violet') },
         } } },
       evening: { good: '瀞玄老師說網站一打開，紫氣就上來了。', bad: '莉莉絲老師說首頁一目了然，客人看完就走了。' },
-      body: `客戶：解憂時代事務所（瀞玄老師拉莉莉絲老師、熙恩教授駐站的一條龍命理網站），窗口是助理雅雯。\n這期做 ${modules.length} 個功能，子議題各自開發、各自交 QC、各自通知雅雯；子議題都結案，這張就跟著結案。\n需求會議原話在各子議題的附件。`,
+      body: `客戶：解憂時代事務所（瀞玄老師開的，另請莉莉絲老師、熙恩教授駐站，一條龍命理網站），窗口是助理雅雯。\n這期做 ${modules.length} 個功能，子議題各自開發、各自交 QC、各自通知雅雯；子議題都結案，這張就跟著結案。\n需求會議原話在各子議題的附件。`,
       subtasks: [
         { work: 'estimate', question: { items: [{ type: 'hours', free: true,
           text: '整個網站（資料卡、六大排盤、流年與合婚、預約、三位老師各一個專欄，含跟老師們來回），你估：',
@@ -2001,7 +2003,7 @@
     return {
       // 結算卡的縮圖畫網站首頁（母議題沒有手動測試，玩家只在這裡看到首頁）；沒有主卡，同事評語不照單張卡算
       name: '心領神會', issueBase: 499, reportShot: 'fate',
-      brief: '三位命理老師合開一個網站。問她們要什麼，都說都好。',
+      brief: '瀞玄老師的命理事務所要做網站，兩位駐站老師也有份。問老師們要什麼，都說都好。',
       unlabeled: { note: '09:30 解憂時代事務所需求會議（會議室）', devices: { phone: 64, tablet: 100 } },
       meetings: [MORNING, vendorMeeting(modules, cards)],
       cards: [],   // 卡都是廠商需求會議散會後 SA 開的（vendorMeeting 的 cards）

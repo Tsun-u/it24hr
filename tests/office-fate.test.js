@@ -102,3 +102,9 @@ test('會議回答標對人：個人資料卡第 2 句三位老師各自回；�
     ask.replies.forEach((_, j) => assert.doesNotMatch(Works.replyLine(ask, j, page.who), /^[^「]+：[^「]+：「/, `${page.id} 第 ${i} 句：一句回答標了兩個人`));
   }
 });
+
+test('首頁老師排序題的線索：會議開場雅雯說事務所是瀞玄開的、另外兩位是駐站；早會和抽關說明不再說三位合開', () => {
+  const s = Sandbox.make('fate', 'legacy');
+  assert.deepEqual(s.meetings[1].intro[0], { who: '解憂時代 助理 雅雯', text: '事務所是瀞玄老師開的。為了服務不同的客人，老師另外請了西洋命理的莉莉絲老師、現代命理的熙恩教授來駐站。' });
+  assert.ok(![...s.meetings[0].lines.map(l => l.text), s.brief].some(t => t.includes('合開')));
+});
