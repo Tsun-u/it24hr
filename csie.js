@@ -1,5 +1,6 @@
-// csie.js — CSIE 課程頁（csie.html）：APCS 和資工所六科的小教室目錄。
-// 網址 #<課程> 開那門課、#<課程>/<頁> 直接翻到那一頁（結算卡的印章從這裡進來）；沒有 # 就是課程目錄
+// csie.js — CSIE 課程：APCS 和資工所六科的課程清單，加上講義頁的開頭（把靜態的內文換成互動版）。
+// 網址：csie/index.html 課程目錄、csie/<課>/index.html 一門課、csie/<課>/<頁>.html 一頁講義（classroom-static.js 產生）；
+// 舊網址 csie.html#<課>/<頁>（結算卡的印章、分享出去的連結）轉到新網址
 (function (root) {
   // 七門課：APCS 的程式設計排第一（讀資料結構之前的那一門），後面是資工所常考的六科；ready 的課有小教室可以讀
   const COURSES = [
@@ -13,40 +14,25 @@
   ];
   const parseHash = (hash) => { const [course = '', page = ''] = hash.replace(/^#/, '').split('/'); return { course, page }; };
   const course = (id) => COURSES.find(c => c.id === id) || null;
-
-  function boot() {
-    const main = document.getElementById('csie');
-    const h = (tag, cls, text) => { const el = document.createElement(tag); if (cls) el.className = cls; if (text !== undefined) el.textContent = text; return el; };
-
-    function showList() {
-      document.title = 'CSIE 課程｜IT24hr';
-      const list = h('div', 'csie-courses');
-      for (const c of COURSES) {
-        const card = h(c.ready ? 'a' : 'div', `csie-course${c.ready ? '' : ' soon'}`);
-        if (c.ready) card.href = `#${c.id}`;
-        card.append(h('strong', '', c.name), h('span', '', c.note), h('small', '', c.ready ? '開始讀' : '籌備中'));
-        list.append(card);
-      }
-      main.replaceChildren(h('p', 'csie-intro', '寫給想認識資訊工程的人：從高中生、準備 APCS 和大學申請，到準備證照、研究所考試的學生。'), list);
-    }
-    function showCourse(c, page) {
-      document.title = `${c.name}｜CSIE 課程｜IT24hr`;
-      const back = h('a', 'csie-back', '‹ 所有課程'); back.href = '#';
-      const room = h('div', 'csie-room');
-      main.replaceChildren(back, h('h2', 'csie-course-title', c.name), room);
-      root.ClassroomView.mount(room, { course: c.id, id: page, onSelect: (id) => history.replaceState(null, '', `#${c.id}/${id}`) });
-    }
-    function render() {
-      const { course: id, page } = parseHash(location.hash);
-      const c = course(id);
-      if (c && c.ready) showCourse(c, page); else showList();
-      window.scrollTo(0, 0);
-    }
-    window.addEventListener('hashchange', render);
-    render();
+  // 舊網址的 hash 要轉去哪（相對網站根目錄）：開了的課才有自己的頁，其他回課程目錄
+  function legacyTarget(hash) {
+    const { course: id, page } = parseHash(hash);
+    if (!course(id)?.ready) return 'csie/index.html';
+    return `csie/${id}/${page || 'index'}.html`;
+  }
+  // 講義頁的網址是哪門課哪一頁；不是講義頁回 null
+  function parsePath(pathname) {
+    const m = pathname.match(/\/csie\/([^/]+)\/([^/]+)\.html$/);
+    return m && m[2] !== 'index' ? { course: m[1], page: m[2] } : null;
   }
 
-  const api = { COURSES, parseHash, course };
+  function boot() {
+    const here = parsePath(location.pathname);
+    if (here) root.ClassroomView.render(document.querySelector('.cr-body'), here);
+    else location.replace(legacyTarget(location.hash));
+  }
+
+  const api = { COURSES, parseHash, course, legacyTarget, parsePath };
   if (typeof module !== 'undefined') module.exports = api;
   else { root.Csie = api; boot(); }
 })(typeof window !== 'undefined' ? window : globalThis);

@@ -1,0 +1,297 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Graph　圖｜資料結構｜CSIE 課程｜IT24hr</title>
+<meta name="description" content="圖（Graph）：捷運路線圖：站是點、路線是邊。">
+<link rel="canonical" href="https://tsun-u.github.io/it24hr/csie/ds/graph.html">
+<meta property="og:type" content="article">
+<meta property="og:site_name" content="IT24hr">
+<meta property="og:locale" content="zh_TW">
+<meta property="og:url" content="https://tsun-u.github.io/it24hr/csie/ds/graph.html">
+<meta property="og:title" content="Graph　圖｜資料結構｜CSIE 課程｜IT24hr">
+<meta property="og:description" content="圖（Graph）：捷運路線圖：站是點、路線是邊。">
+<meta property="og:image" content="https://tsun-u.github.io/it24hr/assets/og-image.jpg">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta name="twitter:card" content="summary_large_image">
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"Article","headline":"Graph 圖","description":"圖（Graph）：捷運路線圖：站是點、路線是邊。","inLanguage":"zh-Hant-TW","author":[{"@type":"Person","name":"Tsun-u"},{"@type":"Person","name":"ATone"}],"image":"https://tsun-u.github.io/it24hr/assets/og-image.jpg","isPartOf":{"@type":"Course","name":"資料結構","url":"https://tsun-u.github.io/it24hr/csie/ds/index.html"},"url":"https://tsun-u.github.io/it24hr/csie/ds/graph.html"}</script>
+<link rel="icon" href="../../assets/favicon.svg" type="image/svg+xml">
+<link rel="icon" href="../../assets/favicon-32.png" sizes="32x32" type="image/png">
+<link rel="apple-touch-icon" href="../../assets/apple-touch-icon.png">
+<link rel="stylesheet" href="../../styles.css">
+</head>
+<body class="csie-body">
+<header class="csie-head">
+  <a class="csie-logo" href="../../index.html">IT24hr</a>
+  <h1>CSIE 課程</h1>
+  <a class="btn csie-play" href="../../index.html">開始玩</a>
+</header>
+<main id="csie" class="csie-main">
+<a class="csie-back" href="index.html">‹ 資料結構</a>
+<h2 class="csie-course-title">資料結構</h2>
+<div class="csie-room"><div class="cr-main"><nav class="cr-nav"><p class="cr-group">初階篇</p><a class="cr-item" href="array.html"><span class="mono">Array</span><small>陣列</small></a><a class="cr-item" href="linked_list.html"><span class="mono">Linked List</span><small>鏈結串列</small></a><a class="cr-item" href="stack.html"><span class="mono">Stack</span><small>堆疊</small></a><a class="cr-item" href="queue.html"><span class="mono">Queue</span><small>佇列</small></a><a class="cr-item" href="circular_queue.html"><span class="mono">Circular Queue</span><small>環狀佇列</small></a><a class="cr-item" href="deque.html"><span class="mono">Deque</span><small>雙向佇列</small></a><a class="cr-item" href="tree.html"><span class="mono">Tree</span><small>樹</small></a><a class="cr-item on" href="graph.html"><span class="mono">Graph</span><small>圖</small></a><p class="cr-group">附錄</p><a class="cr-item" href="hashing.html"><span class="mono">Hashing</span><small>雜湊</small></a><a class="cr-item" href="searching.html"><span class="mono">Searching</span><small>搜尋</small></a><a class="cr-item" href="sorting.html"><span class="mono">Sorting</span><small>排序</small></a><a class="cr-item" href="disjoint_set.html"><span class="mono">Disjoint Set</span><small>互斥集合</small></a><a class="cr-item" href="complexity.html"><span class="mono">Big-O</span><small>時間複雜度</small></a><p class="cr-group">進階篇</p><a class="cr-item" href="heap.html"><span class="mono">Heap</span><small>堆積</small></a><a class="cr-item" href="trie.html"><span class="mono">Trie</span><small>字典樹</small></a><a class="cr-item" href="avl.html"><span class="mono">AVL Tree</span><small>AVL 樹</small></a><a class="cr-item" href="red_black.html"><span class="mono">Red-Black Tree</span><small>紅黑樹</small></a><a class="cr-item" href="b_tree.html"><span class="mono">B-Tree</span><small>B 樹</small></a><a class="cr-item" href="topological_sort.html"><span class="mono">Topological Sort</span><small>拓樸排序</small></a><a class="cr-item" href="shortest_path.html"><span class="mono">Shortest Path</span><small>最短路徑</small></a><a class="cr-item" href="mst.html"><span class="mono">MST</span><small>最小生成樹</small></a><p class="cr-group">彩蛋</p><a class="cr-item" href="null.html"><span class="mono">null</span><small>還沒初始化</small></a></nav><div class="cr-body"><article class="cr-page"><h3 class="cr-title">Graph　圖</h3>
+<section class="cr-sec"><h4>生活比喻</h4><p class="cr-hook">捷運路線圖：站是點、路線是邊。</p></section>
+<section class="cr-sec"><h4>什麼時候會用到</h4><ul><li>捷運轉乘、地圖導航：車站或路口是點、路線或道路是邊，App 就是在這張圖上幫你找路。</li><li>社群網站的「你可能認識的人」：每個人是點、朋友關係是邊，朋友的朋友就是從你出發走兩步到得了的人——BFS 的第二層。</li><li>網頁之間的超連結：每個網頁是點、連結是有方向的邊；搜尋引擎的爬蟲沿著邊一頁一頁走，把網頁收進來。</li><li>安裝套件、編譯程式的相依關係：「要先有 A 才能裝 B」是一條有方向的邊，電腦照著這些邊排出先後順序。</li></ul></section>
+<section class="cr-sec"><h4>核心觀念</h4><p>圖（Graph）由頂點（vertex）和邊（edge）組成：頂點是東西，邊把兩個有關係的頂點連起來。有邊直接連著的兩個頂點叫相鄰（adjacent），也就是彼此的鄰居。圖論從 1736 年尤拉（Euler）的七橋問題開始：他把陸地看成點、橋看成邊，證明七座橋沒辦法各走一次走完——就是一筆畫問題。</p><p>邊沒有方向的叫無向圖（undirected graph），像捷運兩個方向都能搭；邊有方向的叫有向圖（directed graph），像單行道、社群網站的追蹤（你追蹤他，他不一定追蹤你）。邊上帶數字（距離、票價、時間）的叫加權圖（weighted graph）。</p><p>一張有 n 個頂點、e 條邊的圖，常見兩種存法。相鄰矩陣（adjacency matrix）是 n × n 的表格，第 i 列第 j 行填 1 代表 i 和 j 之間有邊：問「這兩點有沒有邊」看一格就知道，但不管邊多少都要 n² 格。相鄰串列（adjacency list）是每個頂點各記一串自己的鄰居：只記真的有的邊，省空間、列出鄰居也快，但問兩點有沒有邊要翻那一串。</p><p>把每個頂點都走過一次叫走訪（traversal），有兩種走法。廣度優先搜尋（BFS，Breadth-First Search）靠前面的佇列（Queue）：先走完離起點一步的點，再走兩步的，一層一層往外；佇列先進先出，所以先排到的、離起點近的先走。</p><p>深度優先搜尋（DFS，Depth-First Search）靠前面的堆疊（Stack）：一條路走到底，走不下去就退回上一個點，換一個還沒走過的鄰居。堆疊後進先出，最後走到的點最先退掉；寫成遞迴時，幫你記這條路的就是 call stack。</p><p>圖還有很多經典問題：最短路徑（Dijkstra）、最小生成樹（Prim、Kruskal）、拓樸排序，屬於研究所考試的範圍，進階篇各有一頁。 <a class="cr-link cr-see" href="shortest_path.html">→ 最短路徑</a><a class="cr-link cr-see" href="mst.html">→ 最小生成樹</a><a class="cr-link cr-see" href="topological_sort.html">→ 拓樸排序</a></p></section>
+<section class="cr-sec"><h4>常見誤解</h4><div class="cr-traps"><div class="cr-trap"><p class="cr-trap-line wrong"><span class="cr-sr">誤解：</span><span>樹和圖是兩種不一樣的東西</span></p><p class="cr-trap-line right"><span class="cr-sr">正解：</span><span>樹就是一種圖：連通（任兩點之間都有路）、而且沒有環的圖。n 個頂點的樹剛好 n − 1 條邊，再多一條就會出現環。</span></p></div><div class="cr-trap"><p class="cr-trap-line wrong"><span class="cr-sr">誤解：</span><span>照著鄰居一直走就好，不用記走過哪裡</span></p><p class="cr-trap-line right"><span class="cr-sr">正解：</span><span>圖可能有環，像這頁的 A → B → E → C → A。不標記走過的點，就會在環上繞不停。</span></p></div><div class="cr-trap"><p class="cr-trap-line wrong"><span class="cr-sr">誤解：</span><span>BFS 的點從佇列拿出來時再標記就好</span></p><p class="cr-trap-line right"><span class="cr-sr">正解：</span><span>這樣同一個點會被排進去好幾次：這頁的 E 會被 B 排一次、被 C 再排一次。要在排進佇列的那一刻就標記，所以沙盒說「把還沒排過的鄰居排進去」。</span></p></div><div class="cr-trap"><p class="cr-trap-line wrong"><span class="cr-sr">誤解：</span><span>BFS、DFS 走出來的順序只有一種</span></p><p class="cr-trap-line right"><span class="cr-sr">正解：</span><span>要看鄰居先看誰。這頁約定照字母順序，BFS 是 A B C D E F；如果 B 的鄰居先看 E 再看 D，就變成 A B C E D F。考題通常會講好「字母（或編號）小的先走」，沒講的話答案不只一種。</span></p></div><div class="cr-trap"><p class="cr-trap-line wrong"><span class="cr-sr">誤解：</span><span>無向圖的一條邊，存一次就好</span></p><p class="cr-trap-line right"><span class="cr-sr">正解：</span><span>A–B 要在 A 的串列記 B、也在 B 的串列記 A（矩陣是 [A][B] 和 [B][A] 都填 1），所以相鄰串列總共記 2e 筆。只記一邊，就變成有向圖了。</span></p></div><div class="cr-trap"><p class="cr-trap-line wrong"><span class="cr-sr">誤解：</span><span>相鄰矩陣查得快，所以一定比較好</span></p><p class="cr-trap-line right"><span class="cr-sr">正解：</span><span>要看圖長什麼樣子。矩陣不管幾條邊都佔 n² 格：一萬個人就是一億格，社群網站這種每個人只連少數朋友的圖（稀疏圖），大部分格子都是 0。邊少用相鄰串列；邊很多（稠密圖）、或常常要問兩點有沒有邊，才用矩陣。</span></p></div></div></section>
+<section class="cr-sec"><h4>實作</h4><div class="cr-code"><p class="cr-sub">Python：用內建的</p><pre class="cr-pre"># 內建的沒有圖，考試要自己刻；這裡用字典存相鄰串列、deque 當佇列
+from collections import deque
+
+edges = [(&quot;A&quot;, &quot;B&quot;), (&quot;A&quot;, &quot;C&quot;), (&quot;B&quot;, &quot;D&quot;), (&quot;B&quot;, &quot;E&quot;), (&quot;C&quot;, &quot;E&quot;), (&quot;C&quot;, &quot;F&quot;), (&quot;E&quot;, &quot;F&quot;)]
+graph = {v: [] for v in &quot;ABCDEF&quot;}
+for u, v in edges:
+    graph[u].append(v)
+    graph[v].append(u)  # 無向邊：兩頭都要記
+
+visited = {&quot;A&quot;}
+queue = deque([&quot;A&quot;])
+order = []
+while queue:
+    v = queue.popleft()
+    order.append(v)
+    for w in graph[v]:
+        if w not in visited:
+            visited.add(w)  # 排進佇列就標記，同一個點才不會排兩次
+            queue.append(w)
+print(&quot; &quot;.join(order))</pre><p class="cr-sub">Python：自己刻（考試要手寫）</p><pre class="cr-pre"># 自己刻：相鄰矩陣存圖、陣列加 front／rear 當佇列
+NAMES = &quot;ABCDEF&quot;
+N = len(NAMES)
+EDGES = [(0, 1), (0, 2), (1, 3), (1, 4), (2, 4), (2, 5), (4, 5)]  # 0～5 是 A～F
+
+adj = [[0] * N for _ in range(N)]
+for u, v in EDGES:
+    adj[u][v] = adj[v][u] = 1  # 無向邊：矩陣沿對角線對稱
+
+
+def bfs(start):
+    visited = [False] * N
+    queue = [0] * N  # 每個點最多排進來一次，長度 N 就夠
+    front = rear = 0  # front 指第一個，rear 指下一個空位
+    order = []
+    visited[start] = True
+    queue[rear] = start
+    rear += 1
+    while front &lt; rear:
+        v = queue[front]
+        front += 1
+        order.append(NAMES[v])
+        for w in range(N):  # 照 A～F 的順序看鄰居
+            if adj[v][w] and not visited[w]:
+                visited[w] = True  # 排進佇列就標記，同一個點才不會排兩次
+                queue[rear] = w
+                rear += 1
+    return order
+
+
+print(&quot; &quot;.join(bfs(0)))</pre><p class="cr-sub">JavaScript：用內建的</p><pre class="cr-pre">// 內建的沒有圖，考試要自己刻；這裡用 Map 存相鄰串列、陣列當佇列（push 排進來、shift 叫號）
+const edges = [['A', 'B'], ['A', 'C'], ['B', 'D'], ['B', 'E'], ['C', 'E'], ['C', 'F'], ['E', 'F']];
+const graph = new Map([...'ABCDEF'].map((v) =&gt; [v, []]));
+for (const [u, v] of edges) {
+  graph.get(u).push(v);
+  graph.get(v).push(u); // 無向邊：兩頭都要記
+}
+
+const visited = new Set(['A']);
+const queue = ['A'];
+const order = [];
+while (queue.length) {
+  const v = queue.shift();
+  order.push(v);
+  for (const w of graph.get(v)) {
+    if (!visited.has(w)) {
+      visited.add(w); // 排進佇列就標記，同一個點才不會排兩次
+      queue.push(w);
+    }
+  }
+}
+console.log(order.join(' '));</pre><p class="cr-sub">JavaScript：自己刻（考試要手寫）</p><pre class="cr-pre">// 自己刻：相鄰矩陣存圖、陣列加 front／rear 當佇列
+const NAMES = 'ABCDEF';
+const N = NAMES.length;
+const EDGES = [[0, 1], [0, 2], [1, 3], [1, 4], [2, 4], [2, 5], [4, 5]]; // 0～5 是 A～F
+
+const adj = Array.from({ length: N }, () =&gt; new Array(N).fill(0));
+for (const [u, v] of EDGES) adj[u][v] = adj[v][u] = 1; // 無向邊：矩陣沿對角線對稱
+
+function bfs(start) {
+  const visited = new Array(N).fill(false);
+  const queue = new Array(N); // 每個點最多排進來一次，長度 N 就夠
+  let front = 0, rear = 0; // front 指第一個，rear 指下一個空位
+  const order = [];
+  visited[start] = true;
+  queue[rear++] = start;
+  while (front &lt; rear) {
+    const v = queue[front++];
+    order.push(NAMES[v]);
+    for (let w = 0; w &lt; N; w++) { // 照 A～F 的順序看鄰居
+      if (adj[v][w] &amp;&amp; !visited[w]) {
+        visited[w] = true; // 排進佇列就標記，同一個點才不會排兩次
+        queue[rear++] = w;
+      }
+    }
+  }
+  return order;
+}
+
+console.log(bfs(0).join(' '));</pre><p class="cr-sub">Java：用內建的</p><pre class="cr-pre">// 內建的沒有圖，考試要自己刻；這裡用 HashMap 存相鄰串列、ArrayDeque 當佇列
+import java.util.*;
+
+public class Main {
+    public static void main(String[] args) {
+        String[][] edges = {{&quot;A&quot;, &quot;B&quot;}, {&quot;A&quot;, &quot;C&quot;}, {&quot;B&quot;, &quot;D&quot;}, {&quot;B&quot;, &quot;E&quot;}, {&quot;C&quot;, &quot;E&quot;}, {&quot;C&quot;, &quot;F&quot;}, {&quot;E&quot;, &quot;F&quot;}};
+        Map&lt;String, List&lt;String&gt;&gt; graph = new HashMap&lt;&gt;();
+        for (String v : &quot;ABCDEF&quot;.split(&quot;&quot;)) graph.put(v, new ArrayList&lt;&gt;());
+        for (String[] e : edges) {
+            graph.get(e[0]).add(e[1]);
+            graph.get(e[1]).add(e[0]); // 無向邊：兩頭都要記
+        }
+
+        Set&lt;String&gt; visited = new HashSet&lt;&gt;(List.of(&quot;A&quot;));
+        Queue&lt;String&gt; queue = new ArrayDeque&lt;&gt;(List.of(&quot;A&quot;));
+        List&lt;String&gt; order = new ArrayList&lt;&gt;();
+        while (!queue.isEmpty()) {
+            String v = queue.poll();
+            order.add(v);
+            for (String w : graph.get(v)) {
+                if (!visited.contains(w)) {
+                    visited.add(w); // 排進佇列就標記，同一個點才不會排兩次
+                    queue.offer(w);
+                }
+            }
+        }
+        System.out.println(String.join(&quot; &quot;, order));
+    }
+}</pre><p class="cr-sub">Java：自己刻（考試要手寫）</p><pre class="cr-pre">// 自己刻：相鄰矩陣存圖、陣列加 front／rear 當佇列
+public class Main {
+    static final String NAMES = &quot;ABCDEF&quot;;
+    static final int N = NAMES.length();
+    static final int[][] adj = new int[N][N];
+
+    static String bfs(int start) {
+        boolean[] visited = new boolean[N];
+        int[] queue = new int[N]; // 每個點最多排進來一次，長度 N 就夠
+        int front = 0, rear = 0; // front 指第一個，rear 指下一個空位
+        StringBuilder order = new StringBuilder();
+        visited[start] = true;
+        queue[rear++] = start;
+        while (front &lt; rear) {
+            int v = queue[front++];
+            if (order.length() &gt; 0) order.append(' ');
+            order.append(NAMES.charAt(v));
+            for (int w = 0; w &lt; N; w++) { // 照 A～F 的順序看鄰居
+                if (adj[v][w] == 1 &amp;&amp; !visited[w]) {
+                    visited[w] = true; // 排進佇列就標記，同一個點才不會排兩次
+                    queue[rear++] = w;
+                }
+            }
+        }
+        return order.toString();
+    }
+
+    public static void main(String[] args) {
+        int[][] edges = {{0, 1}, {0, 2}, {1, 3}, {1, 4}, {2, 4}, {2, 5}, {4, 5}}; // 0～5 是 A～F
+        for (int[] e : edges) adj[e[0]][e[1]] = adj[e[1]][e[0]] = 1; // 無向邊：矩陣沿對角線對稱
+        System.out.println(bfs(0));
+    }
+}</pre><p class="cr-sub">C++：用內建的</p><pre class="cr-pre">// 內建的沒有圖，考試要自己刻；這裡用 std::map 存相鄰串列、std::queue 當佇列
+#include &lt;iostream&gt;
+#include &lt;map&gt;
+#include &lt;queue&gt;
+#include &lt;set&gt;
+#include &lt;string&gt;
+#include &lt;utility&gt;
+#include &lt;vector&gt;
+
+int main() {
+    std::vector&lt;std::pair&lt;char, char&gt;&gt; edges = {{'A', 'B'}, {'A', 'C'}, {'B', 'D'}, {'B', 'E'}, {'C', 'E'}, {'C', 'F'}, {'E', 'F'}};
+    std::map&lt;char, std::vector&lt;char&gt;&gt; graph;
+    for (auto [u, v] : edges) {
+        graph[u].push_back(v);
+        graph[v].push_back(u); // 無向邊：兩頭都要記
+    }
+
+    std::set&lt;char&gt; visited = {'A'};
+    std::queue&lt;char&gt; queue;
+    queue.push('A');
+    std::string order;
+    while (!queue.empty()) {
+        char v = queue.front(); queue.pop();
+        if (!order.empty()) order += ' ';
+        order += v;
+        for (char w : graph[v]) {
+            if (!visited.count(w)) {
+                visited.insert(w); // 排進佇列就標記，同一個點才不會排兩次
+                queue.push(w);
+            }
+        }
+    }
+    std::cout &lt;&lt; order &lt;&lt; &quot;\n&quot;;
+}</pre><p class="cr-sub">C++：自己刻（考試要手寫）</p><pre class="cr-pre">// 自己刻：相鄰矩陣存圖、陣列加 front／rear 當佇列
+#include &lt;iostream&gt;
+#include &lt;string&gt;
+
+const char NAMES[] = &quot;ABCDEF&quot;;
+const int N = 6;
+int adj[N][N];
+
+std::string bfs(int start) {
+    bool visited[N] = {};
+    int queue[N]; // 每個點最多排進來一次，長度 N 就夠
+    int front = 0, rear = 0; // front 指第一個，rear 指下一個空位
+    std::string order;
+    visited[start] = true;
+    queue[rear++] = start;
+    while (front &lt; rear) {
+        int v = queue[front++];
+        if (!order.empty()) order += ' ';
+        order += NAMES[v];
+        for (int w = 0; w &lt; N; w++) { // 照 A～F 的順序看鄰居
+            if (adj[v][w] &amp;&amp; !visited[w]) {
+                visited[w] = true; // 排進佇列就標記，同一個點才不會排兩次
+                queue[rear++] = w;
+            }
+        }
+    }
+    return order;
+}
+
+int main() {
+    int edges[][2] = {{0, 1}, {0, 2}, {1, 3}, {1, 4}, {2, 4}, {2, 5}, {4, 5}}; // 0～5 是 A～F
+    for (auto&amp; e : edges) adj[e[0]][e[1]] = adj[e[1]][e[0]] = 1; // 無向邊：矩陣沿對角線對稱
+    std::cout &lt;&lt; bfs(0) &lt;&lt; &quot;\n&quot;;
+}</pre><p class="cr-out mono">輸出：A B C D E F</p></div></section>
+<section class="cr-sec"><h4>時間複雜度</h4><table class="cr-big-o"><tr><td>查兩點之間有沒有邊（相鄰矩陣）</td><td class="mono">O(1)</td></tr><tr><td>查兩點之間有沒有邊（相鄰串列）</td><td class="mono">O(n)</td></tr><tr><td>BFS／DFS 走訪（相鄰串列）</td><td class="mono">O(n + e)</td></tr><tr><td>BFS／DFS 走訪（相鄰矩陣）</td><td class="mono">O(n²)</td></tr><tr><td>相鄰串列佔的空間</td><td class="mono">O(n + e)</td></tr><tr><td>相鄰矩陣佔的空間</td><td class="mono">O(n²)</td></tr></table><p class="cr-hint">O(1)、O(n) 是什麼意思、怎麼算，見附錄「時間複雜度」。</p></section>
+<section class="cr-sec"><h4>總結</h4><p class="cr-hook">下次打開捷運路線圖、用地圖 App 找路，你就知道：那是一張圖，站是點、路線是邊。</p></section></article></div></div></div>
+</main>
+<footer class="seo-foot"><nav aria-label="IT24hr 的其他內容"><a href="../../index.html">玩 IT24hr</a><a href="../../se.html">認識軟體工程</a><a href="../../csie.html">CSIE 課程</a><a href="../../handbook.html">新人手冊</a><a href="../../atlas.html">IT 圖鑑</a></nav></footer>
+<script src="../../vendor/rough.js"></script>
+<script src="../../icons.js"></script>
+<script src="../../verdict.js"></script>
+<script src="../../classroom.js"></script>
+<script src="../../classroom/ds/array.js"></script>
+<script src="../../classroom/ds/avl.js"></script>
+<script src="../../classroom/ds/b_tree.js"></script>
+<script src="../../classroom/ds/circular_queue.js"></script>
+<script src="../../classroom/ds/complexity.js"></script>
+<script src="../../classroom/ds/deque.js"></script>
+<script src="../../classroom/ds/disjoint_set.js"></script>
+<script src="../../classroom/ds/graph.js"></script>
+<script src="../../classroom/ds/hashing.js"></script>
+<script src="../../classroom/ds/heap.js"></script>
+<script src="../../classroom/ds/linked_list.js"></script>
+<script src="../../classroom/ds/mst.js"></script>
+<script src="../../classroom/ds/null.js"></script>
+<script src="../../classroom/ds/queue.js"></script>
+<script src="../../classroom/ds/red_black.js"></script>
+<script src="../../classroom/ds/searching.js"></script>
+<script src="../../classroom/ds/shortest_path.js"></script>
+<script src="../../classroom/ds/sorting.js"></script>
+<script src="../../classroom/ds/stack.js"></script>
+<script src="../../classroom/ds/topological_sort.js"></script>
+<script src="../../classroom/ds/tree.js"></script>
+<script src="../../classroom/ds/trie.js"></script>
+<script src="../../classroom-view.js"></script>
+<script src="../../csie.js"></script>
+</body>
+</html>

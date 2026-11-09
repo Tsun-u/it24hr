@@ -1,0 +1,119 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Input &amp; Output　輸入與輸出｜APCS 程式設計｜CSIE 課程｜IT24hr</title>
+<meta name="description" content="輸入與輸出（Input &amp; Output）：為什麼在超市結帳的時候，店員只要刷了條碼就知道商品金額？">
+<link rel="canonical" href="https://tsun-u.github.io/it24hr/csie/programming/io.html">
+<meta property="og:type" content="article">
+<meta property="og:site_name" content="IT24hr">
+<meta property="og:locale" content="zh_TW">
+<meta property="og:url" content="https://tsun-u.github.io/it24hr/csie/programming/io.html">
+<meta property="og:title" content="Input &amp; Output　輸入與輸出｜APCS 程式設計｜CSIE 課程｜IT24hr">
+<meta property="og:description" content="輸入與輸出（Input &amp; Output）：為什麼在超市結帳的時候，店員只要刷了條碼就知道商品金額？">
+<meta property="og:image" content="https://tsun-u.github.io/it24hr/assets/og-image.jpg">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta name="twitter:card" content="summary_large_image">
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"Article","headline":"Input & Output 輸入與輸出","description":"輸入與輸出（Input & Output）：為什麼在超市結帳的時候，店員只要刷了條碼就知道商品金額？","inLanguage":"zh-Hant-TW","author":[{"@type":"Person","name":"Tsun-u"},{"@type":"Person","name":"ATone"}],"image":"https://tsun-u.github.io/it24hr/assets/og-image.jpg","isPartOf":{"@type":"Course","name":"APCS 程式設計","url":"https://tsun-u.github.io/it24hr/csie/programming/index.html"},"url":"https://tsun-u.github.io/it24hr/csie/programming/io.html"}</script>
+<link rel="icon" href="../../assets/favicon.svg" type="image/svg+xml">
+<link rel="icon" href="../../assets/favicon-32.png" sizes="32x32" type="image/png">
+<link rel="apple-touch-icon" href="../../assets/apple-touch-icon.png">
+<link rel="stylesheet" href="../../styles.css">
+</head>
+<body class="csie-body">
+<header class="csie-head">
+  <a class="csie-logo" href="../../index.html">IT24hr</a>
+  <h1>CSIE 課程</h1>
+  <a class="btn csie-play" href="../../index.html">開始玩</a>
+</header>
+<main id="csie" class="csie-main">
+<a class="csie-back" href="index.html">‹ APCS 程式設計</a>
+<h2 class="csie-course-title">APCS 程式設計</h2>
+<div class="csie-room"><div class="cr-main"><nav class="cr-nav"><p class="cr-group">基礎</p><a class="cr-item" href="variables.html"><span class="mono">Variables</span><small>變數與資料型態</small></a><a class="cr-item" href="expressions.html"><span class="mono">Expressions</span><small>運算式</small></a><a class="cr-item on" href="io.html"><span class="mono">Input &amp; Output</span><small>輸入與輸出</small></a><a class="cr-item" href="selection.html"><span class="mono">if / else</span><small>條件判斷</small></a><a class="cr-item" href="loops.html"><span class="mono">Loops</span><small>迴圈</small></a><p class="cr-group">陣列與字串</p><a class="cr-item" href="arrays.html"><span class="mono">Arrays</span><small>陣列與串列</small></a><a class="cr-item" href="strings.html"><span class="mono">Strings</span><small>字元與字串</small></a><p class="cr-group">函式</p><a class="cr-item" href="functions.html"><span class="mono">Functions</span><small>函式</small></a><a class="cr-item" href="recursion.html"><span class="mono">Recursion</span><small>遞迴</small></a><a class="cr-item" href="structs.html"><span class="mono">Structs</span><small>自訂資料型態</small></a></nav><div class="cr-body"><article class="cr-page"><h3 class="cr-title">Input &amp; Output　輸入與輸出</h3>
+<section class="cr-sec"><h4>生活應用</h4><p class="cr-hook">為什麼在超市結帳的時候，店員只要刷了條碼就知道商品金額？</p></section>
+<section class="cr-sec"><h4>複習</h4><p>我們前面學了變數和運算式，最直覺的做法是把這位客人買的東西直接寫進程式：milk = 2、bread = 1，算好總價。下一位客人來了，你得改程式、再跑一次；後面還排了十個人。</p><blockquote class="cr-quote">程式跑起來以後，可以向外面要資料、算完把結果交出來，這就是輸入與輸出。</blockquote><p>店員就只要刷條碼了。</p></section>
+<section class="cr-sec"><h4>核心觀念</h4><p>輸入（input）是程式跑起來以後才向外面要資料：鍵盤打的字、檔案的內容、條碼槍刷到的數字；輸出（output）是把算好的結果交出去：印在螢幕上、寫進檔案。程式裡只寫「讀兩個數、算總價、印出來」，同一支程式就能服務每一位客人，不用每來一個人就改一次程式。沒有特別指定時，輸入從標準輸入（standard input，stdin）來，平常就是鍵盤；輸出到標準輸出（standard output，stdout），平常就是螢幕。APCS 的測資就是從標準輸入餵進來的，跟有人在鍵盤上幫你打字一樣。</p><p>讀一個整數：C 寫 scanf(&quot;%d&quot;, &amp;n)、C++ 寫 std::cin &gt;&gt; n、Java 先開一個 Scanner sc = new Scanner(System.in)，再 int n = sc.nextInt()、Python 寫 n = int(input())。Python 的 input() 一次讀一整行，拿到的是字串，要用 int() 轉成整數才能算；一行有好幾個數時，先用 split() 照空白切成一段一段的字串，再用 map(int, …) 每段轉成整數：milk, bread = map(int, input().split())。C、C++、Java 一次讀一個數，會自己跳過中間的空白和換行，所以一行兩個數就是讀兩次：scanf(&quot;%d %d&quot;, &amp;milk, &amp;bread)、std::cin &gt;&gt; milk &gt;&gt; bread。</p><p>C 的 scanf 要把讀到的數放進變數裡，所以得告訴它變數住在記憶體的哪裡，也就是變數的位址（address）；&amp; 就是「取位址」，&amp;milk 是 milk 的位址。printf 只要值、不用改變數，所以不用 &amp;。</p><p>輸出：C 寫 printf(&quot;%d\n&quot;, total)、C++ 寫 std::cout &lt;&lt; total &lt;&lt; &quot;\n&quot;、Java 寫 System.out.println(total)、Python 寫 print(total)。printf 的格式裡 %d 是整數、%f 是小數、%.2f 是小數取到第二位，\n 是換行；Python 的 print 一次印好幾個值時，中間自動放一個空白，最後自動換行。APCS 照題目寫的輸出格式比對答案：空白、換行要照題目，多印的提示字（像「請輸入：」「答案是」）會讓整行答案對不上。</p><p>有的題目先給筆數、再給資料：第一行是 3，接著三個數。筆數每次不一樣，沒辦法先寫好要讀幾次，要配迴圈一筆一筆讀。 <a class="cr-link cr-see" href="loops.html">→ 迴圈</a></p></section>
+<section class="cr-sec"><h4>什麼時候會用到</h4><ul><li>自動販賣機：投錢、按按鈕是輸入，掉出飲料和找零是輸出。</li><li>登入網站：你打的帳號密碼是輸入，「登入成功」或「密碼錯誤」是輸出。</li><li>APCS 和線上解題系統：評分程式把測資從標準輸入餵進你的程式，再拿你印出來的東西，跟正確答案一個字一個字比對。</li><li>電腦內部：鍵盤、滑鼠、麥克風是輸入裝置，螢幕、喇叭、印表機是輸出裝置；程式和程式之間也能接起來，一支程式的輸出直接當成下一支的輸入（命令列的管線 pipe，寫成 |）。</li></ul></section>
+<section class="cr-sec"><h4>常見誤解</h4><div class="cr-traps"><div class="cr-trap"><p class="cr-trap-line wrong"><span class="cr-sr">誤解：</span><span>Python 的 input() 拿到的是數字</span></p><p class="cr-trap-line right"><span class="cr-sr">正解：</span><span>input() 拿到的永遠是字串：打 3 拿到的是 &quot;3&quot;，&quot;3&quot; + &quot;4&quot; 是 &quot;34&quot;，不是 7。要拿來算，先用 int() 轉成整數：n = int(input())。</span></p></div><div class="cr-trap"><p class="cr-trap-line wrong"><span class="cr-sr">誤解：</span><span>寫給 APCS 的程式，讀之前也要先印「請輸入：」</span></p><p class="cr-trap-line right"><span class="cr-sr">正解：</span><span>測資是機器餵的，沒有人在看提示字；評分照你的輸出跟答案逐字比對，多印的「請輸入：」會讓整行對不上。題目要什麼就只印什麼。</span></p></div><div class="cr-trap"><p class="cr-trap-line wrong"><span class="cr-sr">誤解：</span><span>C 的 scanf(&quot;%d&quot;, n) 跟 printf 一樣，不用 &amp;</span></p><p class="cr-trap-line right"><span class="cr-sr">正解：</span><span>scanf 要把讀到的數放進變數，得知道變數住在哪裡，要寫 &amp;n 給它位址。少了 &amp;，它會把數字寫到不知道哪裡去，常常直接當掉（gcc 會給警告，記得看）。printf 只要值，才不用 &amp;。</span></p></div><div class="cr-trap"><p class="cr-trap-line wrong"><span class="cr-sr">誤解：</span><span>一行兩個數，Python 寫兩次 int(input()) 就好</span></p><p class="cr-trap-line right"><span class="cr-sr">正解：</span><span>input() 一次讀一整行：第一次就讀到 &quot;3 4&quot;，int(&quot;3 4&quot;) 直接報錯 ValueError；寫兩次 int(input()) 是在讀兩行，每行一個數。一行好幾個數要先切開：a, b = map(int, input().split())。C、C++、Java 一次讀一個數、會跳過空白和換行，才不在意是不是同一行。</span></p></div><div class="cr-trap"><p class="cr-trap-line wrong"><span class="cr-sr">誤解：</span><span>C 的 printf 用 %d 也能印小數</span></p><p class="cr-trap-line right"><span class="cr-sr">正解：</span><span>%d 是整數、%f 才是浮點數（%.2f 取到小數第二位）。格式跟值的型態對不上時，C 不會幫你轉，印出來是一個莫名其妙的數字；Java 的 printf 對不上會直接報錯。C++ 的 cout 和 Python 的 print 會看值的型態自己決定怎麼印。</span></p></div></div></section>
+<section class="cr-sec"><h4>實作</h4><div class="cr-code"><p class="cr-sub">C</p><pre class="cr-pre">#include &lt;stdio.h&gt;
+
+// 輸入兩行，例如：第一行 3 4，第二行 5
+int main(void) {
+    int a, b, c;
+    scanf(&quot;%d %d&quot;, &amp;a, &amp;b);          // 一行兩個數：讀兩個整數，放進 a、b 的位址
+    scanf(&quot;%d&quot;, &amp;c);                 // 第二行一個數；scanf 會自己跳過換行
+    int total = a + b + c;
+    int product = a * b * c;
+    double average = total / 3.0;    // 整數除以整數會捨去小數，除以 3.0 才留得住
+    printf(&quot;%d %d %.2f\n&quot;, total, product, average);   // %.2f：小數取到第二位
+    return 0;
+}</pre><p class="cr-sub">C++</p><pre class="cr-pre">#include &lt;iomanip&gt;
+#include &lt;iostream&gt;
+
+// 輸入兩行，例如：第一行 3 4，第二行 5
+int main() {
+    int a, b, c;
+    std::cin &gt;&gt; a &gt;&gt; b;              // 一行兩個數：&gt;&gt; 一次讀一個，自己跳過空白
+    std::cin &gt;&gt; c;                   // 第二行一個數；換行也一起跳過
+    int total = a + b + c;
+    int product = a * b * c;
+    double average = total / 3.0;    // 整數除以整數會捨去小數，除以 3.0 才留得住
+    std::cout &lt;&lt; total &lt;&lt; &quot; &quot; &lt;&lt; product &lt;&lt; &quot; &quot;
+              &lt;&lt; std::fixed &lt;&lt; std::setprecision(2) &lt;&lt; average &lt;&lt; &quot;\n&quot;;   // fixed 加 setprecision(2)：小數取到第二位
+    return 0;
+}</pre><p class="cr-sub">Java</p><pre class="cr-pre">import java.util.Scanner;
+
+// 輸入兩行，例如：第一行 3 4，第二行 5
+public class Main {
+    public static void main(String[] args) {
+        Scanner sc = new Scanner(System.in);
+        int a = sc.nextInt();            // nextInt 一次讀一個數，自己跳過空白和換行
+        int b = sc.nextInt();
+        int c = sc.nextInt();
+        int total = a + b + c;
+        int product = a * b * c;
+        double average = total / 3.0;    // 整數除以整數會捨去小數，除以 3.0 才留得住
+        System.out.printf(&quot;%d %d %.2f\n&quot;, total, product, average);   // %.2f：小數取到第二位
+    }
+}</pre><p class="cr-sub">Python</p><pre class="cr-pre"># 輸入兩行，例如：第一行 3 4，第二行 5
+a, b = map(int, input().split())   # 第一行有兩個數：split() 照空白切開，map(int, …) 每段轉成整數
+c = int(input())                   # 第二行只有一個數
+total = a + b + c
+product = a * b * c
+average = total / 3                # Python 的 / 一定算出小數
+print(total, product, f&quot;{average:.2f}&quot;)   # print 用空白隔開每個值；:.2f 取到小數第二位</pre><p class="cr-tr-label">輸入</p><pre class="cr-tr-stdin">3 4
+5</pre><p class="cr-out mono">輸出：12 60 4.00</p></div></section>
+<section class="cr-sec"><h4>試試看</h4><div class="cr-try"><p class="cr-try-q"><span class="cr-try-kind">程式運行追蹤</span><span>1. 輸入有兩行：第一行是 7 2，第二行是 3。下面這段程式印出什麼？</span></p><p class="cr-sub">C</p><pre class="cr-pre">int a, b, c;
+scanf(&quot;%d %d&quot;, &amp;a, &amp;b);
+scanf(&quot;%d&quot;, &amp;c);
+printf(&quot;%d %d\n&quot;, a * c - b, a / b + c);</pre><p class="cr-tr-label">輸入</p><pre class="cr-tr-stdin">7 2
+3</pre><ol class="cr-try-opts"><li>19 6.5</li><li>7 6</li><li>19 6</li><li>11 4</li></ol></div><div class="cr-try"><p class="cr-try-q"><span class="cr-try-kind">程式填空</span><span>2. 輸入只有一行：7 3。程式要把 7 放進 a、3 放進 b，再印出 a * 2 + b。____ 那一行要做什麼？</span></p><p class="cr-sub">C</p><pre class="cr-pre">int a, b;
+____;
+printf(&quot;%d\n&quot;, a * 2 + b);</pre><p class="cr-tr-label">輸入</p><pre class="cr-tr-stdin">7 3</pre><ol class="cr-try-opts"><li>讀進一個整數</li><li>讀進兩個整數，第一個放進 b、第二個放進 a</li><li>讀進一整行，當成一個字串</li><li>讀進兩個整數，第一個放進 a、第二個放進 b</li></ol></div><div class="cr-try"><p class="cr-try-q"><span class="cr-try-kind">程式測試與除錯</span><span>3. 輸入一行「付的錢 價錢」，想印出要找多少錢。輸入 100 65，結果印出 -35。要怎麼改？</span></p><p class="cr-sub">C</p><pre class="cr-pre">int price, paid;
+scanf(&quot;%d %d&quot;, &amp;price, &amp;paid);
+int change = paid - price;
+printf(&quot;%d\n&quot;, change);</pre><p class="cr-tr-label">輸入</p><pre class="cr-tr-stdin">100 65</pre><ol class="cr-try-opts"><li>讀之前先印出「請輸入付的錢和價錢：」</li><li>讀進來的順序改成先 paid、再 price</li><li>把 paid - price 改成 paid + price</li><li>把一行讀兩個數，改成分兩行各讀一個</li></ol></div></section>
+<section class="cr-sec"><h4>總結</h4><p class="cr-hook">刷條碼的時候，條碼上的數字被送進程式，這是輸入；程式查到這個商品多少錢、顯示在螢幕上，這是輸出。下次看到「你給它東西、它回你結果」的機器，你就知道：那是一支讀輸入、印輸出的程式，APCS 的題目也一樣，照格式讀測資、照格式印答案。</p></section>
+<section class="cr-sec"><h4>課外補充</h4><p>讀到輸入結束（EOF，end of file）：有的題目不先給筆數，資料一直給到輸入結束為止。學了迴圈以後可以這樣讀：C 寫 while (scanf(&quot;%d&quot;, &amp;x) != EOF)、C++ 寫 while (std::cin &gt;&gt; x)、Java 寫 while (sc.hasNextInt())、Python 寫 for line in sys.stdin:（要先 import sys），讀不到東西迴圈就停。</p><p>測資很大（幾十萬個數）時，光是讀輸入就會變慢：Python 用 sys.stdin.readline() 代替 input() 快很多（讀到的字串尾巴多一個換行，int() 會自己忽略）；C++ 在 main 的開頭加 std::ios::sync_with_stdio(false); 和 std::cin.tie(nullptr);，cin 會快很多；Java 的 Scanner 也偏慢，可以改用 BufferedReader 一次讀一整行再自己切。C 的 scanf 本來就夠快。</p></section></article></div></div></div>
+</main>
+<footer class="seo-foot"><nav aria-label="IT24hr 的其他內容"><a href="../../index.html">玩 IT24hr</a><a href="../../se.html">認識軟體工程</a><a href="../../csie.html">CSIE 課程</a><a href="../../handbook.html">新人手冊</a><a href="../../atlas.html">IT 圖鑑</a></nav></footer>
+<script src="../../vendor/rough.js"></script>
+<script src="../../icons.js"></script>
+<script src="../../verdict.js"></script>
+<script src="../../classroom.js"></script>
+<script src="../../classroom/programming/arrays.js"></script>
+<script src="../../classroom/programming/expressions.js"></script>
+<script src="../../classroom/programming/functions.js"></script>
+<script src="../../classroom/programming/io.js"></script>
+<script src="../../classroom/programming/loops.js"></script>
+<script src="../../classroom/programming/recursion.js"></script>
+<script src="../../classroom/programming/selection.js"></script>
+<script src="../../classroom/programming/strings.js"></script>
+<script src="../../classroom/programming/structs.js"></script>
+<script src="../../classroom/programming/variables.js"></script>
+<script src="../../classroom-view.js"></script>
+<script src="../../csie.js"></script>
+</body>
+</html>

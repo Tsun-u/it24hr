@@ -84,6 +84,8 @@
     return ops.map((op) => { s = box.apply(s, op); return { op, state: s, label: box.label(op, s) }; });
   }
 
+  // 從一頁講義（csie/<from>/<頁>.html）連到另一頁的相對網址：同一門課只寫檔名，別門課多一層 ../<課>/
+  const href = (from, course, id) => `${course === from ? '' : `../${course}/`}${id}.html`;
   const items = (course) => (TOC[course] || []).flatMap(g => g.items);
   const item = (course, id) => items(course).find(i => i.id === id) || null;
   // 附錄 Big-O 的總表：照目錄順序，那門課每一頁的時間複雜度
@@ -164,7 +166,7 @@
     return parts.join('；');
   }
 
-  const api = { TOC, STAMP_PAGE, LANGS, PAGES, add, replay, complexityTable, pageForStamp, item, fill, traceLine, isRecord, fieldsOf, showValue, depthOf, frameVars, changedVars, stepNote };
+  const api = { TOC, STAMP_PAGE, LANGS, PAGES, add, replay, complexityTable, pageForStamp, href, items, item, fill, traceLine, isRecord, fieldsOf, showValue, depthOf, frameVars, changedVars, stepNote };
   if (typeof module !== 'undefined') {
     module.exports = api;
     // node（測試、實跑程式）沒有 script 標籤：classroom/<課程>/ 底下每一頁都載進來

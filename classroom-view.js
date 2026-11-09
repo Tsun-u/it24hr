@@ -1,4 +1,4 @@
-// classroom-view.js — 小教室的畫面：左邊目錄、右邊講義，放在 CSIE 課程頁（csie.html）裡，一次顯示一門課。
+// classroom-view.js — 小教室講義頁的互動版：csie/<課>/<頁>.html 的右欄（左欄目錄和預先寫好的文字由 classroom-static.js 產生）。
 // 目錄在 classroom.js、每頁的內容和圖在 classroom/<課程>/<id>.js；圖用 rough.js 畫成手繪風的 SVG（vendor/rough.js）
 (function (root) {
   const h = (tag, cls, text) => { const el = document.createElement(tag); if (cls) el.className = cls; if (text !== undefined) el.textContent = text; return el; };
@@ -13,18 +13,16 @@
   const kit = { h, svgEl, svgText, rough: root.rough, INK: '#1f2328', FILL: '#9cc3f5', NEW: '#ffd166' };
 
   function section(title, ...children) { const sec = h('section', 'cr-sec'); sec.append(h('h4', '', title), ...children); return sec; }
+  // 連到另一頁講義的連結
+  const pageLink = (cls, text, c, id) => { const a = h('a', cls, text); a.href = root.Classroom.href(course, c, id); return a; };
   // 一段文字；寫成 { text, see } 時後面多幾個翻到別頁的連結。see 是一個或一串頁 id；
-  // 同一門課寫頁 id，別門課寫「課程/頁 id」（例：ds/stack），點了改網址、換那門課
+  // 同一門課寫頁 id，別門課寫「課程/頁 id」（例：ds/stack）
   function prose(tag, t) {
     if (typeof t === 'string') return h(tag, '', t);
     const el = h(tag, '', `${t.text} `);
     for (const to of [].concat(t.see)) {
       const [c, id] = to.includes('/') ? to.split('/') : [course, to];
-      const link = h('button', 'cr-link cr-see', `→ ${root.Classroom.item(c, id).zh}`); link.type = 'button';
-      link.addEventListener('click', () => {
-        if (c === course) { select(id); window.scrollTo(0, 0); } else location.hash = `#${c}/${id}`;
-      });
-      el.append(link);
+      el.append(pageLink('cr-link cr-see', `→ ${root.Classroom.item(c, id).zh}`, c, id));
     }
     return el;
   }
@@ -99,8 +97,7 @@
     const table = h('table', 'cr-big-o cr-overview');
     for (const g of root.Classroom.complexityTable(course)) {
       const head = h('tr'); const th = h('th'); th.colSpan = 2;
-      const link = h('button', 'cr-link', `${g.name}　${g.zh}`); link.type = 'button'; link.addEventListener('click', () => { select(g.id); window.scrollTo(0, 0); });
-      th.append(link); head.append(th); table.append(head);
+      th.append(pageLink('cr-link', `${g.name}　${g.zh}`, course, g.id)); head.append(th); table.append(head);
       for (const [op, o] of g.rows) { const tr = h('tr'); tr.append(h('td', '', op), h('td', 'mono', o)); table.append(tr); }
     }
     return table;
@@ -124,9 +121,10 @@
   // 頁上目前的語言：on(fn) 登記換語言時要重畫的段落（登記時先畫一次），tabs() 是一排語言鈕
   function langSwitch() {
     const langs = root.Classroom.LANGS[course]; const subs = []; const rows = [];
-    const ui = { lang: progLang || langs[0][0] };
+    const saved = savedLang();
+    const ui = { lang: langs.some(([v]) => v === saved) ? saved : langs[0][0] };
     const mark = () => { for (const row of rows) for (const b of row.children) b.classList.toggle('on', b.dataset.v === ui.lang); };
-    ui.set = (v) => { ui.lang = progLang = v; mark(); for (const fn of subs) fn(v); };
+    ui.set = (v) => { ui.lang = v; saveLang(v); mark(); for (const fn of subs) fn(v); };
     ui.on = (fn) => { subs.push(fn); fn(ui.lang); };
     ui.tabs = () => {
       const row = h('div', 'cr-tabs');
@@ -316,34 +314,18 @@
     return art;
   }
 
-  // 現在顯示的課程和換頁：mount 之後才有，總表的頁名、連結也靠它翻頁
+  // 這一頁是哪門課：render 時設定，連結和語言清單靠它
   let course = 'ds';
-  let select = () => {};
-  // 程式設計課選的語言：換頁也留著（還沒選過就是那門課的第一種）
-  let progLang = null;
-  // 把一門課的小教室（左邊目錄、右邊講義）放進 container。id 是一開始翻到哪一頁（沒給或還沒寫就開第一頁寫好的）；
-  // 每次換頁呼叫 onSelect(id)，CSIE 課程頁拿來改網址
-  function mount(container, { course: c = 'ds', id, onSelect } = {}) {
+  // 程式設計課選的語言：換頁也留著（每頁是一個網址，所以存在 sessionStorage；沒選過就是那門課的第一種）。
+  // 關掉分頁就忘的暫存，不是存檔，所以不用 it24hr. 開頭（那是存檔備份會帶走的 key）
+  const LANG_KEY = 'csie-lang';
+  const savedLang = () => { try { return sessionStorage.getItem(LANG_KEY); } catch { return null; } };
+  const saveLang = (v) => { try { sessionStorage.setItem(LANG_KEY, v); } catch { /* 無痕模式存不了就只記這一頁 */ } };
+  // 講義頁（csie/<課>/<頁>.html）的右欄：把預先寫好的文字換成有圖、沙盒、追蹤器的互動版；左欄目錄是靜態頁產生的
+  function render(body, { course: c, page: id }) {
     course = c;
-    const TOC = root.Classroom.TOC[course]; const PAGES = root.Classroom.PAGES[course] || {};
-    const main = h('div', 'cr-main'); const nav = h('nav', 'cr-nav'); const body = h('div', 'cr-body');
-    select = (pid) => {
-      body.replaceChildren(pageNode(pid));
-      for (const b of nav.querySelectorAll('button')) b.classList.toggle('on', b.dataset.id === pid);
-      if (onSelect) onSelect(pid);
-    };
-    for (const g of TOC) {
-      nav.append(h('p', 'cr-group', g.group));
-      for (const it of g.items) {
-        const ready = Boolean(PAGES[it.id]);
-        const b = h('button', `cr-item${ready ? '' : ' soon'}`); b.type = 'button'; b.dataset.id = it.id;
-        b.append(h('span', 'mono', it.name), h('small', '', ready ? it.zh : `${it.zh}・準備中`));
-        b.addEventListener('click', () => { select(it.id); window.scrollTo(0, 0); }); nav.append(b);
-      }
-    }
-    main.append(nav, body); container.replaceChildren(main);
-    select(PAGES[id] ? id : TOC.flatMap(g => g.items).find(i => PAGES[i.id]).id);
+    body.replaceChildren(pageNode(id));
   }
 
-  root.ClassroomView = { mount };
+  root.ClassroomView = { render };
 })(typeof window !== 'undefined' ? window : globalThis);

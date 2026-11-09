@@ -1,0 +1,301 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Trie　字典樹｜資料結構｜CSIE 課程｜IT24hr</title>
+<meta name="description" content="字典樹（Trie）：搜尋框的自動完成：開頭一樣的字共用同一段路，打得越多、候選越少。">
+<link rel="canonical" href="https://tsun-u.github.io/it24hr/csie/ds/trie.html">
+<meta property="og:type" content="article">
+<meta property="og:site_name" content="IT24hr">
+<meta property="og:locale" content="zh_TW">
+<meta property="og:url" content="https://tsun-u.github.io/it24hr/csie/ds/trie.html">
+<meta property="og:title" content="Trie　字典樹｜資料結構｜CSIE 課程｜IT24hr">
+<meta property="og:description" content="字典樹（Trie）：搜尋框的自動完成：開頭一樣的字共用同一段路，打得越多、候選越少。">
+<meta property="og:image" content="https://tsun-u.github.io/it24hr/assets/og-image.jpg">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta name="twitter:card" content="summary_large_image">
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"Article","headline":"Trie 字典樹","description":"字典樹（Trie）：搜尋框的自動完成：開頭一樣的字共用同一段路，打得越多、候選越少。","inLanguage":"zh-Hant-TW","author":[{"@type":"Person","name":"Tsun-u"},{"@type":"Person","name":"ATone"}],"image":"https://tsun-u.github.io/it24hr/assets/og-image.jpg","isPartOf":{"@type":"Course","name":"資料結構","url":"https://tsun-u.github.io/it24hr/csie/ds/index.html"},"url":"https://tsun-u.github.io/it24hr/csie/ds/trie.html"}</script>
+<link rel="icon" href="../../assets/favicon.svg" type="image/svg+xml">
+<link rel="icon" href="../../assets/favicon-32.png" sizes="32x32" type="image/png">
+<link rel="apple-touch-icon" href="../../assets/apple-touch-icon.png">
+<link rel="stylesheet" href="../../styles.css">
+</head>
+<body class="csie-body">
+<header class="csie-head">
+  <a class="csie-logo" href="../../index.html">IT24hr</a>
+  <h1>CSIE 課程</h1>
+  <a class="btn csie-play" href="../../index.html">開始玩</a>
+</header>
+<main id="csie" class="csie-main">
+<a class="csie-back" href="index.html">‹ 資料結構</a>
+<h2 class="csie-course-title">資料結構</h2>
+<div class="csie-room"><div class="cr-main"><nav class="cr-nav"><p class="cr-group">初階篇</p><a class="cr-item" href="array.html"><span class="mono">Array</span><small>陣列</small></a><a class="cr-item" href="linked_list.html"><span class="mono">Linked List</span><small>鏈結串列</small></a><a class="cr-item" href="stack.html"><span class="mono">Stack</span><small>堆疊</small></a><a class="cr-item" href="queue.html"><span class="mono">Queue</span><small>佇列</small></a><a class="cr-item" href="circular_queue.html"><span class="mono">Circular Queue</span><small>環狀佇列</small></a><a class="cr-item" href="deque.html"><span class="mono">Deque</span><small>雙向佇列</small></a><a class="cr-item" href="tree.html"><span class="mono">Tree</span><small>樹</small></a><a class="cr-item" href="graph.html"><span class="mono">Graph</span><small>圖</small></a><p class="cr-group">附錄</p><a class="cr-item" href="hashing.html"><span class="mono">Hashing</span><small>雜湊</small></a><a class="cr-item" href="searching.html"><span class="mono">Searching</span><small>搜尋</small></a><a class="cr-item" href="sorting.html"><span class="mono">Sorting</span><small>排序</small></a><a class="cr-item" href="disjoint_set.html"><span class="mono">Disjoint Set</span><small>互斥集合</small></a><a class="cr-item" href="complexity.html"><span class="mono">Big-O</span><small>時間複雜度</small></a><p class="cr-group">進階篇</p><a class="cr-item" href="heap.html"><span class="mono">Heap</span><small>堆積</small></a><a class="cr-item on" href="trie.html"><span class="mono">Trie</span><small>字典樹</small></a><a class="cr-item" href="avl.html"><span class="mono">AVL Tree</span><small>AVL 樹</small></a><a class="cr-item" href="red_black.html"><span class="mono">Red-Black Tree</span><small>紅黑樹</small></a><a class="cr-item" href="b_tree.html"><span class="mono">B-Tree</span><small>B 樹</small></a><a class="cr-item" href="topological_sort.html"><span class="mono">Topological Sort</span><small>拓樸排序</small></a><a class="cr-item" href="shortest_path.html"><span class="mono">Shortest Path</span><small>最短路徑</small></a><a class="cr-item" href="mst.html"><span class="mono">MST</span><small>最小生成樹</small></a><p class="cr-group">彩蛋</p><a class="cr-item" href="null.html"><span class="mono">null</span><small>還沒初始化</small></a></nav><div class="cr-body"><article class="cr-page"><h3 class="cr-title">Trie　字典樹</h3>
+<section class="cr-sec"><h4>生活比喻</h4><p class="cr-hook">搜尋框的自動完成：開頭一樣的字共用同一段路，打得越多、候選越少。</p></section>
+<section class="cr-sec"><h4>什麼時候會用到</h4><ul><li>搜尋框、手機鍵盤的自動完成：打了 ca，就從 c → a 走到的那個節點往下找，跳出 car、card、care、cat；多打一個 r，候選就只剩 car 開頭的三個。</li><li>拼字檢查：把整本字典放進 Trie，打的字照字母走下去，走到一半沒路、或走完了那個節點卻沒有字尾的標記，就知道字典裡沒有這個字。</li><li>過濾留言裡的不雅字、找出文章提到了哪些關鍵字：要找的字有好幾百個時，全放進同一棵 Trie，文章從頭掃一遍就好。AC 自動機（Aho–Corasick）就是在 Trie 上多加「這裡對不上時跳去哪」的連結。</li><li>路由器轉送封包：路由表的每一筆是 IP 位址的開頭（例如 192.168.0.0/16），收到封包要找開頭對得最長的那一筆，叫最長字首比對（longest prefix match）。常見做法是把 IP 拆成一個一個位元，放進每個節點只有 0、1 兩個孩子的 Trie，一個位元走一步。</li></ul></section>
+<section class="cr-sec"><h4>核心觀念</h4><p>Trie 又叫字典樹、字首樹（prefix tree），名字取自 retrieval（取回），有人念 tree、有人念 try（跟一般的樹分開）。它不在節點裡放整個字，而是每條邊代表一個字母：從根往下走，路上的字母連起來就是字。所以開頭一樣的字共用同一段路，cat、car、card、care 都從 c → a 出發。</p><p>根不代表任何字母。有字在某個節點結束，就在那個節點做標記，圖上畫成雙圈：card、care 都經過 car 的 r，那個 r 也是雙圈，因為 car 本身也是一個字。光看路走不走得到，分不出 car 是不是字，要看標記。</p><p>插入（insert）：照字母一個一個往下走，有路就沿用，沒路就長一個新節點，走完在最後那個節點做標記。查一個字（search）：照字母走下去，走完還要那個節點有標記才算。查字首（startsWith）：字首走得完就代表有字是這樣開頭的；要列出接得下去的字，就從走到的節點往下，把有標記的節點都收起來。三個操作都是一個字母走一步，花的時間只跟字長 L 有關，跟存了幾個字無關。</p><p>每個節點的孩子怎麼存：只放小寫英文字母時，常見的是留 26 格的陣列（第 0 格是 a、第 25 格是 z），從字母直接算出往哪一格走；字母種類很多（中文、Unicode）時改用雜湊表，只存真的有的孩子。 <a class="cr-link cr-see" href="hashing.html">→ 雜湊</a></p></section>
+<section class="cr-sec"><h4>常見誤解</h4><div class="cr-traps"><div class="cr-trap"><p class="cr-trap-line wrong"><span class="cr-sr">誤解：</span><span>每個節點存一個完整的字</span></p><p class="cr-trap-line right"><span class="cr-sr">正解：</span><span>一個節點只對應一個字母（從爸爸走到它的那條邊），字是從根走下來、整條路上的字母連起來的。所以開頭一樣的字才能共用同一段路：car、card、care 都走同一段 c → a → r。</span></p></div><div class="cr-trap"><p class="cr-trap-line wrong"><span class="cr-sr">誤解：</span><span>走得到 car 的路，就代表 car 是一個字</span></p><p class="cr-trap-line right"><span class="cr-sr">正解：</span><span>要看那個節點有沒有字尾的標記（圖上的雙圈）。只存 card 的話，c → a → r 的路也在，但 r 不是雙圈，car 就不是字。所以查一個字要走完再看標記，查字首只要走得完就算。</span></p></div><div class="cr-trap"><p class="cr-trap-line wrong"><span class="cr-sr">誤解：</span><span>Trie 查一個字一定比雜湊表快</span></p><p class="cr-trap-line right"><span class="cr-sr">正解：</span><span>兩個都要把整個字看一遍：雜湊表要用整個字算出雜湊值，Trie 要一個字母走一步，都跟字長成正比。Trie 贏的是找字首、照字母順序列出來；雜湊表只能拿整個字去查，回答不了「開頭是 ca 的有哪些」。</span></p></div><div class="cr-trap"><p class="cr-trap-line wrong"><span class="cr-sr">誤解：</span><span>Trie 很省空間</span></p><p class="cr-trap-line right"><span class="cr-sr">正解：</span><span>開頭一樣的字共用前面那段，是省了一些；但每個節點都要留孩子的位置，用 26 格陣列的話，一個節點就是 26 個指標。字少、開頭又各不相同時，大部分格子都空著，比直接把字串存起來還佔空間。</span></p></div><div class="cr-trap"><p class="cr-trap-line wrong"><span class="cr-sr">誤解：</span><span>Trie 列出來的字一定照字母順序</span></p><p class="cr-trap-line right"><span class="cr-sr">正解：</span><span>要看孩子怎麼走。26 格陣列從 a 走到 z，出來就是字母順序；孩子用 Python 的 dict、JavaScript 的 Map 存的話，走的是放進去的順序：這頁先放 cat 再放 car，a 底下先有 t 才有 r，不排序就會列出 cat car card care。所以這頁 Python、JavaScript 的程式走孩子之前先排序。</span></p></div></div></section>
+<section class="cr-sec"><h4>實作</h4><div class="cr-code"><p class="cr-sub">Python：用內建的</p><pre class="cr-pre"># 內建的沒有 Trie，考試要自己刻；最接近的是排好序的串列＋bisect。
+# 排好序以後，開頭一樣的字會排在一起：二分搜尋找到第一個不比 &quot;car&quot; 小的字，往後拿到開頭不是 car 為止
+import bisect
+
+words = sorted([&quot;cat&quot;, &quot;car&quot;, &quot;card&quot;, &quot;care&quot;, &quot;dog&quot;])
+prefix = &quot;car&quot;
+i = bisect.bisect_left(words, prefix)
+found = []
+while i &lt; len(words) and words[i].startswith(prefix):
+    found.append(words[i])
+    i += 1
+print(*found)</pre><p class="cr-sub">Python：自己刻（考試要手寫）</p><pre class="cr-pre">class Node:
+    def __init__(self):
+        self.children = {}   # 字母 → 下一個節點
+        self.end = False     # 有沒有字在這裡結束
+
+
+class Trie:
+    def __init__(self):
+        self.root = Node()
+
+    def insert(self, word):
+        node = self.root
+        for ch in word:                   # 照字母往下走，沒有路就長一個新節點
+            if ch not in node.children:
+                node.children[ch] = Node()
+            node = node.children[ch]
+        node.end = True
+
+    def starts_with(self, prefix):
+        node = self.root
+        for ch in prefix:                 # 先走完字首，走不下去就是沒有
+            if ch not in node.children:
+                return []
+            node = node.children[ch]
+        found = []
+        self._collect(node, prefix, found)
+        return found
+
+    # 先收自己，再走每個孩子；dict 照放進去的順序，要照字母順序列出來就先排序
+    def _collect(self, node, word, found):
+        if node.end:
+            found.append(word)
+        for ch in sorted(node.children):
+            self._collect(node.children[ch], word + ch, found)
+
+
+trie = Trie()
+for w in (&quot;cat&quot;, &quot;car&quot;, &quot;card&quot;, &quot;care&quot;, &quot;dog&quot;):
+    trie.insert(w)
+print(*trie.starts_with(&quot;car&quot;))</pre><p class="cr-sub">JavaScript：用內建的</p><pre class="cr-pre">// 內建的沒有 Trie，考試要自己刻；最接近的是排好序的陣列，filter 留下開頭是 car 的字（要整個陣列掃一遍）
+const words = ['cat', 'car', 'card', 'care', 'dog'].sort();
+const prefix = 'car';
+const found = words.filter(w =&gt; w.startsWith(prefix));
+console.log(found.join(' '));</pre><p class="cr-sub">JavaScript：自己刻（考試要手寫）</p><pre class="cr-pre">class Node {
+  constructor() {
+    this.children = new Map();   // 字母 → 下一個節點
+    this.end = false;            // 有沒有字在這裡結束
+  }
+}
+
+class Trie {
+  constructor() {
+    this.root = new Node();
+  }
+  insert(word) {
+    let node = this.root;
+    for (const ch of word) {             // 照字母往下走，沒有路就長一個新節點
+      if (!node.children.has(ch)) node.children.set(ch, new Node());
+      node = node.children.get(ch);
+    }
+    node.end = true;
+  }
+  startsWith(prefix) {
+    let node = this.root;
+    for (const ch of prefix) {           // 先走完字首，走不下去就是沒有
+      node = node.children.get(ch);
+      if (!node) return [];
+    }
+    const found = [];
+    this.collect(node, prefix, found);
+    return found;
+  }
+  // 先收自己，再走每個孩子；Map 照放進去的順序，要照字母順序列出來就先排序
+  collect(node, word, found) {
+    if (node.end) found.push(word);
+    for (const ch of [...node.children.keys()].sort()) this.collect(node.children.get(ch), word + ch, found);
+  }
+}
+
+const trie = new Trie();
+for (const w of ['cat', 'car', 'card', 'care', 'dog']) trie.insert(w);
+console.log(trie.startsWith('car').join(' '));</pre><p class="cr-sub">Java：用內建的</p><pre class="cr-pre">import java.util.StringJoiner;
+import java.util.TreeSet;
+
+public class Main {
+    public static void main(String[] args) {
+        // 內建的沒有 Trie，考試要自己刻；最接近的是 TreeSet，字會照字母順序排好，開頭一樣的排在一起。
+        // subSet 拿出從 &quot;car&quot; 到 &quot;car&quot; 接最大字元（不含）的那一段，就是開頭是 car 的字
+        TreeSet&lt;String&gt; words = new TreeSet&lt;&gt;();
+        for (String w : new String[] {&quot;cat&quot;, &quot;car&quot;, &quot;card&quot;, &quot;care&quot;, &quot;dog&quot;}) words.add(w);
+        String prefix = &quot;car&quot;;
+        StringJoiner out = new StringJoiner(&quot; &quot;);
+        for (String w : words.subSet(prefix, prefix + Character.MAX_VALUE)) out.add(w);
+        System.out.println(out);
+    }
+}</pre><p class="cr-sub">Java：自己刻（考試要手寫）</p><pre class="cr-pre">import java.util.ArrayList;
+import java.util.List;
+
+public class Main {
+    // 只放小寫英文字母：每個節點留 26 格給孩子，第 0 格是 a、第 25 格是 z
+    static class Node {
+        Node[] children = new Node[26];
+        boolean end;   // 有沒有字在這裡結束
+    }
+
+    static class Trie {
+        private final Node root = new Node();
+
+        void insert(String word) {
+            Node node = root;
+            for (char ch : word.toCharArray()) {      // 照字母往下走，沒有路就長一個新節點
+                int i = ch - 'a';
+                if (node.children[i] == null) node.children[i] = new Node();
+                node = node.children[i];
+            }
+            node.end = true;
+        }
+
+        List&lt;String&gt; startsWith(String prefix) {
+            List&lt;String&gt; found = new ArrayList&lt;&gt;();
+            Node node = root;
+            for (char ch : prefix.toCharArray()) {    // 先走完字首，走不下去就是沒有
+                node = node.children[ch - 'a'];
+                if (node == null) return found;
+            }
+            collect(node, new StringBuilder(prefix), found);
+            return found;
+        }
+
+        // 先收自己，再從 a 到 z 走每個孩子，收到的字就是照字母排的
+        private void collect(Node node, StringBuilder word, List&lt;String&gt; found) {
+            if (node.end) found.add(word.toString());
+            for (int i = 0; i &lt; 26; i++) {
+                if (node.children[i] == null) continue;
+                word.append((char) ('a' + i));
+                collect(node.children[i], word, found);
+                word.deleteCharAt(word.length() - 1);
+            }
+        }
+    }
+
+    public static void main(String[] args) {
+        Trie trie = new Trie();
+        for (String w : new String[] {&quot;cat&quot;, &quot;car&quot;, &quot;card&quot;, &quot;care&quot;, &quot;dog&quot;}) trie.insert(w);
+        System.out.println(String.join(&quot; &quot;, trie.startsWith(&quot;car&quot;)));
+    }
+}</pre><p class="cr-sub">C++：用內建的</p><pre class="cr-pre">#include &lt;iostream&gt;
+#include &lt;set&gt;
+#include &lt;string&gt;
+
+int main() {
+    // 內建的沒有 Trie，考試要自己刻；最接近的是 std::set，字會照字母順序排好，開頭一樣的排在一起。
+    // lower_bound 找到第一個不比 &quot;car&quot; 小的字，往後拿到開頭不是 car 為止
+    std::set&lt;std::string&gt; words = {&quot;cat&quot;, &quot;car&quot;, &quot;card&quot;, &quot;care&quot;, &quot;dog&quot;};
+    std::string prefix = &quot;car&quot;;
+    bool first = true;
+    for (auto it = words.lower_bound(prefix); it != words.end() &amp;&amp; it-&gt;compare(0, prefix.size(), prefix) == 0; ++it) {
+        std::cout &lt;&lt; (first ? &quot;&quot; : &quot; &quot;) &lt;&lt; *it;
+        first = false;
+    }
+    std::cout &lt;&lt; &quot;\n&quot;;
+}</pre><p class="cr-sub">C++：自己刻（考試要手寫）</p><pre class="cr-pre">#include &lt;iostream&gt;
+#include &lt;string&gt;
+#include &lt;vector&gt;
+
+// 只放小寫英文字母：每個節點留 26 格給孩子，第 0 格是 a、第 25 格是 z
+struct Node {
+    Node* children[26] = {};
+    bool end = false;   // 有沒有字在這裡結束
+};
+
+void insert(Node* root, const std::string&amp; word) {
+    Node* node = root;
+    for (char ch : word) {                       // 照字母往下走，沒有路就長一個新節點
+        Node*&amp; next = node-&gt;children[ch - 'a'];
+        if (!next) next = new Node();
+        node = next;
+    }
+    node-&gt;end = true;
+}
+
+// 先收自己，再從 a 到 z 走每個孩子，收到的字就是照字母排的
+void collect(const Node* node, std::string&amp; word, std::vector&lt;std::string&gt;&amp; found) {
+    if (node-&gt;end) found.push_back(word);
+    for (int i = 0; i &lt; 26; i++) {
+        if (!node-&gt;children[i]) continue;
+        word.push_back(static_cast&lt;char&gt;('a' + i));
+        collect(node-&gt;children[i], word, found);
+        word.pop_back();
+    }
+}
+
+std::vector&lt;std::string&gt; startsWith(const Node* root, const std::string&amp; prefix) {
+    std::vector&lt;std::string&gt; found;
+    const Node* node = root;
+    for (char ch : prefix) {                     // 先走完字首，走不下去就是沒有
+        node = node-&gt;children[ch - 'a'];
+        if (!node) return found;
+    }
+    std::string word = prefix;
+    collect(node, word, found);
+    return found;
+}
+
+// 釋放記憶體：孩子先刪，最後才刪自己
+void destroy(Node* node) {
+    for (Node* child : node-&gt;children) if (child) destroy(child);
+    delete node;
+}
+
+int main() {
+    Node* root = new Node();
+    for (const char* w : {&quot;cat&quot;, &quot;car&quot;, &quot;card&quot;, &quot;care&quot;, &quot;dog&quot;}) insert(root, w);
+    std::vector&lt;std::string&gt; found = startsWith(root, &quot;car&quot;);
+    for (size_t i = 0; i &lt; found.size(); i++) std::cout &lt;&lt; (i ? &quot; &quot; : &quot;&quot;) &lt;&lt; found[i];
+    std::cout &lt;&lt; &quot;\n&quot;;
+    destroy(root);
+}</pre><p class="cr-out mono">輸出：car card care</p></div></section>
+<section class="cr-sec"><h4>時間複雜度</h4><table class="cr-big-o"><tr><td>insert 插入一個字（L 是字長）</td><td class="mono">O(L)</td></tr><tr><td>search 查一個字在不在</td><td class="mono">O(L)</td></tr><tr><td>startsWith 查有沒有字是這樣開頭的</td><td class="mono">O(L)</td></tr><tr><td>列出開頭是這個字首的字</td><td class="mono">O(L)，再加上結果的總長度</td></tr></table><p class="cr-hint">O(1)、O(n) 是什麼意思、怎麼算，見附錄「時間複雜度」。</p></section>
+<section class="cr-sec"><h4>總結</h4><p class="cr-hook">下次在搜尋框打了幾個字母、看著自動完成的候選越來越少，你就知道：那是一棵 Trie，開頭一樣的字共用同一段路，打得越多、走得越深、候選越少。</p></section></article></div></div></div>
+</main>
+<footer class="seo-foot"><nav aria-label="IT24hr 的其他內容"><a href="../../index.html">玩 IT24hr</a><a href="../../se.html">認識軟體工程</a><a href="../../csie.html">CSIE 課程</a><a href="../../handbook.html">新人手冊</a><a href="../../atlas.html">IT 圖鑑</a></nav></footer>
+<script src="../../vendor/rough.js"></script>
+<script src="../../icons.js"></script>
+<script src="../../verdict.js"></script>
+<script src="../../classroom.js"></script>
+<script src="../../classroom/ds/array.js"></script>
+<script src="../../classroom/ds/avl.js"></script>
+<script src="../../classroom/ds/b_tree.js"></script>
+<script src="../../classroom/ds/circular_queue.js"></script>
+<script src="../../classroom/ds/complexity.js"></script>
+<script src="../../classroom/ds/deque.js"></script>
+<script src="../../classroom/ds/disjoint_set.js"></script>
+<script src="../../classroom/ds/graph.js"></script>
+<script src="../../classroom/ds/hashing.js"></script>
+<script src="../../classroom/ds/heap.js"></script>
+<script src="../../classroom/ds/linked_list.js"></script>
+<script src="../../classroom/ds/mst.js"></script>
+<script src="../../classroom/ds/null.js"></script>
+<script src="../../classroom/ds/queue.js"></script>
+<script src="../../classroom/ds/red_black.js"></script>
+<script src="../../classroom/ds/searching.js"></script>
+<script src="../../classroom/ds/shortest_path.js"></script>
+<script src="../../classroom/ds/sorting.js"></script>
+<script src="../../classroom/ds/stack.js"></script>
+<script src="../../classroom/ds/topological_sort.js"></script>
+<script src="../../classroom/ds/tree.js"></script>
+<script src="../../classroom/ds/trie.js"></script>
+<script src="../../classroom-view.js"></script>
+<script src="../../csie.js"></script>
+</body>
+</html>

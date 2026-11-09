@@ -1,0 +1,184 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Arrays　陣列與串列｜APCS 程式設計｜CSIE 課程｜IT24hr</title>
+<meta name="description" content="陣列與串列（Arrays）：全班 30 個人的成績都存進程式了，我想輸入座號，就印出那個人的成績和有沒有及格，怎麼做？">
+<link rel="canonical" href="https://tsun-u.github.io/it24hr/csie/programming/arrays.html">
+<meta property="og:type" content="article">
+<meta property="og:site_name" content="IT24hr">
+<meta property="og:locale" content="zh_TW">
+<meta property="og:url" content="https://tsun-u.github.io/it24hr/csie/programming/arrays.html">
+<meta property="og:title" content="Arrays　陣列與串列｜APCS 程式設計｜CSIE 課程｜IT24hr">
+<meta property="og:description" content="陣列與串列（Arrays）：全班 30 個人的成績都存進程式了，我想輸入座號，就印出那個人的成績和有沒有及格，怎麼做？">
+<meta property="og:image" content="https://tsun-u.github.io/it24hr/assets/og-image.jpg">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta name="twitter:card" content="summary_large_image">
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"Article","headline":"Arrays 陣列與串列","description":"陣列與串列（Arrays）：全班 30 個人的成績都存進程式了，我想輸入座號，就印出那個人的成績和有沒有及格，怎麼做？","inLanguage":"zh-Hant-TW","author":[{"@type":"Person","name":"Tsun-u"},{"@type":"Person","name":"ATone"}],"image":"https://tsun-u.github.io/it24hr/assets/og-image.jpg","isPartOf":{"@type":"Course","name":"APCS 程式設計","url":"https://tsun-u.github.io/it24hr/csie/programming/index.html"},"url":"https://tsun-u.github.io/it24hr/csie/programming/arrays.html"}</script>
+<link rel="icon" href="../../assets/favicon.svg" type="image/svg+xml">
+<link rel="icon" href="../../assets/favicon-32.png" sizes="32x32" type="image/png">
+<link rel="apple-touch-icon" href="../../assets/apple-touch-icon.png">
+<link rel="stylesheet" href="../../styles.css">
+</head>
+<body class="csie-body">
+<header class="csie-head">
+  <a class="csie-logo" href="../../index.html">IT24hr</a>
+  <h1>CSIE 課程</h1>
+  <a class="btn csie-play" href="../../index.html">開始玩</a>
+</header>
+<main id="csie" class="csie-main">
+<a class="csie-back" href="index.html">‹ APCS 程式設計</a>
+<h2 class="csie-course-title">APCS 程式設計</h2>
+<div class="csie-room"><div class="cr-main"><nav class="cr-nav"><p class="cr-group">基礎</p><a class="cr-item" href="variables.html"><span class="mono">Variables</span><small>變數與資料型態</small></a><a class="cr-item" href="expressions.html"><span class="mono">Expressions</span><small>運算式</small></a><a class="cr-item" href="io.html"><span class="mono">Input &amp; Output</span><small>輸入與輸出</small></a><a class="cr-item" href="selection.html"><span class="mono">if / else</span><small>條件判斷</small></a><a class="cr-item" href="loops.html"><span class="mono">Loops</span><small>迴圈</small></a><p class="cr-group">陣列與字串</p><a class="cr-item on" href="arrays.html"><span class="mono">Arrays</span><small>陣列與串列</small></a><a class="cr-item" href="strings.html"><span class="mono">Strings</span><small>字元與字串</small></a><p class="cr-group">函式</p><a class="cr-item" href="functions.html"><span class="mono">Functions</span><small>函式</small></a><a class="cr-item" href="recursion.html"><span class="mono">Recursion</span><small>遞迴</small></a><a class="cr-item" href="structs.html"><span class="mono">Structs</span><small>自訂資料型態</small></a></nav><div class="cr-body"><article class="cr-page"><h3 class="cr-title">Arrays　陣列與串列</h3>
+<section class="cr-sec"><h4>生活應用</h4><p class="cr-hook">全班 30 個人的成績都存進程式了，我想輸入座號，就印出那個人的成績和有沒有及格，怎麼做？</p></section>
+<section class="cr-sec"><h4>複習</h4><p>我們前面學了變數和判斷式，最直覺的做法就是寫 30 個變數、一串 if／else if（你輸入的座號，還要對回變數）和一個判斷式（判斷你取出來的數字有沒有及格）。在你把 else if 寫到第 15 個的時候，你收到通知：「隔壁班 35 人也麻煩你囉！」你是否已經開始懷疑人生？</p><blockquote class="cr-quote">陣列可以解決這個問題。</blockquote></section>
+<section class="cr-sec"><h4>核心觀念</h4><p>陣列（array）是一排同型態、連續、有編號的格子，整排共用一個名字。全班的成績不用 s1、s2、…、s30 三十個名字，一個 score 就夠：score[0] 是第一個人、score[29] 是最後一個人。方括號裡的編號叫索引（index），從 0 開始數，所以 n 格的陣列索引是 0 到 n − 1，座號 k 的成績在 score[k − 1]。</p><p>索引可以是變數，這就是它比 30 個變數強的地方：你輸入的座號本身就是位置，score[k − 1] 一行就拿到了，不用 30 個 if 一個一個對。而且不管陣列有 5 格還是 5 萬格，拿第 i 格都只要一步，O(1)。</p><p>大小：C、C++、Java 宣告時就要定幾格（int score[30]），之後不能多不能少；Python 的 list 用 append 可以一直加，所以這一頁叫「陣列與串列」。要對每一格做同一件事，用迴圈讓 i 從 0 跑到 n − 1，叫走訪（traverse）：算總和、找最高分、數幾個人不及格，都是走訪一遍。</p><p>表格用二維陣列（two-dimensional array）：table[i][j] 先列後行，table[i] 是第 i 列（第 i 個人的那一排），table[i][j] 是那一列的第 j 格（他的第 j 科）。走訪整張表就是巢狀迴圈：外圈換列、內圈換行。</p><p>陣列在記憶體裡怎麼排、為什麼拿第 i 格只要一步、插一格進中間要搬多少，資料結構中我們也會再次提到它。 <a class="cr-link cr-see" href="../ds/array.html">→ 陣列</a></p></section>
+<section class="cr-sec"><h4>什麼時候會用到</h4><ul><li>電影院選位：一排座位存成一排格子，看 8 號位子有沒有人，直接讀編號 8 對到的那一格，不用從第一個位子一路看過去。</li><li>開票：每位候選人一格，開一張票就在那位的格子加 1，開完直接讀每格是幾票，不用為每位候選人各寫一個 if。</li><li>遊戲棋盤：井字遊戲、踩地雷的棋盤是二維陣列 board[列][行]，每格存這裡是空的、圈還是叉；判斷連線就是沿著列、行、斜線一格一格讀。</li><li>電腦內部：下一頁的字串底下是一排字元的陣列；排序、搜尋這些演算法大多在一個陣列上一格一格走。</li></ul></section>
+<section class="cr-sec"><h4>常見誤解</h4><div class="cr-traps"><div class="cr-trap"><p class="cr-trap-line wrong"><span class="cr-sr">誤解：</span><span>第一格是 score[1]</span></p><p class="cr-trap-line right"><span class="cr-sr">正解：</span><span>第一格是 score[0]。索引是「離第一格幾步」，所以座號 k 的成績是 score[k − 1]：追蹤器挑 k = 3，拿到的是 score[2] = 90，不是 score[3] = 45。</span></p></div><div class="cr-trap"><p class="cr-trap-line wrong"><span class="cr-sr">誤解：</span><span>n 格的陣列，最後一格是 a[n]</span></p><p class="cr-trap-line right"><span class="cr-sr">正解：</span><span>最後一格是 a[n − 1]，a[n] 已經出界。C、C++ 不檢查，讀到的是旁邊記憶體的垃圾值、寫進去會弄壞別的變數；Java 丟 ArrayIndexOutOfBoundsException，Python 報 IndexError。Python 的 a[-1] 是倒數第一格，C、C++、Java 的 a[-1] 一樣是出界。</span></p></div><div class="cr-trap"><p class="cr-trap-line wrong"><span class="cr-sr">誤解：</span><span>b = a 會把陣列複製一份</span></p><p class="cr-trap-line right"><span class="cr-sr">正解：</span><span>Python 和 Java 的 b = a 是讓 b 和 a 指著同一排格子，改 b[0]，a[0] 也變了。要複製得明講：Python 寫 list(a) 或 a[:]，Java 寫 a.clone()。C、C++ 的陣列不能整排用 = 指定，要用迴圈一格一格抄。</span></p></div><div class="cr-trap"><p class="cr-trap-line wrong"><span class="cr-sr">誤解：</span><span>宣告 int a[5] 以後，每一格都是 0</span></p><p class="cr-trap-line right"><span class="cr-sr">正解：</span><span>Java 的 new int[5] 每格是 0；C、C++ 在函式裡宣告的 int a[5] 沒有初始值，裡面是記憶體原本的垃圾，要寫 int a[5] = {0} 才全是 0；Python 要自己寫 [0] * 5。考試的 C 題本常從這裡出。</span></p></div><div class="cr-trap"><p class="cr-trap-line wrong"><span class="cr-sr">誤解：</span><span>二維陣列 a[i][j] 的 i 是行（直的）</span></p><p class="cr-trap-line right"><span class="cr-sr">正解：</span><span>先列後行：a[i] 是第 i 列（橫的一整排），a[i][j] 是那一列裡的第 j 格。3 列 4 行的表宣告成 a[3][4]，i 最大 2、j 最大 3，兩個寫反就出界。</span></p></div><div class="cr-trap"><p class="cr-trap-line wrong"><span class="cr-sr">誤解：</span><span>陣列滿了再塞下一格，它會自己變大</span></p><p class="cr-trap-line right"><span class="cr-sr">正解：</span><span>C、C++、Java 的陣列宣告幾格就是幾格，塞第 n + 1 個就是出界；要變大得另開一個更大的陣列，把舊的搬過去。Python 的 list 要用 append 這類方法加才會長，a[5] = x 對只有 5 格的 list 一樣是 IndexError。</span></p></div></div></section>
+<section class="cr-sec"><h4>實作</h4><div class="cr-code"><p class="cr-sub">C</p><pre class="cr-pre">#include &lt;stdio.h&gt;
+
+int main(void) {
+    int score[] = {72, 58, 90, 45, 88};
+    int n = 5;
+
+    int total = 0;
+    for (int i = 0; i &lt; n; i++) {           // 走訪：i 從 0 到 n - 1，每一格做同一件事
+        total += score[i];
+    }
+    int avg = total / n;                    // 整數除法：353 / 5 = 70
+
+    int below = 0;
+    for (int i = 0; i &lt; n; i++) {
+        if (score[i] &lt; avg) {
+            below += 1;
+        }
+    }
+
+    int table[3][3] = {{80, 90, 70}, {60, 75, 85}, {95, 88, 92}};   // 3 個人 × 3 科：table[i] 是第 i 個人那一列
+    int rows[3] = {0, 0, 0};
+    for (int i = 0; i &lt; 3; i++) {
+        for (int j = 0; j &lt; 3; j++) {       // 巢狀迴圈走訪二維陣列：外圈換列、內圈換行
+            rows[i] += table[i][j];
+        }
+    }
+
+    printf(&quot;%d %d %d %d %d\n&quot;, avg, below, rows[0], rows[1], rows[2]);
+    return 0;
+}</pre><p class="cr-sub">C++</p><pre class="cr-pre">#include &lt;iostream&gt;
+
+int main() {
+    int score[] = {72, 58, 90, 45, 88};
+    int n = 5;
+
+    int total = 0;
+    for (int i = 0; i &lt; n; i++) {           // 走訪：i 從 0 到 n - 1，每一格做同一件事
+        total += score[i];
+    }
+    int avg = total / n;                    // 整數除法：353 / 5 = 70
+
+    int below = 0;
+    for (int i = 0; i &lt; n; i++) {
+        if (score[i] &lt; avg) {
+            below += 1;
+        }
+    }
+
+    int table[3][3] = {{80, 90, 70}, {60, 75, 85}, {95, 88, 92}};   // 3 個人 × 3 科：table[i] 是第 i 個人那一列
+    int rows[3] = {0, 0, 0};
+    for (int i = 0; i &lt; 3; i++) {
+        for (int j = 0; j &lt; 3; j++) {       // 巢狀迴圈走訪二維陣列：外圈換列、內圈換行
+            rows[i] += table[i][j];
+        }
+    }
+
+    std::cout &lt;&lt; avg &lt;&lt; &quot; &quot; &lt;&lt; below &lt;&lt; &quot; &quot; &lt;&lt; rows[0] &lt;&lt; &quot; &quot; &lt;&lt; rows[1] &lt;&lt; &quot; &quot; &lt;&lt; rows[2] &lt;&lt; &quot;\n&quot;;
+    return 0;
+}</pre><p class="cr-sub">Java</p><pre class="cr-pre">public class Main {
+    public static void main(String[] args) {
+        int[] score = {72, 58, 90, 45, 88};
+        int n = 5;
+
+        int total = 0;
+        for (int i = 0; i &lt; n; i++) {       // 走訪：i 從 0 到 n - 1，每一格做同一件事
+            total += score[i];
+        }
+        int avg = total / n;                // 整數除法：353 / 5 = 70
+
+        int below = 0;
+        for (int i = 0; i &lt; n; i++) {
+            if (score[i] &lt; avg) {
+                below += 1;
+            }
+        }
+
+        int[][] table = {{80, 90, 70}, {60, 75, 85}, {95, 88, 92}};   // 3 個人 × 3 科：table[i] 是第 i 個人那一列
+        int[] rows = {0, 0, 0};
+        for (int i = 0; i &lt; 3; i++) {
+            for (int j = 0; j &lt; 3; j++) {   // 巢狀迴圈走訪二維陣列：外圈換列、內圈換行
+                rows[i] += table[i][j];
+            }
+        }
+
+        System.out.println(avg + &quot; &quot; + below + &quot; &quot; + rows[0] + &quot; &quot; + rows[1] + &quot; &quot; + rows[2]);
+    }
+}</pre><p class="cr-sub">Python</p><pre class="cr-pre">score = [72, 58, 90, 45, 88]
+n = 5
+
+total = 0
+for i in range(n):                 # 走訪：i 從 0 到 n - 1，每一格做同一件事
+    total += score[i]
+avg = total // n                   # 整數除法：353 // 5 = 70
+
+below = 0
+for i in range(n):
+    if score[i] &lt; avg:
+        below += 1
+
+table = [[80, 90, 70], [60, 75, 85], [95, 88, 92]]   # 3 個人 × 3 科：table[i] 是第 i 個人那一列
+rows = [0, 0, 0]
+for i in range(3):
+    for j in range(3):             # 巢狀迴圈走訪二維陣列：外圈換列、內圈換行
+        rows[i] += table[i][j]
+
+print(avg, below, rows[0], rows[1], rows[2])</pre><p class="cr-out mono">輸出：70 2 240 220 275</p></div></section>
+<section class="cr-sec"><h4>跑幾步</h4><table class="cr-big-o"><tr><td>追蹤器的 score[k - 1]：照編號直接拿，陣列 5 格或 5 萬格都一樣</td><td class="mono">1 次，O(1)</td></tr><tr><td>實作的走訪 total += score[i]（n = 5 時跑 5 次）</td><td class="mono">n 次，O(n)</td></tr><tr><td>實作的二維走訪 rows[i] += table[i][j]（3 × 3 的表跑 9 次）</td><td class="mono">n·m 次，O(n·m)</td></tr></table><p>拿一格不管陣列多大都是一步，要每一格都看過才跟格數一起長。Big-O 的意思和怎麼算，在資料結構的附錄。 <a class="cr-link cr-see" href="../ds/complexity.html">→ 時間複雜度</a></p></section>
+<section class="cr-sec"><h4>試試看</h4><div class="cr-try"><p class="cr-try-q"><span class="cr-try-kind">程式運行追蹤</span><span>1. 下面這段程式印出什麼？</span></p><p class="cr-sub">C</p><pre class="cr-pre">int a[] = {3, 1, 4, 1, 5};
+for (int i = 1; i &lt; 5; i++) {
+    a[i] = a[i - 1] + a[i];
+}
+printf(&quot;%d %d\n&quot;, a[2], a[4]);</pre><ol class="cr-try-opts"><li>8 9</li><li>5 6</li><li>4 5</li><li>8 14</li></ol></div><div class="cr-try"><p class="cr-try-q"><span class="cr-try-kind">程式測試與除錯</span><span>2. 想算 5 個成績的總和（應該是 353），結果印出 281。要怎麼改？</span></p><p class="cr-sub">C</p><pre class="cr-pre">int score[] = {72, 58, 90, 45, 88};
+int n = 5;
+int total = 0;
+for (int i = 1; i &lt; n; i++) {
+    total += score[i];
+}
+printf(&quot;%d\n&quot;, total);</pre><ol class="cr-try-opts"><li>把 i &lt; n 改成 i &lt;= n</li><li>把 i = 1 改成 i = 0</li><li>把 n = 5 改成 n = 6</li><li>把 total = 0 改成 total = 72</li></ol></div><div class="cr-try"><p class="cr-try-q"><span class="cr-try-kind">程式效能分析</span><span>3. 一張 n 列 m 行的成績表，n = 4、m = 3 時，下面這段程式跑完 count 是多少？</span></p><p class="cr-sub">C</p><pre class="cr-pre">int count = 0;
+for (int i = 0; i &lt; n; i++) {
+    for (int j = 0; j &lt; m; j++) {
+        count += 1;
+    }
+}</pre><ol class="cr-try-opts"><li>4</li><li>7</li><li>12</li><li>3</li></ol></div></section>
+<section class="cr-sec"><h4>總結</h4><p class="cr-hook">把 30 個成績放進一個陣列 score，輸入座號 k，score[k − 1] 就是那個人的成績，再用一個 if 判斷及不及格，30 個 if 變成一行。下次碰到照編號找資料，你就知道：放進陣列，用編號直接拿。</p></section>
+<section class="cr-sec"><h4>課外補充</h4><p>Python 的 list 不要求每一格同型態：[1, &quot;a&quot;, 2.5] 放得進去，所以它叫串列（list）而不叫陣列。C、C++、Java 的陣列宣告成 int 就每一格都是 int，這也是它每一格一樣大、位置算得出來的原因。</p><p>C 的陣列交給函式時，傳過去的是第一格的位址，不是整個複製一份，所以函式裡改了 a[0]，外面的 a[0] 也跟著變。這件事在函式那頁的傳值、傳參考再細講。</p></section></article></div></div></div>
+</main>
+<footer class="seo-foot"><nav aria-label="IT24hr 的其他內容"><a href="../../index.html">玩 IT24hr</a><a href="../../se.html">認識軟體工程</a><a href="../../csie.html">CSIE 課程</a><a href="../../handbook.html">新人手冊</a><a href="../../atlas.html">IT 圖鑑</a></nav></footer>
+<script src="../../vendor/rough.js"></script>
+<script src="../../icons.js"></script>
+<script src="../../verdict.js"></script>
+<script src="../../classroom.js"></script>
+<script src="../../classroom/programming/arrays.js"></script>
+<script src="../../classroom/programming/expressions.js"></script>
+<script src="../../classroom/programming/functions.js"></script>
+<script src="../../classroom/programming/io.js"></script>
+<script src="../../classroom/programming/loops.js"></script>
+<script src="../../classroom/programming/recursion.js"></script>
+<script src="../../classroom/programming/selection.js"></script>
+<script src="../../classroom/programming/strings.js"></script>
+<script src="../../classroom/programming/structs.js"></script>
+<script src="../../classroom/programming/variables.js"></script>
+<script src="../../classroom-view.js"></script>
+<script src="../../csie.js"></script>
+</body>
+</html>

@@ -1,0 +1,434 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>B-Tree　B 樹｜資料結構｜CSIE 課程｜IT24hr</title>
+<meta name="description" content="B 樹（B-Tree）：圖書館找書：走一趟比看一眼牌子累得多，所以一塊牌子寫好幾段書號，走兩三趟就找到書。">
+<link rel="canonical" href="https://tsun-u.github.io/it24hr/csie/ds/b_tree.html">
+<meta property="og:type" content="article">
+<meta property="og:site_name" content="IT24hr">
+<meta property="og:locale" content="zh_TW">
+<meta property="og:url" content="https://tsun-u.github.io/it24hr/csie/ds/b_tree.html">
+<meta property="og:title" content="B-Tree　B 樹｜資料結構｜CSIE 課程｜IT24hr">
+<meta property="og:description" content="B 樹（B-Tree）：圖書館找書：走一趟比看一眼牌子累得多，所以一塊牌子寫好幾段書號，走兩三趟就找到書。">
+<meta property="og:image" content="https://tsun-u.github.io/it24hr/assets/og-image.jpg">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta name="twitter:card" content="summary_large_image">
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"Article","headline":"B-Tree B 樹","description":"B 樹（B-Tree）：圖書館找書：走一趟比看一眼牌子累得多，所以一塊牌子寫好幾段書號，走兩三趟就找到書。","inLanguage":"zh-Hant-TW","author":[{"@type":"Person","name":"Tsun-u"},{"@type":"Person","name":"ATone"}],"image":"https://tsun-u.github.io/it24hr/assets/og-image.jpg","isPartOf":{"@type":"Course","name":"資料結構","url":"https://tsun-u.github.io/it24hr/csie/ds/index.html"},"url":"https://tsun-u.github.io/it24hr/csie/ds/b_tree.html"}</script>
+<link rel="icon" href="../../assets/favicon.svg" type="image/svg+xml">
+<link rel="icon" href="../../assets/favicon-32.png" sizes="32x32" type="image/png">
+<link rel="apple-touch-icon" href="../../assets/apple-touch-icon.png">
+<link rel="stylesheet" href="../../styles.css">
+</head>
+<body class="csie-body">
+<header class="csie-head">
+  <a class="csie-logo" href="../../index.html">IT24hr</a>
+  <h1>CSIE 課程</h1>
+  <a class="btn csie-play" href="../../index.html">開始玩</a>
+</header>
+<main id="csie" class="csie-main">
+<a class="csie-back" href="index.html">‹ 資料結構</a>
+<h2 class="csie-course-title">資料結構</h2>
+<div class="csie-room"><div class="cr-main"><nav class="cr-nav"><p class="cr-group">初階篇</p><a class="cr-item" href="array.html"><span class="mono">Array</span><small>陣列</small></a><a class="cr-item" href="linked_list.html"><span class="mono">Linked List</span><small>鏈結串列</small></a><a class="cr-item" href="stack.html"><span class="mono">Stack</span><small>堆疊</small></a><a class="cr-item" href="queue.html"><span class="mono">Queue</span><small>佇列</small></a><a class="cr-item" href="circular_queue.html"><span class="mono">Circular Queue</span><small>環狀佇列</small></a><a class="cr-item" href="deque.html"><span class="mono">Deque</span><small>雙向佇列</small></a><a class="cr-item" href="tree.html"><span class="mono">Tree</span><small>樹</small></a><a class="cr-item" href="graph.html"><span class="mono">Graph</span><small>圖</small></a><p class="cr-group">附錄</p><a class="cr-item" href="hashing.html"><span class="mono">Hashing</span><small>雜湊</small></a><a class="cr-item" href="searching.html"><span class="mono">Searching</span><small>搜尋</small></a><a class="cr-item" href="sorting.html"><span class="mono">Sorting</span><small>排序</small></a><a class="cr-item" href="disjoint_set.html"><span class="mono">Disjoint Set</span><small>互斥集合</small></a><a class="cr-item" href="complexity.html"><span class="mono">Big-O</span><small>時間複雜度</small></a><p class="cr-group">進階篇</p><a class="cr-item" href="heap.html"><span class="mono">Heap</span><small>堆積</small></a><a class="cr-item" href="trie.html"><span class="mono">Trie</span><small>字典樹</small></a><a class="cr-item" href="avl.html"><span class="mono">AVL Tree</span><small>AVL 樹</small></a><a class="cr-item" href="red_black.html"><span class="mono">Red-Black Tree</span><small>紅黑樹</small></a><a class="cr-item on" href="b_tree.html"><span class="mono">B-Tree</span><small>B 樹</small></a><a class="cr-item" href="topological_sort.html"><span class="mono">Topological Sort</span><small>拓樸排序</small></a><a class="cr-item" href="shortest_path.html"><span class="mono">Shortest Path</span><small>最短路徑</small></a><a class="cr-item" href="mst.html"><span class="mono">MST</span><small>最小生成樹</small></a><p class="cr-group">彩蛋</p><a class="cr-item" href="null.html"><span class="mono">null</span><small>還沒初始化</small></a></nav><div class="cr-body"><article class="cr-page"><h3 class="cr-title">B-Tree　B 樹</h3>
+<section class="cr-sec"><h4>生活比喻</h4><p class="cr-hook">圖書館找書：走一趟比看一眼牌子累得多，所以一塊牌子寫好幾段書號，走兩三趟就找到書。</p></section>
+<section class="cr-sec"><h4>什麼時候會用到</h4><ul><li>網路商店查訂單、銀行 App 查交易紀錄：幾千萬筆資料裡輸入編號，一下子就跳出來，靠的是資料庫替這個欄位建的索引（index）。</li><li>資料庫的索引：MySQL（InnoDB）、PostgreSQL、SQLite 建索引預設用的都是 B 樹這一家，多半是 B+ 樹。一個節點放幾百個鍵，一百萬筆資料從根往下讀三四個節點就找到。</li><li>電腦的檔案系統：Windows 的 NTFS、macOS 的 APFS 都用 B 樹這一家記住資料夾裡有哪些檔案；Linux 的 Btrfs，名字就是 B-tree file system。</li><li>範圍查詢：「價格在 100 到 500 之間的商品」。雜湊索引把鍵打散了，只能整張表掃過一遍；B+ 樹的葉子照順序串成一條，找到 100 就沿著葉子往右讀到 500 為止。 <a class="cr-link cr-see" href="hashing.html">→ 雜湊</a></li></ul></section>
+<section class="cr-sec"><h4>核心觀念</h4><p>B 樹（B-tree）是一個節點可以放好幾個鍵（key）、接好幾個孩子的搜尋樹。節點裡的鍵由小到大排好，k 個鍵把範圍切成 k + 1 段，每一段接一個孩子：比第一個鍵小的往最左邊走，夾在兩個鍵中間的走中間，比最後一個鍵大的往最右邊。找東西就是從根開始，在節點裡比一比、挑一段走下去，走到葉子還沒有就是不在。</p><p>為什麼要一個節點放好幾個鍵？資料庫和檔案系統的資料放在硬碟（或 SSD）上，讀一次不是讀一個數，而是讀一整塊（常見 4 KB 到 16 KB），讀一次硬碟又比讀記憶體慢上千倍。讓一個節點剛好佔一整塊、放幾百個鍵，樹就很矮：一百萬筆資料放進平衡的二元搜尋樹至少 20 層，找一筆最多要讀 20 次硬碟；B 樹三四層就到底，節點裡要比幾次都在記憶體裡比，很快。 <a class="cr-link cr-see" href="tree.html">→ 樹</a></p><p>m 階（order m）的 B 樹規定：每個節點最多 m 個孩子、m − 1 個鍵；根以外的節點至少要半滿，不會太空；所有的葉子都在同一層，所以永遠是平衡的。這頁用 3 階：一個節點放 1～2 個鍵、不是葉子的接 2～3 個孩子，又叫 2-3 樹（2-3 tree）。</p><p>放進來（insert）：先找到該放的葉子，照大小插進去。超過 m − 1 個鍵就從中間拆開（split）：左半、右半變成兩個節點，正中間那個鍵升上去，插進爸爸裡。爸爸也塞爆了就再拆，一路往上；連根都拆了，升上去的鍵自己當新的根，樹就長高一層。所以 B 樹是從下往上長的，葉子才會永遠在同一層。刪除（delete）反過來：節點太空就跟隔壁的兄弟借一個鍵，借不到就跟兄弟合併；合併到根都空了，樹就矮一層。</p><p>B+ 樹（B+ tree）是資料庫最常用的變形：上面的節點只放鍵當路標，資料都放在葉子，葉子再從左到右串成一條，找一段範圍就沿著葉子往右讀。</p></section>
+<section class="cr-sec"><h4>常見誤解</h4><div class="cr-traps"><div class="cr-trap"><p class="cr-trap-line wrong"><span class="cr-sr">誤解：</span><span>B 樹的 B 是 binary，B 樹就是一種二元樹</span></p><p class="cr-trap-line right"><span class="cr-sr">正解：</span><span>一個節點有好幾個孩子，3 階就最多 3 個，二元樹才是最多 2 個。B 代表什麼，1970 年代初發明它的 Bayer 和 McCreight 沒有定論，常見的猜法是 balanced（平衡）、Bayer 的姓、他們當時工作的波音（Boeing）。</span></p></div><div class="cr-trap"><p class="cr-trap-line wrong"><span class="cr-sr">誤解：</span><span>跟二元搜尋樹一樣，新的鍵往下接成新的葉子，樹是往下長的</span></p><p class="cr-trap-line right"><span class="cr-sr">正解：</span><span>B 樹是從下往上長的。新的鍵一律放進現有的葉子，塞爆了就拆開、中間的鍵升上去；要變高只有一個辦法：根也拆了，在最上面多一個新的根。所以葉子永遠在同一層。</span></p></div><div class="cr-trap"><p class="cr-trap-line wrong"><span class="cr-sr">誤解：</span><span>照排好的順序插進去，B 樹也會像二元搜尋樹一樣歪成一條</span></p><p class="cr-trap-line right"><span class="cr-sr">正解：</span><span>不會，所有的葉子一律在同一層。沙盒照 10、20、…、70 由小到大插，二元搜尋樹會歪成一條 7 層的直線，B 樹插完只有 3 層。</span></p></div><div class="cr-trap"><p class="cr-trap-line wrong"><span class="cr-sr">誤解：</span><span>節點塞爆時，升上去的是剛放進來的那個鍵</span></p><p class="cr-trap-line right"><span class="cr-sr">正解：</span><span>升上去的是塞爆那個節點正中間的鍵，不一定是新來的。insert(50) 時塞爆的是 [30 40 50]，升上去的是 40，不是 50。</span></p></div><div class="cr-trap"><p class="cr-trap-line wrong"><span class="cr-sr">誤解：</span><span>B 樹找一個鍵比的次數比二元搜尋樹少</span></p><p class="cr-trap-line right"><span class="cr-sr">正解：</span><span>比的次數差不多：每一層都要在節點裡找（可以用二分搜尋），加起來一樣是 O(log n)。B 樹省的是讀硬碟的次數：在節點裡比都在記憶體裡、很快，慢的是從硬碟讀下一個節點，而 B 樹的層數少得多。</span></p></div><div class="cr-trap"><p class="cr-trap-line wrong"><span class="cr-sr">誤解：</span><span>B 樹和 B+ 樹是同一個東西</span></p><p class="cr-trap-line right"><span class="cr-sr">正解：</span><span>B 樹每個鍵都帶著資料，在哪一層找到就停；B+ 樹上面的節點只放鍵當路標，資料都在葉子，葉子還串成一條。B+ 樹找什麼都要走到葉子，但範圍查詢、照順序列出來快得多，資料庫索引多半用 B+ 樹。</span></p></div><div class="cr-trap"><p class="cr-trap-line wrong"><span class="cr-sr">誤解：</span><span>m 階的 B 樹，就是一個節點最多放 m 個鍵</span></p><p class="cr-trap-line right"><span class="cr-sr">正解：</span><span>常見的定義（Knuth）是最多 m 個孩子、m − 1 個鍵，所以 3 階最多 2 個鍵。CLRS《演算法導論》改用最小分支度 t：根以外的節點有 t − 1 到 2t − 1 個鍵。各本書不同，考試前先看清楚題目用哪一種。</span></p></div></div></section>
+<section class="cr-sec"><h4>實作</h4><div class="cr-code"><p class="cr-sub">Python：用內建的</p><pre class="cr-pre"># 內建的沒有 B 樹，B 樹多半住在資料庫和檔案系統裡，考試要自己刻；最接近的是排好序的串列＋bisect（用二分搜尋找位置）
+from bisect import bisect_left, insort
+
+keys = []
+for x in range(10, 71, 10):
+    insort(keys, x)
+
+
+def contains(x):
+    i = bisect_left(keys, x)              # x 該插在第幾格；那格剛好是 x 才算找到
+    return i &lt; len(keys) and keys[i] == x
+
+
+def yes_no(found):
+    return &quot;yes&quot; if found else &quot;no&quot;
+
+
+print(yes_no(contains(60)), yes_no(contains(35)), len(keys))</pre><p class="cr-sub">Python：自己刻（考試要手寫）</p><pre class="cr-pre">M = 3   # 3 階：一個節點最多 M - 1 = 2 個鍵、M = 3 個孩子
+
+
+class Node:
+    def __init__(self, keys, children):
+        self.keys = keys            # 由小到大
+        self.children = children    # 葉子沒有孩子；不是葉子的話，孩子比鍵多一個
+
+
+# 前面有幾個鍵比 x 小：x 該插在第幾格，也是要往下走的第幾個孩子
+def position(node, x):
+    i = 0
+    while i &lt; len(node.keys) and node.keys[i] &lt; x:
+        i += 1
+    return i
+
+
+class BTree:
+    def __init__(self):
+        self.root = Node([], [])
+        self.size = 0
+
+    def contains(self, x):
+        node = self.root
+        while True:
+            i = position(node, x)
+            if i &lt; len(node.keys) and node.keys[i] == x:
+                return True
+            if not node.children:             # 走到葉子還沒有：不在裡面
+                return False
+            node = node.children[i]
+
+    def insert(self, x):
+        if self.contains(x):                  # 一樣的鍵不重複放
+            return
+        up = self._insert(self.root, x)
+        if up:                                # 根也拆了：升上去的鍵當新的根，樹長高一層
+            key, right = up
+            self.root = Node([key], [self.root, right])
+        self.size += 1
+
+    # 把 x 放進以 node 為根的子樹；node 塞到 M 個鍵就從中間拆開，回傳（升上去的鍵, 右半邊的新節點）
+    def _insert(self, node, x):
+        i = position(node, x)
+        if not node.children:
+            node.keys.insert(i, x)            # 新的鍵一律放進葉子
+        else:
+            up = self._insert(node.children[i], x)
+            if up:                            # 孩子拆成兩半：升上來的鍵插在第 i 格，右半邊接在它右邊
+                key, right = up
+                node.keys.insert(i, key)
+                node.children.insert(i + 1, right)
+        if len(node.keys) &lt; M:
+            return None
+        mid = len(node.keys) // 2             # 正中間那個鍵升上去，左半留在原本的節點
+        right = Node(node.keys[mid + 1:], node.children[mid + 1:])
+        key = node.keys[mid]
+        node.keys = node.keys[:mid]
+        node.children = node.children[:mid + 1]
+        return key, right
+
+
+def yes_no(found):
+    return &quot;yes&quot; if found else &quot;no&quot;
+
+
+tree = BTree()
+for x in range(10, 71, 10):
+    tree.insert(x)
+print(yes_no(tree.contains(60)), yes_no(tree.contains(35)), tree.size)</pre><p class="cr-sub">JavaScript：用內建的</p><pre class="cr-pre">// 內建的沒有 B 樹，B 樹多半住在資料庫和檔案系統裡，考試要自己刻；最接近的是排好序的陣列（sort 要給比較函式，不然會照字串排）
+const keys = [];
+for (let x = 10; x &lt;= 70; x += 10) keys.push(x);
+keys.sort((a, b) =&gt; a - b);
+const yesNo = (x) =&gt; (keys.includes(x) ? 'yes' : 'no');   // includes 從頭一個一個比
+console.log(yesNo(60), yesNo(35), keys.length);</pre><p class="cr-sub">JavaScript：自己刻（考試要手寫）</p><pre class="cr-pre">const M = 3;   // 3 階：一個節點最多 M - 1 = 2 個鍵、M = 3 個孩子
+
+class Node {
+  constructor(keys = [], children = []) {
+    this.keys = keys;           // 由小到大
+    this.children = children;   // 葉子沒有孩子；不是葉子的話，孩子比鍵多一個
+  }
+}
+
+// 前面有幾個鍵比 x 小：x 該插在第幾格，也是要往下走的第幾個孩子
+function position(node, x) {
+  let i = 0;
+  while (i &lt; node.keys.length &amp;&amp; node.keys[i] &lt; x) i++;
+  return i;
+}
+
+class BTree {
+  constructor() {
+    this.root = new Node();
+    this.size = 0;
+  }
+  contains(x) {
+    let node = this.root;
+    for (;;) {
+      const i = position(node, x);
+      if (node.keys[i] === x) return true;
+      if (!node.children.length) return false;   // 走到葉子還沒有：不在裡面
+      node = node.children[i];
+    }
+  }
+  insert(x) {
+    if (this.contains(x)) return;                // 一樣的鍵不重複放
+    const up = this.insertInto(this.root, x);
+    if (up) this.root = new Node([up.key], [this.root, up.right]);   // 根也拆了：升上去的鍵當新的根，樹長高一層
+    this.size++;
+  }
+  // 把 x 放進以 node 為根的子樹；node 塞到 M 個鍵就從中間拆開，回傳升上去的鍵和右半邊的新節點
+  insertInto(node, x) {
+    const i = position(node, x);
+    if (!node.children.length) node.keys.splice(i, 0, x);   // 新的鍵一律放進葉子
+    else {
+      const up = this.insertInto(node.children[i], x);
+      if (up) {                                             // 孩子拆成兩半：升上來的鍵插在第 i 格，右半邊接在它右邊
+        node.keys.splice(i, 0, up.key);
+        node.children.splice(i + 1, 0, up.right);
+      }
+    }
+    if (node.keys.length &lt; M) return null;
+    const mid = Math.floor(node.keys.length / 2);           // 正中間那個鍵升上去，左半留在原本的節點
+    const right = new Node(node.keys.slice(mid + 1), node.children.slice(mid + 1));
+    const key = node.keys[mid];
+    node.keys = node.keys.slice(0, mid);
+    node.children = node.children.slice(0, mid + 1);
+    return { key, right };
+  }
+}
+
+const tree = new BTree();
+for (let x = 10; x &lt;= 70; x += 10) tree.insert(x);
+const yesNo = (x) =&gt; (tree.contains(x) ? 'yes' : 'no');
+console.log(yesNo(60), yesNo(35), tree.size);</pre><p class="cr-sub">Java：用內建的</p><pre class="cr-pre">import java.util.TreeSet;
+
+public class Main {
+    public static void main(String[] args) {
+        // 內建的沒有 B 樹，B 樹多半住在資料庫和檔案系統裡，考試要自己刻；
+        // 最接近的是排好序的集合 TreeSet（底下是前一頁的紅黑樹）
+        TreeSet&lt;Integer&gt; keys = new TreeSet&lt;&gt;();
+        for (int x = 10; x &lt;= 70; x += 10) keys.add(x);
+        System.out.println(yesNo(keys.contains(60)) + &quot; &quot; + yesNo(keys.contains(35)) + &quot; &quot; + keys.size());
+    }
+
+    static String yesNo(boolean found) {
+        return found ? &quot;yes&quot; : &quot;no&quot;;
+    }
+}</pre><p class="cr-sub">Java：自己刻（考試要手寫）</p><pre class="cr-pre">import java.util.ArrayList;
+import java.util.List;
+
+public class Main {
+    static final int M = 3;   // 3 階：一個節點最多 M - 1 = 2 個鍵、M = 3 個孩子
+
+    static class Node {
+        List&lt;Integer&gt; keys = new ArrayList&lt;&gt;();    // 由小到大
+        List&lt;Node&gt; children = new ArrayList&lt;&gt;();   // 葉子沒有孩子；不是葉子的話，孩子比鍵多一個
+
+        boolean isLeaf() {
+            return children.isEmpty();
+        }
+
+        // 前面有幾個鍵比 x 小：x 該插在第幾格，也是要往下走的第幾個孩子
+        int position(int x) {
+            int i = 0;
+            while (i &lt; keys.size() &amp;&amp; keys.get(i) &lt; x) i++;
+            return i;
+        }
+    }
+
+    // 節點拆開時升上去的鍵，和右半邊的新節點
+    static class Split {
+        final int key;
+        final Node right;
+
+        Split(int key, Node right) {
+            this.key = key;
+            this.right = right;
+        }
+    }
+
+    static class BTree {
+        Node root = new Node();
+        int size = 0;
+
+        boolean contains(int x) {
+            Node node = root;
+            while (true) {
+                int i = node.position(x);
+                if (i &lt; node.keys.size() &amp;&amp; node.keys.get(i) == x) return true;
+                if (node.isLeaf()) return false;      // 走到葉子還沒有：不在裡面
+                node = node.children.get(i);
+            }
+        }
+
+        void insert(int x) {
+            if (contains(x)) return;                  // 一樣的鍵不重複放
+            Split up = insertInto(root, x);
+            if (up != null) {                         // 根也拆了：升上去的鍵當新的根，樹長高一層
+                Node newRoot = new Node();
+                newRoot.keys.add(up.key);
+                newRoot.children.add(root);
+                newRoot.children.add(up.right);
+                root = newRoot;
+            }
+            size++;
+        }
+
+        // 把 x 放進以 node 為根的子樹；node 塞到 M 個鍵就從中間拆開，回傳升上去的鍵和右半邊
+        Split insertInto(Node node, int x) {
+            int i = node.position(x);
+            if (node.isLeaf()) node.keys.add(i, x);   // 新的鍵一律放進葉子
+            else {
+                Split up = insertInto(node.children.get(i), x);
+                if (up != null) {                     // 孩子拆成兩半：升上來的鍵插在第 i 格，右半邊接在它右邊
+                    node.keys.add(i, up.key);
+                    node.children.add(i + 1, up.right);
+                }
+            }
+            if (node.keys.size() &lt; M) return null;
+            int mid = node.keys.size() / 2;           // 正中間那個鍵升上去，左半留在原本的節點
+            int key = node.keys.get(mid);
+            Node right = new Node();
+            right.keys.addAll(node.keys.subList(mid + 1, node.keys.size()));
+            node.keys.subList(mid, node.keys.size()).clear();
+            if (!node.isLeaf()) {                     // 葉子沒有孩子可以分
+                right.children.addAll(node.children.subList(mid + 1, node.children.size()));
+                node.children.subList(mid + 1, node.children.size()).clear();
+            }
+            return new Split(key, right);
+        }
+    }
+
+    static String yesNo(boolean found) {
+        return found ? &quot;yes&quot; : &quot;no&quot;;
+    }
+
+    public static void main(String[] args) {
+        BTree tree = new BTree();
+        for (int x = 10; x &lt;= 70; x += 10) tree.insert(x);
+        System.out.println(yesNo(tree.contains(60)) + &quot; &quot; + yesNo(tree.contains(35)) + &quot; &quot; + tree.size);
+    }
+}</pre><p class="cr-sub">C++：用內建的</p><pre class="cr-pre">#include &lt;iostream&gt;
+#include &lt;set&gt;
+
+int main() {
+    // 內建的沒有 B 樹，B 樹多半住在資料庫和檔案系統裡，考試要自己刻；
+    // 最接近的是排好序的集合 std::set（常見的實作底下是前一頁的紅黑樹）
+    std::set&lt;int&gt; keys;
+    for (int x = 10; x &lt;= 70; x += 10) keys.insert(x);
+    auto yesNo = [&amp;](int x) { return keys.count(x) ? &quot;yes&quot; : &quot;no&quot;; };
+    std::cout &lt;&lt; yesNo(60) &lt;&lt; &quot; &quot; &lt;&lt; yesNo(35) &lt;&lt; &quot; &quot; &lt;&lt; keys.size() &lt;&lt; &quot;\n&quot;;
+}</pre><p class="cr-sub">C++：自己刻（考試要手寫）</p><pre class="cr-pre">#include &lt;iostream&gt;
+#include &lt;vector&gt;
+
+const int M = 3;   // 3 階：一個節點最多 M - 1 = 2 個鍵、M = 3 個孩子
+
+struct Node {
+    std::vector&lt;int&gt; keys;          // 由小到大
+    std::vector&lt;Node*&gt; children;    // 葉子沒有孩子；不是葉子的話，孩子比鍵多一個
+
+    bool isLeaf() const { return children.empty(); }
+
+    // 前面有幾個鍵比 x 小：x 該插在第幾格，也是要往下走的第幾個孩子
+    int position(int x) const {
+        int i = 0;
+        while (i &lt; (int)keys.size() &amp;&amp; keys[i] &lt; x) i++;
+        return i;
+    }
+};
+
+// 節點拆開時升上去的鍵，和右半邊的新節點（沒拆的話 right 是 nullptr）
+struct Split {
+    int key = 0;
+    Node* right = nullptr;
+};
+
+class BTree {
+    Node* root = new Node();
+    int count = 0;
+
+    // 把 x 放進以 node 為根的子樹；node 塞到 M 個鍵就從中間拆開，回傳升上去的鍵和右半邊
+    Split insertInto(Node* node, int x) {
+        int i = node-&gt;position(x);
+        if (node-&gt;isLeaf()) node-&gt;keys.insert(node-&gt;keys.begin() + i, x);   // 新的鍵一律放進葉子
+        else {
+            Split up = insertInto(node-&gt;children[i], x);
+            if (up.right) {      // 孩子拆成兩半：升上來的鍵插在第 i 格，右半邊接在它右邊
+                node-&gt;keys.insert(node-&gt;keys.begin() + i, up.key);
+                node-&gt;children.insert(node-&gt;children.begin() + i + 1, up.right);
+            }
+        }
+        if ((int)node-&gt;keys.size() &lt; M) return {};
+        int mid = node-&gt;keys.size() / 2;                                     // 正中間那個鍵升上去，左半留在原本的節點
+        Node* right = new Node();
+        right-&gt;keys.assign(node-&gt;keys.begin() + mid + 1, node-&gt;keys.end());
+        int key = node-&gt;keys[mid];
+        node-&gt;keys.resize(mid);
+        if (!node-&gt;isLeaf()) {                                               // 葉子沒有孩子可以分
+            right-&gt;children.assign(node-&gt;children.begin() + mid + 1, node-&gt;children.end());
+            node-&gt;children.resize(mid + 1);
+        }
+        return {key, right};
+    }
+
+    // 釋放記憶體用後序：孩子先刪，最後才刪自己
+    static void destroy(Node* node) {
+        for (Node* child : node-&gt;children) destroy(child);
+        delete node;
+    }
+
+public:
+    ~BTree() { destroy(root); }
+
+    bool contains(int x) const {
+        const Node* node = root;
+        while (true) {
+            int i = node-&gt;position(x);
+            if (i &lt; (int)node-&gt;keys.size() &amp;&amp; node-&gt;keys[i] == x) return true;
+            if (node-&gt;isLeaf()) return false;    // 走到葉子還沒有：不在裡面
+            node = node-&gt;children[i];
+        }
+    }
+
+    void insert(int x) {
+        if (contains(x)) return;                 // 一樣的鍵不重複放
+        Split up = insertInto(root, x);
+        if (up.right) {                          // 根也拆了：升上去的鍵當新的根，樹長高一層
+            Node* newRoot = new Node();
+            newRoot-&gt;keys.push_back(up.key);
+            newRoot-&gt;children = {root, up.right};
+            root = newRoot;
+        }
+        count++;
+    }
+
+    int size() const { return count; }
+};
+
+int main() {
+    BTree tree;
+    for (int x = 10; x &lt;= 70; x += 10) tree.insert(x);
+    auto yesNo = [&amp;](int x) { return tree.contains(x) ? &quot;yes&quot; : &quot;no&quot;; };
+    std::cout &lt;&lt; yesNo(60) &lt;&lt; &quot; &quot; &lt;&lt; yesNo(35) &lt;&lt; &quot; &quot; &lt;&lt; tree.size() &lt;&lt; &quot;\n&quot;;
+}</pre><p class="cr-out mono">輸出：yes no 7</p></div></section>
+<section class="cr-sec"><h4>時間複雜度</h4><table class="cr-big-o"><tr><td>search 找一個鍵</td><td class="mono">O(log n)</td></tr><tr><td>insert 插入（含一路往上拆）</td><td class="mono">O(log n)</td></tr><tr><td>delete 刪除（含借鍵、合併）</td><td class="mono">O(log n)</td></tr><tr><td>讀硬碟的次數（樹的高度）</td><td class="mono">O(log n)，底數是階數 m</td></tr></table><p class="cr-hint">O(1)、O(n) 是什麼意思、怎麼算，見附錄「時間複雜度」。</p></section>
+<section class="cr-sec"><h4>總結</h4><p class="cr-hook">下次在圖書館看著樓層指引、在網路商店一下子就查到訂單，你就知道：那是一棵 B 樹，讀一次硬碟就像走一趟路，所以一個節點塞很多個值，讀兩三次就找到。</p></section></article></div></div></div>
+</main>
+<footer class="seo-foot"><nav aria-label="IT24hr 的其他內容"><a href="../../index.html">玩 IT24hr</a><a href="../../se.html">認識軟體工程</a><a href="../../csie.html">CSIE 課程</a><a href="../../handbook.html">新人手冊</a><a href="../../atlas.html">IT 圖鑑</a></nav></footer>
+<script src="../../vendor/rough.js"></script>
+<script src="../../icons.js"></script>
+<script src="../../verdict.js"></script>
+<script src="../../classroom.js"></script>
+<script src="../../classroom/ds/array.js"></script>
+<script src="../../classroom/ds/avl.js"></script>
+<script src="../../classroom/ds/b_tree.js"></script>
+<script src="../../classroom/ds/circular_queue.js"></script>
+<script src="../../classroom/ds/complexity.js"></script>
+<script src="../../classroom/ds/deque.js"></script>
+<script src="../../classroom/ds/disjoint_set.js"></script>
+<script src="../../classroom/ds/graph.js"></script>
+<script src="../../classroom/ds/hashing.js"></script>
+<script src="../../classroom/ds/heap.js"></script>
+<script src="../../classroom/ds/linked_list.js"></script>
+<script src="../../classroom/ds/mst.js"></script>
+<script src="../../classroom/ds/null.js"></script>
+<script src="../../classroom/ds/queue.js"></script>
+<script src="../../classroom/ds/red_black.js"></script>
+<script src="../../classroom/ds/searching.js"></script>
+<script src="../../classroom/ds/shortest_path.js"></script>
+<script src="../../classroom/ds/sorting.js"></script>
+<script src="../../classroom/ds/stack.js"></script>
+<script src="../../classroom/ds/topological_sort.js"></script>
+<script src="../../classroom/ds/tree.js"></script>
+<script src="../../classroom/ds/trie.js"></script>
+<script src="../../classroom-view.js"></script>
+<script src="../../csie.js"></script>
+</body>
+</html>

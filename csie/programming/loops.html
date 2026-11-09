@@ -1,0 +1,144 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Loops　迴圈｜APCS 程式設計｜CSIE 課程｜IT24hr</title>
+<meta name="description" content="迴圈（Loops）：喜歡的歌手發了新單曲，我想要在通勤時的半小時一直重複聽，怎麼做？">
+<link rel="canonical" href="https://tsun-u.github.io/it24hr/csie/programming/loops.html">
+<meta property="og:type" content="article">
+<meta property="og:site_name" content="IT24hr">
+<meta property="og:locale" content="zh_TW">
+<meta property="og:url" content="https://tsun-u.github.io/it24hr/csie/programming/loops.html">
+<meta property="og:title" content="Loops　迴圈｜APCS 程式設計｜CSIE 課程｜IT24hr">
+<meta property="og:description" content="迴圈（Loops）：喜歡的歌手發了新單曲，我想要在通勤時的半小時一直重複聽，怎麼做？">
+<meta property="og:image" content="https://tsun-u.github.io/it24hr/assets/og-image.jpg">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta name="twitter:card" content="summary_large_image">
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"Article","headline":"Loops 迴圈","description":"迴圈（Loops）：喜歡的歌手發了新單曲，我想要在通勤時的半小時一直重複聽，怎麼做？","inLanguage":"zh-Hant-TW","author":[{"@type":"Person","name":"Tsun-u"},{"@type":"Person","name":"ATone"}],"image":"https://tsun-u.github.io/it24hr/assets/og-image.jpg","isPartOf":{"@type":"Course","name":"APCS 程式設計","url":"https://tsun-u.github.io/it24hr/csie/programming/index.html"},"url":"https://tsun-u.github.io/it24hr/csie/programming/loops.html"}</script>
+<link rel="icon" href="../../assets/favicon.svg" type="image/svg+xml">
+<link rel="icon" href="../../assets/favicon-32.png" sizes="32x32" type="image/png">
+<link rel="apple-touch-icon" href="../../assets/apple-touch-icon.png">
+<link rel="stylesheet" href="../../styles.css">
+</head>
+<body class="csie-body">
+<header class="csie-head">
+  <a class="csie-logo" href="../../index.html">IT24hr</a>
+  <h1>CSIE 課程</h1>
+  <a class="btn csie-play" href="../../index.html">開始玩</a>
+</header>
+<main id="csie" class="csie-main">
+<a class="csie-back" href="index.html">‹ APCS 程式設計</a>
+<h2 class="csie-course-title">APCS 程式設計</h2>
+<div class="csie-room"><div class="cr-main"><nav class="cr-nav"><p class="cr-group">基礎</p><a class="cr-item" href="variables.html"><span class="mono">Variables</span><small>變數與資料型態</small></a><a class="cr-item" href="expressions.html"><span class="mono">Expressions</span><small>運算式</small></a><a class="cr-item" href="io.html"><span class="mono">Input &amp; Output</span><small>輸入與輸出</small></a><a class="cr-item" href="selection.html"><span class="mono">if / else</span><small>條件判斷</small></a><a class="cr-item on" href="loops.html"><span class="mono">Loops</span><small>迴圈</small></a><p class="cr-group">陣列與字串</p><a class="cr-item" href="arrays.html"><span class="mono">Arrays</span><small>陣列與串列</small></a><a class="cr-item" href="strings.html"><span class="mono">Strings</span><small>字元與字串</small></a><p class="cr-group">函式</p><a class="cr-item" href="functions.html"><span class="mono">Functions</span><small>函式</small></a><a class="cr-item" href="recursion.html"><span class="mono">Recursion</span><small>遞迴</small></a><a class="cr-item" href="structs.html"><span class="mono">Structs</span><small>自訂資料型態</small></a></nav><div class="cr-body"><article class="cr-page"><h3 class="cr-title">Loops　迴圈</h3>
+<section class="cr-sec"><h4>生活應用</h4><p class="cr-hook">喜歡的歌手發了新單曲，我想要在通勤時的半小時一直重複聽，怎麼做？</p></section>
+<section class="cr-sec"><h4>複習</h4><p>我們前面學了輸出，最直覺的做法就是把「播放：新單曲」寫 10 次。寫到第 6 次時，你發現回程也要聽，還得再寫 10 次……這時你會不會想：</p><blockquote class="cr-quote">要是我可以改一個用來表達次數的變數，讓它自動幫我重複 n 次就好了。</blockquote><p>恭喜，你想到的就是迴圈。</p></section>
+<section class="cr-sec"><h4>核心觀念</h4><p>迴圈（loop）讓同一段程式重複執行：規則寫一次，條件成立就一直重複，不用把同樣的程式寫好幾遍。while 迴圈每一圈開頭先檢查條件：成立就把迴圈本體（body）跑一次，再回到開頭檢查；不成立就離開，接著跑迴圈後面的程式。</p><p>for 迴圈把「從幾開始、什麼時候停、每圈怎麼變」寫在同一行。C、C++、Java 的 for (int i = 1; i &lt;= n; i++) 跟 while 寫法一模一樣：先 i = 1，每圈開頭檢查 i &lt;= n，跑完本體做 i++。Python 的 for i in range(1, n + 1) 是讓 i 依序取 1 到 n，range 不包含結尾的那個數。</p><p>迴圈裡面再放一個迴圈，叫巢狀迴圈（nested loop）。課表就是一個：要是把整學期每一天、每一節要上什麼都列出來，會是厚厚一本冊子；課表只寫一週，每天照著上午、午休、下午跑一輪（內圈），星期一到星期五跑完是一週（外圈），學期還沒結束就再從星期一開始。外圈每跑一圈，內圈就從頭整個跑一輪。</p><p>break 是馬上離開整個迴圈；continue 是跳過這一圈剩下的部分，直接進下一圈。條件永遠成立、迴圈停不下來，叫無窮迴圈（infinite loop），最常見的原因是忘了在本體裡更新變數。</p></section>
+<section class="cr-sec"><h4>什麼時候會用到</h4><ul><li>鬧鐘的貪睡：按一下就過五分鐘再響，直到你把它關掉。</li><li>算全班的平均分數：從第一個人到最後一個人，一個一個加起來，再除以人數。</li><li>遊戲畫面：遊戲一直重複「讀按鍵、算位置、畫一張畫面」，一秒幾十次，直到你關掉遊戲，這叫遊戲迴圈（game loop）。</li><li>網站的伺服器：一直等新的連線進來，來一個處理一個，整天不停。</li></ul></section>
+<section class="cr-sec"><h4>常見誤解</h4><div class="cr-traps"><div class="cr-trap"><p class="cr-trap-line wrong"><span class="cr-sr">誤解：</span><span>本體跑到一半條件不成立了，迴圈就會停在中間</span></p><p class="cr-trap-line right"><span class="cr-sr">正解：</span><span>條件只在每一圈開頭檢查。本體跑到一半 i 已經超過 n，這一圈還是會跑完，回到開頭檢查才離開。</span></p></div><div class="cr-trap"><p class="cr-trap-line wrong"><span class="cr-sr">誤解：</span><span>n = 0 時，迴圈至少也會跑一次</span></p><p class="cr-trap-line right"><span class="cr-sr">正解：</span><span>while 和 for 都是先檢查再跑，n = 0 時一次都不跑，總和是 0（追蹤器挑 n = 0 看看）。C、C++、Java 的 do-while 才是先跑再檢查、至少跑一次；Python 沒有 do-while。</span></p></div><div class="cr-trap"><p class="cr-trap-line wrong"><span class="cr-sr">誤解：</span><span>range(1, 5) 會跑到 5</span></p><p class="cr-trap-line right"><span class="cr-sr">正解：</span><span>range 不包含結尾，只有 1、2、3、4。要跑到 n 要寫 range(1, n + 1)。</span></p></div><div class="cr-trap"><p class="cr-trap-line wrong"><span class="cr-sr">誤解：</span><span>迴圈跑完以後，C 和 Python 的迴圈變數一樣大</span></p><p class="cr-trap-line right"><span class="cr-sr">正解：</span><span>C 的 for (i = 1; i &lt;= 3; i++) 跑完時 i 是 4：最後一次檢查 4 &lt;= 3 不成立才離開。Python 的 for i in range(1, 4) 跑完時 i 停在 3。程式識讀的 C 題本和 Python 題本都會考這個差別。</span></p></div><div class="cr-trap"><p class="cr-trap-line wrong"><span class="cr-sr">誤解：</span><span>continue 會回到迴圈最前面、重新開始整個迴圈</span></p><p class="cr-trap-line right"><span class="cr-sr">正解：</span><span>continue 只跳過這一圈剩下的部分。for 迴圈會先做每圈的更新（i++）再檢查條件；while 迴圈的更新寫在本體裡，continue 跳過它的話 i 不會變，就停不下來了。</span></p></div><div class="cr-trap"><p class="cr-trap-line wrong"><span class="cr-sr">誤解：</span><span>巢狀迴圈的內圈只跑一次</span></p><p class="cr-trap-line right"><span class="cr-sr">正解：</span><span>外圈每跑一圈，內圈都從頭整個跑一輪：外圈 3 圈、內圈每次 4 圈，內圈的本體一共跑 12 次。</span></p></div></div></section>
+<section class="cr-sec"><h4>實作</h4><div class="cr-code"><p class="cr-sub">C</p><pre class="cr-pre">#include &lt;stdio.h&gt;
+
+int main(void) {
+    int n = 5;
+
+    int total = 0;
+    for (int i = 1; i &lt;= n; i++) {          // 先檢查 i &lt;= n，成立才跑本體，跑完做 i++
+        total += i;
+    }
+
+    int pairs = 0;
+    for (int i = 1; i &lt;= n; i++) {          // 巢狀迴圈：外圈每跑一圈，內圈整個跑一輪
+        for (int j = i + 1; j &lt;= n; j++) {
+            pairs += 1;
+        }
+    }
+
+    printf(&quot;%d %d\n&quot;, total, pairs);
+    return 0;
+}</pre><p class="cr-sub">C++</p><pre class="cr-pre">#include &lt;iostream&gt;
+
+int main() {
+    int n = 5;
+
+    int total = 0;
+    for (int i = 1; i &lt;= n; i++) {          // 先檢查 i &lt;= n，成立才跑本體，跑完做 i++
+        total += i;
+    }
+
+    int pairs = 0;
+    for (int i = 1; i &lt;= n; i++) {          // 巢狀迴圈：外圈每跑一圈，內圈整個跑一輪
+        for (int j = i + 1; j &lt;= n; j++) {
+            pairs += 1;
+        }
+    }
+
+    std::cout &lt;&lt; total &lt;&lt; &quot; &quot; &lt;&lt; pairs &lt;&lt; &quot;\n&quot;;
+    return 0;
+}</pre><p class="cr-sub">Java</p><pre class="cr-pre">public class Main {
+    public static void main(String[] args) {
+        int n = 5;
+
+        int total = 0;
+        for (int i = 1; i &lt;= n; i++) {      // 先檢查 i &lt;= n，成立才跑本體，跑完做 i++
+            total += i;
+        }
+
+        int pairs = 0;
+        for (int i = 1; i &lt;= n; i++) {      // 巢狀迴圈：外圈每跑一圈，內圈整個跑一輪
+            for (int j = i + 1; j &lt;= n; j++) {
+                pairs += 1;
+            }
+        }
+
+        System.out.println(total + &quot; &quot; + pairs);
+    }
+}</pre><p class="cr-sub">Python</p><pre class="cr-pre">n = 5
+
+total = 0
+for i in range(1, n + 1):          # i 依序是 1、2、…、n，range 不包含結尾
+    total += i
+
+pairs = 0
+for i in range(1, n + 1):          # 巢狀迴圈：外圈每跑一圈，內圈整個跑一輪
+    for j in range(i + 1, n + 1):
+        pairs += 1
+
+print(total, pairs)</pre><p class="cr-out mono">輸出：15 10</p></div></section>
+<section class="cr-sec"><h4>跑幾步</h4><table class="cr-big-o"><tr><td>追蹤器那段的條件 i &lt;= n（n = 3 時檢查 4 次，最後一次不成立）</td><td class="mono">n + 1 次</td></tr><tr><td>本體的 total += i、i += 1</td><td class="mono">各 n 次</td></tr><tr><td>追蹤器那段整段</td><td class="mono">O(n)</td></tr><tr><td>實作的巢狀迴圈（n = 5 時 pairs 加了 10 次）</td><td class="mono">n(n − 1) / 2 次，O(n²)</td></tr></table><p>數出每一行跑幾次，再看次數跟著 n 怎麼長，就是時間複雜度。Big-O 的意思和怎麼算，在資料結構的附錄。 <a class="cr-link cr-see" href="../ds/complexity.html">→ 時間複雜度</a></p></section>
+<section class="cr-sec"><h4>試試看</h4><div class="cr-try"><p class="cr-try-q"><span class="cr-try-kind">程式運行追蹤</span><span>1. 下面這段程式印出什麼？</span></p><p class="cr-sub">C</p><pre class="cr-pre">int x = 0;
+for (int i = 1; i &lt; 5; i++) {
+    x += i * 2;
+}
+printf(&quot;%d\n&quot;, x);</pre><ol class="cr-try-opts"><li>16</li><li>20</li><li>30</li><li>8</li></ol></div><div class="cr-try"><p class="cr-try-q"><span class="cr-try-kind">程式測試與除錯</span><span>2. 想印出 1 到 5（一行一個），結果只印到 4。要怎麼改？</span></p><p class="cr-sub">C</p><pre class="cr-pre">int i = 1;
+while (i &lt; 5) {
+    printf(&quot;%d\n&quot;, i);
+    i += 1;
+}</pre><ol class="cr-try-opts"><li>把 i &lt; 5 改成 i &lt;= 5</li><li>把 i = 1 改成 i = 0</li><li>把 i += 1 移到印出那行的前面</li><li>把 i += 1 改成 i += 2</li></ol></div><div class="cr-try"><p class="cr-try-q"><span class="cr-try-kind">程式效能分析</span><span>3. n = 10 時，下面這段程式跑完，count 是多少？</span></p><p class="cr-sub">C</p><pre class="cr-pre">int count = 0;
+for (int i = 0; i &lt; n; i++) {
+    for (int j = 0; j &lt; i; j++) {
+        count += 1;
+    }
+}</pre><ol class="cr-try-opts"><li>100</li><li>45</li><li>55</li><li>90</li></ol></div></section>
+<section class="cr-sec"><h4>總結</h4><p class="cr-hook">下次把喜歡的歌設成重複播放，你就知道：那是一個迴圈，同一件事寫一次，讓它一直重複跑，不用把同一行程式寫 10 次。</p></section>
+<section class="cr-sec"><h4>課外補充</h4><p>do…while 迴圈：先把本體跑一次，跑完才檢查條件，所以本體至少會跑一次，適合「先讓使用者輸入，輸入錯了再問一次」這種情況。C、C++、Java 都有：do { … } while (條件);（結尾的分號不能少）。</p><p>Python 沒有 do…while，常見的寫法是 while True: 先跑本體，最後寫 if not 條件: break，效果一樣。</p></section></article></div></div></div>
+</main>
+<footer class="seo-foot"><nav aria-label="IT24hr 的其他內容"><a href="../../index.html">玩 IT24hr</a><a href="../../se.html">認識軟體工程</a><a href="../../csie.html">CSIE 課程</a><a href="../../handbook.html">新人手冊</a><a href="../../atlas.html">IT 圖鑑</a></nav></footer>
+<script src="../../vendor/rough.js"></script>
+<script src="../../icons.js"></script>
+<script src="../../verdict.js"></script>
+<script src="../../classroom.js"></script>
+<script src="../../classroom/programming/arrays.js"></script>
+<script src="../../classroom/programming/expressions.js"></script>
+<script src="../../classroom/programming/functions.js"></script>
+<script src="../../classroom/programming/io.js"></script>
+<script src="../../classroom/programming/loops.js"></script>
+<script src="../../classroom/programming/recursion.js"></script>
+<script src="../../classroom/programming/selection.js"></script>
+<script src="../../classroom/programming/strings.js"></script>
+<script src="../../classroom/programming/structs.js"></script>
+<script src="../../classroom/programming/variables.js"></script>
+<script src="../../classroom-view.js"></script>
+<script src="../../csie.js"></script>
+</body>
+</html>

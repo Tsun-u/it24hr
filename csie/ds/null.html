@@ -1,0 +1,208 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>null　還沒初始化｜資料結構｜CSIE 課程｜IT24hr</title>
+<meta name="description" content="還沒初始化（null）：領到鑰匙、打開置物櫃沒東西，是空的；連鑰匙都還沒領到，是 null。">
+<link rel="canonical" href="https://tsun-u.github.io/it24hr/csie/ds/null.html">
+<meta property="og:type" content="article">
+<meta property="og:site_name" content="IT24hr">
+<meta property="og:locale" content="zh_TW">
+<meta property="og:url" content="https://tsun-u.github.io/it24hr/csie/ds/null.html">
+<meta property="og:title" content="null　還沒初始化｜資料結構｜CSIE 課程｜IT24hr">
+<meta property="og:description" content="還沒初始化（null）：領到鑰匙、打開置物櫃沒東西，是空的；連鑰匙都還沒領到，是 null。">
+<meta property="og:image" content="https://tsun-u.github.io/it24hr/assets/og-image.jpg">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta name="twitter:card" content="summary_large_image">
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"Article","headline":"null 還沒初始化","description":"還沒初始化（null）：領到鑰匙、打開置物櫃沒東西，是空的；連鑰匙都還沒領到，是 null。","inLanguage":"zh-Hant-TW","author":[{"@type":"Person","name":"Tsun-u"},{"@type":"Person","name":"ATone"}],"image":"https://tsun-u.github.io/it24hr/assets/og-image.jpg","isPartOf":{"@type":"Course","name":"資料結構","url":"https://tsun-u.github.io/it24hr/csie/ds/index.html"},"url":"https://tsun-u.github.io/it24hr/csie/ds/null.html"}</script>
+<link rel="icon" href="../../assets/favicon.svg" type="image/svg+xml">
+<link rel="icon" href="../../assets/favicon-32.png" sizes="32x32" type="image/png">
+<link rel="apple-touch-icon" href="../../assets/apple-touch-icon.png">
+<link rel="stylesheet" href="../../styles.css">
+</head>
+<body class="csie-body">
+<header class="csie-head">
+  <a class="csie-logo" href="../../index.html">IT24hr</a>
+  <h1>CSIE 課程</h1>
+  <a class="btn csie-play" href="../../index.html">開始玩</a>
+</header>
+<main id="csie" class="csie-main">
+<a class="csie-back" href="index.html">‹ 資料結構</a>
+<h2 class="csie-course-title">資料結構</h2>
+<div class="csie-room"><div class="cr-main"><nav class="cr-nav"><p class="cr-group">初階篇</p><a class="cr-item" href="array.html"><span class="mono">Array</span><small>陣列</small></a><a class="cr-item" href="linked_list.html"><span class="mono">Linked List</span><small>鏈結串列</small></a><a class="cr-item" href="stack.html"><span class="mono">Stack</span><small>堆疊</small></a><a class="cr-item" href="queue.html"><span class="mono">Queue</span><small>佇列</small></a><a class="cr-item" href="circular_queue.html"><span class="mono">Circular Queue</span><small>環狀佇列</small></a><a class="cr-item" href="deque.html"><span class="mono">Deque</span><small>雙向佇列</small></a><a class="cr-item" href="tree.html"><span class="mono">Tree</span><small>樹</small></a><a class="cr-item" href="graph.html"><span class="mono">Graph</span><small>圖</small></a><p class="cr-group">附錄</p><a class="cr-item" href="hashing.html"><span class="mono">Hashing</span><small>雜湊</small></a><a class="cr-item" href="searching.html"><span class="mono">Searching</span><small>搜尋</small></a><a class="cr-item" href="sorting.html"><span class="mono">Sorting</span><small>排序</small></a><a class="cr-item" href="disjoint_set.html"><span class="mono">Disjoint Set</span><small>互斥集合</small></a><a class="cr-item" href="complexity.html"><span class="mono">Big-O</span><small>時間複雜度</small></a><p class="cr-group">進階篇</p><a class="cr-item" href="heap.html"><span class="mono">Heap</span><small>堆積</small></a><a class="cr-item" href="trie.html"><span class="mono">Trie</span><small>字典樹</small></a><a class="cr-item" href="avl.html"><span class="mono">AVL Tree</span><small>AVL 樹</small></a><a class="cr-item" href="red_black.html"><span class="mono">Red-Black Tree</span><small>紅黑樹</small></a><a class="cr-item" href="b_tree.html"><span class="mono">B-Tree</span><small>B 樹</small></a><a class="cr-item" href="topological_sort.html"><span class="mono">Topological Sort</span><small>拓樸排序</small></a><a class="cr-item" href="shortest_path.html"><span class="mono">Shortest Path</span><small>最短路徑</small></a><a class="cr-item" href="mst.html"><span class="mono">MST</span><small>最小生成樹</small></a><p class="cr-group">彩蛋</p><a class="cr-item on" href="null.html"><span class="mono">null</span><small>還沒初始化</small></a></nav><div class="cr-body"><article class="cr-page"><h3 class="cr-title">null　還沒初始化</h3>
+<section class="cr-sec"><h4>生活比喻</h4><p class="cr-hook">領到鑰匙、打開置物櫃沒東西，是空的；連鑰匙都還沒領到，是 null。</p></section>
+<section class="cr-sec"><h4>什麼時候會用到</h4><ul><li>表單沒填的欄位：會員資料的年齡沒填，資料庫存的是 NULL（不知道），不是 0 歲，也不是空字串。</li><li>找不到時回傳 null：在通訊錄搜一個沒存過的名字，程式回傳 null 代表「沒有這個人」。網頁的 document.querySelector、Java 的 Map.get 找不到都回 null，Python 的 dict.get 回 None。</li><li>鏈結串列（Linked List）最後一個節點的 next 是 null：從頭一路走，走到 null 就知道到底了。</li><li>樹（Tree）的葉子底下：葉子的左右子節點都是 null。遞迴走訪一棵樹時，「碰到 null 就回頭」是最常見的終止條件（base case）。</li></ul></section>
+<section class="cr-sec"><h4>核心觀念</h4><p>在 Python、JavaScript、Java 裡，存物件的變數放的不是物件本身，而是指向它的參考（reference），就像一把對到某個置物櫃的鑰匙；C++ 要用指標（pointer）才有這一層。null 就是這個參考沒指向任何東西：鑰匙還沒對到任何櫃子。</p><p>所以 null 跟「空的」不一樣。空的堆疊是真的有一個堆疊、只是裡面沒東西，可以問它空了沒、可以 push；null 是根本還沒有堆疊，對它做任何事都會出錯。要先 new 一個堆疊、讓 s 真的指向它，s 才有東西可以用，這一步常被叫做初始化（initialize）。</p><p>四種語言的寫法：Python 是 None，JavaScript 有 null 和 undefined 兩種，Java 是 null，C++ 是 nullptr（C++11 起；更早的程式寫 NULL 或 0）。null 參考是 Tony Hoare 在 1965 年設計 ALGOL W 時加進去的，2009 年他在演講裡自己稱它是「十億美元的錯誤」（billion-dollar mistake）。</p></section>
+<section class="cr-sec"><h4>你在遊戲裡為什麼是它</h4><p class="stamp">null</p><p class="cr-stamp-line">「大家都在等你初始化。」</p><p>結算卡蓋 null，是因為你今天的點擊紀錄一筆都沒有：一張卡都沒點開，更別說動手，判定的第一條就是「什麼都沒有 → null」。你就像一個宣告好了、卻一直沒指向任何東西的變數，看板上的卡全都在等你 new 一下。往好處想：今天零 bug——因為一行程式都沒寫。</p></section>
+<section class="cr-sec"><h4>常見誤解</h4><div class="cr-traps"><div class="cr-trap"><p class="cr-trap-line wrong"><span class="cr-sr">誤解：</span><span>null 就是空的</span></p><p class="cr-trap-line right"><span class="cr-sr">正解：</span><span>不一樣。空的堆疊有盒子、只是裡面沒東西，可以 push、可以問它空了沒；null 是連盒子都沒有，連「空了沒」都問不了，一問就出錯。</span></p></div><div class="cr-trap"><p class="cr-trap-line wrong"><span class="cr-sr">誤解：</span><span>null、0、空字串都代表『沒有』，所以一樣</span></p><p class="cr-trap-line right"><span class="cr-sr">正解：</span><span>0 是一個數字、&quot;&quot; 是一個長度 0 的字串，它們都是真的存在的值；null 是根本沒有值。表單的年齡填 0 跟沒填是兩回事。偏偏在 if 判斷裡，這三個在 JavaScript 和 Python 都算「假」，寫 if (!age) 會把填 0 的人當成沒填；要分清楚就明寫 age === null（Python 寫 age is None）。</span></p></div><div class="cr-trap"><p class="cr-trap-line wrong"><span class="cr-sr">誤解：</span><span>宣告了變數，它就自動是 null</span></p><p class="cr-trap-line right"><span class="cr-sr">正解：</span><span>不一定。Java 物件型別的欄位（field）沒給值預設是 null，但區域變數沒給值就拿來用會編譯錯誤；JavaScript 寫 let s; 得到的是 undefined；Python 沒給過值的名字根本不存在，一用就 NameError；C++ 沒初始化的區域指標裡是一個亂七八糟的位址，不是 nullptr，比 null 更危險。</span></p></div><div class="cr-trap"><p class="cr-trap-line wrong"><span class="cr-sr">誤解：</span><span>JavaScript 的 undefined 跟 null 一樣</span></p><p class="cr-trap-line right"><span class="cr-sr">正解：</span><span>不一樣。undefined 是「還沒給值」（宣告了沒給值、物件沒有那個屬性、函式沒有 return），null 是程式刻意放進去的「沒有」。null == undefined 是 true，但 null === undefined 是 false；typeof null 還會得到 &quot;object&quot;，這是 JavaScript 早年留下來的 bug。</span></p></div><div class="cr-trap"><p class="cr-trap-line wrong"><span class="cr-sr">誤解：</span><span>Python 判斷 None 用 == 就好</span></p><p class="cr-trap-line right"><span class="cr-sr">正解：</span><span>要寫 x is None。== 會呼叫物件自己定義的比較方法（__eq__），有些類別會給出意想不到的結果（NumPy 陣列跟 None 用 == 比，得到的是一整排 True／False）；None 整個程式只有一個，用 is 直接比「是不是同一個」最準，PEP 8 也這樣規定。</span></p></div><div class="cr-trap"><p class="cr-trap-line wrong"><span class="cr-sr">誤解：</span><span>C++ 的 nullptr、NULL、0 都一樣</span></p><p class="cr-trap-line right"><span class="cr-sr">正解：</span><span>NULL 通常是代表整數 0 的巨集（macro）。同時有 f(int) 和 f(char*) 兩個多載（overload）時，f(NULL) 可能跑去呼叫 f(int)，也可能編譯器直接說呼叫不明確（ambiguous）；nullptr（C++11 起）有自己的型別 std::nullptr_t，只會被當成指標，f(nullptr) 一定呼叫 f(char*)。新的 C++ 程式一律寫 nullptr。</span></p></div><div class="cr-trap"><p class="cr-trap-line wrong"><span class="cr-sr">誤解：</span><span>對 null 呼叫方法，頂多回傳 null</span></p><p class="cr-trap-line right"><span class="cr-sr">正解：</span><span>沒那麼客氣。Java 丟 NullPointerException、JavaScript 丟 TypeError、Python 丟 AttributeError，C++ 是未定義行為（undefined behavior），常常直接當掉。JavaScript 的 s?.push(1) 會安靜地回傳 undefined，那是用 ?.（optional chaining）刻意要求「是 null 就跳過」，不是預設行為。</span></p></div></div></section>
+<section class="cr-sec"><h4>實作</h4><div class="cr-code"><p class="cr-sub">Python：用內建的</p><pre class="cr-pre">s = None                # 還沒有堆疊：s 沒指向任何東西
+before = &quot;null&quot; if s is None else &quot;not null&quot;   # new 之前：s 是不是 null
+s = []                  # 建立空的堆疊：Python 的 list 就能當堆疊用
+s.append(1)             # push(1)
+print(before, s[-1])</pre><p class="cr-sub">Python：自己刻（考試要手寫）</p><pre class="cr-pre">class Node:
+    def __init__(self, value, next_node):
+        self.value = value
+        self.next = next_node
+
+
+class Stack:
+    def __init__(self):
+        self.top = None     # 空的堆疊：堆疊本身在，只是 top 還沒指向任何節點
+
+    def push(self, x):
+        self.top = Node(x, self.top)    # 新節點壓在原本的頂端上面
+
+    def peek(self):
+        if self.top is None:
+            raise IndexError(&quot;stack underflow&quot;)
+        return self.top.value
+
+
+s = None                # 還沒有堆疊：s 沒指向任何東西
+before = &quot;null&quot; if s is None else &quot;not null&quot;   # new 之前：s 是不是 null
+s = Stack()             # 建立空的堆疊
+s.push(1)
+print(before, s.peek())</pre><p class="cr-sub">JavaScript：用內建的</p><pre class="cr-pre">let s = null;           // 還沒有堆疊：s 沒指向任何東西（只寫 let s; 會是 undefined，不是 null）
+const before = s === null ? 'null' : 'not null';   // new 之前：s 是不是 null
+s = [];                 // 建立空的堆疊：JS 的陣列就能當堆疊用
+s.push(1);
+console.log(before, s[s.length - 1]);</pre><p class="cr-sub">JavaScript：自己刻（考試要手寫）</p><pre class="cr-pre">class Stack {
+  constructor() {
+    this.top = null;    // 空的堆疊：堆疊本身在，只是 top 還沒指向任何節點
+  }
+  push(x) {
+    this.top = { value: x, next: this.top };   // 新節點壓在原本的頂端上面
+  }
+  peek() {
+    if (this.top === null) throw new Error('stack underflow');
+    return this.top.value;
+  }
+}
+
+let s = null;           // 還沒有堆疊：s 沒指向任何東西
+const before = s === null ? 'null' : 'not null';   // new 之前：s 是不是 null
+s = new Stack();        // 建立空的堆疊
+s.push(1);
+console.log(before, s.peek());</pre><p class="cr-sub">Java：用內建的</p><pre class="cr-pre">import java.util.ArrayDeque;
+
+public class Main {
+    public static void main(String[] args) {
+        ArrayDeque&lt;Integer&gt; s = null;   // 還沒有堆疊：s 沒指向任何東西
+        String before = s == null ? &quot;null&quot; : &quot;not null&quot;;   // new 之前：s 是不是 null
+        s = new ArrayDeque&lt;&gt;();         // 建立空的堆疊
+        s.push(1);
+        System.out.println(before + &quot; &quot; + s.peek());
+    }
+}</pre><p class="cr-sub">Java：自己刻（考試要手寫）</p><pre class="cr-pre">public class Main {
+    static class Node {
+        int value;
+        Node next;
+
+        Node(int value, Node next) {
+            this.value = value;
+            this.next = next;
+        }
+    }
+
+    static class Stack {
+        private Node top = null;   // 空的堆疊：堆疊本身在，只是 top 還沒指向任何節點
+
+        void push(int x) {
+            top = new Node(x, top);   // 新節點壓在原本的頂端上面
+        }
+
+        int peek() {
+            if (top == null) throw new IllegalStateException(&quot;stack underflow&quot;);
+            return top.value;
+        }
+    }
+
+    public static void main(String[] args) {
+        Stack s = null;            // 還沒有堆疊：s 沒指向任何東西
+        String before = s == null ? &quot;null&quot; : &quot;not null&quot;;   // new 之前：s 是不是 null
+        s = new Stack();           // 建立空的堆疊
+        s.push(1);
+        System.out.println(before + &quot; &quot; + s.peek());
+    }
+}</pre><p class="cr-sub">C++：用內建的</p><pre class="cr-pre">#include &lt;iostream&gt;
+#include &lt;stack&gt;
+
+int main() {
+    std::stack&lt;int&gt;* s = nullptr;   // 還沒有堆疊：s 沒指向任何東西
+    const char* before = s == nullptr ? &quot;null&quot; : &quot;not null&quot;;   // new 之前：s 是不是 null
+    s = new std::stack&lt;int&gt;();      // 建立空的堆疊
+    s-&gt;push(1);
+    std::cout &lt;&lt; before &lt;&lt; &quot; &quot; &lt;&lt; s-&gt;top() &lt;&lt; &quot;\n&quot;;
+    delete s;
+}</pre><p class="cr-sub">C++：自己刻（考試要手寫）</p><pre class="cr-pre">#include &lt;iostream&gt;
+#include &lt;stdexcept&gt;
+
+struct Node {
+    int value;
+    Node* next;
+};
+
+class Stack {
+    Node* top = nullptr;   // 空的堆疊：堆疊本身在，只是 top 還沒指向任何節點
+
+public:
+    ~Stack() {
+        while (top != nullptr) {   // 一路走到最底下那個節點的 next（nullptr）
+            Node* old = top;
+            top = top-&gt;next;
+            delete old;
+        }
+    }
+    void push(int x) {
+        top = new Node{x, top};   // 新節點壓在原本的頂端上面
+    }
+    int peek() const {
+        if (top == nullptr) throw std::underflow_error(&quot;stack underflow&quot;);
+        return top-&gt;value;
+    }
+};
+
+int main() {
+    Stack* s = nullptr;    // 還沒有堆疊：s 沒指向任何東西
+    const char* before = s == nullptr ? &quot;null&quot; : &quot;not null&quot;;   // new 之前：s 是不是 null
+    s = new Stack();       // 建立空的堆疊
+    s-&gt;push(1);
+    std::cout &lt;&lt; before &lt;&lt; &quot; &quot; &lt;&lt; s-&gt;peek() &lt;&lt; &quot;\n&quot;;
+    delete s;
+}</pre><p class="cr-out mono">輸出：null 1</p></div></section>
+<section class="cr-sec"><h4>時間複雜度</h4><table class="cr-big-o"><tr><td>檢查是不是 null</td><td class="mono">O(1)</td></tr><tr><td>建立空的堆疊 new Stack()</td><td class="mono">O(1)</td></tr><tr><td>push 放進</td><td class="mono">O(1)</td></tr></table><p class="cr-hint">O(1)、O(n) 是什麼意思、怎麼算，見附錄「時間複雜度」。</p></section>
+<section class="cr-sec"><h4>總結</h4><p class="cr-hook">下次看到 null，想想那把還沒領到的置物櫃鑰匙：打開沒東西是空的，連櫃子都還沒有才是 null——先 new 一個，再放東西。</p></section></article></div></div></div>
+</main>
+<footer class="seo-foot"><nav aria-label="IT24hr 的其他內容"><a href="../../index.html">玩 IT24hr</a><a href="../../se.html">認識軟體工程</a><a href="../../csie.html">CSIE 課程</a><a href="../../handbook.html">新人手冊</a><a href="../../atlas.html">IT 圖鑑</a></nav></footer>
+<script src="../../vendor/rough.js"></script>
+<script src="../../icons.js"></script>
+<script src="../../verdict.js"></script>
+<script src="../../classroom.js"></script>
+<script src="../../classroom/ds/array.js"></script>
+<script src="../../classroom/ds/avl.js"></script>
+<script src="../../classroom/ds/b_tree.js"></script>
+<script src="../../classroom/ds/circular_queue.js"></script>
+<script src="../../classroom/ds/complexity.js"></script>
+<script src="../../classroom/ds/deque.js"></script>
+<script src="../../classroom/ds/disjoint_set.js"></script>
+<script src="../../classroom/ds/graph.js"></script>
+<script src="../../classroom/ds/hashing.js"></script>
+<script src="../../classroom/ds/heap.js"></script>
+<script src="../../classroom/ds/linked_list.js"></script>
+<script src="../../classroom/ds/mst.js"></script>
+<script src="../../classroom/ds/null.js"></script>
+<script src="../../classroom/ds/queue.js"></script>
+<script src="../../classroom/ds/red_black.js"></script>
+<script src="../../classroom/ds/searching.js"></script>
+<script src="../../classroom/ds/shortest_path.js"></script>
+<script src="../../classroom/ds/sorting.js"></script>
+<script src="../../classroom/ds/stack.js"></script>
+<script src="../../classroom/ds/topological_sort.js"></script>
+<script src="../../classroom/ds/tree.js"></script>
+<script src="../../classroom/ds/trie.js"></script>
+<script src="../../classroom-view.js"></script>
+<script src="../../csie.js"></script>
+</body>
+</html>

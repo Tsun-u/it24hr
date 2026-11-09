@@ -1,0 +1,184 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Recursion　遞迴｜APCS 程式設計｜CSIE 課程｜IT24hr</title>
+<meta name="description" content="遞迴（Recursion）：你是班長，晚上接到老師的電話：「由於電腦教室設備臨時故障，維修需要時間，明天資訊課和後天的歷史課對調，請通知同學帶對課本。」怎麼做？">
+<link rel="canonical" href="https://tsun-u.github.io/it24hr/csie/programming/recursion.html">
+<meta property="og:type" content="article">
+<meta property="og:site_name" content="IT24hr">
+<meta property="og:locale" content="zh_TW">
+<meta property="og:url" content="https://tsun-u.github.io/it24hr/csie/programming/recursion.html">
+<meta property="og:title" content="Recursion　遞迴｜APCS 程式設計｜CSIE 課程｜IT24hr">
+<meta property="og:description" content="遞迴（Recursion）：你是班長，晚上接到老師的電話：「由於電腦教室設備臨時故障，維修需要時間，明天資訊課和後天的歷史課對調，請通知同學帶對課本。」怎麼做？">
+<meta property="og:image" content="https://tsun-u.github.io/it24hr/assets/og-image.jpg">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta name="twitter:card" content="summary_large_image">
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"Article","headline":"Recursion 遞迴","description":"遞迴（Recursion）：你是班長，晚上接到老師的電話：「由於電腦教室設備臨時故障，維修需要時間，明天資訊課和後天的歷史課對調，請通知同學帶對課本。」怎麼做？","inLanguage":"zh-Hant-TW","author":[{"@type":"Person","name":"Tsun-u"},{"@type":"Person","name":"ATone"}],"image":"https://tsun-u.github.io/it24hr/assets/og-image.jpg","isPartOf":{"@type":"Course","name":"APCS 程式設計","url":"https://tsun-u.github.io/it24hr/csie/programming/index.html"},"url":"https://tsun-u.github.io/it24hr/csie/programming/recursion.html"}</script>
+<link rel="icon" href="../../assets/favicon.svg" type="image/svg+xml">
+<link rel="icon" href="../../assets/favicon-32.png" sizes="32x32" type="image/png">
+<link rel="apple-touch-icon" href="../../assets/apple-touch-icon.png">
+<link rel="stylesheet" href="../../styles.css">
+</head>
+<body class="csie-body">
+<header class="csie-head">
+  <a class="csie-logo" href="../../index.html">IT24hr</a>
+  <h1>CSIE 課程</h1>
+  <a class="btn csie-play" href="../../index.html">開始玩</a>
+</header>
+<main id="csie" class="csie-main">
+<a class="csie-back" href="index.html">‹ APCS 程式設計</a>
+<h2 class="csie-course-title">APCS 程式設計</h2>
+<div class="csie-room"><div class="cr-main"><nav class="cr-nav"><p class="cr-group">基礎</p><a class="cr-item" href="variables.html"><span class="mono">Variables</span><small>變數與資料型態</small></a><a class="cr-item" href="expressions.html"><span class="mono">Expressions</span><small>運算式</small></a><a class="cr-item" href="io.html"><span class="mono">Input &amp; Output</span><small>輸入與輸出</small></a><a class="cr-item" href="selection.html"><span class="mono">if / else</span><small>條件判斷</small></a><a class="cr-item" href="loops.html"><span class="mono">Loops</span><small>迴圈</small></a><p class="cr-group">陣列與字串</p><a class="cr-item" href="arrays.html"><span class="mono">Arrays</span><small>陣列與串列</small></a><a class="cr-item" href="strings.html"><span class="mono">Strings</span><small>字元與字串</small></a><p class="cr-group">函式</p><a class="cr-item" href="functions.html"><span class="mono">Functions</span><small>函式</small></a><a class="cr-item on" href="recursion.html"><span class="mono">Recursion</span><small>遞迴</small></a><a class="cr-item" href="structs.html"><span class="mono">Structs</span><small>自訂資料型態</small></a></nav><div class="cr-body"><article class="cr-page"><h3 class="cr-title">Recursion　遞迴</h3>
+<section class="cr-sec"><h4>生活應用</h4><p class="cr-hook">你是班長，晚上接到老師的電話：「由於電腦教室設備臨時故障，維修需要時間，明天資訊課和後天的歷史課對調，請通知同學帶對課本。」怎麼做？</p></section>
+<section class="cr-sec"><h4>複習</h4><p>我們前面學了迴圈，最直覺的做法是照座號打 30 通電話。可是你不想打 30 通，所以你決定：</p><blockquote class="cr-quote">打給座號 1 號的同學，請他往下通知下一個號碼的人。</blockquote><p>1 號打給 2 號、2 號打給 3 號……每個人做的事一模一樣：接到電話，再打給下一個；30 號後面沒有人，就停。把工作做自己的那一份、剩下的交給下一個，這種寫法叫遞迴。</p></section>
+<section class="cr-sec"><h4>核心觀念</h4><p>遞迴（recursion）是函式呼叫自己。班長的辦法寫成函式 notify(k, n)：通知 k 號同學，再呼叫 notify(k + 1, n)，請他去通知剩下的人。每一號做的事一模一樣，所以一個函式就寫完了，不用寫 30 次。</p><p>一個遞迴有兩個部分。終止條件（base case）：問題已經小到可以直接回答，不用再呼叫自己，像 k 是最後一號 n，就不再往下打。遞迴的那一步（recursive case）：把問題縮小一點，再呼叫自己，像從「通知 k 號以後的人」變成「通知 k + 1 號以後的人」。少了終止條件，或每次呼叫沒有往終止條件靠近，就停不下來。</p><p>每呼叫一次就是新的一層，參數各自一份：notify(1, 3) 呼叫 notify(2, 3) 的時候，自己那一層的 k 還是 1，在旁邊等它回來。最後一層最先回傳，交回上一層，上一層把那一行做完再往回交，一路回到第一層。</p><p>後呼叫的先回來，就是後進先出，所以電腦用一個堆疊記每一層，叫呼叫堆疊（call stack）。資料結構的堆疊頁也會再講到它。 <a class="cr-link cr-see" href="../ds/stack.html">→ 堆疊</a></p><p>費氏數列 fib(n) = fib(n − 1) + fib(n − 2) 照定義寫成遞迴很漂亮，可是 fib(n − 1) 裡面又會再算一次 fib(n − 2)，同樣的東西被重複算了很多次。下面「跑幾步」數給你看。</p></section>
+<section class="cr-sec"><h4>什麼時候會用到</h4><ul><li>排隊時想知道自己是第幾個：問前面的人「你是第幾個？」，他再往前問，問到第一個人說「我是第 1 個」，答案一路傳回來，每個人加 1 就知道了。</li><li>算一個資料夾有多大：裡面的檔案加起來，再加上每個子資料夾的大小，子資料夾也用同一個方法算，算到沒有子資料夾為止。</li><li>家族樹、公司的組織圖、網站的選單：一個節點底下接著幾棵小一點的樹，走訪整棵樹就是「看自己，再對每棵小樹做同一件事」。 <a class="cr-link cr-see" href="../ds/tree.html">→ 樹</a></li><li>電腦內部：合併排序、快速排序把陣列切成兩半各自排好；APCS 實作題常見的走迷宮、DFS，都是寫成遞迴。 <a class="cr-link cr-see" href="../ds/sorting.html">→ 排序</a></li></ul></section>
+<section class="cr-sec"><h4>常見誤解</h4><div class="cr-traps"><div class="cr-trap"><p class="cr-trap-line wrong"><span class="cr-sr">誤解：</span><span>每一層遞迴共用同一個 k</span></p><p class="cr-trap-line right"><span class="cr-sr">正解：</span><span>每呼叫一次，參數就重新開一份：notify(1, 3) 那層的 k 是 1，它呼叫的 notify(2, 3) 那層 k 是 2，改其中一層不會動到別層。追蹤器的呼叫堆疊上，一層一個 k。</span></p></div><div class="cr-trap"><p class="cr-trap-line wrong"><span class="cr-sr">誤解：</span><span>沒寫終止條件，遞迴也會自己停</span></p><p class="cr-trap-line right"><span class="cr-sr">正解：</span><span>它會一直呼叫自己，直到呼叫堆疊塞滿：C、C++ 通常整個當掉（stack overflow），Java 丟 StackOverflowError，Python 預設大約 1000 層就報 RecursionError。</span></p></div><div class="cr-trap"><p class="cr-trap-line wrong"><span class="cr-sr">誤解：</span><span>有終止條件就一定會停</span></p><p class="cr-trap-line right"><span class="cr-sr">正解：</span><span>每次呼叫都要讓問題變小，往終止條件靠近。把 notify(k + 1, n) 寫成 notify(k, n)，k 永遠到不了 n；階乘的終止條件是 n == 1，呼叫 fact(0) 會一路減成負數、碰不到 1，一樣停不下來。</span></p></div><div class="cr-trap"><p class="cr-trap-line wrong"><span class="cr-sr">誤解：</span><span>return 會直接回到主程式</span></p><p class="cr-trap-line right"><span class="cr-sr">正解：</span><span>return 只回到呼叫它的上一層。notify(3, 3) 回傳 1 給 notify(2, 3)，它加 1 變 2 再交給 notify(1, 3)，再加 1 變 3，才回到主程式（追蹤器挑 n = 3 看看）。</span></p></div><div class="cr-trap"><p class="cr-trap-line wrong"><span class="cr-sr">誤解：</span><span>遞迴一定比迴圈好</span></p><p class="cr-trap-line right"><span class="cr-sr">正解：</span><span>遞迴常常寫得比較短、比較貼近定義，可是每一層都要記在呼叫堆疊上。費氏數列照定義寫，fib(30) 要呼叫 2692537 次；用迴圈從 fib(0)、fib(1) 往後算，30 圈就到了。</span></p></div></div></section>
+<section class="cr-sec"><h4>實作</h4><div class="cr-code"><p class="cr-sub">C</p><pre class="cr-pre">#include &lt;stdio.h&gt;
+
+int fact(int n) {
+    if (n == 1) {                       // 終止條件：1! 就是 1
+        return 1;
+    }
+    return n * fact(n - 1);             // 縮小一點：n! = n × (n - 1)!
+}
+
+int fib(int n) {
+    if (n &lt;= 1) {                       // 終止條件：fib(0) = 0、fib(1) = 1
+        return n;
+    }
+    return fib(n - 1) + fib(n - 2);     // 照定義寫：前兩項相加
+}
+
+int gcd(int a, int b) {
+    if (b == 0) {                       // 終止條件：除得盡了，a 就是最大公因數
+        return a;
+    }
+    return gcd(b, a % b);               // 輾轉相除：換成 b 和 a 除以 b 的餘數
+}
+
+int main(void) {
+    printf(&quot;%d %d %d\n&quot;, fact(5), fib(10), gcd(48, 18));
+    return 0;
+}</pre><p class="cr-sub">C++</p><pre class="cr-pre">#include &lt;iostream&gt;
+
+int fact(int n) {
+    if (n == 1) {                       // 終止條件：1! 就是 1
+        return 1;
+    }
+    return n * fact(n - 1);             // 縮小一點：n! = n × (n - 1)!
+}
+
+int fib(int n) {
+    if (n &lt;= 1) {                       // 終止條件：fib(0) = 0、fib(1) = 1
+        return n;
+    }
+    return fib(n - 1) + fib(n - 2);     // 照定義寫：前兩項相加
+}
+
+int gcd(int a, int b) {
+    if (b == 0) {                       // 終止條件：除得盡了，a 就是最大公因數
+        return a;
+    }
+    return gcd(b, a % b);               // 輾轉相除：換成 b 和 a 除以 b 的餘數
+}
+
+int main() {
+    std::cout &lt;&lt; fact(5) &lt;&lt; &quot; &quot; &lt;&lt; fib(10) &lt;&lt; &quot; &quot; &lt;&lt; gcd(48, 18) &lt;&lt; &quot;\n&quot;;
+    return 0;
+}</pre><p class="cr-sub">Java</p><pre class="cr-pre">public class Main {
+    static int fact(int n) {
+        if (n == 1) {                   // 終止條件：1! 就是 1
+            return 1;
+        }
+        return n * fact(n - 1);         // 縮小一點：n! = n × (n - 1)!
+    }
+
+    static int fib(int n) {
+        if (n &lt;= 1) {                   // 終止條件：fib(0) = 0、fib(1) = 1
+            return n;
+        }
+        return fib(n - 1) + fib(n - 2); // 照定義寫：前兩項相加
+    }
+
+    static int gcd(int a, int b) {
+        if (b == 0) {                   // 終止條件：除得盡了，a 就是最大公因數
+            return a;
+        }
+        return gcd(b, a % b);           // 輾轉相除：換成 b 和 a 除以 b 的餘數
+    }
+
+    public static void main(String[] args) {
+        System.out.println(fact(5) + &quot; &quot; + fib(10) + &quot; &quot; + gcd(48, 18));
+    }
+}</pre><p class="cr-sub">Python</p><pre class="cr-pre">def fact(n):
+    if n == 1:                          # 終止條件：1! 就是 1
+        return 1
+    return n * fact(n - 1)              # 縮小一點：n! = n × (n - 1)!
+
+
+def fib(n):
+    if n &lt;= 1:                          # 終止條件：fib(0) = 0、fib(1) = 1
+        return n
+    return fib(n - 1) + fib(n - 2)      # 照定義寫：前兩項相加
+
+
+def gcd(a, b):
+    if b == 0:                          # 終止條件：除得盡了，a 就是最大公因數
+        return a
+    return gcd(b, a % b)                # 輾轉相除：換成 b 和 a 除以 b 的餘數
+
+
+print(fact(5), fib(10), gcd(48, 18))</pre><p class="cr-out mono">輸出：120 55 6</p></div></section>
+<section class="cr-sec"><h4>跑幾步</h4><table class="cr-big-o"><tr><td>追蹤器的 notify(1, n)：每一號呼叫一次（n = 3 時呼叫 3 次）</td><td class="mono">n 次，O(n)</td></tr><tr><td>實作的 fact(n)：n、n − 1、…、1 各一層</td><td class="mono">n 次，O(n)</td></tr><tr><td>照定義寫的 fib(n)：每一層又呼叫兩次（fib(5) 呼叫 15 次、fib(10) 呼叫 177 次）</td><td class="mono">n 每加 1，次數大約變 1.6 倍，O(2ⁿ)</td></tr></table><p>遞迴跑幾步，數的是函式一共被呼叫幾次、每次呼叫做多少事。Big-O 的意思和怎麼算，在資料結構的附錄。 <a class="cr-link cr-see" href="../ds/complexity.html">→ 時間複雜度</a></p></section>
+<section class="cr-sec"><h4>試試看</h4><div class="cr-try"><p class="cr-try-q"><span class="cr-try-kind">程式運行追蹤</span><span>1. 下面這段程式印出什麼？</span></p><p class="cr-sub">C</p><pre class="cr-pre">int f(int n) {
+    if (n == 0) {
+        return 0;
+    }
+    return n + f(n - 1);
+}
+
+printf(&quot;%d\n&quot;, f(4));</pre><ol class="cr-try-opts"><li>24</li><li>0</li><li>10</li><li>4</li></ol></div><div class="cr-try"><p class="cr-try-q"><span class="cr-try-kind">程式測試與除錯</span><span>2. 想算 5!（5 × 4 × 3 × 2 × 1 = 120），結果印出 0。要怎麼改？</span></p><p class="cr-sub">C</p><pre class="cr-pre">int fact(int n) {
+    if (n == 1) {
+        return 0;
+    }
+    return n * fact(n - 1);
+}
+
+printf(&quot;%d\n&quot;, fact(5));</pre><ol class="cr-try-opts"><li>把 n == 1 改成 n == 0</li><li>把 fact(n - 1) 改成 fact(n)</li><li>把 n * fact(n - 1) 改成 n + fact(n - 1)</li><li>把 return 0 改成 return 1</li></ol></div><div class="cr-try"><p class="cr-try-q"><span class="cr-try-kind">程式效能分析</span><span>3. 用 calls 數 fib 被呼叫了幾次。下面這段程式跑完 fib(5)，印出的 calls 是多少？</span></p><p class="cr-sub">C</p><pre class="cr-pre">int calls = 0;
+
+int fib(int n) {
+    calls += 1;
+    if (n &lt;= 1) {
+        return n;
+    }
+    return fib(n - 1) + fib(n - 2);
+}
+
+fib(5);
+printf(&quot;%d\n&quot;, calls);</pre><ol class="cr-try-opts"><li>15</li><li>5</li><li>6</li><li>32</li></ol></div></section>
+<section class="cr-sec"><h4>總結</h4><p class="cr-hook">notify(k) 做兩件事：通知 k 號，再 notify(k + 1)；k 是最後一號時不再往下打。下次碰到一件事可以拆成「做自己這份，剩下的交給下一個」，你就知道：這就是遞迴，記得寫停下來的條件。</p></section>
+<section class="cr-sec"><h4>課外補充</h4><p>記住算過的答案（記憶化，memoization）：開一個陣列 memo，算出 fib(k) 就記在 memo[k]，下次要用先查表，查得到就直接拿。每個 fib(k) 只真的算一次，fib(30) 從呼叫兩百多萬次變成 30 次左右，O(n)。</p><p>Python 預設最多疊大約 1000 層，超過就報 RecursionError。可以用 import sys 再寫 sys.setrecursionlimit(10000) 調高上限，可是層數太深，底下的程式還是會把堆疊用完、整個當掉；遞迴要疊很深的時候，改寫成迴圈比較穩。</p></section></article></div></div></div>
+</main>
+<footer class="seo-foot"><nav aria-label="IT24hr 的其他內容"><a href="../../index.html">玩 IT24hr</a><a href="../../se.html">認識軟體工程</a><a href="../../csie.html">CSIE 課程</a><a href="../../handbook.html">新人手冊</a><a href="../../atlas.html">IT 圖鑑</a></nav></footer>
+<script src="../../vendor/rough.js"></script>
+<script src="../../icons.js"></script>
+<script src="../../verdict.js"></script>
+<script src="../../classroom.js"></script>
+<script src="../../classroom/programming/arrays.js"></script>
+<script src="../../classroom/programming/expressions.js"></script>
+<script src="../../classroom/programming/functions.js"></script>
+<script src="../../classroom/programming/io.js"></script>
+<script src="../../classroom/programming/loops.js"></script>
+<script src="../../classroom/programming/recursion.js"></script>
+<script src="../../classroom/programming/selection.js"></script>
+<script src="../../classroom/programming/strings.js"></script>
+<script src="../../classroom/programming/structs.js"></script>
+<script src="../../classroom/programming/variables.js"></script>
+<script src="../../classroom-view.js"></script>
+<script src="../../csie.js"></script>
+</body>
+</html>

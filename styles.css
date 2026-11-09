@@ -1361,7 +1361,9 @@ a.csie-course:hover { border-color: var(--accent); }
 .cr-item { display: grid; text-align: left; border: 0; background: transparent; color: inherit; border-radius: 6px; padding: 6px 10px; cursor: pointer; }
 .cr-item span { font-weight: 700; } .cr-item small { font-size: 12px; color: var(--muted); }
 .cr-item.on { background: var(--accent); color: #fff; } .cr-item.on small { color: #e8eefc; }
-.cr-item.soon { opacity: .55; }
+.cr-item.soon { opacity: .55; cursor: default; }
+a.cr-item, a.cr-link { text-decoration: none; }
+.csie-group { margin: 18px 0 8px; font-size: 16px; }
 .cr-body { padding: 4px 0 26px 22px; }
 .cr-title { margin: 0 0 6px; font-size: 22px; }
 .cr-hook { font-size: 18px; font-weight: 700; }   /* 生活比喻是一句話的 Hook */

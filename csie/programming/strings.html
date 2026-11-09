@@ -1,0 +1,149 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Strings　字元與字串｜APCS 程式設計｜CSIE 課程｜IT24hr</title>
+<meta name="description" content="字元與字串（Strings）：註冊帳號時常看到「6～12 個字，第一個字要是英文字母」。程式要怎麼檢查你打的帳號符不符合？">
+<link rel="canonical" href="https://tsun-u.github.io/it24hr/csie/programming/strings.html">
+<meta property="og:type" content="article">
+<meta property="og:site_name" content="IT24hr">
+<meta property="og:locale" content="zh_TW">
+<meta property="og:url" content="https://tsun-u.github.io/it24hr/csie/programming/strings.html">
+<meta property="og:title" content="Strings　字元與字串｜APCS 程式設計｜CSIE 課程｜IT24hr">
+<meta property="og:description" content="字元與字串（Strings）：註冊帳號時常看到「6～12 個字，第一個字要是英文字母」。程式要怎麼檢查你打的帳號符不符合？">
+<meta property="og:image" content="https://tsun-u.github.io/it24hr/assets/og-image.jpg">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta name="twitter:card" content="summary_large_image">
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"Article","headline":"Strings 字元與字串","description":"字元與字串（Strings）：註冊帳號時常看到「6～12 個字，第一個字要是英文字母」。程式要怎麼檢查你打的帳號符不符合？","inLanguage":"zh-Hant-TW","author":[{"@type":"Person","name":"Tsun-u"},{"@type":"Person","name":"ATone"}],"image":"https://tsun-u.github.io/it24hr/assets/og-image.jpg","isPartOf":{"@type":"Course","name":"APCS 程式設計","url":"https://tsun-u.github.io/it24hr/csie/programming/index.html"},"url":"https://tsun-u.github.io/it24hr/csie/programming/strings.html"}</script>
+<link rel="icon" href="../../assets/favicon.svg" type="image/svg+xml">
+<link rel="icon" href="../../assets/favicon-32.png" sizes="32x32" type="image/png">
+<link rel="apple-touch-icon" href="../../assets/apple-touch-icon.png">
+<link rel="stylesheet" href="../../styles.css">
+</head>
+<body class="csie-body">
+<header class="csie-head">
+  <a class="csie-logo" href="../../index.html">IT24hr</a>
+  <h1>CSIE 課程</h1>
+  <a class="btn csie-play" href="../../index.html">開始玩</a>
+</header>
+<main id="csie" class="csie-main">
+<a class="csie-back" href="index.html">‹ APCS 程式設計</a>
+<h2 class="csie-course-title">APCS 程式設計</h2>
+<div class="csie-room"><div class="cr-main"><nav class="cr-nav"><p class="cr-group">基礎</p><a class="cr-item" href="variables.html"><span class="mono">Variables</span><small>變數與資料型態</small></a><a class="cr-item" href="expressions.html"><span class="mono">Expressions</span><small>運算式</small></a><a class="cr-item" href="io.html"><span class="mono">Input &amp; Output</span><small>輸入與輸出</small></a><a class="cr-item" href="selection.html"><span class="mono">if / else</span><small>條件判斷</small></a><a class="cr-item" href="loops.html"><span class="mono">Loops</span><small>迴圈</small></a><p class="cr-group">陣列與字串</p><a class="cr-item" href="arrays.html"><span class="mono">Arrays</span><small>陣列與串列</small></a><a class="cr-item on" href="strings.html"><span class="mono">Strings</span><small>字元與字串</small></a><p class="cr-group">函式</p><a class="cr-item" href="functions.html"><span class="mono">Functions</span><small>函式</small></a><a class="cr-item" href="recursion.html"><span class="mono">Recursion</span><small>遞迴</small></a><a class="cr-item" href="structs.html"><span class="mono">Structs</span><small>自訂資料型態</small></a></nav><div class="cr-body"><article class="cr-page"><h3 class="cr-title">Strings　字元與字串</h3>
+<section class="cr-sec"><h4>生活應用</h4><p class="cr-hook">註冊帳號時常看到「6～12 個字，第一個字要是英文字母」。程式要怎麼檢查你打的帳號符不符合？</p></section>
+<section class="cr-sec"><h4>複習</h4><p>我們前面學了陣列，最直覺的做法是請使用者一次打一個字，先問「帳號有幾個字？」，再一格一格存進陣列。使用者打到第 5 個字就關掉網頁了。就算存好了，要判斷第一格是不是英文字母，你還得寫 52 個 if，把 a 到 z、A 到 Z 一個一個比。好消息是，程式語言早就幫我們準備好了：</p><blockquote class="cr-quote">一整串字可以一次存起來，字母還能像數字一樣比大小。</blockquote></section>
+<section class="cr-sec"><h4>核心觀念</h4><p>字元（character）是一個字：一個字母、一個數字、一個符號。電腦裡存的是它的編號，不是字形：ASCII 編碼把 'A' 編成 65、'a' 編成 97、'0' 編成 48，大寫、小寫、數字各自連號。字元存的是數字，所以可以加減、可以比大小：'a' &lt;= first 而且 first &lt;= 'z'，就是在問 first 的編號有沒有落在 97 到 122 之間，小寫那 26 個 if 變成兩個比較，大寫再兩個。</p><p>字串（string）是一排字元，像陣列一樣有編號、從 0 開始：name[0] 是第一個字。C 的字串就是 char 陣列，結尾多放一個 '\0' 當句點，strlen 從頭數到它為止；C++ 的 std::string、Java 的 String、Python 的 str 是字串型態，長度直接問它（length()、len）。</p><p>常用的三件事：取第 i 個字（name[i]，Java 寫 name.charAt(i)）、問長度、取子字串（Python 切片 name[0:5]、Java substring(0, 5)、C++ substr(0, 5)，C 要自己一格一格複製）。</p><p>比較兩個字串照字典順序：從第一個字開始一個一個比，先比出大小的那個字就決定了。&quot;apple&quot; &lt; &quot;banana&quot; 因為 'a' 比 'b' 小；&quot;10&quot; &lt; &quot;9&quot; 也是真，因為先比的是 '1' 和 '9'，不是比數值。</p></section>
+<section class="cr-sec"><h4>什麼時候會用到</h4><ul><li>註冊帳號、設定密碼：檢查有幾個字、第一個字是不是字母、有沒有大寫。</li><li>通訊錄照姓名排序、字典照字母排：兩個名字一個字一個字比，先比出大小的那個字決定順序。</li><li>把你打的「2024」變成數字 2024：每個字減掉 '0' 得到一位數，再一位一位拼起來，程式讀輸入時就在做這件事。</li><li>你寫的程式本身：編譯器拿到的就是一長串字元，一個字一個字讀，認出 int、=、;，才知道你要它做什麼。</li></ul></section>
+<section class="cr-sec"><h4>常見誤解</h4><div class="cr-traps"><div class="cr-trap"><p class="cr-trap-line wrong"><span class="cr-sr">誤解：</span><span>'7' 和 7 是同一個東西</span></p><p class="cr-trap-line right"><span class="cr-sr">正解：</span><span>'7' 是字元，存的是編號 55；要得到數字 7 得寫 '7' - '0'（55 − 48）。Python 寫 ord('7') - ord('0')。</span></p></div><div class="cr-trap"><p class="cr-trap-line wrong"><span class="cr-sr">誤解：</span><span>C 的字串 &quot;abc&quot; 佔 3 格</span></p><p class="cr-trap-line right"><span class="cr-sr">正解：</span><span>佔 4 格：a、b、c 後面還有結尾的 '\0'，strlen 靠它知道字串到哪裡結束。宣告 char s[3] 放 &quot;abc&quot; 就少一格。</span></p></div><div class="cr-trap"><p class="cr-trap-line wrong"><span class="cr-sr">誤解：</span><span>C 可以用 == 比兩個字串一不一樣</span></p><p class="cr-trap-line right"><span class="cr-sr">正解：</span><span>C 的 == 比的是兩個陣列的位址，不是內容，要用 strcmp(a, b) == 0；Java 的 == 也是比位址，要用 a.equals(b)。Python 和 C++ 的 std::string 可以直接 ==。</span></p></div><div class="cr-trap"><p class="cr-trap-line wrong"><span class="cr-sr">誤解：</span><span>Python 可以用 s[0] = 'x' 改字串的第一個字</span></p><p class="cr-trap-line right"><span class="cr-sr">正解：</span><span>Python 和 Java 的字串不可變，改一個字要另做一個新字串（'x' + s[1:]）。C 的 char 陣列和 C++ 的 std::string 可以直接改 s[0]。</span></p></div><div class="cr-trap"><p class="cr-trap-line wrong"><span class="cr-sr">誤解：</span><span>&quot;10&quot; &lt; &quot;9&quot; 是假，因為 10 比 9 大</span></p><p class="cr-trap-line right"><span class="cr-sr">正解：</span><span>字串比的是字典順序：先比第一個字，'1'（49）比 '9'（57）小，所以是真。要比數值得先轉成數字。</span></p></div><div class="cr-trap"><p class="cr-trap-line wrong"><span class="cr-sr">誤解：</span><span>'a' 和 &quot;a&quot; 一樣</span></p><p class="cr-trap-line right"><span class="cr-sr">正解：</span><span>C、C++、Java 的 'a' 是一個字元、就是數字 97；&quot;a&quot; 是字串，C 裡佔兩格（a 和 '\0'）。Python 沒有字元型態，'a' 和 &quot;a&quot; 都是長度 1 的字串，所以追蹤器裡 first 顯示成 &quot;t&quot;，C 的同一格是字元 't'。</span></p></div></div></section>
+<section class="cr-sec"><h4>實作</h4><div class="cr-code"><p class="cr-sub">C</p><pre class="cr-pre">#include &lt;stdio.h&gt;
+#include &lt;string.h&gt;
+
+int main(void) {
+    char name[] = &quot;tsunu0824&quot;;
+    int code = 'A';                         // 字元存的是數字：'A' 是 65
+    char upper = 't' - 'a' + 'A';           // 小寫轉大寫：跟 'a' 差幾號，就跟 'A' 差幾號
+    int n = strlen(name);                   // 長度：從頭數到結尾的 '\0'
+
+    char head[6];                           // 取前 5 個字：C 要自己一格一格複製，最後補 '\0'
+    for (int i = 0; i &lt; 5; i++) {
+        head[i] = name[i];
+    }
+    head[5] = '\0';
+
+    int vowels = 0;
+    for (int i = 0; i &lt; n; i++) {           // 走訪每一個字，數母音
+        char c = name[i];
+        if (c == 'a' || c == 'e' || c == 'i' || c == 'o' || c == 'u') {
+            vowels += 1;
+        }
+    }
+
+    printf(&quot;%d %c %d %s %d\n&quot;, code, upper, n, head, vowels);
+    return 0;
+}</pre><p class="cr-sub">C++</p><pre class="cr-pre">#include &lt;iostream&gt;
+#include &lt;string&gt;
+
+int main() {
+    std::string name = &quot;tsunu0824&quot;;
+    int code = 'A';                         // 字元存的是數字：'A' 是 65
+    char upper = 't' - 'a' + 'A';           // 小寫轉大寫：跟 'a' 差幾號，就跟 'A' 差幾號
+    int n = name.length();                  // 長度：std::string 自己記著
+
+    std::string head = name.substr(0, 5);   // 取前 5 個字：從第 0 格開始取 5 個
+
+    int vowels = 0;
+    for (int i = 0; i &lt; n; i++) {           // 走訪每一個字，數母音
+        char c = name[i];
+        if (c == 'a' || c == 'e' || c == 'i' || c == 'o' || c == 'u') {
+            vowels += 1;
+        }
+    }
+
+    std::cout &lt;&lt; code &lt;&lt; &quot; &quot; &lt;&lt; upper &lt;&lt; &quot; &quot; &lt;&lt; n &lt;&lt; &quot; &quot; &lt;&lt; head &lt;&lt; &quot; &quot; &lt;&lt; vowels &lt;&lt; &quot;\n&quot;;
+    return 0;
+}</pre><p class="cr-sub">Java</p><pre class="cr-pre">public class Main {
+    public static void main(String[] args) {
+        String name = &quot;tsunu0824&quot;;
+        int code = 'A';                         // 字元存的是數字：'A' 是 65
+        char upper = (char) ('t' - 'a' + 'A');  // 小寫轉大寫：算完是 int，要轉回 char
+        int n = name.length();                  // 長度：String 自己記著
+
+        String head = name.substring(0, 5);     // 取前 5 個字：從第 0 格取到第 5 格之前
+
+        int vowels = 0;
+        for (int i = 0; i &lt; n; i++) {           // 走訪每一個字，數母音
+            char c = name.charAt(i);
+            if (c == 'a' || c == 'e' || c == 'i' || c == 'o' || c == 'u') {
+                vowels += 1;
+            }
+        }
+
+        System.out.println(code + &quot; &quot; + upper + &quot; &quot; + n + &quot; &quot; + head + &quot; &quot; + vowels);
+    }
+}</pre><p class="cr-sub">Python</p><pre class="cr-pre">name = &quot;tsunu0824&quot;
+code = ord('A')                          # 字元存的是數字：ord 把 'A' 變成 65
+upper = chr(ord('t') - ord('a') + ord('A'))   # 小寫轉大寫：算完是數字，chr 變回字
+n = len(name)                            # 長度
+
+head = name[0:5]                         # 取前 5 個字：切片，從第 0 格取到第 5 格之前
+
+vowels = 0
+for c in name:                           # 走訪每一個字，數母音
+    if c == 'a' or c == 'e' or c == 'i' or c == 'o' or c == 'u':
+        vowels += 1
+
+print(code, upper, n, head, vowels)</pre><p class="cr-out mono">輸出：65 T 9 tsunu 2</p></div></section>
+<section class="cr-sec"><h4>跑幾步</h4><table class="cr-big-o"><tr><td>取第 i 個字 name[i]（追蹤器的 first = name[0]）</td><td class="mono">1 次，O(1)</td></tr><tr><td>問長度：C++／Java／Python 記在旁邊</td><td class="mono">1 次，O(1)</td></tr><tr><td>問長度：C 的 strlen 從頭數到 '\0'</td><td class="mono">n 次，O(n)</td></tr><tr><td>走訪一遍、數字元（實作數母音時 n = 9，if 檢查 9 次）</td><td class="mono">n 次，O(n)</td></tr><tr><td>比較兩個字串：一個字一個字比，最壞比到最後一個</td><td class="mono">最多 n 次，O(n)</td></tr></table><p>數出每一行跑幾次，再看次數跟著字串長度 n 怎麼長，就是時間複雜度。Big-O 的意思和怎麼算，在資料結構的附錄。 <a class="cr-link cr-see" href="../ds/complexity.html">→ 時間複雜度</a></p></section>
+<section class="cr-sec"><h4>試試看</h4><div class="cr-try"><p class="cr-try-q"><span class="cr-try-kind">程式運行追蹤</span><span>1. 下面這段程式印出什麼？</span></p><p class="cr-sub">C</p><pre class="cr-pre">char c = 'A' + 2;
+printf(&quot;%c\n&quot;, c);</pre><ol class="cr-try-opts"><li>67</li><li>A2</li><li>C</li><li>錯誤，字母不能加數字</li></ol></div><div class="cr-try"><p class="cr-try-q"><span class="cr-try-kind">解析計算邏輯</span><span>2. s 是一個字串。這段程式跑完，count 是什麼？</span></p><p class="cr-sub">C</p><pre class="cr-pre">int count = 0;
+for (int i = 0; i &lt; strlen(s); i++) {
+    if ('A' &lt;= s[i] &amp;&amp; s[i] &lt;= 'Z') {
+        count += 1;
+    }
+}</pre><ol class="cr-try-opts"><li>s 裡有幾個英文字母</li><li>s 裡有幾個大寫字母</li><li>s 的長度</li><li>第一個大寫字母在第幾格</li></ol></div><div class="cr-try"><p class="cr-try-q"><span class="cr-try-kind">程式測試與除錯</span><span>3. 想把字元 '7' 變成數字 7，結果印出 48。要怎麼改？</span></p><p class="cr-sub">C</p><pre class="cr-pre">char c = '7';
+int d = c - 7;
+printf(&quot;%d\n&quot;, d);</pre><ol class="cr-try-opts"><li>把減掉的 7 改成 1</li><li>把減掉的 7 改成 0</li><li>把減改成加</li><li>把減掉的 7 改成 '0'</li></ol></div></section>
+<section class="cr-sec"><h4>總結</h4><p class="cr-hook">長度用 len 看，第一個字是 name[0]；字母存的是數字，所以 'a' &lt;= first &lt;= 'z' 就能判斷是不是小寫字母。下次看到註冊頁面跳出「帳號格式不對」，你就知道：那是一支程式在數字串的長度、一個字一個字檢查。</p></section>
+<section class="cr-sec"><h4>課外補充</h4><p>中文一個字不是一個 byte：UTF-8 把一個中文字存成 3 個 byte，所以 C 的 strlen(&quot;你好&quot;) 是 6，不是 2。Python 的 len(&quot;你好&quot;) 和 Java 的 &quot;你好&quot;.length() 算的是字，都是 2。題目有中文輸入時，想清楚要數的是字還是 byte。</p><p>Python 沒有字元型態，所以用 ord(c) 把一個字變成數字、chr(97) 把數字變回字。C、C++、Java 的字元本來就是數字，直接運算就好；要印成數字就轉型 (int) c，要印成字就轉回 (char) 97。</p></section></article></div></div></div>
+</main>
+<footer class="seo-foot"><nav aria-label="IT24hr 的其他內容"><a href="../../index.html">玩 IT24hr</a><a href="../../se.html">認識軟體工程</a><a href="../../csie.html">CSIE 課程</a><a href="../../handbook.html">新人手冊</a><a href="../../atlas.html">IT 圖鑑</a></nav></footer>
+<script src="../../vendor/rough.js"></script>
+<script src="../../icons.js"></script>
+<script src="../../verdict.js"></script>
+<script src="../../classroom.js"></script>
+<script src="../../classroom/programming/arrays.js"></script>
+<script src="../../classroom/programming/expressions.js"></script>
+<script src="../../classroom/programming/functions.js"></script>
+<script src="../../classroom/programming/io.js"></script>
+<script src="../../classroom/programming/loops.js"></script>
+<script src="../../classroom/programming/recursion.js"></script>
+<script src="../../classroom/programming/selection.js"></script>
+<script src="../../classroom/programming/strings.js"></script>
+<script src="../../classroom/programming/structs.js"></script>
+<script src="../../classroom/programming/variables.js"></script>
+<script src="../../classroom-view.js"></script>
+<script src="../../csie.js"></script>
+</body>
+</html>

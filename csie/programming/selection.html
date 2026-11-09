@@ -1,0 +1,164 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>if / else　條件判斷｜APCS 程式設計｜CSIE 課程｜IT24hr</title>
+<meta name="description" content="條件判斷（if / else）：出門前打開電視，早安新聞的主播說今天最好要帶傘。可以不用開電視就知道要不要帶傘嗎？">
+<link rel="canonical" href="https://tsun-u.github.io/it24hr/csie/programming/selection.html">
+<meta property="og:type" content="article">
+<meta property="og:site_name" content="IT24hr">
+<meta property="og:locale" content="zh_TW">
+<meta property="og:url" content="https://tsun-u.github.io/it24hr/csie/programming/selection.html">
+<meta property="og:title" content="if / else　條件判斷｜APCS 程式設計｜CSIE 課程｜IT24hr">
+<meta property="og:description" content="條件判斷（if / else）：出門前打開電視，早安新聞的主播說今天最好要帶傘。可以不用開電視就知道要不要帶傘嗎？">
+<meta property="og:image" content="https://tsun-u.github.io/it24hr/assets/og-image.jpg">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta name="twitter:card" content="summary_large_image">
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"Article","headline":"if / else 條件判斷","description":"條件判斷（if / else）：出門前打開電視，早安新聞的主播說今天最好要帶傘。可以不用開電視就知道要不要帶傘嗎？","inLanguage":"zh-Hant-TW","author":[{"@type":"Person","name":"Tsun-u"},{"@type":"Person","name":"ATone"}],"image":"https://tsun-u.github.io/it24hr/assets/og-image.jpg","isPartOf":{"@type":"Course","name":"APCS 程式設計","url":"https://tsun-u.github.io/it24hr/csie/programming/index.html"},"url":"https://tsun-u.github.io/it24hr/csie/programming/selection.html"}</script>
+<link rel="icon" href="../../assets/favicon.svg" type="image/svg+xml">
+<link rel="icon" href="../../assets/favicon-32.png" sizes="32x32" type="image/png">
+<link rel="apple-touch-icon" href="../../assets/apple-touch-icon.png">
+<link rel="stylesheet" href="../../styles.css">
+</head>
+<body class="csie-body">
+<header class="csie-head">
+  <a class="csie-logo" href="../../index.html">IT24hr</a>
+  <h1>CSIE 課程</h1>
+  <a class="btn csie-play" href="../../index.html">開始玩</a>
+</header>
+<main id="csie" class="csie-main">
+<a class="csie-back" href="index.html">‹ APCS 程式設計</a>
+<h2 class="csie-course-title">APCS 程式設計</h2>
+<div class="csie-room"><div class="cr-main"><nav class="cr-nav"><p class="cr-group">基礎</p><a class="cr-item" href="variables.html"><span class="mono">Variables</span><small>變數與資料型態</small></a><a class="cr-item" href="expressions.html"><span class="mono">Expressions</span><small>運算式</small></a><a class="cr-item" href="io.html"><span class="mono">Input &amp; Output</span><small>輸入與輸出</small></a><a class="cr-item on" href="selection.html"><span class="mono">if / else</span><small>條件判斷</small></a><a class="cr-item" href="loops.html"><span class="mono">Loops</span><small>迴圈</small></a><p class="cr-group">陣列與字串</p><a class="cr-item" href="arrays.html"><span class="mono">Arrays</span><small>陣列與串列</small></a><a class="cr-item" href="strings.html"><span class="mono">Strings</span><small>字元與字串</small></a><p class="cr-group">函式</p><a class="cr-item" href="functions.html"><span class="mono">Functions</span><small>函式</small></a><a class="cr-item" href="recursion.html"><span class="mono">Recursion</span><small>遞迴</small></a><a class="cr-item" href="structs.html"><span class="mono">Structs</span><small>自訂資料型態</small></a></nav><div class="cr-body"><article class="cr-page"><h3 class="cr-title">if / else　條件判斷</h3>
+<section class="cr-sec"><h4>生活應用</h4><p class="cr-hook">出門前打開電視，早安新聞的主播說今天最好要帶傘。可以不用開電視就知道要不要帶傘嗎？</p></section>
+<section class="cr-sec"><h4>複習</h4><p>我們前面學了輸入與輸出，最直覺的做法是讓程式讀進今天的降雨機率，再印出來：「今天降雨機率 70%」。可是你每天還是得自己看著數字想：70% 要帶嗎？40% 呢？後來你連穿不穿外套、要不要擦防曬，都想看一眼程式就知道。可是到目前為止，我們寫的程式只會照順序一行一行從頭跑到尾，沒辦法照規則出現不同結果。</p><blockquote class="cr-quote">條件判斷就是要教它如何做決定。</blockquote></section>
+<section class="cr-sec"><h4>核心觀念</h4><p>條件判斷（selection）讓程式照條件走不同的路。if 後面接一個條件，也就是一個算出來是真或假的比較：rain &gt; 50 在 rain 是 70 時成立、是 30 時不成立。成立就跑 if 底下那一塊程式（區塊，block），不成立就跳過；後面可以接 else，條件不成立時改跑 else 那一塊。到目前為止的程式只會從頭跑到尾，條件判斷是第一個讓它「分岔」的東西：同一支程式，今天印出 umbrella，明天什麼都不印。</p><p>只分「帶、不帶」有時不夠：70% 以上一定帶，50% 到 70% 之間「再看看」，50% 以下不帶。這時用 else if（Python 寫 elif）一路往下比：先看 rain &gt;= 70，不成立才看 rain &gt; 50，都不成立才走 else。中了一個就不再往下比，所以第二個條件不用再寫「而且小於 70」，走到它的時候 rain 一定已經小於 70 了。</p><p>條件裡面還可以再放條件，叫巢狀 if（nested if）：先判斷有沒有下雨，有下雨再判斷風大不大，風大就別撐傘、改穿雨衣。一個條件不夠用時，也可以用 &amp;&amp;（而且，Python 寫 and）和 ||（或者，Python 寫 or）把兩個條件接起來：rain &gt; 50 &amp;&amp; rain &lt; 70 是「超過 50 而且不到 70」，兩邊都成立整個才成立；|| 是其中一邊成立就成立。</p><p>C、C++、Java 用大括號 { } 把要一起跑的那幾行框起來，縮排只是給人看的；Python 沒有大括號，縮排就是區塊：往內縮的那幾行屬於上面的 if，退回來就不屬於了。追蹤器裡三組降雨機率都挑挑看，同一支程式走的路不一樣。</p></section>
+<section class="cr-sec"><h4>什麼時候會用到</h4><ul><li>手機的勿擾模式：晚上 11 點以後來電就不響，標成最愛的那幾個人打來例外。</li><li>網購結帳：滿 1000 元免運，不然加 60 元運費；有輸入優惠碼再打折。</li><li>遊戲：血量歸零就 Game Over，碰到金幣就加分——每一格畫面都要判斷好幾次。</li><li>電腦內部：作業系統收到你按的每一個鍵，都先判斷是不是 Ctrl、是不是 Enter，再決定交給哪個程式處理；CPU 裡面每個 if 最後都變成一條「分支」指令，跳去不同的地方繼續跑。</li></ul></section>
+<section class="cr-sec"><h4>常見誤解</h4><div class="cr-traps"><div class="cr-trap"><p class="cr-trap-line wrong"><span class="cr-sr">誤解：</span><span>else 配的是最上面那個 if</span></p><p class="cr-trap-line right"><span class="cr-sr">正解：</span><span>else 配最近的、還沒配到 else 的那個 if（dangling else）。C、C++、Java 不看縮排，巢狀 if 要用大括號框清楚；Python 看縮排，else 跟哪個 if 對齊就配哪個。</span></p></div><div class="cr-trap"><p class="cr-trap-line wrong"><span class="cr-sr">誤解：</span><span>0 &lt; x &lt; 10 在 C 也能判斷 x 介於 0 到 10 之間</span></p><p class="cr-trap-line right"><span class="cr-sr">正解：</span><span>C 從左到右算：0 &lt; x 先變成 1 或 0，再拿 1 或 0 跟 10 比，永遠成立。要寫 0 &lt; x &amp;&amp; x &lt; 10。Python 可以連著寫，意思真的是「介於中間」。</span></p></div><div class="cr-trap"><p class="cr-trap-line wrong"><span class="cr-sr">誤解：</span><span>C 的 if (x = 5) 是在判斷 x 等不等於 5</span></p><p class="cr-trap-line right"><span class="cr-sr">正解：</span><span>一個等號是指定：先把 5 放進 x，再拿 5 當條件，5 不是 0 所以永遠成立。比較要寫兩個等號 x == 5。Python 和 Java 遇到這種寫法會直接報錯，反而幫你擋下來。</span></p></div><div class="cr-trap"><p class="cr-trap-line wrong"><span class="cr-sr">誤解：</span><span>三個獨立的 if 跟 if／else if／else 一樣</span></p><p class="cr-trap-line right"><span class="cr-sr">正解：</span><span>獨立的 if 每一個都會檢查，條件重疊時會中好幾個：score 是 95 時，if score &gt;= 90、if score &gt;= 80、if score &gt;= 60 三個都成立，會印出三個等第。else if 中了一個就不再往下比。</span></p></div><div class="cr-trap"><p class="cr-trap-line wrong"><span class="cr-sr">誤解：</span><span>C 的 if 沒加大括號，底下縮排的幾行都歸它管</span></p><p class="cr-trap-line right"><span class="cr-sr">正解：</span><span>沒大括號只管緊接著的那一行，第二行不管條件成不成立都會跑。C、C++、Java 看的是大括號，不是縮排；兩行以上就加大括號。</span></p></div></div></section>
+<section class="cr-sec"><h4>實作</h4><div class="cr-code"><p class="cr-sub">C</p><pre class="cr-pre">#include &lt;stdio.h&gt;
+
+int main(void) {
+    int score = 85;
+    int late = 0;                           // 1 是遲到、0 是沒遲到
+
+    char grade;
+    if (score &gt;= 90) {                      // 一路往下比，中了一個就不再比
+        grade = 'A';
+    } else if (score &gt;= 80) {
+        grade = 'B';
+    } else if (score &gt;= 60) {
+        grade = 'C';
+    } else {
+        grade = 'D';
+    }
+
+    int ok = 0;
+    if (score &gt;= 60 &amp;&amp; late == 0) {         // 兩個條件都成立才算
+        ok = 1;
+    }
+
+    printf(&quot;%c %d\n&quot;, grade, ok);
+    return 0;
+}</pre><p class="cr-sub">C++</p><pre class="cr-pre">#include &lt;iostream&gt;
+
+int main() {
+    int score = 85;
+    int late = 0;                           // 1 是遲到、0 是沒遲到
+
+    char grade;
+    if (score &gt;= 90) {                      // 一路往下比，中了一個就不再比
+        grade = 'A';
+    } else if (score &gt;= 80) {
+        grade = 'B';
+    } else if (score &gt;= 60) {
+        grade = 'C';
+    } else {
+        grade = 'D';
+    }
+
+    int ok = 0;
+    if (score &gt;= 60 &amp;&amp; late == 0) {         // 兩個條件都成立才算
+        ok = 1;
+    }
+
+    std::cout &lt;&lt; grade &lt;&lt; &quot; &quot; &lt;&lt; ok &lt;&lt; &quot;\n&quot;;
+    return 0;
+}</pre><p class="cr-sub">Java</p><pre class="cr-pre">public class Main {
+    public static void main(String[] args) {
+        int score = 85;
+        int late = 0;                       // 1 是遲到、0 是沒遲到
+
+        char grade;
+        if (score &gt;= 90) {                  // 一路往下比，中了一個就不再比
+            grade = 'A';
+        } else if (score &gt;= 80) {
+            grade = 'B';
+        } else if (score &gt;= 60) {
+            grade = 'C';
+        } else {
+            grade = 'D';
+        }
+
+        int ok = 0;
+        if (score &gt;= 60 &amp;&amp; late == 0) {     // 兩個條件都成立才算
+            ok = 1;
+        }
+
+        System.out.println(grade + &quot; &quot; + ok);
+    }
+}</pre><p class="cr-sub">Python</p><pre class="cr-pre">score = 85
+late = 0                            # 1 是遲到、0 是沒遲到
+
+if score &gt;= 90:                     # 一路往下比，中了一個就不再比
+    grade = &quot;A&quot;
+elif score &gt;= 80:
+    grade = &quot;B&quot;
+elif score &gt;= 60:
+    grade = &quot;C&quot;
+else:
+    grade = &quot;D&quot;
+
+ok = 0
+if score &gt;= 60 and late == 0:       # 兩個條件都成立才算
+    ok = 1
+
+print(grade, ok)</pre><p class="cr-out mono">輸出：B 1</p></div></section>
+<section class="cr-sec"><h4>試試看</h4><div class="cr-try"><p class="cr-try-q"><span class="cr-try-kind">程式運行追蹤</span><span>1. 下面這段程式印出什麼？</span></p><p class="cr-sub">C</p><pre class="cr-pre">int x = 5;
+int y = 20;
+if (x &gt; 0)
+    if (y &gt; 50)
+        printf(&quot;A\n&quot;);
+else
+    printf(&quot;B\n&quot;);</pre><ol class="cr-try-opts"><li>A</li><li>B</li><li>AB</li><li>什麼都不印</li></ol></div><div class="cr-try"><p class="cr-try-q"><span class="cr-try-kind">程式填空</span><span>2. 想在 x 是 3 的倍數而且是偶數的時候才印出 yes，____ 要填什麼？（Python 把 &amp;&amp; 寫成 and、|| 寫成 or）</span></p><p class="cr-sub">C</p><pre class="cr-pre">int x = 12;
+if (____) {
+    printf(&quot;yes\n&quot;);
+}</pre><ol class="cr-try-opts"><li>x % 3 &amp;&amp; x % 2 == 0</li><li>x % 3 == 0 || x % 2 == 0</li><li>x % 3 == 0 &amp;&amp; x % 2 == 1</li><li>x % 3 == 0 &amp;&amp; x % 2 == 0</li></ol></div><div class="cr-try"><p class="cr-try-q"><span class="cr-try-kind">程式測試與除錯</span><span>3. 60 分應該算及格，可是輸入 60 卻印出 fail。要怎麼改？</span></p><p class="cr-sub">C</p><pre class="cr-pre">int score = 60;
+if (score &gt; 60) {
+    printf(&quot;pass\n&quot;);
+} else {
+    printf(&quot;fail\n&quot;);
+}</pre><ol class="cr-try-opts"><li>把 score &gt; 60 改成 score &lt; 60</li><li>把 score &gt; 60 改成 score == 60</li><li>把 score &gt; 60 改成 score &gt;= 60</li><li>把印 pass 和印 fail 的兩行對調</li></ol></div></section>
+<section class="cr-sec"><h4>總結</h4><p class="cr-hook">可以：讓程式讀今天的降雨機率，寫「如果超過 50% 就印出記得帶傘，不然就不印」。下次發現自己每天都在做「如果…就…」的決定，你就知道：這種判斷可以交給程式。</p></section>
+<section class="cr-sec"><h4>課外補充</h4><p>switch／case：同一個變數要跟好幾個固定的值比，像選單的 1、2、3 各做一件事，C、C++、Java 可以寫 switch (choice) { case 1: … break; case 2: … break; default: … }，比一長串 else if 整齊。每個 case 結尾要寫 break，漏掉的話會一路往下掉（fall-through），把下一個 case 的程式也跑掉。switch 只能比「等於某個值」，score &gt;= 90 這種範圍還是要用 if／else if。</p><p>Python 沒有 switch。3.10 以後有 match／case（APCS 程式實作的環境是 Python 3.10，可以用），寫法跟 switch 很像、結尾不用 break；更常見的寫法是直接用 if／elif，或是把對照表放進字典（dict）用 key 查，例如 name = {1: &quot;A&quot;, 2: &quot;B&quot;}[choice]。</p></section></article></div></div></div>
+</main>
+<footer class="seo-foot"><nav aria-label="IT24hr 的其他內容"><a href="../../index.html">玩 IT24hr</a><a href="../../se.html">認識軟體工程</a><a href="../../csie.html">CSIE 課程</a><a href="../../handbook.html">新人手冊</a><a href="../../atlas.html">IT 圖鑑</a></nav></footer>
+<script src="../../vendor/rough.js"></script>
+<script src="../../icons.js"></script>
+<script src="../../verdict.js"></script>
+<script src="../../classroom.js"></script>
+<script src="../../classroom/programming/arrays.js"></script>
+<script src="../../classroom/programming/expressions.js"></script>
+<script src="../../classroom/programming/functions.js"></script>
+<script src="../../classroom/programming/io.js"></script>
+<script src="../../classroom/programming/loops.js"></script>
+<script src="../../classroom/programming/recursion.js"></script>
+<script src="../../classroom/programming/selection.js"></script>
+<script src="../../classroom/programming/strings.js"></script>
+<script src="../../classroom/programming/structs.js"></script>
+<script src="../../classroom/programming/variables.js"></script>
+<script src="../../classroom-view.js"></script>
+<script src="../../csie.js"></script>
+</body>
+</html>

@@ -5,4 +5,41 @@
   <url><loc>https://tsun-u.github.io/it24hr/se.html</loc></url>
   <url><loc>https://tsun-u.github.io/it24hr/handbook.html</loc></url>
   <url><loc>https://tsun-u.github.io/it24hr/atlas.html</loc></url>
+  <url><loc>https://tsun-u.github.io/it24hr/csie/index.html</loc></url>
+  <url><loc>https://tsun-u.github.io/it24hr/csie/programming/index.html</loc></url>
+  <url><loc>https://tsun-u.github.io/it24hr/csie/programming/variables.html</loc></url>
+  <url><loc>https://tsun-u.github.io/it24hr/csie/programming/expressions.html</loc></url>
+  <url><loc>https://tsun-u.github.io/it24hr/csie/programming/io.html</loc></url>
+  <url><loc>https://tsun-u.github.io/it24hr/csie/programming/selection.html</loc></url>
+  <url><loc>https://tsun-u.github.io/it24hr/csie/programming/loops.html</loc></url>
+  <url><loc>https://tsun-u.github.io/it24hr/csie/programming/arrays.html</loc></url>
+  <url><loc>https://tsun-u.github.io/it24hr/csie/programming/strings.html</loc></url>
+  <url><loc>https://tsun-u.github.io/it24hr/csie/programming/functions.html</loc></url>
+  <url><loc>https://tsun-u.github.io/it24hr/csie/programming/recursion.html</loc></url>
+  <url><loc>https://tsun-u.github.io/it24hr/csie/programming/structs.html</loc></url>
+  <url><loc>https://tsun-u.github.io/it24hr/csie/ds/index.html</loc></url>
+  <url><loc>https://tsun-u.github.io/it24hr/csie/ds/array.html</loc></url>
+  <url><loc>https://tsun-u.github.io/it24hr/csie/ds/linked_list.html</loc></url>
+  <url><loc>https://tsun-u.github.io/it24hr/csie/ds/stack.html</loc></url>
+  <url><loc>https://tsun-u.github.io/it24hr/csie/ds/queue.html</loc></url>
+  <url><loc>https://tsun-u.github.io/it24hr/csie/ds/circular_queue.html</loc></url>
+  <url><loc>https://tsun-u.github.io/it24hr/csie/ds/deque.html</loc></url>
+  <url><loc>https://tsun-u.github.io/it24hr/csie/ds/tree.html</loc></url>
+  <url><loc>https://tsun-u.github.io/it24hr/csie/ds/graph.html</loc></url>
+  <url><loc>https://tsun-u.github.io/it24hr/csie/ds/hashing.html</loc></url>
+  <url><loc>https://tsun-u.github.io/it24hr/csie/ds/searching.html</loc></url>
+  <url><loc>https://tsun-u.github.io/it24hr/csie/ds/sorting.html</loc></url>
+  <url><loc>https://tsun-u.github.io/it24hr/csie/ds/disjoint_set.html</loc></url>
+  <url><loc>https://tsun-u.github.io/it24hr/csie/ds/complexity.html</loc></url>
+  <url><loc>https://tsun-u.github.io/it24hr/csie/ds/heap.html</loc></url>
+  <url><loc>https://tsun-u.github.io/it24hr/csie/ds/trie.html</loc></url>
+  <url><loc>https://tsun-u.github.io/it24hr/csie/ds/avl.html</loc></url>
+  <url><loc>https://tsun-u.github.io/it24hr/csie/ds/red_black.html</loc></url>
+  <url><loc>https://tsun-u.github.io/it24hr/csie/ds/b_tree.html</loc></url>
+  <url><loc>https://tsun-u.github.io/it24hr/csie/ds/topological_sort.html</loc></url>
+  <url><loc>https://tsun-u.github.io/it24hr/csie/ds/shortest_path.html</loc></url>
+  <url><loc>https://tsun-u.github.io/it24hr/csie/ds/mst.html</loc></url>
+  <url><loc>https://tsun-u.github.io/it24hr/csie/ds/null.html</loc></url>
+  <url><loc>https://tsun-u.github.io/it24hr/csie/algorithms/index.html</loc></url>
+  <url><loc>https://tsun-u.github.io/it24hr/csie/algorithms/dp.html</loc></url>
 </urlset>
