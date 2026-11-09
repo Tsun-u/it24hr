@@ -2,6 +2,11 @@
 (function (root) {
   const CHANGELOG = [
   {
+    "hash": "ec04388",
+    "date": "2026-11-09",
+    "subject": "程式設計小教室附錄：傳值與傳參考"
+  },
+  {
     "hash": "0ded111",
     "date": "2026-11-09",
     "subject": "演算法小教室：雙指標"
