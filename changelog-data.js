@@ -2,6 +2,36 @@
 (function (root) {
   const CHANGELOG = [
   {
+    "hash": "96117c6",
+    "date": "2026-11-09",
+    "subject": "changelog: date entries by commit date"
+  },
+  {
+    "hash": "055c017",
+    "date": "2026-11-09",
+    "subject": "重產 CSIE 課程頁：底部連結改連 csie/index.html"
+  },
+  {
+    "hash": "4dc8ea9",
+    "date": "2026-11-09",
+    "subject": "SEO: point CSIE links, canonical and sitemap at the csie/ pages"
+  },
+  {
+    "hash": "8198db5",
+    "date": "2026-11-09",
+    "subject": "CSIE 課程每一頁有自己的網址，內文預先寫進 HTML"
+  },
+  {
+    "hash": "4224b58",
+    "date": "2026-11-09",
+    "subject": "演算法小教室開課：第一頁動態規劃"
+  },
+  {
+    "hash": "ab8fe7d",
+    "date": "2026-11-09",
+    "subject": "函式頁的 Java 程式改用 camelCase：isPrime、addOne"
+  },
+  {
     "hash": "4fc40cf",
     "date": "2026-11-09",
     "subject": "SEO: generate static content pages and sitemap from existing data"
