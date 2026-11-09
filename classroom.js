@@ -55,9 +55,10 @@
   // 演算法：基礎篇對準 APCS 程式實作的中高級；資料結構已經教過的搜尋、排序、圖的演算法不重複
   algorithms: [
     { group: '基礎篇', items: [
-      { id: 'prefix_sum', name: 'Prefix Sum & Two Pointers', zh: '前綴和與雙指標' },
+      { id: 'prefix_sum', name: 'Prefix Sum', zh: '前綴和' },
+      { id: 'two_pointers', name: 'Two Pointers', zh: '雙指標' },
       { id: 'binary_answer', name: 'Binary Search on Answer', zh: '二分搜尋答案' },
-      { id: 'backtracking', name: 'Backtracking', zh: '暴力枚舉與回溯' },
+      { id: 'backtracking', name: 'Backtracking', zh: '回溯' },
       { id: 'divide_conquer', name: 'Divide and Conquer', zh: '分治法' },
       { id: 'greedy', name: 'Greedy', zh: '貪婪法' },
       { id: 'dp', name: 'Dynamic Programming', zh: '動態規劃' },
