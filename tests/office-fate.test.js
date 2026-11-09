@@ -90,3 +90,15 @@ test('規格第 3 題多選，預填到單選的 profileFields：全勾＝都存
   assert.equal(fill([0, 2]), 1);
   assert.equal(fill([0, 1, 2, 3, 4, 5]), 2);
 });
+
+test('會議回答標對人：個人資料卡第 2 句三位老師各自回；每題「被問到時的回應」是誰講的，就由誰回答', () => {
+  const pages = Sandbox.make('fate', 'legacy', { pool: 'all' }).meetings[1].pages;
+  const profile = pages.find(p => p.id === 'profile');
+  assert.deepEqual(profile.question.asks[1].map(ask => Works.replyLine(ask, 0, profile.who).split('：')[0]),
+    ['解憂時代 莉莉絲老師', '解憂時代 瀞玄老師', '解憂時代 熙恩教授']);
+  for (const page of pages) for (const [i, asks] of Object.entries(page.question.asks)) for (const ask of [].concat(asks)) {
+    const said = ask.text.split('：')[0];
+    assert.ok((ask.who || page.who).includes(said), `${page.id} 第 ${i} 句：${said}講的，回答卻是 ${ask.who || page.who}`);
+    ask.replies.forEach((_, j) => assert.doesNotMatch(Works.replyLine(ask, j, page.who), /^[^「]+：[^「]+：「/, `${page.id} 第 ${i} 句：一句回答標了兩個人`));
+  }
+});

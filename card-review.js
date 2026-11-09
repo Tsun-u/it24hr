@@ -98,6 +98,7 @@
     if (item.type === 'order') return new Map([].concat(item.answer || []).map((k, pos) => [k, `第${pos + 1}步`]));
     return new Map([].concat(item.answer ?? []).map(k => [k, '✓']));
   }
+  // replies：每個選項對方怎麼回（已經寫好「誰：回答」的整行）
   function optionList(item, replies = null) {
     const marks = marksOf(item); const ol = el('ol', 'rv-opts');
     (item.options || []).forEach((text, k) => {
@@ -145,7 +146,7 @@
     const box = el('div');
     (q.segments || []).forEach((seg, i) => {
       const item = el('div', 'rv-item'); item.append(el('p', 'rv-q', `第 ${i + 1} 段：${seg}`));
-      for (const ask of [].concat((q.asks || {})[i] || [])) { item.append(el('p', 'rv-note', ask.text || '')); item.append(optionList(ask, ask.replies)); }
+      for (const ask of [].concat((q.asks || {})[i] || [])) { item.append(el('p', 'rv-note', ask.text || '')); item.append(optionList(ask, (ask.options || []).map((_, k) => Works.replyLine(ask, k)))); }
       box.append(item);
     });
     return box;

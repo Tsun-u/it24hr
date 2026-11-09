@@ -240,6 +240,14 @@
     return /[。？！…～]$/.test(m[1]) ? m[1] : m[1] + m[2];
   };
 
+  // 需求討論的回答寫成「誰：回答」。引號開頭的是被問的人講的：ask.who，沒寫就是那一段的說話人 who；
+  // 不是引號開頭的已經寫了誰在講（「瀞玄：……」、旁白），照原樣。不知道說話人時只回回答本身
+  function replyLine(ask, j, who = null) {
+    const reply = ask.replies && ask.replies[j]; if (!reply) return null;
+    const speaker = ask.who || who;
+    return reply.startsWith('「') && speaker ? `${speaker}：${reply}` : reply;
+  }
+
   // 做完一件事在卡上留的筆記（像 Redmine note，記錄人是玩家自己）：把選了什麼用人話寫下來
   function summarize(question, answers, result) {
     if (question.kind === 'manual') return result && result.nullException ? '手動測試：對著空氣測了一下。' : `手動測試：${(result && result.version) || '沒做任何操作'}。`;
@@ -253,7 +261,8 @@
       const a = answers || {};
       const asked = Object.entries(a.asks || {}).flatMap(([i, js]) => [].concat(js).map((j, k) => {
         const ask = askList(question, i)[k]; if (!ask || j === undefined || ask.options[j] === undefined) return null;
-        return `${ask.options[j]}${ask.replies && ask.replies[j] ? `→${ask.replies[j]}` : ''}`;
+        const reply = replyLine(ask, j);
+        return `${ask.options[j]}${reply ? `→${reply}` : ''}`;
       })).filter(Boolean);
       return `圈了 ${(a.circled || []).length} 處。${asked.length ? `問了：${asked.join('；')}` : '沒問什麼。'}`;
     }
@@ -672,7 +681,7 @@
     return order;
   }
 
-  const api = { paletteHints, grade, outcomes, prefill, replyAnswered, chatText, deployBefore, functionsToFill, testDrives, givenOptions, summarize, testStyle, deviceTestOptions, label, intro, aiAnswers, aiRoll, applyNotes, firstAsks, applyAsk, aiSpots, fixNotes, fixDrops, reviseAnswers, displayOrder, rightAnswers, pickedIn, hiddenOptions, visibleItem, activeFunction, activeItem, LABELS, INTROS, MENU, LOW_BATTERY };
+  const api = { paletteHints, grade, outcomes, prefill, replyAnswered, chatText, deployBefore, functionsToFill, testDrives, givenOptions, replyLine, summarize,testStyle, deviceTestOptions, label, intro, aiAnswers, aiRoll, applyNotes, firstAsks, applyAsk, aiSpots, fixNotes, fixDrops, reviseAnswers, displayOrder, rightAnswers, pickedIn, hiddenOptions, visibleItem, activeFunction, activeItem, LABELS, INTROS, MENU, LOW_BATTERY };
   if (typeof module !== 'undefined') module.exports = api;
   else root.Works = api;
 })(typeof window !== 'undefined' ? window : globalThis);

@@ -84,8 +84,9 @@
       [].concat(q.asks[i]).forEach((ask, k) => {
         const j = [].concat(asks[i] ?? [])[k];
         if (j === undefined) { log.append(h('p', 'muted', `（${q.segments[i]}——圈了但沒問）`)); return; }
-        const reply = saAsked.includes(i) ? '「這個怡君剛剛也問了。」' : (ask.replies && ask.replies[j]) || '「嗯。」';
-        log.append(h('p', 'me', `你：${ask.options[j]}`), h('p', 'them', `${who}：${reply}`));
+        const speaker = ask.who || who;   // 一段裡分別問不同人時，那一題寫了 who
+        const reply = saAsked.includes(i) ? `${speaker}：「這個怡君剛剛也問了。」` : Works.replyLine(ask, j, who) || `${speaker}：「嗯。」`;
+        log.append(h('p', 'me', `你：${ask.options[j]}`), h('p', 'them', reply));
       });
     }
     if (!log.children.length) log.append(h('p', 'muted', empty));
