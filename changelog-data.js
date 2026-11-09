@@ -2,6 +2,16 @@
 (function (root) {
   const CHANGELOG = [
   {
+    "hash": "0ded111",
+    "date": "2026-11-09",
+    "subject": "演算法小教室：雙指標"
+  },
+  {
+    "hash": "a713b13",
+    "date": "2026-11-09",
+    "subject": "條件判斷的課外補充加上 switch／match 的範例程式"
+  },
+  {
     "hash": "45bc941",
     "date": "2026-11-09",
     "subject": "演算法小教室：前綴和"
