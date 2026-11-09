@@ -2,6 +2,16 @@
 (function (root) {
   const CHANGELOG = [
   {
+    "hash": "01effa7",
+    "date": "2026-11-09",
+    "subject": "預約會議「要不要做優惠價」改由瀞玄回答"
+  },
+  {
+    "hash": "8482007",
+    "date": "2026-11-09",
+    "subject": "需求會議的回答標對說話人"
+  },
+  {
     "hash": "4e226bb",
     "date": "2026-11-08",
     "subject": "第三關結算卡的縮圖改畫網站首頁"
