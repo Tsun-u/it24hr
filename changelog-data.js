@@ -2,6 +2,16 @@
 (function (root) {
   const CHANGELOG = [
   {
+    "hash": "4fc40cf",
+    "date": "2026-11-09",
+    "subject": "SEO: generate static content pages and sitemap from existing data"
+  },
+  {
+    "hash": "bf41ece",
+    "date": "2026-11-09",
+    "subject": "SEO basics: descriptions, Open Graph, canonical, JSON-LD; noindex the card review page"
+  },
+  {
     "hash": "5e35b83",
     "date": "2026-11-09",
     "subject": "day1: SA follows up on the QC evening line"
