@@ -1,5 +1,5 @@
 // 對外測試用的靜態伺服器：node scripts/serve.mjs [port]，遊戲在 /it24hr/。
-// 只開放遊戲本身的檔案（index.html、根目錄的 js／css、assets/、LICENSES/、vendor/、classroom/），文件與劇本一律 404。
+// 只開放遊戲本身的檔案（index.html、根目錄的 js／css／html／xml、assets/、LICENSES/、vendor/、classroom/、csie/），文件與劇本一律 404。
 import { createServer } from 'node:http';
 import { readFile } from 'node:fs/promises';
 import { extname, join, normalize, sep } from 'node:path';
@@ -10,13 +10,13 @@ const PREFIX = '/it24hr/';
 const PORT = Number(process.argv[2]) || 8765;
 const TYPES = {
   '.html': 'text/html; charset=utf-8', '.js': 'text/javascript; charset=utf-8', '.css': 'text/css; charset=utf-8',
-  '.txt': 'text/plain; charset=utf-8', '.svg': 'image/svg+xml', '.png': 'image/png', '.webp': 'image/webp',
+  '.txt': 'text/plain; charset=utf-8', '.xml': 'application/xml; charset=utf-8', '.svg': 'image/svg+xml', '.png': 'image/png', '.webp': 'image/webp',
 };
 
 function allowed(path) {
   if (path.includes('..')) return false;
-  if (/^[a-z0-9-]+\.(js|css|html)$/.test(path)) return true;
-  return /^(assets|LICENSES|vendor|classroom)\/[\w./-]+$/.test(path);
+  if (/^[a-z0-9-]+\.(js|css|html|xml)$/.test(path)) return true;
+  return /^(assets|LICENSES|vendor|classroom|csie)\/[\w./-]+$/.test(path);
 }
 
 createServer(async (request, response) => {

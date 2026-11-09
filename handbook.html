@@ -1,0 +1,673 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>新人手冊：IT 職場常用詞｜IT24hr</title>
+<meta name="description" content="PM、SA、QC、需求單位、code review、部署、煙霧測試……IT 職場常聽到的詞，用一句話講清楚，再補上主要的工作或用途。">
+<link rel="canonical" href="https://tsun-u.github.io/it24hr/handbook.html">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="IT24hr">
+<meta property="og:locale" content="zh_TW">
+<meta property="og:url" content="https://tsun-u.github.io/it24hr/handbook.html">
+<meta property="og:title" content="新人手冊：IT 職場常用詞｜IT24hr">
+<meta property="og:description" content="PM、SA、QC、需求單位、code review、部署、煙霧測試……IT 職場常聽到的詞，用一句話講清楚，再補上主要的工作或用途。">
+<meta property="og:image" content="https://tsun-u.github.io/it24hr/assets/og-image.jpg">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta name="twitter:card" content="summary_large_image">
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"DefinedTermSet","name":"新人手冊","inLanguage":"zh-Hant-TW","hasDefinedTerm":[{"@type":"DefinedTerm","name":"PM","description":"在有限的時間、預算與人力內，帶領團隊完成目標、確保專案順利交付的人。","url":"https://tsun-u.github.io/it24hr/handbook.html#pm"},{"@type":"DefinedTerm","name":"產品經理","description":"決定產品要做什麼、為什麼做、先做哪些功能的人。","url":"https://tsun-u.github.io/it24hr/handbook.html#product_manager"},{"@type":"DefinedTerm","name":"需求單位","description":"提出系統需求、說明自己部門的工作流程和規則，系統做好後確認能不能用的部門，例如人事、會計、總務。","url":"https://tsun-u.github.io/it24hr/handbook.html#requester"},{"@type":"DefinedTerm","name":"RA","description":"到現場了解使用者真正需要什麼，再把大家的話整理成清楚、驗收得了的需求規格的人。","url":"https://tsun-u.github.io/it24hr/handbook.html#ra"},{"@type":"DefinedTerm","name":"SA","description":"負責弄清楚「使用者到底需要什麼」，再把它整理成工程師看得懂的規格的人。","url":"https://tsun-u.github.io/it24hr/handbook.html#sa"},{"@type":"DefinedTerm","name":"SD","description":"接下 SA 的規格，設計系統內部要怎麼做：資料怎麼存、功能怎麼切、各部分怎麼接的人。","url":"https://tsun-u.github.io/it24hr/handbook.html#sd"},{"@type":"DefinedTerm","name":"UI／UX 設計師","description":"設計畫面長相（UI）和使用流程（UX）的人，目標是讓人不用教就會用。","url":"https://tsun-u.github.io/it24hr/handbook.html#uiux"},{"@type":"DefinedTerm","name":"SWE","description":"寫軟體的人的統稱：把 SD 設計好的架構實作成能跑的程式。","url":"https://tsun-u.github.io/it24hr/handbook.html#swe"},{"@type":"DefinedTerm","name":"PG","description":"照規格把程式寫出來的人。","url":"https://tsun-u.github.io/it24hr/handbook.html#pg"},{"@type":"DefinedTerm","name":"RD","description":"做技術研發的人；不一定限於軟體，硬體、韌體、演算法也算。","url":"https://tsun-u.github.io/it24hr/handbook.html#rd"},{"@type":"DefinedTerm","name":"前端／後端／全端工程師","description":"軟體工程師照負責的那一層分：前端做使用者看得到的畫面，後端做看不到的資料和邏輯，全端兩邊都做。","url":"https://tsun-u.github.io/it24hr/handbook.html#dev_layers"},{"@type":"DefinedTerm","name":"DBA","description":"專門顧資料庫的人：效能、備份、權限，資料不能壞。","url":"https://tsun-u.github.io/it24hr/handbook.html#dba"},{"@type":"DefinedTerm","name":"QC／QA","description":"在程式交給使用者之前，用有系統的測試找出問題、確保品質的人。","url":"https://tsun-u.github.io/it24hr/handbook.html#qc"},{"@type":"DefinedTerm","name":"DevOps／SRE","description":"負責把程式送上伺服器、盯著系統穩定運作的人。","url":"https://tsun-u.github.io/it24hr/handbook.html#devops"},{"@type":"DefinedTerm","name":"資安人員","description":"負責讓系統和公司資料不被偷、不被破壞的人。","url":"https://tsun-u.github.io/it24hr/handbook.html#security"},{"@type":"DefinedTerm","name":"網管人員","description":"顧公司網路的人：對外連線、內部網路、Wi-Fi、VPN、防火牆。","url":"https://tsun-u.github.io/it24hr/handbook.html#netadmin"},{"@type":"DefinedTerm","name":"MIS","description":"顧公司內部電腦、系統、帳號的人，職缺常寫「資訊管理工程師」「資訊管理人員」，俗稱「管電腦的」；一般人口中的「IT」很多時候是指他們。","url":"https://tsun-u.github.io/it24hr/handbook.html#mis"},{"@type":"DefinedTerm","name":"議題","description":"在軟體開發過程中，用來記錄、追蹤和管理專案中需要被解決的問題、新功能需求（Feature）或任務（Task）的工具。","url":"https://tsun-u.github.io/it24hr/handbook.html#issue"},{"@type":"DefinedTerm","name":"母議題、子議題","description":"一個大需求開成一張母議題，拆出來的小工作各開一張子議題掛在它底下。","url":"https://tsun-u.github.io/it24hr/handbook.html#parent_issue"},{"@type":"DefinedTerm","name":"看板","description":"把每張 issue 照「現在進行到哪一步、在誰手上」排成幾欄的板子，一眼看出工作卡在哪。","url":"https://tsun-u.github.io/it24hr/handbook.html#board"},{"@type":"DefinedTerm","name":"Priority","description":"一張 issue 有多急，通常分成幾級；排工作順序時先做急的。","url":"https://tsun-u.github.io/it24hr/handbook.html#priority"},{"@type":"DefinedTerm","name":"需求整理","description":"把需求單位說的一大段話整理成條列重點：要做什麼、有什麼規則和限制、哪些只是背景說明。","url":"https://tsun-u.github.io/it24hr/handbook.html#read_req"},{"@type":"DefinedTerm","name":"需求討論","description":"拿著整理需求時不確定的地方，去問需求單位或 SA，把「我以為」變成「我們說好了」。","url":"https://tsun-u.github.io/it24hr/handbook.html#discuss"},{"@type":"DefinedTerm","name":"估時","description":"預估一件工作要做多久，給 PM 排時程用。","url":"https://tsun-u.github.io/it24hr/handbook.html#estimate"},{"@type":"DefinedTerm","name":"追加需求","description":"專案進行中才加進來、原本沒說好的需求，常常用「順便」開頭。","url":"https://tsun-u.github.io/it24hr/handbook.html#change_req"},{"@type":"DefinedTerm","name":"退件","description":"QC 測出問題，把 issue 退回給工程師修；退件理由會寫在卡上。","url":"https://tsun-u.github.io/it24hr/handbook.html#reject"},{"@type":"DefinedTerm","name":"結案","description":"issue 驗收通過、做完了，正式關掉。","url":"https://tsun-u.github.io/it24hr/handbook.html#closed"},{"@type":"DefinedTerm","name":"開發計畫","description":"動手寫程式前先寫的文件：要拆成哪幾步、先做哪一步、每一步大概多久。","url":"https://tsun-u.github.io/it24hr/handbook.html#plan"},{"@type":"DefinedTerm","name":"規格","description":"寫清楚系統要做什麼：有哪些功能、每個欄位長什麼樣、遇到什麼情況怎麼處理。","url":"https://tsun-u.github.io/it24hr/handbook.html#spec"},{"@type":"DefinedTerm","name":"驗收","description":"確認做出來的東西符合需求；驗收文件列出要測哪些情況、怎樣算通過。","url":"https://tsun-u.github.io/it24hr/handbook.html#accept"},{"@type":"DefinedTerm","name":"前端程式","description":"把畫面做出來的程式：東西怎麼排、用哪些按鈕和欄位、用什麼顏色、輸入時怎麼檢查和提醒。","url":"https://tsun-u.github.io/it24hr/handbook.html#ui_design"},{"@type":"DefinedTerm","name":"測試程式","description":"用程式去測程式：寫一次，之後每次改動都能自動再跑一遍。","url":"https://tsun-u.github.io/it24hr/handbook.html#test_code"},{"@type":"DefinedTerm","name":"手動測試","description":"由人實際操作系統，一個一個點、一格一格打，確認結果跟預期一樣。","url":"https://tsun-u.github.io/it24hr/handbook.html#manual_test"},{"@type":"DefinedTerm","name":"煙霧測試","description":"系統更新之後，快速點一輪最重要的功能，確認沒有整個壞掉。","url":"https://tsun-u.github.io/it24hr/handbook.html#smoke"},{"@type":"DefinedTerm","name":"防呆","description":"讓使用者就算亂操作，也不會把資料弄壞或卡住的設計；例如提款機不讓你領負數的錢。","url":"https://tsun-u.github.io/it24hr/handbook.html#guard"},{"@type":"DefinedTerm","name":"檢閱程式碼","description":"程式寫好、放進正式版本之前，請別人看一遍找問題；也會輪到你看別人的。","url":"https://tsun-u.github.io/it24hr/handbook.html#review"},{"@type":"DefinedTerm","name":"Debug","description":"找出程式哪裡錯、為什麼錯，再把它修好。","url":"https://tsun-u.github.io/it24hr/handbook.html#debug"},{"@type":"DefinedTerm","name":"前端","description":"使用者看得到、點得到的那一層：網頁畫面、按鈕、表單。","url":"https://tsun-u.github.io/it24hr/handbook.html#frontend"},{"@type":"DefinedTerm","name":"後端","description":"使用者看不到的那一層：存資料、算規則、跟其他系統交換資料。","url":"https://tsun-u.github.io/it24hr/handbook.html#backend"},{"@type":"DefinedTerm","name":"元件","description":"畫面上可以重複使用的零件，例如按鈕、下拉選單、日期選擇器。","url":"https://tsun-u.github.io/it24hr/handbook.html#component"},{"@type":"DefinedTerm","name":"碳粉匣","description":"雷射印表機裝碳粉的盒子；印表機說「碳粉不足」，就是要換這個。","url":"https://tsun-u.github.io/it24hr/handbook.html#toner"},{"@type":"DefinedTerm","name":"噴墨","description":"用墨水匣把墨水噴到紙上的印表機，沒有碳粉。","url":"https://tsun-u.github.io/it24hr/handbook.html#inkjet"},{"@type":"DefinedTerm","name":"色票","description":"一組定好的顏色，整個系統照著用，畫面才不會五顏六色。","url":"https://tsun-u.github.io/it24hr/handbook.html#palette"},{"@type":"DefinedTerm","name":"RWD","description":"同一個網頁在手機、平板、電腦上，會自動調整成適合那個螢幕的版面。","url":"https://tsun-u.github.io/it24hr/handbook.html#rwd"},{"@type":"DefinedTerm","name":"資料庫","description":"系統存資料的地方，像一套有規則的大表格。","url":"https://tsun-u.github.io/it24hr/handbook.html#db"},{"@type":"DefinedTerm","name":"API","description":"讓兩個系統互相講話的窗口；例如盤點平台向人事系統要一份員工名單。","url":"https://tsun-u.github.io/it24hr/handbook.html#api"},{"@type":"DefinedTerm","name":"CSV","description":"用逗號隔開欄位的純文字表格檔，Excel 打得開，系統之間交換資料很常用。","url":"https://tsun-u.github.io/it24hr/handbook.html#csv"},{"@type":"DefinedTerm","name":"jQuery","description":"很老牌的 JavaScript 工具包，十幾年前幾乎每個網站都有，很多舊系統現在還在用。","url":"https://tsun-u.github.io/it24hr/handbook.html#jquery"},{"@type":"DefinedTerm","name":"IDE","description":"寫程式用的編輯器：幫你把程式上色、自動補字、標出打錯的地方。","url":"https://tsun-u.github.io/it24hr/handbook.html#ide"},{"@type":"DefinedTerm","name":"function","description":"程式裡一段有名字、只做一件事的程式碼，例如專門檢查日期格式的那一段。","url":"https://tsun-u.github.io/it24hr/handbook.html#function"},{"@type":"DefinedTerm","name":"commit","description":"把這次改的程式存成一個版本，並寫一句改了什麼。","url":"https://tsun-u.github.io/it24hr/handbook.html#commit"},{"@type":"DefinedTerm","name":"終端機","description":"用打字指令操作電腦的黑色視窗。","url":"https://tsun-u.github.io/it24hr/handbook.html#terminal"},{"@type":"DefinedTerm","name":"部署","description":"把寫好的程式放到伺服器上，讓大家用得到。口語多半說上線、上版。","url":"https://tsun-u.github.io/it24hr/handbook.html#deploy"},{"@type":"DefinedTerm","name":"備份","description":"把現在的資料或程式另外存一份，出事時可以拿它復原。","url":"https://tsun-u.github.io/it24hr/handbook.html#backup"},{"@type":"DefinedTerm","name":"測試機","description":"給工程師和 QC 測試用的伺服器；在這裡壞掉，不會影響真正的使用者。","url":"https://tsun-u.github.io/it24hr/handbook.html#test_server"},{"@type":"DefinedTerm","name":"正式機","description":"真正的使用者在用的伺服器；在這上面出錯，所有人都看得到。","url":"https://tsun-u.github.io/it24hr/handbook.html#prod"},{"@type":"DefinedTerm","name":"502","description":"網頁伺服器回不出東西時顯示的錯誤代碼；使用者看到的就是一個錯誤頁。","url":"https://tsun-u.github.io/it24hr/handbook.html#http502"},{"@type":"DefinedTerm","name":"快取","description":"瀏覽器或伺服器把拿過的東西先存一份，下次直接用，省時間。","url":"https://tsun-u.github.io/it24hr/handbook.html#cache"},{"@type":"DefinedTerm","name":"Lighthouse","description":"Google 做的網頁健檢工具，幫網頁的速度、無障礙、寫法打分數。","url":"https://tsun-u.github.io/it24hr/handbook.html#lighthouse"},{"@type":"DefinedTerm","name":"VPN","description":"在家連回公司內部網路的加密通道；沒連上，就進不了公司的系統。","url":"https://tsun-u.github.io/it24hr/handbook.html#vpn"},{"@type":"DefinedTerm","name":"MAC 位址","description":"每張網路卡出廠時就有的編號，像裝置在網路上的身分證字號，例如 A4:83:E7:12:5C:0F。","url":"https://tsun-u.github.io/it24hr/handbook.html#mac"},{"@type":"DefinedTerm","name":"私人位址","description":"手機連 Wi-Fi 時不用真正的 MAC 位址，改用一組隨機產生的，讓不同地方的網路認不出是同一支手機。","url":"https://tsun-u.github.io/it24hr/handbook.html#private_mac"},{"@type":"DefinedTerm","name":"白名單","description":"只放行清單上的、其他一律擋下的做法；反過來，擋下清單上的、其他都放行的叫黑名單。","url":"https://tsun-u.github.io/it24hr/handbook.html#whitelist"},{"@type":"DefinedTerm","name":"無線基地台","description":"發出 Wi-Fi 訊號，讓手機和筆電用無線的方式連進網路的設備。","url":"https://tsun-u.github.io/it24hr/handbook.html#ap"},{"@type":"DefinedTerm","name":"訪客網路","description":"給客人用的 Wi-Fi：上得了網，但跟公司內部網路隔開。","url":"https://tsun-u.github.io/it24hr/handbook.html#guest_wifi"},{"@type":"DefinedTerm","name":"信箱配額","description":"公司給每個人信箱的容量上限；超過了就寄不出信，再多一些連信都收不到。","url":"https://tsun-u.github.io/it24hr/handbook.html#mail_quota"},{"@type":"DefinedTerm","name":"封存","description":"把不常看的舊信搬出信箱，存成另一個檔案；信還在，只是不佔信箱的容量。","url":"https://tsun-u.github.io/it24hr/handbook.html#archive"},{"@type":"DefinedTerm","name":"附件","description":"跟著信一起寄出去的檔案，例如照片、影片、試算表。","url":"https://tsun-u.github.io/it24hr/handbook.html#attachment"},{"@type":"DefinedTerm","name":"共用槽","description":"公司伺服器上大家一起用的資料夾，在電腦上看起來像多了一顆硬碟。","url":"https://tsun-u.github.io/it24hr/handbook.html#share_drive"},{"@type":"DefinedTerm","name":"PR","description":"把自己改好的程式送出去，請別人看過、同意後才併進正式版本的那一包。","url":"https://tsun-u.github.io/it24hr/handbook.html#pr"},{"@type":"DefinedTerm","name":"LGTM","description":"檢閱程式碼時說「我看過了，沒問題」的縮寫。按下去很快，但代表你為這份程式背書。","url":"https://tsun-u.github.io/it24hr/handbook.html#lgtm"},{"@type":"DefinedTerm","name":"diff","description":"把改前、改後的程式並排比較，紅色是刪掉的、綠色是新加的。檢閱程式碼主要就是看這個。","url":"https://tsun-u.github.io/it24hr/handbook.html#diff"},{"@type":"DefinedTerm","name":"localStorage","description":"網頁把資料存在使用者自己瀏覽器裡的地方；關掉網頁還在，但任何人打開那台電腦都看得到。","url":"https://tsun-u.github.io/it24hr/handbook.html#localstorage"},{"@type":"DefinedTerm","name":"GET／POST","description":"網頁跟伺服器要東西的兩種方式：GET 把資料接在網址後面，POST 放在看不到的地方。","url":"https://tsun-u.github.io/it24hr/handbook.html#get_post"},{"@type":"DefinedTerm","name":"log","description":"程式跑的時候留下的流水帳，出事時拿來查；寫了什麼進去，看得到 log 的人就看得到什麼。","url":"https://tsun-u.github.io/it24hr/handbook.html#log"},{"@type":"DefinedTerm","name":"formatter","description":"自動把程式的縮排、空格、換行整理成一致格式的工具。這些事交給它，人不用在檢閱時挑。","url":"https://tsun-u.github.io/it24hr/handbook.html#formatter"},{"@type":"DefinedTerm","name":"縮排","description":"程式每一行前面空幾格，用來表示層次；只影響好不好讀，不影響能不能跑。","url":"https://tsun-u.github.io/it24hr/handbook.html#indent"},{"@type":"DefinedTerm","name":"個資","description":"能認出是誰的資料：姓名、電話、地址、身分證字號。法律規定要保護，存放和傳送都有要求。","url":"https://tsun-u.github.io/it24hr/handbook.html#pii"},{"@type":"DefinedTerm","name":"寫死","description":"把會變的值直接寫在程式裡，例如活動結束日期；要改就得改程式再上線。","url":"https://tsun-u.github.io/it24hr/handbook.html#hardcode"},{"@type":"DefinedTerm","name":"解析度","description":"螢幕有多少點；同一個網頁在手機、平板、電腦上寬度差很多，版面要各自看過。","url":"https://tsun-u.github.io/it24hr/handbook.html#resolution"},{"@type":"DefinedTerm","name":"Claire","description":"遊戲裡公司導入的 AI 程式助理，在終端機裡幫你寫文件、寫程式、部署。致敬知名 AI 服務 Claude，這個遊戲也是在 Claude 協作下完成的。","url":"https://tsun-u.github.io/it24hr/handbook.html#claire"},{"@type":"DefinedTerm","name":"額度","description":"公司買的 AI 使用量上限；用完了，要等它補滿。","url":"https://tsun-u.github.io/it24hr/handbook.html#quota"},{"@type":"DefinedTerm","name":"Accept Edits","description":"讓 AI 改檔案時不用每一步都問你的模式；快，但改了什麼要自己看。","url":"https://tsun-u.github.io/it24hr/handbook.html#accept_edits"},{"@type":"DefinedTerm","name":"Auto Mode","description":"讓 AI 自己判斷哪一步可以直接做的模式；部署這種收不回來的步驟，還是會停下來問你。","url":"https://tsun-u.github.io/it24hr/handbook.html#auto_mode"},{"@type":"DefinedTerm","name":"CLAIRE.md","description":"寫給 AI 看的專案筆記：這個專案的規矩和做法，AI 每次開工會先讀它。","url":"https://tsun-u.github.io/it24hr/handbook.html#claire_md"},{"@type":"DefinedTerm","name":"SKILL","description":"寫給 AI 的一套做法說明：某件事要照哪幾步做；寫一次，之後每次都照做。","url":"https://tsun-u.github.io/it24hr/handbook.html#skill"},{"@type":"DefinedTerm","name":"POC","description":"先做一個能動的雛形給客戶看，證明這條路走得通。","url":"https://tsun-u.github.io/it24hr/handbook.html#poc"},{"@type":"DefinedTerm","name":"legacy","description":"原意是「留下來、還在用的舊系統」；遊戲裡指還沒有 AI 的年代，什麼都自己來。","url":"https://tsun-u.github.io/it24hr/handbook.html#legacy"},{"@type":"DefinedTerm","name":"hybrid","description":"原意是「混合」；遊戲裡指人和 AI 一起做事的過渡年代：AI 幫你寫，你負責看。","url":"https://tsun-u.github.io/it24hr/handbook.html#hybrid"},{"@type":"DefinedTerm","name":"speedrun","description":"原意是「用最快速度破關」；遊戲裡指 AI 一次做完一整段、人只負責檢查的年代。","url":"https://tsun-u.github.io/it24hr/handbook.html#speedrun"},{"@type":"DefinedTerm","name":"稽核","description":"檢查公司的帳、流程、資料有沒有照規定走的人，可能是公司內部的，也可能是外面請來的；通常只能看、不能改。","url":"https://tsun-u.github.io/it24hr/handbook.html#auditor"},{"@type":"DefinedTerm","name":"YAGNI","description":"現在用不到的功能先別做，等真的需要再說。","url":"https://tsun-u.github.io/it24hr/handbook.html#yagni"},{"@type":"DefinedTerm","name":"合規","description":"符合法規、客戶的資安要求或業界標準。接企業客戶常要先過這一關，東西做得再好也要能回答「你們安不安全」。","url":"https://tsun-u.github.io/it24hr/handbook.html#compliance"},{"@type":"DefinedTerm","name":"ISO 27001","description":"證明公司有一套資安管理制度的國際認證；SOC 2 是另一套，美系客戶常問。大客戶招標、簽約前常會問你們有沒有。","url":"https://tsun-u.github.io/it24hr/handbook.html#iso27001"},{"@type":"DefinedTerm","name":"測試案例","description":"一條一條寫好的「這樣操作，應該看到什麼」。測的人照著做，寫程式的人也照著寫。","url":"https://tsun-u.github.io/it24hr/handbook.html#test_case"},{"@type":"DefinedTerm","name":"資安問卷","description":"客戶在簽約或 POC 之前發來的一份問題清單：資料存哪裡、誰看得到、有沒有用 AI、怎麼備份、壞了多久修好。","url":"https://tsun-u.github.io/it24hr/handbook.html#sec_questionnaire"},{"@type":"DefinedTerm","name":"弱點掃描","description":"用工具自動檢查系統有沒有已知的安全漏洞，例如用了有漏洞的舊版套件、沒關的測試入口。","url":"https://tsun-u.github.io/it24hr/handbook.html#vuln_scan"},{"@type":"DefinedTerm","name":"壓測","description":"模擬很多人同時用系統，看會不會變慢或掛掉。","url":"https://tsun-u.github.io/it24hr/handbook.html#load_test"},{"@type":"DefinedTerm","name":"AD","description":"公司管所有員工帳號的那本總名冊（微軟的產品）。登入公司電腦、信箱都靠它認人；系統接上它，員工就不用再多記一組密碼。","url":"https://tsun-u.github.io/it24hr/handbook.html#ad"},{"@type":"DefinedTerm","name":"串接","description":"把兩個本來各過各的系統接起來，讓 A 能跟 B 要資料或請 B 做事。","url":"https://tsun-u.github.io/it24hr/handbook.html#integration"},{"@type":"DefinedTerm","name":"服務帳號","description":"不是給人用、是給程式用的帳號。系統接別的系統時，用它表明「我是誰」。","url":"https://tsun-u.github.io/it24hr/handbook.html#service_account"},{"@type":"DefinedTerm","name":"網域","description":"網址上用「點」隔開的那串名字，像 example.com；也指公司內部那群電腦和帳號共用的範圍。","url":"https://tsun-u.github.io/it24hr/handbook.html#domain"},{"@type":"DefinedTerm","name":"MFA","description":"密碼之外再多一道驗證（手機驗證碼、指紋），兩道都過才算登入。","url":"https://tsun-u.github.io/it24hr/handbook.html#mfa"},{"@type":"DefinedTerm","name":"零信任","description":"「連公司內網也不預設信任」的資安思想：每一次存取都重新驗身分、驗裝置。","url":"https://tsun-u.github.io/it24hr/handbook.html#zero_trust"},{"@type":"DefinedTerm","name":"403","description":"伺服器說「我知道你是誰，但這件事你沒權限」。","url":"https://tsun-u.github.io/it24hr/handbook.html#http403"},{"@type":"DefinedTerm","name":"TODO","description":"程式裡寫給自己和同事的便條：「這裡還沒做」。","url":"https://tsun-u.github.io/it24hr/handbook.html#todo"},{"@type":"DefinedTerm","name":"後門","description":"繞過正常登入就能進系統的暗道，不管是故意留的、還是不小心做出來的。","url":"https://tsun-u.github.io/it24hr/handbook.html#backdoor"},{"@type":"DefinedTerm","name":"區塊鏈","description":"很多台電腦各存一份、互相對帳的帳本，寫進去就很難偷改。","url":"https://tsun-u.github.io/it24hr/handbook.html#blockchain"},{"@type":"DefinedTerm","name":"套件","description":"別人寫好、拿來用的程式零件；一個網頁通常疊著幾十個。","url":"https://tsun-u.github.io/it24hr/handbook.html#package"},{"@type":"DefinedTerm","name":"ERP","description":"公司管進貨、庫存、財務、人事的那套大系統；別的系統常要把資料餵給它。","url":"https://tsun-u.github.io/it24hr/handbook.html#erp"},{"@type":"DefinedTerm","name":"SFTP","description":"加密的檔案傳輸方式，兩家公司之間交換檔案常用。","url":"https://tsun-u.github.io/it24hr/handbook.html#sftp"},{"@type":"DefinedTerm","name":"編碼","description":"文字變成位元組存進檔案的方法。寫的人和讀的人用不同方法，中文就變亂碼。","url":"https://tsun-u.github.io/it24hr/handbook.html#encoding"},{"@type":"DefinedTerm","name":"批次","description":"把累積下來的資料整批一次處理，不是來一筆做一筆。","url":"https://tsun-u.github.io/it24hr/handbook.html#batch"},{"@type":"DefinedTerm","name":"排程","description":"不是有人按才做，而是排好時間（例如每天凌晨 1 點）讓電腦自己跑。","url":"https://tsun-u.github.io/it24hr/handbook.html#schedule"},{"@type":"DefinedTerm","name":"Author Name","description":"程式上記的「這段是誰寫的」。以前寫在檔案開頭的註解裡，現在 git 每次 commit 都自動記一筆。","url":"https://tsun-u.github.io/it24hr/handbook.html#author_name"},{"@type":"DefinedTerm","name":"CI","description":"一家公司固定的顏色、字體、標誌那一套；做給客戶的畫面，配色要跟著它。","url":"https://tsun-u.github.io/it24hr/handbook.html#ci_identity"},{"@type":"DefinedTerm","name":"QA 機器人","description":"在系統裡回答使用者問題的對話框。這裡的 QA 是「問答」，不是品管那個 QA。","url":"https://tsun-u.github.io/it24hr/handbook.html#qa_bot"},{"@type":"DefinedTerm","name":"知識庫","description":"給機器人或客服查的那堆資料：使用手冊、FAQ、過去的問答。","url":"https://tsun-u.github.io/it24hr/handbook.html#knowledge_base"},{"@type":"DefinedTerm","name":"FAQ","description":"把大家一直問的問題和答案整理成的一份清單。","url":"https://tsun-u.github.io/it24hr/handbook.html#faq"},{"@type":"DefinedTerm","name":"大型語言模型","description":"像 Claire 背後那種讀過大量文字、能接話的 AI。同一家通常有快的、便宜的、聰明的幾種等級。","url":"https://tsun-u.github.io/it24hr/handbook.html#llm"},{"@type":"DefinedTerm","name":"企業方案","description":"AI 服務賣給公司的版本：通常承諾資料不拿去訓練模型、有合約、有帳單、可以管誰能用。","url":"https://tsun-u.github.io/it24hr/handbook.html#enterprise_plan"},{"@type":"DefinedTerm","name":"POC 環境","description":"給客戶試用、demo 用的那一套機器，不是測試機也不是正式機；通常客戶的人也登得進去。","url":"https://tsun-u.github.io/it24hr/handbook.html#poc_env"},{"@type":"DefinedTerm","name":"demo","description":"把做好的東西實際操作一遍給客戶或老闆看。","url":"https://tsun-u.github.io/it24hr/handbook.html#demo"},{"@type":"DefinedTerm","name":"儀表板","description":"把很多數字和圖表擺在同一頁的總覽畫面，像車子的儀表板。","url":"https://tsun-u.github.io/it24hr/handbook.html#dashboard"},{"@type":"DefinedTerm","name":"JSON","description":"程式之間交換資料的文字格式，用大括號和冒號寫「欄位：值」；XML 是用角括號標籤的另一種，比較老。","url":"https://tsun-u.github.io/it24hr/handbook.html#json"},{"@type":"DefinedTerm","name":"生成式 AI","description":"會「產出」東西的 AI：寫文章、寫程式、畫圖、對話，像 Claire 這類工具都算。","url":"https://tsun-u.github.io/it24hr/handbook.html#gen_ai"}],"url":"https://tsun-u.github.io/it24hr/handbook.html"}</script>
+<link rel="icon" href="assets/favicon.svg" type="image/svg+xml">
+<link rel="icon" href="assets/favicon-32.png" sizes="32x32" type="image/png">
+<link rel="apple-touch-icon" href="assets/apple-touch-icon.png">
+<link rel="stylesheet" href="styles.css">
+</head>
+<body class="csie-body">
+<header class="csie-head">
+  <a class="csie-logo" href="index.html">IT24hr</a>
+  <h1>新人手冊</h1>
+  <a class="btn csie-play" href="index.html">開始玩</a>
+</header>
+<main class="csie-main se-page">
+<p>IT 職場常聽到的詞，用一句話講清楚，再補上主要的工作或用途。在遊戲裡看到有虛線的詞，點一下也能查。</p>
+<h2>角色</h2>
+<section id="pm">
+<h3>PM（Project Manager，專案經理）</h3>
+<p>在有限的時間、預算與人力內，帶領團隊完成目標、確保專案順利交付的人。</p>
+<p>PM 的主要工作：<br>1. 排時程：把專案拆成幾個階段，決定什麼時候該做到哪裡。<br>2. 分配工作：決定誰做什麼、哪件事先做，人手不夠時去調人。<br>3. 追蹤進度與風險：掌握每件事做到哪裡，看到可能延誤就提早處理。<br>4. 對外溝通：向客戶和老闆回報進度，協調需求變更、時程與費用。<br>有些團隊會由 SA 身兼 PM，一個人先幫你問需求、再追你進度。台灣講 PM 有時是指產品經理（Product Manager），那是另一個職務。</p>
+</section>
+<section id="product_manager">
+<h3>產品經理（Product Manager）</h3>
+<p>決定產品要做什麼、為什麼做、先做哪些功能的人。</p>
+<p>產品經理的主要工作：<br>1. 了解使用者與市場：這個產品要解決誰的什麼問題。<br>2. 排功能的優先順序：哪些先做、哪些不做。<br>3. 寫需求：把要做的功能講清楚，交給 SA 或開發團隊。<br>4. 看結果：功能上線後有沒有達到目的，再調整方向。<br>專案經理管「怎麼準時做完」，產品經理管「該做什麼」；小公司常由同一個人兼，或老闆自己當。</p>
+</section>
+<section id="requester">
+<h3>需求單位</h3>
+<p>提出系統需求、說明自己部門的工作流程和規則，系統做好後確認能不能用的部門，例如人事、會計、總務。</p>
+<p>需求單位在一個系統專案裡做的事：<br>1. 提出需求：說明現在的工作怎麼做、哪裡不方便、希望系統幫忙什麼。<br>2. 說明規則：告訴 SA 部門內的作業規定，像編號格式、誰能看什麼資料、什麼情況要簽核。<br>3. 回答問題：開發過程中 SA 或工程師有疑問時，提供細節和實際例子。<br>4. 驗收與使用：系統做好後實際試用、確認符合需求；之後他們就是每天在用的人。</p>
+</section>
+<section id="ra">
+<h3>RA（Requirements Analyst，需求分析師）</h3>
+<p>到現場了解使用者真正需要什麼，再把大家的話整理成清楚、驗收得了的需求規格的人。</p>
+<p>RA 的主要工作：<br>1. 訪談與觀察：跟需求單位談、到現場看，搞清楚他們現在怎麼做事、哪裡卡住。<br>2. 整理需求：把大家的話列成清單，找出互相打架的地方，追問背後的原因。<br>3. 寫需求規格：把需求寫成文件，每一條都要寫到驗收時判斷得出對錯。<br>4. 管理變更：規格定好之後有人想改，評估影響、確認後更新文件。<br>RA 回答「使用者要什麼」，SA 接著回答「系統要怎麼滿足」。編制完整的團隊才有專職 RA，很多團隊由 SA 一起做。</p>
+</section>
+<section id="sa">
+<h3>SA（System Analyst，系統分析師）</h3>
+<p>負責弄清楚「使用者到底需要什麼」，再把它整理成工程師看得懂的規格的人。</p>
+<p>SA 的主要工作：<br>1. 釐清需求：跟需求單位開會、問問題，搞清楚他們現在怎麼做事、哪裡卡住、希望系統幫上什麼忙。<br>2. 規劃系統：決定系統要有哪些功能、畫面大概長怎樣、要存哪些資料，並評估做不做得到。<br>3. 寫規格文件：把上面這些寫成文件，工程師照它開發、QC 照它測試，大家對著同一份文件做事。<br>4. 居中協調：開發途中工程師有疑問、需求單位想改東西，由 SA 確認後更新文件。<br>卡上寫不清楚的地方，問 SA 最快；需求也可以轉給 SA 整理成規格。</p>
+</section>
+<section id="sd">
+<h3>SD（System Designer，系統設計師）</h3>
+<p>接下 SA 的規格，設計系統內部要怎麼做：資料怎麼存、功能怎麼切、各部分怎麼接的人。</p>
+<p>SD 的主要工作：<br>1. 資料設計：要有哪些資料表、欄位，彼此怎麼關聯。<br>2. 架構設計：系統切成哪幾個部分、各負責什麼、怎麼互相溝通。<br>3. 介面定義：前後端之間、跟外部系統之間的 API 長什麼樣。<br>4. 技術決策：用什麼框架、效能和安全怎麼處理。<br>設計好的東西交給軟體工程師實作；小團隊常由資深工程師兼任 SD。</p>
+</section>
+<section id="uiux">
+<h3>UI／UX 設計師（User Interface／User Experience，使用者介面／使用者經驗）</h3>
+<p>設計畫面長相（UI）和使用流程（UX）的人，目標是讓人不用教就會用。</p>
+<p>UI／UX 設計師的主要工作：<br>1. 研究使用者：觀察、訪談，了解他們怎麼做事、哪裡會卡。<br>2. 規劃流程（UX）：使用者從進來到完成一件事要經過哪些步驟。<br>3. 畫出介面（UI）：版面、顏色、字體、元件，做成設計稿給前端工程師照著做。<br>4. 測試與修正：拿原型給人試用，看哪裡看不懂再改。<br>編制完整的團隊才有專職；小團隊常由 SA、SD 或前端工程師兼著做。</p>
+</section>
+<section id="swe">
+<h3>SWE（Software Engineer，軟體工程師）</h3>
+<p>寫軟體的人的統稱：把 SD 設計好的架構實作成能跑的程式。</p>
+<p>軟體工程師的主要工作：<br>1. 實作：照設計寫出程式，包含程式架構層面的實作，直接跟 SD 對接。<br>2. 測試：寫測試程式、自己先測過。<br>3. 修問題：debug、處理上線後的狀況。<br>4. 參與設計討論：實作時發現設計做不到或有更好的做法，回頭跟 SD、SA 討論。<br>前端、後端、全端工程師都算軟體工程師，只是負責的那一層不同。SWE 這個縮寫在台灣多半是外商或大團隊在用，本土公司常直接叫 RD 或工程師。</p>
+</section>
+<section id="pg">
+<h3>PG（Programmer，程式設計師）</h3>
+<p>照規格把程式寫出來的人。</p>
+<p>PG 跟 SWE 的差別在「要不要自己做設計判斷」：PG 拿到的規格已經寫到很細，照著實作就好；SWE 會碰到架構層面的決定。以前分工沒這麼細時，兩者常常只是資歷的差別，有規模的團隊才感受得到差異。照規格執行的工作也是最先被 AI 工具接手的，所以現在兩者的界線又開始模糊了。</p>
+</section>
+<section id="rd">
+<h3>RD（Research and Development，研發工程師）</h3>
+<p>做技術研發的人；不一定限於軟體，硬體、韌體、演算法也算。</p>
+<p>台灣公司很愛用「RD」或「研發部」統稱技術部門，所以 RD 實際在做什麼要看公司：硬體公司的 RD 可能在設計電路板，軟體公司的 RD 常常就是軟體工程師。看到這個職稱，先問「研發的是什麼」。</p>
+</section>
+<section id="dev_layers">
+<h3>前端／後端／全端工程師</h3>
+<p>軟體工程師照負責的那一層分：前端做使用者看得到的畫面，後端做看不到的資料和邏輯，全端兩邊都做。</p>
+<p>三者的差別：<br>1. 前端工程師：把設計稿做成網頁或 App 的畫面，處理各種螢幕和瀏覽器。<br>2. 後端工程師：資料庫、商業規則、API，確保資料對、速度夠、權限正確。<br>3. 全端工程師：兩邊都能做，小團隊很常見。<br>大公司通常分開，小公司常常一個人全包。</p>
+</section>
+<section id="dba">
+<h3>DBA（Database Administrator，資料庫管理師）</h3>
+<p>專門顧資料庫的人：效能、備份、權限，資料不能壞。</p>
+<p>DBA 的主要工作：<br>1. 規劃與維護資料庫：怎麼存、怎麼建索引才快。<br>2. 備份與還原：確保出事時資料救得回來。<br>3. 權限管理：誰能讀、誰能改。<br>4. 效能調校：查詢變慢時找原因。<br>大公司才有專職 DBA，小公司由後端工程師或 MIS 兼。</p>
+</section>
+<section id="qc">
+<h3>QC／QA（Quality Control／Quality Assurance，品質管制／品質保證）</h3>
+<p>在程式交給使用者之前，用有系統的測試找出問題、確保品質的人。</p>
+<p>QC／QA 的主要工作：<br>1. 寫測試案例：照規格列出要測哪些情況、每種情況的正確結果是什麼。<br>2. 執行測試：照案例一條一條操作系統，也會故意輸入不合理的資料，看系統撐不撐得住。<br>3. 回報問題：發現錯誤就記下症狀和重現步驟，退件給工程師修。<br>4. 把關上線：確認問題都修好、重測通過，才放行給使用者。<br>QC 偏重檢查做出來的東西，QA 偏重從流程上預防問題；很多公司兩個講法混著用。</p>
+</section>
+<section id="devops">
+<h3>DevOps／SRE（Development and Operations／Site Reliability Engineering）</h3>
+<p>負責把程式送上伺服器、盯著系統穩定運作的人。</p>
+<p>DevOps／SRE 的主要工作：<br>1. 建部署流程：讓程式從寫好到上線的步驟自動化、可重複。<br>2. 監控：系統變慢、出錯時第一時間知道。<br>3. 處理事故：系統掛掉時救回來，事後找原因。<br>4. 管伺服器與雲端資源：要幾台、花多少錢。<br>DevOps 偏流程和工具，SRE 偏可靠度，很多公司混著叫。小團隊由後端工程師兼。</p>
+</section>
+<section id="security">
+<h3>資安人員（資訊安全）</h3>
+<p>負責讓系統和公司資料不被偷、不被破壞的人。</p>
+<p>資安人員的主要工作：<br>1. 找漏洞：檢查系統有沒有容易被攻擊的地方，用工具掃描或模擬攻擊。<br>2. 訂規範：密碼、權限、外部套件怎麼用才安全。<br>3. 監控與應變：有可疑行為時追查、處理、通報。<br>4. 教育訓練：提醒同事別點釣魚信。<br>有規模的公司才有專職；小公司常由 MIS 或後端工程師兼，或請外部廠商定期檢測。</p>
+</section>
+<section id="netadmin">
+<h3>網管人員（網路管理）</h3>
+<p>顧公司網路的人：對外連線、內部網路、Wi-Fi、VPN、防火牆。</p>
+<p>網管的主要工作：<br>1. 架設與維護網路設備：交換器、路由器、防火牆、Wi-Fi。<br>2. 帳號與連線：VPN、對外線路、各辦公室互連。<br>3. 排除障礙：網路慢、斷線時找出是哪一段出問題。<br>4. 跟資安配合：擋可疑連線、記錄流量。<br>小公司常跟 MIS 是同一個人。</p>
+</section>
+<section id="mis">
+<h3>MIS（Management Information System，資訊管理系統）</h3>
+<p>顧公司內部電腦、系統、帳號的人，職缺常寫「資訊管理工程師」「資訊管理人員」，俗稱「管電腦的」；一般人口中的「IT」很多時候是指他們。</p>
+<p>MIS 的主要工作：<br>1. 電腦與設備：採購、安裝、修理、汰換。<br>2. 帳號與權限：新人到職開帳號、離職關帳號。<br>3. 公司內部系統：ERP、郵件、檔案伺服器的維運。<br>4. 支援同事：印表機不動、電腦開不了機都找他們。<br>「俗稱 IT」其實有兩群人：做軟體開發的（這一篇前面那些職稱），和顧公司資訊環境的 MIS。兩群的技能和工作內容很不一樣，只是外人常常分不清。</p>
+</section>
+<section id="auditor">
+<h3>稽核</h3>
+<p>檢查公司的帳、流程、資料有沒有照規定走的人，可能是公司內部的，也可能是外面請來的；通常只能看、不能改。</p>
+<p>稽核在系統裡的樣子：<br>1. 常會多一種「唯讀」角色給他們，看得到全部但改不了。<br>2. 他們會要「紀錄」：誰在什麼時候改了什麼，所以系統要留 log。<br>3. 資安問卷、弱點掃描這類合規的事，也常是稽核或資安那邊來要的。</p>
+</section>
+<h2>流程</h2>
+<section id="issue">
+<h3>議題（issue）</h3>
+<p>在軟體開發過程中，用來記錄、追蹤和管理專案中需要被解決的問題、新功能需求（Feature）或任務（Task）的工具。</p>
+<p>Issue 的主要功能：<br>1. 目標拆解與任務指派：將大的專案目標拆成一個個具體的需求任務，並指定給特定的開發人員負責開發。<br>2. 問題回報：當使用者或測試人員發現程式錯誤時，透過 Issue 記錄錯誤症狀、發生步驟與 Log，方便開發人員排查。<br>3. 進度與狀態追蹤：明確標示任務的執行進度、狀態，讓團隊掌握開發進度。<br>4. 討論與資訊紀錄：所有關於該任務的討論、解法、相關文件和執行歷程都會集中在同一個 Issue 內，形成清晰的開發脈絡，供事後檢討或未來回顧。</p>
+</section>
+<section id="parent_issue">
+<h3>母議題、子議題</h3>
+<p>一個大需求開成一張母議題，拆出來的小工作各開一張子議題掛在它底下。</p>
+<p>拆子議題的好處：<br>1. 每一小塊可以各自估時、各自指派、各自驗收。<br>2. 看板上看得出大需求做到哪了。<br>3. 一個人卡住不會擋到整個需求。</p>
+</section>
+<section id="board">
+<h3>看板（Kanban）</h3>
+<p>把每張 issue 照「現在進行到哪一步、在誰手上」排成幾欄的板子，一眼看出工作卡在哪。</p>
+<p>看板的做法來自豐田汽車的生產線，後來被軟體業借來用。常見的欄位像「待處理」「進行中」「測試中」「已完成」，卡片做到哪就往右搬。某一欄堆太多卡，代表那個環節人手不夠或流程塞住了。</p>
+</section>
+<section id="priority">
+<h3>Priority（優先度）</h3>
+<p>一張 issue 有多急，通常分成幾級；排工作順序時先做急的。</p>
+<p>Priority 的用途：<br>1. 讓團隊知道先做哪一張。<br>2. 時間不夠時，決定哪些可以晚一點。<br>3. 跟需求單位說明「這件事為什麼還沒輪到」的依據。<br>在這個遊戲裡，每個人開給你的卡都標著最高。所有事情都最優先的時候，等於沒有一件事是優先的。</p>
+</section>
+<section id="read_req">
+<h3>需求整理</h3>
+<p>把需求單位說的一大段話整理成條列重點：要做什麼、有什麼規則和限制、哪些只是背景說明。</p>
+<p>整理需求的步驟：<br>1. 把原文讀過一遍，標出「系統要做到的事」。<br>2. 把規則和限制另外列出來，例如編號格式、誰能用。<br>3. 背景、情緒、別部門的八卦分開放，不當成需求。<br>4. 不確定的地方記下來，等需求討論時問。</p>
+</section>
+<section id="discuss">
+<h3>需求討論</h3>
+<p>拿著整理需求時不確定的地方，去問需求單位或 SA，把「我以為」變成「我們說好了」。</p>
+<p>需求討論的重點：<br>1. 問的是「怎麼用、什麼情況會發生」，不是「程式怎麼寫」。<br>2. 給對方選項比問開放題有效：「要 A 還是 B？」比「你想要怎樣？」容易得到答案。<br>3. 問到的答案要記回卡上，之後才有憑據。</p>
+</section>
+<section id="estimate">
+<h3>估時</h3>
+<p>預估一件工作要做多久，給 PM 排時程用。</p>
+<p>估時的要點：<br>1. 把工作拆成幾步，每步各估，再加起來。<br>2. 算進「不是寫程式」的時間：等回覆、開會、被打斷、改需求。<br>3. 說出口的數字會變成別人的時程表，所以寧可老實，不要討好。<br>很多工程師會估完再乘上一個自己的保險係數。</p>
+</section>
+<section id="change_req">
+<h3>追加需求</h3>
+<p>專案進行中才加進來、原本沒說好的需求，常常用「順便」開頭。</p>
+<p>遇到追加需求時該做的事：<br>1. 確認它是不是真的要做、跟原本的需求有沒有衝突。<br>2. 另外估時間，講清楚會影響什麼。<br>3. 寫下來（開子議題或更新規格），不要只口頭答應。<br>追加需求本身不是壞事，壞的是它默默吃掉原本的時程。</p>
+</section>
+<section id="reject">
+<h3>退件</h3>
+<p>QC 測出問題，把 issue 退回給工程師修；退件理由會寫在卡上。</p>
+<p>退件單上通常會寫：<br>1. 在哪個畫面、做了什麼操作。<br>2. 預期應該怎樣、實際發生什麼。<br>3. 嚴重程度。<br>理由寫得越清楚，修得越快；反過來說，你給 QC 的驗收文件越清楚，QC 退你時也寫得越清楚。</p>
+</section>
+<section id="closed">
+<h3>結案</h3>
+<p>issue 驗收通過、做完了，正式關掉。</p>
+<p>結案代表這張卡的紀錄到此為止，之後要查「當初怎麼做的」就回來翻它。結案不代表永遠不會再打開：需求單位用了一個月之後發現的問題，通常會以新的 issue 回來。</p>
+</section>
+<section id="yagni">
+<h3>YAGNI（You Aren't Gonna Need It，你不會需要它）</h3>
+<p>現在用不到的功能先別做，等真的需要再說。</p>
+<p>多做的每一行程式都要測、要維護、會出 bug，而「以後可能會用到」多半不會用到。同一掛的口訣還有 KISS（保持簡單）和 DRY（別重複寫同一段）。</p>
+</section>
+<section id="compliance">
+<h3>合規</h3>
+<p>符合法規、客戶的資安要求或業界標準。接企業客戶常要先過這一關，東西做得再好也要能回答「你們安不安全」。</p>
+<p>合規包含的事：資安問卷、弱點掃描、各種認證（例如 ISO 27001）。通常由資安人員或 PM 對口，工程師負責把問到的事做到、寫清楚。</p>
+</section>
+<section id="iso27001">
+<h3>ISO 27001（資安管理認證）</h3>
+<p>證明公司有一套資安管理制度的國際認證；SOC 2 是另一套，美系客戶常問。大客戶招標、簽約前常會問你們有沒有。</p>
+<p>拿認證要盤點流程、寫一堆文件、找第三方來稽核，通常以月或年計，不是一個案子裡順手做得完的事。</p>
+</section>
+<section id="poc_env">
+<h3>POC 環境</h3>
+<p>給客戶試用、demo 用的那一套機器，不是測試機也不是正式機；通常客戶的人也登得進去。</p>
+<p>上面放的是要給客戶看的版本，所以沒驗過的東西別往上丟；它常掛在客戶看得到的網址，壞了客戶會先看到。</p>
+</section>
+<section id="demo">
+<h3>demo（demonstration，展示）</h3>
+<p>把做好的東西實際操作一遍給客戶或老闆看。</p>
+<p>demo 前要先在同一台機器上自己走一遍，因為「在我電腦上可以」在 demo 現場不算數。</p>
+</section>
+<h2>文件與測試</h2>
+<section id="plan">
+<h3>開發計畫</h3>
+<p>動手寫程式前先寫的文件：要拆成哪幾步、先做哪一步、每一步大概多久。</p>
+<p>開發計畫裡通常有：<br>1. 工作拆解：大需求切成幾個小步驟。<br>2. 順序：哪一步要先做，哪些可以同時做。<br>3. 時程：每一步的預估時間。<br>計畫趕不上變化，但有計畫才知道變化發生在哪裡；交接或請假時，別人也接得起來。</p>
+</section>
+<section id="spec">
+<h3>規格</h3>
+<p>寫清楚系統要做什麼：有哪些功能、每個欄位長什麼樣、遇到什麼情況怎麼處理。</p>
+<p>規格文件是給誰看的：<br>1. 工程師照它開發。<br>2. QC 照它寫測試案例。<br>3. 需求單位用它確認「這是不是我要的」。<br>4. 三個月後的自己，忘了當初怎麼說好的時候回來查。<br>規格寫的是「要做到什麼」，不是「程式怎麼寫」。</p>
+</section>
+<section id="accept">
+<h3>驗收</h3>
+<p>確認做出來的東西符合需求；驗收文件列出要測哪些情況、怎樣算通過。</p>
+<p>驗收文件的內容：<br>1. 要測的情境清單：正常操作、輸入錯誤、特殊狀況。<br>2. 每個情境的預期結果。<br>3. 誰來驗、什麼時候驗。<br>它是工程師、QC 和需求單位對「做好了」的共同定義；沒有它，「做好了」會有三種版本。</p>
+</section>
+<section id="ui_design">
+<h3>前端程式</h3>
+<p>把畫面做出來的程式：東西怎麼排、用哪些按鈕和欄位、用什麼顏色、輸入時怎麼檢查和提醒。</p>
+<p>前端程式要決定、也要做出來的事：<br>1. 版面：資訊怎麼排，重要的放哪裡。<br>2. 元件：用輸入框、下拉選單還是按鈕。<br>3. 顏色與風格：有設計規範就照規範，沒有的話要自己定一組不衝突的顏色。<br>4. 提示與防呆：使用者可能做錯的地方，先提醒或擋下來。<br>5. 顯示：算好的數字、從別的地方帶來的資料，怎麼呈現在畫面上。<br>資料怎麼存、誰有權限，是後端程式的事。編制完整的團隊會由 UI／UX 設計師先畫好畫面，再由前端工程師寫成程式；小團隊常常是同一個人從畫面設計做到程式。好的介面讓第一次用的人不用問就會用。</p>
+</section>
+<section id="test_code">
+<h3>測試程式</h3>
+<p>用程式去測程式：寫一次，之後每次改動都能自動再跑一遍。</p>
+<p>測試程式的種類：<br>1. 單元測試：測一小段程式對不對，例如檢查日期格式的那一段。<br>2. 整合測試：測幾個部分接在一起能不能正常運作。<br>它最有價值的時候，是半年後有人改了別的地方，它跳出來說「這裡壞了」。</p>
+</section>
+<section id="manual_test">
+<h3>手動測試</h3>
+<p>由人實際操作系統，一個一個點、一格一格打，確認結果跟預期一樣。</p>
+<p>手動測試會做的事：<br>1. 照驗收文件的情境操作一遍。<br>2. 換不同裝置看：手機、平板、電腦。<br>3. 故意亂來：打奇怪的字、按錯順序、網路斷掉。<br>自動測試只會測你想得到的情況，手動測試的價值在於試出你沒想到的。</p>
+</section>
+<section id="smoke">
+<h3>煙霧測試（Smoke testing）</h3>
+<p>系統更新之後，快速點一輪最重要的功能，確認沒有整個壞掉。</p>
+<p>名字來自硬體：設備修好後先通電，沒冒煙才算過、才值得繼續細測。軟體的 smoke testing 也一樣：不求完整，只求在最短時間內發現「一打開就壞」這種大問題。台灣業界口語多半直接講英文。</p>
+</section>
+<section id="guard">
+<h3>防呆</h3>
+<p>讓使用者就算亂操作，也不會把資料弄壞或卡住的設計；例如提款機不讓你領負數的錢。</p>
+<p>常見的防呆：<br>1. 格式檢查：電話、電子郵件打錯就提醒。<br>2. 必填檢查：表單少填就不能送出。<br>3. 範圍檢查：密碼太短、數量填成負的，先擋下來。<br>防呆跟日本品管的 poka-yoke（ポカヨケ）概念相通：用設計避免不小心的失誤。工程師測自己的程式時不會亂打，所以漏掉的防呆常常是 QC 或使用者幫你找到的。</p>
+</section>
+<section id="review">
+<h3>檢閱程式碼（Code Review）</h3>
+<p>程式寫好、放進正式版本之前，請別人看一遍找問題；也會輪到你看別人的。</p>
+<p>Code review 看的重點：<br>1. 邏輯對不對、有沒有漏掉的情況。<br>2. 別人看不看得懂：命名、結構。<br>3. 有沒有風險，例如動到資料的地方。<br>看的不是縮排和空格。有了 AI 之後多了一件事：確認自己真的看懂了 AI 寫的東西。台灣業界口語直接講 code review。</p>
+</section>
+<section id="debug">
+<h3>Debug（除錯）</h3>
+<p>找出程式哪裡錯、為什麼錯，再把它修好。</p>
+<p>Debug 的步驟：<br>1. 重現：找出怎麼操作一定會出錯。<br>2. 定位：縮小範圍，找到出錯的那段程式。<br>3. 修正並確認：改好後再跑一次，確定好了、也沒弄壞別的。<br>最花時間的通常不是修，而是第一步。傳說最早的 bug 是一隻卡在電腦零件裡的蛾。</p>
+</section>
+<section id="test_case">
+<h3>測試案例</h3>
+<p>一條一條寫好的「這樣操作，應該看到什麼」。測的人照著做，寫程式的人也照著寫。</p>
+<p>跟驗收文件很像，差別是更細、可以直接動手照做：輸入什麼、按哪裡、預期畫面長怎樣。</p>
+</section>
+<section id="sec_questionnaire">
+<h3>資安問卷</h3>
+<p>客戶在簽約或 POC 之前發來的一份問題清單：資料存哪裡、誰看得到、有沒有用 AI、怎麼備份、壞了多久修好。</p>
+<p>回答要簡短、誠實、看得懂。客戶的資安人員會逐題看，答不清楚會被退回來追問；空白或敷衍比老實寫「有」更麻煩。</p>
+</section>
+<section id="vuln_scan">
+<h3>弱點掃描</h3>
+<p>用工具自動檢查系統有沒有已知的安全漏洞，例如用了有漏洞的舊版套件、沒關的測試入口。</p>
+<p>客戶常用自己的工具掃你的系統，報告會列出漏洞等級和建議升級的版本；掃不過通常不給上線。</p>
+</section>
+<section id="load_test">
+<h3>壓測（壓力測試）</h3>
+<p>模擬很多人同時用系統，看會不會變慢或掛掉。</p>
+<p>壓測前要先問清楚：預期有多少使用者、尖峰時同時多少人在線、可以接受多慢。p95 是「95% 的請求都在這個時間內回來」，比平均值更能看出卡住的那一群人。</p>
+</section>
+<h2>技術</h2>
+<section id="frontend">
+<h3>前端</h3>
+<p>使用者看得到、點得到的那一層：網頁畫面、按鈕、表單。</p>
+<p>前端工程師負責把畫面做出來，讓它在各種螢幕大小、各種瀏覽器上都能正常顯示和操作；使用者點了按鈕之後，前端把資料送給後端處理。</p>
+</section>
+<section id="backend">
+<h3>後端</h3>
+<p>使用者看不到的那一層：存資料、算規則、跟其他系統交換資料。</p>
+<p>後端工程師負責資料庫、商業規則（例如誰能改什麼）和 API。後端出錯時使用者常常看不出來，等看得出來的時候，資料可能已經錯了一段時間，所以後端特別重視檢查和紀錄。</p>
+</section>
+<section id="component">
+<h3>元件</h3>
+<p>畫面上可以重複使用的零件，例如按鈕、下拉選單、日期選擇器。</p>
+<p>同一個元件全系統共用，改一次就全部一起變，畫面才會一致；反過來說，改壞一次也全部一起壞。選元件時要想使用者實際怎麼操作，不是只挑好看的。</p>
+</section>
+<section id="toner">
+<h3>碳粉匣</h3>
+<p>雷射印表機裝碳粉的盒子；印表機說「碳粉不足」，就是要換這個。</p>
+<p>雷射印表機用雷射在感光鼓上畫出影像，碳粉吸上去、轉印到紙上再加熱固定，剛印出來的紙是溫的就是這個原因。碳粉匣照機型分系列，不同系列裝不進去，叫貨前要先查清楚機型。新的碳粉匣裝之前要撕掉封條，忘了撕會印出一張白紙。</p>
+</section>
+<section id="inkjet">
+<h3>噴墨</h3>
+<p>用墨水匣把墨水噴到紙上的印表機，沒有碳粉。</p>
+<p>噴墨印表機多半是家用、印相片；辦公室大量列印多半用雷射印表機。所以顯示「碳粉不足」的一定是雷射印表機，不會是噴墨的那台。</p>
+</section>
+<section id="palette">
+<h3>色票</h3>
+<p>一組定好的顏色，整個系統照著用，畫面才不會五顏六色。</p>
+<p>色票通常會定：主色、輔助色、警告色、背景色和文字色。顏色有慣例：紅色多半留給錯誤和危險，綠色代表成功，亂用會讓使用者誤會。</p>
+</section>
+<section id="rwd">
+<h3>RWD（Responsive Web Design，響應式網頁設計）</h3>
+<p>同一個網頁在手機、平板、電腦上，會自動調整成適合那個螢幕的版面。</p>
+<p>做法是讓版面照螢幕寬度改變：寬螢幕排成好幾欄，窄螢幕疊成一欄。網頁工具常說自己內建 RWD，實際上版面在哪個寬度會擠在一起，還是要拿真的手機、平板開過才知道。</p>
+</section>
+<section id="db">
+<h3>資料庫</h3>
+<p>系統存資料的地方，像一套有規則的大表格。</p>
+<p>資料庫把資料存成一張張表，每張表有固定的欄位，例如資產編號、名稱、持有人。程式可以重寫，資料不能重來，所以動資料庫之前，大家都會特別緊張。</p>
+</section>
+<section id="api">
+<h3>API（Application Programming Interface，應用程式介面）</h3>
+<p>讓兩個系統互相講話的窗口；例如盤點平台向人事系統要一份員工名單。</p>
+<p>API 像兩個系統之間的約定：怎麼問、回答長什麼格式都說好了。前端跟後端之間、公司系統跟外部服務之間，都靠 API 溝通；任何一邊偷改格式，另一邊就會壞掉。</p>
+</section>
+<section id="csv">
+<h3>CSV（Comma-Separated Values，逗號分隔值）</h3>
+<p>用逗號隔開欄位的純文字表格檔，Excel 打得開，系統之間交換資料很常用。</p>
+<p>一行就是一筆資料，逗號分開每個欄位。它簡單到幾乎每個系統都能匯出匯入，也簡單到每個系統對它的解讀都有一點不一樣，所以匯出前最好拿對方要用的程式實際開開看。</p>
+</section>
+<section id="jquery">
+<h3>jQuery</h3>
+<p>很老牌的 JavaScript 工具包，十幾年前幾乎每個網站都有，很多舊系統現在還在用。</p>
+<p>它當年讓操作網頁變得簡單很多。後來瀏覽器本身越來越強，新專案就比較少用了，但舊系統裡到處都還找得到它，維護舊系統的工程師還是得懂。</p>
+</section>
+<section id="ide">
+<h3>IDE（Integrated Development Environment，整合開發環境）</h3>
+<p>寫程式用的編輯器：幫你把程式上色、自動補字、標出打錯的地方。</p>
+<p>IDE 抓得到打錯字和語法錯誤，抓不到邏輯錯誤。它說沒問題，只代表程式看起來像程式。</p>
+</section>
+<section id="function">
+<h3>function（函式）</h3>
+<p>程式裡一段有名字、只做一件事的程式碼，例如專門檢查日期格式的那一段。</p>
+<p>把程式拆成一個個 function 的好處：<br>1. 名字取得好，讀的人不用看內容就知道它做什麼。<br>2. 同一件事寫一次，到處可以重複叫它。<br>3. 出錯時知道去哪一段找。<br>一個 function 做太多事，改一個地方就會牽動另一個地方。</p>
+</section>
+<section id="commit">
+<h3>commit</h3>
+<p>把這次改的程式存成一個版本，並寫一句改了什麼。</p>
+<p>版本控制系統（像 Git）會把每次 commit 記下來，之後可以看歷史、比較差異、退回去。commit 訊息是寫給未來的人看的，「修 bug」「改一下」這種訊息半年後誰也看不懂。</p>
+</section>
+<section id="terminal">
+<h3>終端機</h3>
+<p>用打字指令操作電腦的黑色視窗。</p>
+<p>跑測試、把程式放上伺服器、叫 AI 做事，很多都在終端機裡做。黑底白字看起來很嚇人，但好處是每一步做了什麼都留在畫面上，出事時可以往回翻。</p>
+</section>
+<section id="deploy">
+<h3>部署</h3>
+<p>把寫好的程式放到伺服器上，讓大家用得到。口語多半說上線、上版。</p>
+<p>部署是寫程式之後最緊張的時刻：步驟少一步、順序錯一個，使用者就會先發現。所以很多公司把部署步驟寫成固定的清單，照著做、做完打勾。</p>
+</section>
+<section id="backup">
+<h3>備份</h3>
+<p>把現在的資料或程式另外存一份，出事時可以拿它復原。</p>
+<p>備份的要點：<br>1. 存在跟原本不同的地方。<br>2. 定期做，不是想到才做。<br>3. 要實際試過還原——沒有還原過的備份，不算備份。<br>真的要用的時候才發現備份是壞的，是最常見的悲劇之一。</p>
+</section>
+<section id="test_server">
+<h3>測試機</h3>
+<p>給工程師和 QC 測試用的伺服器；在這裡壞掉，不會影響真正的使用者。</p>
+<p>程式先放到測試機測，確定沒問題才放到正式機。測試機跟正式機越像越好：「測試機好好的，正式機壞了」通常是兩邊的設定或資料不一樣。</p>
+</section>
+<section id="prod">
+<h3>正式機</h3>
+<p>真正的使用者在用的伺服器；在這上面出錯，所有人都看得到。</p>
+<p>很多公司的正式機只在固定時段更新，更新前會先公告維護時間，出事時也有固定的回報和處理流程。</p>
+</section>
+<section id="http502">
+<h3>502（HTTP 502 Bad Gateway，閘道錯誤）</h3>
+<p>網頁伺服器回不出東西時顯示的錯誤代碼；使用者看到的就是一個錯誤頁。</p>
+<p>網頁伺服器通常分兩層：前面接請求的，和後面真正處理的。502 代表前面那層找不到後面的程式，常發生在程式剛被換掉、還沒重新啟動的那幾秒。</p>
+</section>
+<section id="cache">
+<h3>快取</h3>
+<p>瀏覽器或伺服器把拿過的東西先存一份，下次直接用，省時間。</p>
+<p>快取讓網頁變快，但也會讓你改了東西卻還看到舊畫面，因為拿到的是存起來的舊版。電腦科學有句老話：最難的兩件事是命名和讓快取失效。</p>
+</section>
+<section id="lighthouse">
+<h3>Lighthouse</h3>
+<p>Google 做的網頁健檢工具，幫網頁的速度、無障礙、寫法打分數。</p>
+<p>它會模擬使用者打開網頁，量載入時間、檢查顏色對比夠不夠、圖片有沒有說明文字等等。分數是參考不是目的，為了分數好看把功能拿掉，使用者不會比較開心。</p>
+</section>
+<section id="vpn">
+<h3>VPN（Virtual Private Network，虛擬私人網路）</h3>
+<p>在家連回公司內部網路的加密通道；沒連上，就進不了公司的系統。</p>
+<p>公司的系統通常只開放給內部網路，在外面要先用 VPN「假裝自己在公司裡」。它要帳號密碼、有時還要手機驗證，而且斷線常挑最不好的時機。</p>
+</section>
+<section id="mac">
+<h3>MAC 位址（Media Access Control address，媒體存取控制位址）</h3>
+<p>每張網路卡出廠時就有的編號，像裝置在網路上的身分證字號，例如 A4:83:E7:12:5C:0F。</p>
+<p>MAC 位址是 12 個十六進位的字（0～9、A～F），兩個一組。前半段代表製造商，後半段是那張網路卡自己的號碼。手機、筆電、印表機只要會連網路就有一個，網路設備靠它認出「這是哪一台」，所以常拿它來決定誰可以連。</p>
+</section>
+<section id="private_mac">
+<h3>私人位址（Private Wi-Fi Address）</h3>
+<p>手機連 Wi-Fi 時不用真正的 MAC 位址，改用一組隨機產生的，讓不同地方的網路認不出是同一支手機。</p>
+<p>iPhone 叫「私人 Wi-Fi 位址」，Android 叫「隨機 MAC」，新手機預設是開著的。每個 Wi-Fi 網路各用一組，同一個網路多半會一直用同一組；關掉就換回真正的 MAC 位址。隨機產生的位址有個記號：第一組的第二個字是 2、6、A 或 E。</p>
+</section>
+<section id="whitelist">
+<h3>白名單</h3>
+<p>只放行清單上的、其他一律擋下的做法；反過來，擋下清單上的、其他都放行的叫黑名單。</p>
+<p>白名單比較安全，代價是每多一個人要用，就得有人把他加進清單。無線基地台的「MAC 過濾」就是一種白名單：只有登記過 MAC 位址的裝置連得上，知道密碼也沒用。</p>
+</section>
+<section id="ap">
+<h3>無線基地台（Access Point，AP）</h3>
+<p>發出 Wi-Fi 訊號，讓手機和筆電用無線的方式連進網路的設備。</p>
+<p>公司的無線基地台通常有管理頁，可以看誰連過、誰被擋，設定誰能連、要不要開訪客網路。重新啟動它的時候，所有連著的裝置都會斷線一陣子。</p>
+</section>
+<section id="guest_wifi">
+<h3>訪客網路</h3>
+<p>給客人用的 Wi-Fi：上得了網，但跟公司內部網路隔開。</p>
+<p>連訪客網路的裝置碰不到公司的印表機、檔案和內部系統，客人的電腦就算中毒，也傳不進公司裡。員工的裝置連上去也一樣，只能上外面的網站。</p>
+</section>
+<section id="mail_quota">
+<h3>信箱配額</h3>
+<p>公司給每個人信箱的容量上限；超過了就寄不出信，再多一些連信都收不到。</p>
+<p>配額由管理者統一設定，快滿的時候信箱會先跳警告。調高上限要權限、也要預算，不是每個人說調就能調。</p>
+</section>
+<section id="archive">
+<h3>封存</h3>
+<p>把不常看的舊信搬出信箱，存成另一個檔案；信還在，只是不佔信箱的容量。</p>
+<p>封存檔就是一個普通的檔案，放在哪裡就佔哪裡的空間。要再看舊信時，打開封存檔就找得到。</p>
+</section>
+<section id="attachment">
+<h3>附件</h3>
+<p>跟著信一起寄出去的檔案，例如照片、影片、試算表。</p>
+<p>信本身的文字很小，佔信箱空間的多半是附件。同一個附件被轉寄幾十次，每一封都各存一份。</p>
+</section>
+<section id="share_drive">
+<h3>共用槽（網路磁碟機）</h3>
+<p>公司伺服器上大家一起用的資料夾，在電腦上看起來像多了一顆硬碟。</p>
+<p>共用槽的空間是全公司一起用的，一個人放了很大的檔案，其他人可能就存不進去。部門之間交換檔案、放共用的範本都靠它。</p>
+</section>
+<section id="pr">
+<h3>PR（Pull Request，合併請求）</h3>
+<p>把自己改好的程式送出去，請別人看過、同意後才併進正式版本的那一包。</p>
+<p>一個 PR 通常包含：改了哪些檔案（diff）、為什麼改、怎麼測過。看的人在上面留言、要求修改或同意合併。團隊用它確保沒有人單方面把東西塞進正式版本。</p>
+</section>
+<section id="lgtm">
+<h3>LGTM（Looks Good To Me）</h3>
+<p>檢閱程式碼時說「我看過了，沒問題」的縮寫。按下去很快，但代表你為這份程式背書。</p>
+<p>通常出現在 PR（請同事看你改的程式的那張單）的留言裡。它的意思是「以我看到的，可以合併」，所以之後出事，檢閱的人也有一份責任。</p>
+</section>
+<section id="diff">
+<h3>diff（difference，差異）</h3>
+<p>把改前、改後的程式並排比較，紅色是刪掉的、綠色是新加的。檢閱程式碼主要就是看這個。</p>
+<p>每一行前面有記號：「+」新加、「-」刪掉、空白是沒動的上下文。看 diff 的重點是新加和刪掉的那些行在做什麼、會不會影響別的地方。</p>
+</section>
+<section id="localstorage">
+<h3>localStorage（瀏覽器本機儲存）</h3>
+<p>網頁把資料存在使用者自己瀏覽器裡的地方；關掉網頁還在，但任何人打開那台電腦都看得到。</p>
+<p>適合存不重要的偏好設定，例如深色模式開不開。它沒有加密、也不會跟伺服器同步，換一台電腦就沒有了。</p>
+</section>
+<section id="get_post">
+<h3>GET／POST（HTTP 方法）</h3>
+<p>網頁跟伺服器要東西的兩種方式：GET 把資料接在網址後面，POST 放在看不到的地方。</p>
+<p>GET 用來「拿」：網址可以收藏、分享、出現在瀏覽紀錄和伺服器的 log 裡。POST 用來「送」：資料放在請求的內容裡，網址上看不到。</p>
+</section>
+<section id="log">
+<h3>log（紀錄檔）</h3>
+<p>程式跑的時候留下的流水帳，出事時拿來查；寫了什麼進去，看得到 log 的人就看得到什麼。</p>
+<p>log 常常會保存很久、很多人看得到（維運、監控系統、外包廠商）。所以寫 log 的時候要想：這一行被別人看到可以嗎？</p>
+</section>
+<section id="formatter">
+<h3>formatter（排版工具）</h3>
+<p>自動把程式的縮排、空格、換行整理成一致格式的工具。這些事交給它，人不用在檢閱時挑。</p>
+<p>團隊通常會設定一套規則，存檔或送 PR 前自動跑一次。這樣檢閱的人可以專心看邏輯，不用為了空幾格吵架。</p>
+</section>
+<section id="indent">
+<h3>縮排（indent）</h3>
+<p>程式每一行前面空幾格，用來表示層次；只影響好不好讀，不影響能不能跑。</p>
+<p>兩格、四格、Tab 都有人用，重要的是整個專案一致。多數團隊交給 formatter 統一處理。</p>
+</section>
+<section id="pii">
+<h3>個資（個人資料）</h3>
+<p>能認出是誰的資料：姓名、電話、地址、身分證字號。法律規定要保護，存放和傳送都有要求。</p>
+<p>台灣有《個人資料保護法》。常見的原則：只收需要的、存起來要保護、傳送時不要走看得到的管道、不要寫進不該寫的地方。</p>
+</section>
+<section id="hardcode">
+<h3>寫死（hard-code）</h3>
+<p>把會變的值直接寫在程式裡，例如活動結束日期；要改就得改程式再上線。</p>
+<p>相對的做法是放在設定檔或資料庫裡，讓不會寫程式的人也能改。什麼該寫死、什麼不該，看那個值多常變、由誰決定。</p>
+</section>
+<section id="resolution">
+<h3>解析度（resolution）</h3>
+<p>螢幕有多少點；同一個網頁在手機、平板、電腦上寬度差很多，版面要各自看過。</p>
+<p>網頁通常不是寫三套，而是用 RWD 讓同一套在不同寬度下重新排版。測試時三種尺寸都要看，常見的問題是按鈕被蓋住、表格要左右捲。</p>
+</section>
+<section id="ad">
+<h3>AD（Active Directory）</h3>
+<p>公司管所有員工帳號的那本總名冊（微軟的產品）。登入公司電腦、信箱都靠它認人；系統接上它，員工就不用再多記一組密碼。</p>
+<p>接 AD 會看到的詞：<br>1. LDAPS：別的系統去問它「這個人是誰、密碼對不對」用的加密管道，636 port 是它的門牌。<br>2. Base DN、OU、DC：告訴它去名冊的哪一層找人，像「某公司／員工部門」這種路徑。<br>3. 兩家公司的 AD 是兩本不同的名冊，系統接的是哪一本，就只有那家的人登得進來。</p>
+</section>
+<section id="integration">
+<h3>串接</h3>
+<p>把兩個本來各過各的系統接起來，讓 A 能跟 B 要資料或請 B 做事。</p>
+<p>要先拿到對方的「怎麼接」：網址、帳號、資料格式。對方還沒給，程式只能先寫 TODO 等著。</p>
+</section>
+<section id="service_account">
+<h3>服務帳號</h3>
+<p>不是給人用、是給程式用的帳號。系統接別的系統時，用它表明「我是誰」。</p>
+<p>密碼放在設定檔、不在人的腦子裡；權限只給做那件事需要的；人離職了它不會跟著消失，所以不要拿某個同事的帳號當服務帳號。</p>
+</section>
+<section id="domain">
+<h3>網域</h3>
+<p>網址上用「點」隔開的那串名字，像 example.com；也指公司內部那群電腦和帳號共用的範圍。</p>
+<p>登入頁寫著哪家的網域，就是在拿哪家的名冊認人。</p>
+</section>
+<section id="mfa">
+<h3>MFA（Multi-Factor Authentication，多因素驗證）</h3>
+<p>密碼之外再多一道驗證（手機驗證碼、指紋），兩道都過才算登入。</p>
+<p>多一道就多一分麻煩，所以要不要做，看系統多重要、使用者是誰、對方有沒有要求。</p>
+</section>
+<section id="zero_trust">
+<h3>零信任</h3>
+<p>「連公司內網也不預設信任」的資安思想：每一次存取都重新驗身分、驗裝置。</p>
+<p>它是一整套架構，不是一個可以勾選的功能；導入通常以年計，需要網路、帳號、裝置管理一起改。</p>
+</section>
+<section id="http403">
+<h3>403（Forbidden，禁止存取）</h3>
+<p>伺服器說「我知道你是誰，但這件事你沒權限」。</p>
+<p>一組常見的數字：401 是「你還沒登入」、403 是「登入了但不能做這件事」、404 是「沒有這個東西」、502 是「後面的機器沒回應」。測試常拿 403 確認「沒權限的人真的進不去」。</p>
+</section>
+<section id="todo">
+<h3>TODO</h3>
+<p>程式裡寫給自己和同事的便條：「這裡還沒做」。</p>
+<p>常見寫法是 // TODO: 說明。缺資料時先留 TODO 讓程式能跑，但交出去之前要清掉或說清楚，不然測的人不知道該測什麼。</p>
+</section>
+<section id="backdoor">
+<h3>後門</h3>
+<p>繞過正常登入就能進系統的暗道，不管是故意留的、還是不小心做出來的。</p>
+<p>例如忘了拿掉的測試帳號、寫死在程式裡的密碼、或接錯名冊讓別家的人也登得進來。弱點掃描和客戶的資安人員會特別找這種東西。</p>
+</section>
+<section id="blockchain">
+<h3>區塊鏈</h3>
+<p>很多台電腦各存一份、互相對帳的帳本，寫進去就很難偷改。</p>
+<p>適合多方互不信任、又要共用同一份紀錄的情境。維護成本高，不是加上去就比較安全；一家公司自己用的系統，通常資料庫加上 log 就夠了。</p>
+</section>
+<section id="package">
+<h3>套件</h3>
+<p>別人寫好、拿來用的程式零件；一個網頁通常疊著幾十個。</p>
+<p>套件會遇到的事：<br>1. 用 npm 這類工具安裝、升級。<br>2. 套件有版本：舊版可能被發現漏洞，新版可能改了寫法讓你的程式壞掉，所以升級前後都要測。<br>3. 「相依套件」是你用的套件另外用到的別組套件，沒有它你的套件就動不了，就像買資料片但沒有買遊戲本體一樣。</p>
+</section>
+<section id="erp">
+<h3>ERP（Enterprise Resource Planning，企業資源規劃）</h3>
+<p>公司管進貨、庫存、財務、人事的那套大系統；別的系統常要把資料餵給它。</p>
+<p>每間公司可能用不同的 ERP 系統，欄位順序、編碼、檔案什麼時候放好，都有各自的規則。照它的匯入規格出檔案才讀得進去。</p>
+</section>
+<section id="sftp">
+<h3>SFTP（SSH File Transfer Protocol，加密檔案傳輸）</h3>
+<p>加密的檔案傳輸方式，兩家公司之間交換檔案常用。</p>
+<p>要對方給帳號和放檔的路徑。排程產生的檔案通常就丟到約好的那個資料夾，對方的系統自己去拿。</p>
+</section>
+<section id="encoding">
+<h3>編碼</h3>
+<p>文字變成位元組存進檔案的方法。寫的人和讀的人用不同方法，中文就變亂碼。</p>
+<p>會碰到的三個名字：<br>1. UTF-8：現在的通用編碼，什麼語言的字都裝得下。<br>2. Big5：台灣早年的繁體中文編碼，舊系統還在用。<br>3. BOM：檔案開頭三個看不見的位元組（EF BB BF），用來標記「我是 UTF-8」；讀檔的程式有的靠它認中文、有的會被它絆倒，所以檔案要給誰讀，先問那支程式。</p>
+</section>
+<section id="batch">
+<h3>批次（Batch）</h3>
+<p>把累積下來的資料整批一次處理，不是來一筆做一筆。</p>
+<p>重點是量：像髒衣服堆到一整籃再一起洗，不是脫一件洗一件。卡上的「批次讀取」就是 ERP 把整份檔案一次讀進去，所以一份檔案裡要有完整的資料。</p>
+</section>
+<section id="schedule">
+<h3>排程</h3>
+<p>不是有人按才做，而是排好時間（例如每天凌晨 1 點）讓電腦自己跑。</p>
+<p>寫 cron 就是在設排程：cron 是 Linux 上排時間的工具，那串「0 1 <em> </em> *」是分、時、日、月、星期，意思是每天凌晨 1 點。排程跑的時候旁邊沒人，要有人看 log，不然失敗了沒人知道。</p>
+</section>
+<section id="author_name">
+<h3>Author Name（作者欄）</h3>
+<p>程式上記的「這段是誰寫的」。以前寫在檔案開頭的註解裡，現在 git 每次 commit 都自動記一筆。</p>
+<p>出事的時候大家第一件事就是查這一欄，所以「這個 Author Name 好眼熟」是工程師的老笑話：查了半天，寫壞的人是自己。AI 幫你寫的程式，作者欄上還是你的名字。</p>
+</section>
+<section id="ci_identity">
+<h3>CI（Corporate Identity，企業識別）</h3>
+<p>一家公司固定的顏色、字體、標誌那一套；做給客戶的畫面，配色要跟著它。</p>
+<p>工程師圈子裡 CI 更常指 Continuous Integration（持續整合：每次 commit 自動跑測試）。看上下文分：講顏色是企業識別，講測試是持續整合。</p>
+</section>
+<section id="dashboard">
+<h3>儀表板</h3>
+<p>把很多數字和圖表擺在同一頁的總覽畫面，像車子的儀表板。</p>
+<p>主管愛看，但要先問使用者到底要什麼：只是要勾幾筆資料的人，給他一整頁圖表是增加麻煩不是幫忙。</p>
+</section>
+<section id="json">
+<h3>JSON（JavaScript Object Notation）</h3>
+<p>程式之間交換資料的文字格式，用大括號和冒號寫「欄位：值」；XML 是用角括號標籤的另一種，比較老。</p>
+<p>JSON 和 XML 都是裝資料的格式，不是程式：會寫 JSON、XML 跟會寫程式是兩回事，就像會填表單跟會設計表單是兩回事。API 回傳的資料、設定檔，現在多半是 JSON。</p>
+</section>
+<h2>AI</h2>
+<section id="claire">
+<h3>Claire</h3>
+<p>遊戲裡公司導入的 AI 程式助理，在終端機裡幫你寫文件、寫程式、部署。致敬知名 AI 服務 Claude，這個遊戲也是在 Claude 協作下完成的。</p>
+<p>你用打字下指令，它讀專案、改檔案、跑指令，做完回報。AI 做得很快，但送出去的東西上面寫的是你的名字，所以看懂它做了什麼是你的責任。<br>產品名稱靈感來源：<br>https://github.com/anthropics/claude-code/issues/31984<br>https://www.reddit.com/r/ClaudeCode/comments/1ucrfky/claudes_sister_has_entered_the_chat_claire/</p>
+</section>
+<section id="quota">
+<h3>額度</h3>
+<p>公司買的 AI 使用量上限；用完了，要等它補滿。</p>
+<p>AI 服務照用量收費，公司買的方案越貴額度越多。額度是錢，所以什麼事交給 AI、什麼事自己做，也是一種判斷。</p>
+</section>
+<section id="accept_edits">
+<h3>Accept Edits</h3>
+<p>讓 AI 改檔案時不用每一步都問你的模式；快，但改了什麼要自己看。</p>
+<p>每一步都問很安全，也很煩；全部放行很快，也很危險。大部分人會在兩者之間找一個自己睡得著的位置。</p>
+</section>
+<section id="auto_mode">
+<h3>Auto Mode</h3>
+<p>讓 AI 自己判斷哪一步可以直接做的模式；部署這種收不回來的步驟，還是會停下來問你。</p>
+<p>旁邊有另一個 AI 在把關：讀檔、改資料夾裡的檔案直接放行，部署、刪資料這類收不回來的先擋下來。CLAIRE.md 寫好部署流程，它就照著做到底，不再一步一步問。問得少不代表不會錯，做完還是要自己看。</p>
+</section>
+<section id="claire_md">
+<h3>CLAIRE.md</h3>
+<p>寫給 AI 看的專案筆記：這個專案的規矩和做法，AI 每次開工會先讀它。</p>
+<p>寫進去的規矩 AI 會照做，沒寫的它會自己猜。猜錯的時候，與其每次口頭糾正，不如補一行進筆記，下次它就記得了。</p>
+</section>
+<section id="skill">
+<h3>SKILL（技能說明）</h3>
+<p>寫給 AI 的一套做法說明：某件事要照哪幾步做；寫一次，之後每次都照做。</p>
+<p>SKILL 像給新人的標準作業程序。寫得好不好，差別在有沒有寫「為什麼」：只有步驟的說明，遇到沒寫到的情況 AI 就不知道怎麼辦。</p>
+</section>
+<section id="poc">
+<h3>POC（Proof of Concept，概念驗證）</h3>
+<p>先做一個能動的雛形給客戶看，證明這條路走得通。</p>
+<p>POC 只求能動、能展示，不求完整，所以會省掉很多正式版才需要的東西。最常見的意外，是 POC 被客戶一句「這個不錯，直接上線吧」變成正式版。</p>
+</section>
+<section id="qa_bot">
+<h3>QA 機器人（Question Answering，問答）</h3>
+<p>在系統裡回答使用者問題的對話框。這裡的 QA 是「問答」，不是品管那個 QA。</p>
+<p>做之前要講清楚三件事：只答某個範圍的問題還是什麼都聊、答不出來時說什麼、回答根據哪些資料。</p>
+</section>
+<section id="knowledge_base">
+<h3>知識庫</h3>
+<p>給機器人或客服查的那堆資料：使用手冊、FAQ、過去的問答。</p>
+<p>機器人答得好不好，一半看知識庫整理得好不好。問題不在知識庫裡時，好的設計會說「這個我不知道」，而不是瞎掰一個。</p>
+</section>
+<section id="faq">
+<h3>FAQ（Frequently Asked Questions，常見問題）</h3>
+<p>把大家一直問的問題和答案整理成的一份清單。</p>
+<p>做 QA 機器人常從 FAQ 和使用手冊開始，因為那是需求單位自己確認過的內容。</p>
+</section>
+<section id="llm">
+<h3>大型語言模型</h3>
+<p>像 Claire 背後那種讀過大量文字、能接話的 AI。同一家通常有快的、便宜的、聰明的幾種等級。</p>
+<p>挑哪一級看工作：簡單的用快的省額度，難的用聰明的。資料會不會被拿去訓練模型，看你用的是哪種方案。</p>
+</section>
+<section id="enterprise_plan">
+<h3>企業方案</h3>
+<p>AI 服務賣給公司的版本：通常承諾資料不拿去訓練模型、有合約、有帳單、可以管誰能用。</p>
+<p>客戶的資安問卷問「資料會不會送進 AI」時，你們用的是哪種方案、送了什麼進去，就是答案的一部分。</p>
+</section>
+<section id="gen_ai">
+<h3>生成式 AI</h3>
+<p>會「產出」東西的 AI：寫文章、寫程式、畫圖、對話，像 Claire 這類工具都算。</p>
+<p>客戶問「有沒有用生成式 AI」通常不是反對，是要知道資料有沒有送出去、送去哪、會不會被拿去訓練。</p>
+</section>
+<h2>時代</h2>
+<section id="legacy">
+<h3>legacy</h3>
+<p>原意是「留下來、還在用的舊系統」；遊戲裡指還沒有 AI 的年代，什麼都自己來。</p>
+<p>舊系統之所以沒人敢動，是因為它還在賺錢，而且寫它的人已經離職了。這個年代的工程師得自己查資料、自己寫、自己測。</p>
+</section>
+<section id="hybrid">
+<h3>hybrid</h3>
+<p>原意是「混合」；遊戲裡指人和 AI 一起做事的過渡年代：AI 幫你寫，你負責看。</p>
+<p>這個年代最累的不是寫，是判斷 AI 說的哪一句是對的——它講得很有自信，對錯都一樣有自信。</p>
+</section>
+<section id="speedrun">
+<h3>speedrun</h3>
+<p>原意是「用最快速度破關」；遊戲裡指 AI 一次做完一整段、人只負責檢查的年代。</p>
+<p>當產出的速度超過看得完的速度，人的工作就從「做」變成「看」，而看也是會累的。</p>
+</section>
+</main>
+<footer class="seo-foot"><nav aria-label="IT24hr 的其他內容"><a href="index.html">玩 IT24hr</a><a href="se.html">認識軟體工程</a><a href="csie.html">CSIE 課程</a><a href="handbook.html">新人手冊</a><a href="atlas.html">IT 圖鑑</a></nav></footer>
+
+</body>
+</html>

@@ -1448,6 +1448,10 @@ a.csie-course:hover { border-color: var(--accent); }
 /* 認識軟體工程（se.js）：一篇長文，章節捲動閱讀，12 站點一站看一站，小範本開浮動視窗 */
 .se-page { max-width: 880px; line-height: 1.75; }
 .se-page svg { max-width: 100%; height: auto; }
+.se-page img { display: block; max-width: 100%; height: auto; margin: 12px auto; }
+/* 內容頁底部互相連結（scripts/build-seo.js 產生） */
+.seo-foot { border-top: 1px solid #d8cfbd; padding: 16px 20px 32px; }
+.seo-foot nav { max-width: 880px; margin: 0 auto; display: flex; flex-wrap: wrap; gap: 8px 18px; font-size: 14px; }
 .se-hero h2 { margin: 10px 0 8px; font-size: 30px; line-height: 1.35; word-break: keep-all; } .se-hero p { margin: 8px 0; } .se-hero svg { display: block; margin: 12px auto; }
 .se-outro { margin: 32px 0 20px; padding: 14px 16px; border-left: 4px solid var(--warn); }
 .se-outro p { margin: 0; }

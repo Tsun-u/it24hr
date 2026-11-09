@@ -371,7 +371,8 @@
     hero.append(h('h2', '', title.text), drawBusyClerk(), ...lead.map((block) => (block.t === 'field' ? hookNode(block) : blockNode(block))));
     const outro = h('div', 'se-outro');
     outro.append(...blocksNode(SE.summary));
-    main.append(hero, nav,
+    // main 裡原本是給搜尋引擎讀的純文字版（scripts/build-seo.js 產生），換成互動版
+    main.replaceChildren(hero, nav,
       section('walk', SE.walk.title, ...blocksNode(SE.walk.lead), ...blocksNode(SE.walk.setting), walkNode()),
       section('sdlc', SE.sdlc.title, ...blocksNode(SE.sdlc.blocks)),
       section('models', SE.models.title, ...blocksNode(SE.models.lead), ...modelsNode()),
