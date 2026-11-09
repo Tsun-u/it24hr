@@ -1,5 +1,6 @@
 // 從 git log 產生 changelog-data.js：node scripts/build-changelog.js
 // 檔案寫不進自己的 hash，所以產出要另外 commit，訊息固定用 COMMIT_SUBJECT，更新履歷不列這種 commit
+// 日期用 commit 日期（進到主線那天）：rebase 進來的 commit 撰寫日期可能比前一筆早，照撰寫日期排會前後顛倒
 const { execFileSync } = require('node:child_process');
 const fs = require('node:fs');
 const path = require('node:path');
@@ -24,7 +25,7 @@ const render = (entries) => `// 由 node scripts/build-changelog.js 從 git log 
 `;
 
 if (require.main === module) {
-  const log = execFileSync('git', ['log', '--abbrev=7', '--date=short', '--format=%h%x09%ad%x09%s'], { cwd: ROOT, encoding: 'utf8' });
+  const log = execFileSync('git', ['log', '--abbrev=7', '--date=short', '--format=%h%x09%cd%x09%s'], { cwd: ROOT, encoding: 'utf8' });
   fs.writeFileSync(OUTPUT, render(parseLog(log)));
 }
 
