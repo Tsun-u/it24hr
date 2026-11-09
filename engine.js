@@ -222,12 +222,13 @@
       if (s.quarrel) this.clock.at(s.quarrel.at, () => this.quarrel());
       // 傍晚需求單位轉述業主看成品的評語（劇本 evening.at 是時鐘時間）
       if (s.evening) this.clock.at(s.evening.at, () => this.eveningReview());
-      // 阿姿加班：19:00 離開辦公室、22:30 睡覺，都在群組說一聲（劇本沒有 QC 的關卡不說）
+      // 同事的作息在群組說一聲：阿姿 19:00 離開辦公室、22:30 睡覺；怡君 19:30 下班（劇本沒有 QC／SA 的關卡不說）
+      const teamSay = (id, from, text) => () => { if (!this.ended) this.addDoc({ id, title: TEAM_GROUP, from, group: TEAM_GROUP, module: null, origin: 'line', kind: 'chat', text, sentences: [], subtasks: [] }); };
       if (!s.noQC) {
-        const qcTeamSay = (id, text) => () => { if (!this.ended) this.addDoc({ id, title: TEAM_GROUP, from: QC, group: TEAM_GROUP, module: null, origin: 'line', kind: 'chat', text, sentences: [], subtasks: [] }); };
-        this.clock.at(C.QC_LEAVE_OFFICE_MIN, qcTeamSay('qc_leave_office', '我先離開辦公室了，晚上交的我回家驗，會比較慢喔。'));
-        this.clock.at(C.QC_SLEEP_MIN, qcTeamSay('qc_sleep', '先睡了，剩下明天再驗。'));
+        this.clock.at(C.QC_LEAVE_OFFICE_MIN, teamSay('qc_leave_office', QC, '我先離開辦公室了，晚上交的我回家驗，會比較慢喔。'));
+        this.clock.at(C.QC_SLEEP_MIN, teamSay('qc_sleep', QC, '先睡了，剩下明天再驗。'));
       }
+      if (!s.noSA) this.clock.at(C.SA_LEAVE_MIN, teamSay('sa_leave', SA, '我先下班了，退回來的卡明天早上看。'));
       // 昨天交了 QC 還沒驗的：07:30 前交的一進公司就有結果，其他的從 09:00 開始算阿姿驗的時間
       for (const card of this.board.cards.filter(c => c.status === 'to_qc')) {
         const submitted = card.events.filter(ev => ev.kind === 'submit').at(-1);
@@ -1384,6 +1385,8 @@
       this.parallelRoll(card);
       this.clock.at(this.clock.minute + this.qcTurnaround(card), () => this.qcReview(card));
     }
+    // 怡君還在不在：19:30 下班，跟玩家走不走無關
+    saOnDuty() { return this.clock.minute < C.SA_LEAVE_MIN; }
     // 驗的人還在不在工作：阿姿照自己的時間加班（19:00 回家繼續驗、22:30 睡），其他驗的人跟玩家一起下班
     reviewerOnDuty(card) {
       return this.reviewerOf(card) === QC ? this.clock.minute < C.QC_SLEEP_MIN : !this.home;
@@ -1572,7 +1575,7 @@
       card.toSA = { right, again, wrong, valid: right.some(os => os.length), was: card.status };
       card.rejectToSA(reason, this.clock.minute); this.markActed(id);
       this.stats.toSA = (this.stats.toSA || 0) + 1;
-      if (!this.home) this.clock.at(this.clock.minute + (card.toSA.valid ? C.SA_RECHECK_MIN : C.SA_BOUNCE_MIN), () => this.saReturns(card));
+      if (this.saOnDuty()) this.clock.at(this.clock.minute + (card.toSA.valid ? C.SA_RECHECK_MIN : C.SA_BOUNCE_MIN), () => this.saReturns(card));
       this.emit('card:to_sa', card); this.emit(`card:to_sa:${id}`, card);
     }
     // 玩家自己開、有來源的卡：退回 SA 就是補一次「開卡時指派給 SA」
@@ -1619,7 +1622,7 @@
     }
     // 怡君把卡還你：勾對的補好、勾錯的說不合理；全部勾錯的原封不動丟回來
     saReturns(card) {
-      if (card.status !== 'rejected_to_sa' || !card.toSA) return;
+      if (card.status !== 'rejected_to_sa' || !card.toSA || !this.saOnDuty()) return;   // 她下班了：隔天早上才處理（schedule 排）
       const { valid, right, again, wrong, was } = card.toSA;
       const refused = [...again.map(o => `「${o.text}」我剛剛問過了，卡上有寫。`),
         ...wrong.map(o => `「${o.text}」我問過了，我覺得你的提議不合理${o.why ? `：${o.why}` : ''}。`)].join('');

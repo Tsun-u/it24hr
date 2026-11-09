@@ -16,6 +16,7 @@ const C = {
   QC_LEAVE_OFFICE_MIN: 19 * 60,
   QC_HOME_TURNAROUND_MIN: 45,
   QC_SLEEP_MIN: 22 * 60 + 30,
+  SA_LEAVE_MIN: 19 * 60 + 30,       // 怡君下班：之後退回 SA 的卡（或還沒處理完的）隔天早上才處理
   AI_ASK_GAP_MIN: 5,                // 矯枉過正的 AI：回答它一題之後，它再做多久才問下一題（或交件）
   AI_FORGET_BACKUP: 0.3,            // AI 部署（Accept Edits、Auto）：沒人教過流程時，它忘了先備份的機率
   AI_GROUP_TIME: 0.7,               // 整組交給 AI：交件時間＝單件加總打七折（額度＝單件加總 −1）

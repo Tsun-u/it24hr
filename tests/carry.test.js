@@ -97,6 +97,17 @@ test('下班前退回 SA、怡君還沒處理的：隔天一早丟回來', () =>
   assert.strictEqual(card.status, 'new'); assert.match(card.comments.at(-1).text, /需求很清楚/);
 });
 
+test('怡君 19:30 下班、群組說一聲：之前退的照常回來，之後才到期的留到隔天早上', () => {
+  const at = (e, clock) => e.tick(min(clock - e.clock.minute));
+  const early = day1(); at(early, C.SA_LEAVE_MIN - C.SA_BOUNCE_MIN - 1);
+  early.rejectToSA('a'); early.tick(min(C.SA_BOUNCE_MIN));
+  assert.strictEqual(early.board.get('a').status, 'new', '19:29 前丟回來');
+  const late = day1(); at(late, C.SA_LEAVE_MIN - 10);
+  late.rejectToSA('a'); late.tick(min(C.SA_BOUNCE_MIN + 5));
+  assert.strictEqual(late.board.get('a').status, 'rejected_to_sa', '她 19:30 走了');
+  assert.ok(late.docs.some(d => d.id === 'sa_leave' && d.group === '精銳三人產線' && d.from === 'SA 怡君'));
+});
+
 test('同一份 carried 給兩次（BAD END 重來那天）：時間不會被推兩次', () => {
   const e = day1(); e.doWork('a', 'estimate', [3]); const carried = e.carryOver();
   const s = { ...script(), cards: [] };
