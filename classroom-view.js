@@ -22,7 +22,9 @@
     const el = h(tag, '', `${t.text} `);
     for (const to of [].concat(t.see || [])) {
       const [c, id] = to.includes('/') ? to.split('/') : [course, to];
-      el.append(pageLink('cr-link cr-see', `→ ${root.Classroom.item(c, id).zh}`, c, id));
+      const link = pageLink('cr-link cr-see', `→ ${root.Classroom.item(c, id).zh}`, c, id);
+      link.target = '_blank'; link.rel = 'noopener';   // 開新分頁，兩頁可以對照著看
+      el.append(link);
     }
     return el;
   }
@@ -32,13 +34,13 @@
   function trapsNode(traps) {
     const line = (kind, icon, label, text) => {
       const p = h('p', `cr-trap-line ${kind}`);
-      p.append(root.Icons.el(icon, 'cr-trap-icon'), h('span', 'cr-sr', label), h('span', '', text));
+      p.append(root.Icons.el(icon, 'cr-trap-icon'), h('span', 'cr-sr', label), prose('span', text));
       return p;
     };
     const list = h('div', 'cr-traps');
-    for (const { wrong, right } of traps) {
+    for (const { wrong, right, see } of traps) {   // see：正解後面接翻到別頁的連結
       const item = h('div', 'cr-trap');
-      item.append(line('wrong', 'circle-x', '誤解：', wrong), line('right', 'circle-check', '正解：', right));
+      item.append(line('wrong', 'circle-x', '誤解：', wrong), line('right', 'circle-check', '正解：', see ? { text: right, see } : right));
       list.append(item);
     }
     return list;

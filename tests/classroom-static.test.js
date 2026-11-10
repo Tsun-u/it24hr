@@ -27,6 +27,12 @@ test('頁內每個連結都指到有產生的頁（準備中的頁不會被連�
   }
 });
 
+test('內文裡翻到別頁的連結（→ 某頁）開新分頁，兩頁可以對照著看', () => {
+  const sees = pages.flatMap(p => [...p.html.matchAll(/<a class="cr-link cr-see"[^>]*>/g)].map(m => m[0]));
+  assert.ok(sees.length > 0);
+  for (const a of sees) assert.ok(a.includes('target="_blank"') && a.includes('rel="noopener"'), a);
+});
+
 test('講義頁的內文是預先寫好的：有標題、比喻和總結，沒有漏掉的值', () => {
   for (const p of pages) {
     // 講義本身會講到 JavaScript 的 undefined，所以只抓整格都是 undefined 的

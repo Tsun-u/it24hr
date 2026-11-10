@@ -176,7 +176,7 @@ replace(arr)
 print(arr[0], arr[1])</pre><p class="cr-out mono">輸出：5
 6
 99 2</p></div></section>
-<section class="cr-sec"><h4>跑幾步</h4><table class="cr-big-o"><tr><td>交給函式一個整數 x</td><td class="mono">抄 1 個值，O(1)</td></tr><tr><td>交給函式 n 格的 C 陣列、Java 陣列、Python list、C++ 的 vector&lt;int&gt;&amp;</td><td class="mono">只抄一個地址，O(1)，跟 n 多大無關</td></tr><tr><td>交給函式 n 格的 C++ vector&lt;int&gt;（沒寫 &amp;）</td><td class="mono">整個複製一份，O(n)</td></tr></table><p>交給函式的東西越大，複製的代價越明顯：十萬格的 vector 沒寫 &amp;，每呼叫一次就抄十萬格，放在迴圈裡呼叫更是倍數放大。Big-O 的意思和怎麼算，在資料結構的附錄。 <a class="cr-link cr-see" href="../ds/complexity.html">→ 時間複雜度</a></p></section>
+<section class="cr-sec"><h4>跑幾步</h4><table class="cr-big-o"><tr><td>交給函式一個整數 x</td><td class="mono">抄 1 個值，O(1)</td></tr><tr><td>交給函式 n 格的 C 陣列、Java 陣列、Python list、C++ 的 vector&lt;int&gt;&amp;</td><td class="mono">只抄一個地址，O(1)，跟 n 多大無關</td></tr><tr><td>交給函式 n 格的 C++ vector&lt;int&gt;（沒寫 &amp;）</td><td class="mono">整個複製一份，O(n)</td></tr></table><p>交給函式的東西越大，複製的代價越明顯：十萬格的 vector 沒寫 &amp;，每呼叫一次就抄十萬格，放在迴圈裡呼叫更是倍數放大。Big-O 的意思和怎麼算，在資料結構的附錄。 <a class="cr-link cr-see" href="../ds/complexity.html" target="_blank" rel="noopener">→ 時間複雜度</a></p></section>
 <section class="cr-sec"><h4>試試看</h4><div class="cr-try"><p class="cr-try-q"><span class="cr-try-kind">程式運行追蹤</span><span>1. 下面這段程式印出什麼？</span></p><p class="cr-sub">C</p><pre class="cr-pre">void reset(int arr[]) {
     arr[0] = 7;
     int other[2] = {0, 0};

@@ -1,0 +1,146 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Divide and Conquer　分治法｜演算法｜CSIE 課程｜IT24hr</title>
+<meta name="description" content="分治法（Divide and Conquer）：一張 0.1 公釐厚的紙，每對折一次，厚度變兩倍。想知道對折 30 次有多厚，要算 30 個 2 乘在一起。手上的計算機只有加減乘除，乘法真的要按 29 次嗎？">
+<link rel="canonical" href="https://tsun-u.github.io/it24hr/csie/algorithms/divide_conquer.html">
+<meta property="og:type" content="article">
+<meta property="og:site_name" content="IT24hr">
+<meta property="og:locale" content="zh_TW">
+<meta property="og:url" content="https://tsun-u.github.io/it24hr/csie/algorithms/divide_conquer.html">
+<meta property="og:title" content="Divide and Conquer　分治法｜演算法｜CSIE 課程｜IT24hr">
+<meta property="og:description" content="分治法（Divide and Conquer）：一張 0.1 公釐厚的紙，每對折一次，厚度變兩倍。想知道對折 30 次有多厚，要算 30 個 2 乘在一起。手上的計算機只有加減乘除，乘法真的要按 29 次嗎？">
+<meta property="og:image" content="https://tsun-u.github.io/it24hr/assets/og-image.jpg">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta name="twitter:card" content="summary_large_image">
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"Article","headline":"Divide and Conquer 分治法","description":"分治法（Divide and Conquer）：一張 0.1 公釐厚的紙，每對折一次，厚度變兩倍。想知道對折 30 次有多厚，要算 30 個 2 乘在一起。手上的計算機只有加減乘除，乘法真的要按 29 次嗎？","inLanguage":"zh-Hant-TW","author":[{"@type":"Person","name":"Tsun-u"},{"@type":"Person","name":"ATone"}],"image":"https://tsun-u.github.io/it24hr/assets/og-image.jpg","isPartOf":{"@type":"Course","name":"演算法","url":"https://tsun-u.github.io/it24hr/csie/algorithms/index.html"},"url":"https://tsun-u.github.io/it24hr/csie/algorithms/divide_conquer.html"}</script>
+<link rel="icon" href="../../assets/favicon.svg" type="image/svg+xml">
+<link rel="icon" href="../../assets/favicon-32.png" sizes="32x32" type="image/png">
+<link rel="apple-touch-icon" href="../../assets/apple-touch-icon.png">
+<link rel="stylesheet" href="../../styles.css">
+</head>
+<body class="csie-body">
+<header class="csie-head">
+  <a class="csie-logo" href="../../index.html">IT24hr</a>
+  <h1>CSIE 課程</h1>
+  <a class="btn csie-play" href="../../index.html">開始玩</a>
+</header>
+<main id="csie" class="csie-main">
+<a class="csie-back" href="index.html">‹ 演算法</a>
+<h2 class="csie-course-title">演算法</h2>
+<div class="csie-room"><div class="cr-main"><nav class="cr-nav"><p class="cr-group">基礎篇</p><a class="cr-item" href="prefix_sum.html"><span class="mono">Prefix Sum</span><small>前綴和</small></a><a class="cr-item" href="two_pointers.html"><span class="mono">Two Pointers</span><small>雙指標</small></a><a class="cr-item" href="binary_answer.html"><span class="mono">Binary Search on Answer</span><small>二分搜尋答案</small></a><a class="cr-item" href="backtracking.html"><span class="mono">Backtracking</span><small>回溯</small></a><a class="cr-item on" href="divide_conquer.html"><span class="mono">Divide and Conquer</span><small>分治法</small></a><a class="cr-item" href="greedy.html"><span class="mono">Greedy</span><small>貪婪法</small></a><a class="cr-item" href="dp.html"><span class="mono">Dynamic Programming</span><small>動態規劃</small></a></nav><div class="cr-body"><article class="cr-page"><h3 class="cr-title">Divide and Conquer　分治法</h3>
+<section class="cr-sec"><h4>生活應用</h4><p class="cr-hook">一張 0.1 公釐厚的紙，每對折一次，厚度變兩倍。想知道對折 30 次有多厚，要算 30 個 2 乘在一起。手上的計算機只有加減乘除，乘法真的要按 29 次嗎？</p></section>
+<section class="cr-sec"><h4>複習</h4><p>用學過的迴圈：一圈乘一次 2，30 個 2 要乘 29 次。29 次不算什麼；可是程式題常常要算一個數的十億次方（再取餘數），迴圈就要跑十億圈。 <a class="cr-link cr-see" href="../programming/loops.html" target="_blank" rel="noopener">→ 迴圈</a></p><p>換個角度看：30 個 2 可以分成兩堆，各 15 個。兩堆乘出來是同一個數，所以只要算一堆，再自己乘自己。15 個 2 又可以再分。</p><blockquote class="cr-quote">把大問題切成一半大的同樣問題，解完小的，再把答案合起來。</blockquote></section>
+<section class="cr-sec"><h4>核心觀念</h4><p>分治法（divide and conquer）分三步。分（divide）：把問題切成比較小的同樣問題。治（conquer）：小問題用同樣的方法解，小到可以直接知道答案就停。合（combine）：把小問題的答案組成大問題的答案。</p><p>算 a 的 n 次方：分，n 切一半；治，算出 half = a 的 n / 2 次方；合，half × half。n 是奇數時，n / 2 捨去小數，少算了一個 a，要再乘回來：2¹⁵ = 2⁷ × 2⁷ × 2。n = 0 是最小的問題，答案直接是 1。</p><p>為什麼快：n 每切一次少一半，30 → 15 → 7 → 3 → 1 → 0，切 5 次就到底；每一層最多乘 2 次。n 是十億也只切 30 次。</p><p>切出來的小問題要做幾個，每個問題不一樣。次方的兩半一模一樣，算一次就好；二分搜尋丟掉一半，也只做一個；合併排序左右兩半內容不同，兩個都要做，再花 n 步合起來，所以是 O(n log n)。 <a class="cr-link cr-see" href="../ds/sorting.html" target="_blank" rel="noopener">→ 排序</a></p><p>分治通常寫成遞迴：函式裡呼叫自己去解小問題，終止條件就是「小到直接知道答案」。 <a class="cr-link cr-see" href="../programming/recursion.html" target="_blank" rel="noopener">→ 遞迴</a></p></section>
+<section class="cr-sec"><h4>什麼時候會用到</h4><ul><li>單淘汰賽：64 隊分成上下兩個半區，各自打出一隊，再打決賽。每個半區裡面又是一場比較小的淘汰賽。</li><li>查字典、猜數字：翻開中間，答案只會在其中一半，另一半整個丟掉。二分搜尋切完只剩一個小問題要做。 <a class="cr-link cr-see" href="../ds/searching.html" target="_blank" rel="noopener">→ 搜尋</a></li><li>合併排序：切成左右兩半各自排好，再把兩疊合成一疊；快速排序也是切兩邊各自排。兩個小問題都要做，力氣花在「合」。 <a class="cr-link cr-see" href="../ds/sorting.html" target="_blank" rel="noopener">→ 排序</a></li><li>RSA 加密要算一個很大的數的幾百位數次方再取餘數，靠的就是這一頁的切一半，叫快速冪（fast exponentiation）。</li><li>APCS 實作題：a 的 n 次方除以 m 的餘數（n 到十億）、逆序數對、最大連續子陣列和。</li></ul></section>
+<section class="cr-sec"><h4>常見誤解</h4><div class="cr-traps"><div class="cr-trap"><p class="cr-trap-line wrong"><span class="cr-sr">誤解：</span><span>用了遞迴，就是分治法</span></p><p class="cr-trap-line right"><span class="cr-sr">正解：</span><span>遞迴是寫法，分治是想法。通知同學的 notify(k + 1) 每次只少一個人，要疊 n 層；分治每次切成一半大，只疊 log₂ n 層。</span></p></div><div class="cr-trap"><p class="cr-trap-line wrong"><span class="cr-sr">誤解：</span><span>half × half 寫成 power(a, n / 2) * power(a, n / 2) 也一樣</span></p><p class="cr-trap-line right"><span class="cr-sr">正解：</span><span>答案一樣，可是兩邊都真的去算了一次，每一層呼叫兩次，總共的呼叫次數跟著 n 等比例變多，白切了。算一次存進 half，再自己乘自己（試試看第二題）。</span></p></div><div class="cr-trap"><p class="cr-trap-line wrong"><span class="cr-sr">誤解：</span><span>n 是奇數沒辦法切一半</span></p><p class="cr-trap-line right"><span class="cr-sr">正解：</span><span>整數除法會捨去小數：15 / 2 是 7。2⁷ × 2⁷ 是 2¹⁴，再乘一個 2 就是 2¹⁵。忘了補這一個，連 2 的 1 次方都會算成 1 × 1 = 1，往上每一層跟著錯，幾次方都印出 1（試試看第三題）。</span></p></div><div class="cr-trap"><p class="cr-trap-line wrong"><span class="cr-sr">誤解：</span><span>能切一半的問題，用分治都會變快</span></p><p class="cr-trap-line right"><span class="cr-sr">正解：</span><span>要看「合」要花多少力氣、小問題要做幾個。找一排數字裡最大的：切兩半各找最大再比一次，每個數還是都看過一遍，跟迴圈一樣是 O(n)。</span></p></div><div class="cr-trap"><p class="cr-trap-line wrong"><span class="cr-sr">誤解：</span><span>答案再大，long long 都裝得下</span></p><p class="cr-trap-line right"><span class="cr-sr">正解：</span><span>2⁶³ 就超過 long long 的上限了。題目通常會要你算除以某個數的餘數，每乘一次就取一次餘數，數字才不會爆掉；Python 的整數沒有上限，可是數字太大一樣會變慢。</span></p></div></div></section>
+<section class="cr-sec"><h4>實作</h4><div class="cr-code"><p class="cr-sub">C</p><pre class="cr-pre">#include &lt;stdio.h&gt;
+
+// a 的 n 次方除以 m 的餘數；m 不超過 1000000007 的話，兩個餘數相乘放得進 long long
+long long power_mod(long long a, long long n, long long m) {
+    if (n == 0) {                               // 最小的問題：0 次方是 1
+        return 1;
+    }
+    long long half = power_mod(a, n / 2, m);    // 治：只算一半，存起來
+    long long result = half * half % m;         // 合：自己乘自己，乘完就取餘數
+    if (n % 2 == 1) {                           // n 是奇數：補回少算的那個 a
+        result = result * (a % m) % m;
+    }
+    return result;
+}
+
+int main(void) {
+    printf(&quot;%lld %lld\n&quot;, power_mod(2, 30, 1000000007), power_mod(3, 1000000000, 1000000007));
+    return 0;
+}</pre><p class="cr-sub">C++</p><pre class="cr-pre">#include &lt;iostream&gt;
+
+// a 的 n 次方除以 m 的餘數；m 不超過 1000000007 的話，兩個餘數相乘放得進 long long
+long long power_mod(long long a, long long n, long long m) {
+    if (n == 0) {                               // 最小的問題：0 次方是 1
+        return 1;
+    }
+    long long half = power_mod(a, n / 2, m);    // 治：只算一半，存起來
+    long long result = half * half % m;         // 合：自己乘自己，乘完就取餘數
+    if (n % 2 == 1) {                           // n 是奇數：補回少算的那個 a
+        result = result * (a % m) % m;
+    }
+    return result;
+}
+
+int main() {
+    std::cout &lt;&lt; power_mod(2, 30, 1000000007) &lt;&lt; &quot; &quot; &lt;&lt; power_mod(3, 1000000000, 1000000007) &lt;&lt; &quot;\n&quot;;
+    return 0;
+}</pre><p class="cr-sub">Java</p><pre class="cr-pre">public class Main {
+    // a 的 n 次方除以 m 的餘數；m 不超過 1000000007 的話，兩個餘數相乘放得進 long
+    static long powerMod(long a, long n, long m) {
+        if (n == 0) {                           // 最小的問題：0 次方是 1
+            return 1;
+        }
+        long half = powerMod(a, n / 2, m);      // 治：只算一半，存起來
+        long result = half * half % m;          // 合：自己乘自己，乘完就取餘數
+        if (n % 2 == 1) {                       // n 是奇數：補回少算的那個 a
+            result = result * (a % m) % m;
+        }
+        return result;
+    }
+
+    public static void main(String[] args) {
+        System.out.println(powerMod(2, 30, 1000000007) + &quot; &quot; + powerMod(3, 1000000000, 1000000007));
+    }
+}</pre><p class="cr-sub">Python</p><pre class="cr-pre">def power_mod(a, n, m):                  # a 的 n 次方除以 m 的餘數
+    if n == 0:                           # 最小的問題：0 次方是 1
+        return 1
+    half = power_mod(a, n // 2, m)       # 治：只算一半，存起來
+    result = half * half % m             # 合：自己乘自己，乘完就取餘數
+    if n % 2 == 1:                       # n 是奇數：補回少算的那個 a
+        result = result * (a % m) % m
+    return result
+
+
+print(power_mod(2, 30, 1000000007), power_mod(3, 1000000000, 1000000007))</pre><p class="cr-out mono">輸出：73741817 235939645</p></div></section>
+<section class="cr-sec"><h4>跑幾步</h4><table class="cr-big-o"><tr><td>迴圈一個一個乘</td><td class="mono">n 次，O(n)</td></tr><tr><td>切一半、算一次存起來：層數 log₂ n，每層最多乘 2 次</td><td class="mono">O(log n)</td></tr><tr><td>切一半、兩邊各算一次：呼叫次數跟著 n 等比例變多</td><td class="mono">O(n)</td></tr></table><p>2 的 30 次方乘 9 次；十億次方大約乘 40 幾次。Big-O 的意思和怎麼算，在資料結構的附錄。 <a class="cr-link cr-see" href="../ds/complexity.html" target="_blank" rel="noopener">→ 時間複雜度</a></p></section>
+<section class="cr-sec"><h4>試試看</h4><div class="cr-try"><p class="cr-try-q"><span class="cr-try-kind">程式運行追蹤</span><span>1. 下面這段程式印出什麼？</span></p><p class="cr-sub">C</p><pre class="cr-pre">int f(int n) {
+    if (n == 0) {
+        return 0;
+    }
+    return f(n / 2) + 1;
+}
+
+printf(&quot;%d\n&quot;, f(13));</pre><ol class="cr-try-opts"><li>13</li><li>5</li><li>4</li><li>3</li></ol></div><div class="cr-try"><p class="cr-try-q"><span class="cr-try-kind">程式效能分析</span><span>2. 把 half × half 寫成兩邊各呼叫一次，函式一共會被呼叫幾次？calls(n) 照那個寫法數：自己這一次，加上兩邊各自的次數。下面這段程式印出什麼？</span></p><p class="cr-sub">C</p><pre class="cr-pre">int calls(int n) {
+    if (n == 0) {
+        return 1;
+    }
+    return 1 + calls(n / 2) + calls(n / 2);
+}
+
+printf(&quot;%d\n&quot;, calls(16));</pre><ol class="cr-try-opts"><li>6</li><li>17</li><li>32</li><li>63</li></ol></div><div class="cr-try"><p class="cr-try-q"><span class="cr-try-kind">程式測試與除錯</span><span>3. 想算 2 的 5 次方（32），結果印出 1。要怎麼改？</span></p><p class="cr-sub">C</p><pre class="cr-pre">int power(int a, int n) {
+    if (n == 0) {
+        return 1;
+    }
+    int half = power(a, n / 2);
+    return half * half;
+}
+
+printf(&quot;%d\n&quot;, power(2, 5));</pre><ol class="cr-try-opts"><li>把終止條件改成 n == 1 時回傳 1</li><li>把 return half * half 改成 return half * half * a</li><li>n 是奇數時，改成回傳 half * half * a</li><li>把終止條件回傳的 1 改成 a</li></ol></div></section>
+<section class="cr-sec"><h4>總結</h4><p class="cr-hook">不用乘 29 次：2 的 30 次方是兩個「2 的 15 次方」相乘，15 次方再切，一路切到 0 次方，總共只乘 9 次，答案是 1073741824。0.1 公釐的紙對折 30 次，厚度超過 100 公里。下次碰到一個大問題，可以先想：能不能切成一半大的同樣問題，解完再合起來？每切一次就少一半，再大的問題也切不了幾次。</p></section>
+<section class="cr-sec"><h4>課外補充</h4><p>逆序數對：一排數字裡，有幾對是大的排在小的前面。兩層迴圈要 O(n²)；照合併排序切兩半，左半、右半各自數完，合併的時候每從右半拿一個數，左半還沒拿的那些都比它大，一次加上去，O(n log n)。 <a class="cr-link cr-see" href="../ds/sorting.html" target="_blank" rel="noopener">→ 排序</a></p></section></article></div></div></div>
+</main>
+<footer class="seo-foot"><nav aria-label="IT24hr 的其他內容"><a href="../../index.html">玩 IT24hr</a><a href="../../se.html">認識軟體工程</a><a href="../../csie/index.html">CSIE 課程</a><a href="../../handbook.html">新人手冊</a><a href="../../atlas.html">IT 圖鑑</a></nav></footer>
+<script src="../../vendor/rough.js"></script>
+<script src="../../icons.js"></script>
+<script src="../../verdict.js"></script>
+<script src="../../classroom.js"></script>
+<script src="../../classroom/algorithms/backtracking.js"></script>
+<script src="../../classroom/algorithms/binary_answer.js"></script>
+<script src="../../classroom/algorithms/divide_conquer.js"></script>
+<script src="../../classroom/algorithms/dp.js"></script>
+<script src="../../classroom/algorithms/greedy.js"></script>
+<script src="../../classroom/algorithms/prefix_sum.js"></script>
+<script src="../../classroom/algorithms/two_pointers.js"></script>
+<script src="../../classroom-view.js"></script>
+<script src="../../csie.js"></script>
+</body>
+</html>

@@ -31,7 +31,7 @@ function lessonBody(course, id, page) {
     if (typeof t === 'string') return text(name, '', t);
     const links = [].concat(t.see || []).map((to) => {
       const [c, pid] = to.includes('/') ? to.split('/') : [course, to];
-      return `<a class="cr-link cr-see" href="${Classroom.href(course, c, pid)}">→ ${esc(Classroom.item(c, pid).zh)}</a>`;
+      return `<a class="cr-link cr-see" href="${Classroom.href(course, c, pid)}" target="_blank" rel="noopener">→ ${esc(Classroom.item(c, pid).zh)}</a>`;
     });
     return tag(name, '', `${esc(t.text)} ${links.join('')}`);
   };
@@ -39,9 +39,9 @@ function lessonBody(course, id, page) {
   const hook = (s) => text('p', 'cr-hook', s);
   const pre = (s) => text('pre', 'cr-pre', s.replace(/\n$/, ''));
   const table = (rows) => tag('table', 'cr-big-o', rows.map(([a, b]) => tag('tr', '', text('td', '', a) + text('td', 'mono', b))).join(''));
-  const traps = tag('div', 'cr-traps', page.traps.map(({ wrong, right }) => tag('div', 'cr-trap',
+  const traps = tag('div', 'cr-traps', page.traps.map(({ wrong, right, see }) => tag('div', 'cr-trap',
     tag('p', 'cr-trap-line wrong', `${text('span', 'cr-sr', '誤解：')}${text('span', '', wrong)}`)
-    + tag('p', 'cr-trap-line right', `${text('span', 'cr-sr', '正解：')}${text('span', '', right)}`))).join(''));
+    + tag('p', 'cr-trap-line right', `${text('span', 'cr-sr', '正解：')}${prose('span', see ? { text: right, see } : right)}`))).join(''));
   const stdin = (s) => (s === undefined ? '' : text('p', 'cr-tr-label', '輸入') + text('pre', 'cr-tr-stdin', s.replace(/\n$/, '')));
   const output = (s) => text('p', 'cr-out mono', `輸出：${s}`);
   const langName = (v) => langs.find(([k]) => k === v)[1];

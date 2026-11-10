@@ -22,10 +22,10 @@ test('結算卡每個印章都對得到資料結構目錄裡寫好的一頁', ()
   assert.strictEqual(CR.pageForStamp('不存在的印章', V.NAMES), null);
 });
 
-test('用途、核心觀念、跑幾步裡連到別頁的 see，都是目錄裡有的頁（別門課寫「課程/頁 id」）', () => {
-  for (const [course, id, p] of allPages()) for (const t of [...(p.review || []), ...(p.uses || []), ...(p.concept || []), ...(p.cost ? [p.cost.note] : []), ...(p.extra || [])]) {
+test('用途、核心觀念、常見誤解、跑幾步裡連到別頁的 see，都是目錄裡有的頁（別門課寫「課程/頁 id」）', () => {
+  for (const [course, id, p] of allPages()) for (const t of [...(p.review || []), ...(p.uses || []), ...(p.concept || []), ...(p.cost ? [p.cost.note] : []), ...(p.extra || []), ...p.traps]) {
     if (typeof t === 'string' || t.quote) continue;
-    assert.ok(t.text, `${course}/${id} 有一段少了 text`);
+    assert.ok(t.text || t.wrong, `${course}/${id} 有一段少了 text`);
     for (const to of [].concat(t.see || [])) {
       const [c, pid] = to.includes('/') ? to.split('/') : [course, to];
       assert.ok(CR.item(c, pid), `${course}/${id} 連到不存在的頁 ${to}`);

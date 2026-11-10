@@ -105,7 +105,7 @@ for i in range(1, n + 1):          # 巢狀迴圈：外圈每跑一圈，內圈�
         pairs += 1
 
 print(total, pairs)</pre><p class="cr-out mono">輸出：15 10</p></div></section>
-<section class="cr-sec"><h4>跑幾步</h4><table class="cr-big-o"><tr><td>追蹤器那段的條件 i &lt;= n（n = 3 時檢查 4 次，最後一次不成立）</td><td class="mono">n + 1 次</td></tr><tr><td>本體的 total += i、i += 1</td><td class="mono">各 n 次</td></tr><tr><td>追蹤器那段整段</td><td class="mono">O(n)</td></tr><tr><td>實作的巢狀迴圈（n = 5 時 pairs 加了 10 次）</td><td class="mono">n(n − 1) / 2 次，O(n²)</td></tr></table><p>數出每一行跑幾次，再看次數跟著 n 怎麼長，就是時間複雜度。Big-O 的意思和怎麼算，在資料結構的附錄。 <a class="cr-link cr-see" href="../ds/complexity.html">→ 時間複雜度</a></p></section>
+<section class="cr-sec"><h4>跑幾步</h4><table class="cr-big-o"><tr><td>追蹤器那段的條件 i &lt;= n（n = 3 時檢查 4 次，最後一次不成立）</td><td class="mono">n + 1 次</td></tr><tr><td>本體的 total += i、i += 1</td><td class="mono">各 n 次</td></tr><tr><td>追蹤器那段整段</td><td class="mono">O(n)</td></tr><tr><td>實作的巢狀迴圈（n = 5 時 pairs 加了 10 次）</td><td class="mono">n(n − 1) / 2 次，O(n²)</td></tr></table><p>數出每一行跑幾次，再看次數跟著 n 怎麼長，就是時間複雜度。Big-O 的意思和怎麼算，在資料結構的附錄。 <a class="cr-link cr-see" href="../ds/complexity.html" target="_blank" rel="noopener">→ 時間複雜度</a></p></section>
 <section class="cr-sec"><h4>試試看</h4><div class="cr-try"><p class="cr-try-q"><span class="cr-try-kind">程式運行追蹤</span><span>1. 下面這段程式印出什麼？</span></p><p class="cr-sub">C</p><pre class="cr-pre">int x = 0;
 for (int i = 1; i &lt; 5; i++) {
     x += i * 2;
