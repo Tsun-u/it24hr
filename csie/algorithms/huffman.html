@@ -1,0 +1,228 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Huffman Coding　霍夫曼編碼｜演算法｜CSIE 課程｜IT24hr</title>
+<meta name="description" content="霍夫曼編碼（Huffman Coding）：把一份全是文字的報告壓成 zip，檔案剩不到一半；解壓縮之後，一個字都沒少。少掉的那一半去哪了？">
+<link rel="canonical" href="https://tsun-u.github.io/it24hr/csie/algorithms/huffman.html">
+<meta property="og:type" content="article">
+<meta property="og:site_name" content="IT24hr">
+<meta property="og:locale" content="zh_TW">
+<meta property="og:url" content="https://tsun-u.github.io/it24hr/csie/algorithms/huffman.html">
+<meta property="og:title" content="Huffman Coding　霍夫曼編碼｜演算法｜CSIE 課程｜IT24hr">
+<meta property="og:description" content="霍夫曼編碼（Huffman Coding）：把一份全是文字的報告壓成 zip，檔案剩不到一半；解壓縮之後，一個字都沒少。少掉的那一半去哪了？">
+<meta property="og:image" content="https://tsun-u.github.io/it24hr/assets/og-image.jpg">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta name="twitter:card" content="summary_large_image">
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"Article","headline":"Huffman Coding 霍夫曼編碼","description":"霍夫曼編碼（Huffman Coding）：把一份全是文字的報告壓成 zip，檔案剩不到一半；解壓縮之後，一個字都沒少。少掉的那一半去哪了？","inLanguage":"zh-Hant-TW","author":[{"@type":"Person","name":"Tsun-u"},{"@type":"Person","name":"ATone"}],"image":"https://tsun-u.github.io/it24hr/assets/og-image.jpg","isPartOf":{"@type":"Course","name":"演算法","url":"https://tsun-u.github.io/it24hr/csie/algorithms/index.html"},"url":"https://tsun-u.github.io/it24hr/csie/algorithms/huffman.html"}</script>
+<link rel="icon" href="../../assets/favicon.svg" type="image/svg+xml">
+<link rel="icon" href="../../assets/favicon-32.png" sizes="32x32" type="image/png">
+<link rel="apple-touch-icon" href="../../assets/apple-touch-icon.png">
+<link rel="stylesheet" href="../../styles.css">
+</head>
+<body class="csie-body">
+<header class="csie-head">
+  <a class="csie-logo" href="../../index.html">IT24hr</a>
+  <h1>CSIE 課程</h1>
+  <a class="btn csie-play" href="../../index.html">開始玩</a>
+</header>
+<main id="csie" class="csie-main">
+<a class="csie-back" href="index.html">‹ 演算法</a>
+<h2 class="csie-course-title">演算法</h2>
+<div class="csie-room"><div class="cr-main"><nav class="cr-nav"><p class="cr-group">基礎篇</p><a class="cr-item" href="prefix_sum.html"><span class="mono">Prefix Sum</span><small>前綴和</small></a><a class="cr-item" href="two_pointers.html"><span class="mono">Two Pointers</span><small>雙指標</small></a><a class="cr-item" href="binary_answer.html"><span class="mono">Binary Search on Answer</span><small>二分搜尋答案</small></a><a class="cr-item" href="backtracking.html"><span class="mono">Backtracking</span><small>回溯</small></a><a class="cr-item" href="divide_conquer.html"><span class="mono">Divide and Conquer</span><small>分治法</small></a><a class="cr-item" href="greedy.html"><span class="mono">Greedy</span><small>貪婪法</small></a><a class="cr-item" href="dp.html"><span class="mono">Dynamic Programming</span><small>動態規劃</small></a><p class="cr-group">經典應用</p><a class="cr-item" href="integral_image.html"><span class="mono">Integral Image</span><small>積分影像</small></a><a class="cr-item" href="sliding_window.html"><span class="mono">Sliding Window</span><small>滑動視窗</small></a><a class="cr-item" href="n_queens.html"><span class="mono">N-Queens</span><small>八皇后</small></a><a class="cr-item" href="inversions.html"><span class="mono">Counting Inversions</span><small>逆序數對</small></a><a class="cr-item on" href="huffman.html"><span class="mono">Huffman Coding</span><small>霍夫曼編碼</small></a><a class="cr-item" href="knapsack.html"><span class="mono">0/1 Knapsack</span><small>背包問題</small></a></nav><div class="cr-body"><article class="cr-page"><h3 class="cr-title">Huffman Coding　霍夫曼編碼</h3>
+<section class="cr-sec"><h4>生活應用</h4><p class="cr-hook">把一份全是文字的報告壓成 zip，檔案剩不到一半；解壓縮之後，一個字都沒少。少掉的那一半去哪了？</p></section>
+<section class="cr-sec"><h4>複習</h4><p>電腦裡每個英文字母都用一樣長的代碼。一則 15 個字的訊息只用到 A、B、C、D、E 五種字母，每個字母 3 個位元，一共 45 個位元。可是 A 出現了 7 次，E 只出現 1 次，兩個卻佔一樣長。</p><p>貪婪法每一步拿眼前最好的；每次要拿「最小的兩個」，用堆積最快。 <a class="cr-link cr-see" href="greedy.html" target="_blank" rel="noopener">→ 貪婪法</a><a class="cr-link cr-see" href="../ds/heap.html" target="_blank" rel="noopener">→ 堆積</a></p><blockquote class="cr-quote">常出現的給短代碼，少出現的給長代碼；每次把出現最少的兩個合成一組。</blockquote></section>
+<section class="cr-sec"><h4>核心觀念</h4><p>霍夫曼編碼（Huffman coding）是 David Huffman 在 1952 年發表的，當時他還是麻省理工學院的研究生。它給每個符號一個長短不一的代碼：越常出現的越短。</p><p>建樹：每個符號先各自是一個節點，記著它出現幾次。每次挑次數最少的兩個，合成一個新的節點，次數是兩個相加，放回去再挑。合到只剩一個，它就是樹根。 <a class="cr-link cr-see" href="../ds/tree.html" target="_blank" rel="noopener">→ 樹</a></p><p>代碼怎麼來：從樹根走到那個符號，往左記 0、往右記 1。常出現的符號比較晚被合進去，離樹根近，代碼就短。</p><p>符號都在葉子上，所以沒有一個代碼會是另一個代碼的開頭，這叫前綴碼（prefix code）。解碼時從樹根照著位元往下走，走到葉子就是一個符號，再回樹根接著走，中間不用放分隔的記號。</p><p>編完一共幾個位元，等於每次合併出來的次數全部加起來：2 + 4 + 8 + 15 = 29。</p><p>「每次拿最小的兩個」用堆積來做，n 個符號是 O(n log n)。為什麼每次合最少的兩個就是最好的，理由跟貪婪法那頁一樣是「換過來也不會變差」：出現最少的兩個放在樹的最深處，不會吃虧。 <a class="cr-link cr-see" href="../ds/heap.html" target="_blank" rel="noopener">→ 堆積</a><a class="cr-link cr-see" href="greedy.html" target="_blank" rel="noopener">→ 貪婪法</a></p></section>
+<section class="cr-sec"><h4>什麼時候會用到</h4><ul><li>zip、gzip、PNG 的壓縮都有這一步；JPEG 圖片和 MP3 音樂存檔前的最後一步，也常用它把數字換成長短不一的代碼。</li><li>摩斯電碼是同一個想法的前輩：英文最常用的 E 是一個點，少用的 Q 要四個符號。差別是摩斯電碼靠停頓分開字母，霍夫曼編碼不用。</li><li>「每次合併最小的兩堆，代價是兩堆的和，要讓總代價最小」這類題目：合併果子、接繩子，都是同一個貪婪法。</li><li>APCS 實作題：上面那種合併的題目，搭配堆積（優先佇列）每次拿最小的兩個。</li></ul></section>
+<section class="cr-sec"><h4>常見誤解</h4><div class="cr-traps"><div class="cr-trap"><p class="cr-trap-line wrong"><span class="cr-sr">誤解：</span><span>常出現的給短代碼就好，代碼隨便取</span></p><p class="cr-trap-line right"><span class="cr-sr">正解：</span><span>A 是 0、B 是 1、C 是 00 的話，收到 00 分不出是 AA 還是 C。要讓每個代碼都不是別的代碼的開頭。</span></p></div><div class="cr-trap"><p class="cr-trap-line wrong"><span class="cr-sr">誤解：</span><span>同一份資料的霍夫曼樹只有一種</span></p><p class="cr-trap-line right"><span class="cr-sr">正解：</span><span>次數一樣的時候先合誰、合起來誰放左邊都可以，每個符號的代碼會不一樣，可是編完的總長度一樣。</span></p></div><div class="cr-trap"><p class="cr-trap-line wrong"><span class="cr-sr">誤解：</span><span>壓縮檔裡只要存編好的位元</span></p><p class="cr-trap-line right"><span class="cr-sr">正解：</span><span>還要存代碼表（或每個符號出現幾次），不然解不回來。資料很短的時候，加上這張表反而比原本還大。</span></p></div><div class="cr-trap"><p class="cr-trap-line wrong"><span class="cr-sr">誤解：</span><span>什麼檔案都壓得小</span></p><p class="cr-trap-line right"><span class="cr-sr">正解：</span><span>要有些符號特別常出現才省得到。每個符號出現的次數都差不多的話，代碼幾乎一樣長；已經壓過的檔案再壓一次，也壓不下去。</span></p></div></div></section>
+<section class="cr-sec"><h4>實作</h4><div class="cr-code"><p class="cr-sub">C</p><pre class="cr-pre">#include &lt;stdio.h&gt;
+
+// 算霍夫曼編碼編完一共幾個位元：每次找出次數最少的兩個合起來，把每次合併的和加起來；counts 是每種符號出現幾次
+int total_bits(const int counts[], int n) {
+    int work[100];                          // 複製一份來合併，原本的陣列不動（最多 100 種符號）
+    for (int i = 0; i &lt; n; i++) {
+        work[i] = counts[i];
+    }
+    int total = 0;
+    while (n &gt; 1) {
+        for (int k = 0; k &lt; 2; k++) {       // 做兩次：先把最小的換到最後一格，再把第二小的換到它前面
+            int small = 0;
+            for (int i = 1; i &lt; n - k; i++) {
+                if (work[i] &lt; work[small]) {
+                    small = i;
+                }
+            }
+            int t = work[small];
+            work[small] = work[n - 1 - k];
+            work[n - 1 - k] = t;
+        }
+        work[n - 2] += work[n - 1];         // 最小的兩個合成一個，放在倒數第二格
+        total += work[n - 2];
+        n--;                                // 最後一格不要了
+    }
+    return total;
+}
+
+int main(void) {
+    int message[] = {7, 4, 2, 1, 1};
+    int even[] = {5, 5, 5, 5};
+    printf(&quot;%d %d\n&quot;, total_bits(message, 5), total_bits(even, 4));
+    return 0;
+}</pre><p class="cr-sub">C++</p><pre class="cr-pre">#include &lt;iostream&gt;
+#include &lt;utility&gt;
+#include &lt;vector&gt;
+
+// 算霍夫曼編碼編完一共幾個位元：每次找出次數最少的兩個合起來，把每次合併的和加起來；work 是每種符號出現幾次
+int total_bits(std::vector&lt;int&gt; work) {     // 傳值：work 是複製的一份，合併的時候不會改到原本的
+    int n = work.size(), total = 0;
+    while (n &gt; 1) {
+        for (int k = 0; k &lt; 2; k++) {       // 做兩次：先把最小的換到最後一格，再把第二小的換到它前面
+            int small = 0;
+            for (int i = 1; i &lt; n - k; i++) {
+                if (work[i] &lt; work[small]) {
+                    small = i;
+                }
+            }
+            std::swap(work[small], work[n - 1 - k]);
+        }
+        work[n - 2] += work[n - 1];         // 最小的兩個合成一個，放在倒數第二格
+        total += work[n - 2];
+        n--;                                // 最後一格不要了
+    }
+    return total;
+}
+
+int main() {
+    std::vector&lt;int&gt; message = {7, 4, 2, 1, 1};
+    std::vector&lt;int&gt; even = {5, 5, 5, 5};
+    std::cout &lt;&lt; total_bits(message) &lt;&lt; &quot; &quot; &lt;&lt; total_bits(even) &lt;&lt; &quot;\n&quot;;
+    return 0;
+}</pre><p class="cr-sub">Java</p><pre class="cr-pre">public class Main {
+    // 算霍夫曼編碼編完一共幾個位元：每次找出次數最少的兩個合起來，把每次合併的和加起來；counts 是每種符號出現幾次
+    static int totalBits(int[] counts) {
+        int[] work = counts.clone();            // 複製一份來合併，原本的陣列不動
+        int n = work.length, total = 0;
+        while (n &gt; 1) {
+            for (int k = 0; k &lt; 2; k++) {       // 做兩次：先把最小的換到最後一格，再把第二小的換到它前面
+                int small = 0;
+                for (int i = 1; i &lt; n - k; i++) {
+                    if (work[i] &lt; work[small]) {
+                        small = i;
+                    }
+                }
+                int t = work[small];
+                work[small] = work[n - 1 - k];
+                work[n - 1 - k] = t;
+            }
+            work[n - 2] += work[n - 1];         // 最小的兩個合成一個，放在倒數第二格
+            total += work[n - 2];
+            n--;                                // 最後一格不要了
+        }
+        return total;
+    }
+
+    public static void main(String[] args) {
+        int[] message = {7, 4, 2, 1, 1};
+        int[] even = {5, 5, 5, 5};
+        System.out.println(totalBits(message) + &quot; &quot; + totalBits(even));
+    }
+}</pre><p class="cr-sub">Python</p><pre class="cr-pre">def total_bits(counts):                 # counts 是每種符號出現幾次
+    work = list(counts)                 # 複製一份來合併，原本的串列不動
+    n, total = len(work), 0
+    while n &gt; 1:
+        for k in range(2):              # 做兩次：先把最小的換到最後一格，再把第二小的換到它前面
+            small = 0
+            for i in range(1, n - k):
+                if work[i] &lt; work[small]:
+                    small = i
+            work[small], work[n - 1 - k] = work[n - 1 - k], work[small]
+        work[n - 2] += work[n - 1]      # 最小的兩個合成一個，放在倒數第二格
+        total += work[n - 2]
+        n -= 1                          # 最後一格不要了
+    return total
+
+
+message = [7, 4, 2, 1, 1]
+even = [5, 5, 5, 5]
+print(total_bits(message), total_bits(even))</pre><p class="cr-out mono">輸出：29 40</p></div></section>
+<section class="cr-sec"><h4>跑幾步</h4><table class="cr-big-o"><tr><td>固定長度：每個符號一樣長</td><td class="mono">15 × 3 = 45 個位元</td></tr><tr><td>每次用迴圈找最小的兩個</td><td class="mono">找一次 O(n)，合 n − 1 次，O(n²)</td></tr><tr><td>用堆積</td><td class="mono">O(n log n)</td></tr></table><p>符號只有幾百種的時候，兩種寫法都很快；差別在符號很多的時候。Big-O 的意思和怎麼算，在資料結構的附錄。 <a class="cr-link cr-see" href="../ds/complexity.html" target="_blank" rel="noopener">→ 時間複雜度</a></p></section>
+<section class="cr-sec"><h4>試試看</h4><div class="cr-try"><p class="cr-try-q"><span class="cr-try-kind">程式運行追蹤</span><span>1. 用這一頁那棵樹解碼（A = 0、B = 10、C = 110、D = 1110、E = 1111）：節點 0 到 3 是中間的節點，0 是樹根；4 到 8 是 A 到 E。下面這段程式印出什麼？</span></p><p class="cr-sub">C</p><pre class="cr-pre">int go0[] = {4, 5, 6, 7};
+int go1[] = {1, 2, 3, 8};
+char letters[] = &quot;ABCDE&quot;;
+int bits[] = {1, 1, 0, 0, 1, 0};
+int node = 0;
+for (int k = 0; k &lt; 6; k++) {
+    if (bits[k] == 0) {
+        node = go0[node];
+    } else {
+        node = go1[node];
+    }
+    if (node &gt;= 4) {
+        printf(&quot;%c&quot;, letters[node - 4]);
+        node = 0;
+    }
+}
+printf(&quot;\n&quot;);</pre><ol class="cr-try-opts"><li>AAC</li><li>ABA</li><li>C</li><li>CAB</li></ol></div><div class="cr-try"><p class="cr-try-q"><span class="cr-try-kind">解析計算邏輯</span><span>2. 一則訊息裡四種符號各出現 5、3、2、2 次。下面這段程式每一輪把最小的兩個換到最後兩格、合成一個，把每次合併的和加起來，就是霍夫曼編碼編完一共幾個位元。它印出什麼？</span></p><p class="cr-sub">C</p><pre class="cr-pre">int counts[] = {5, 3, 2, 2};
+int n = 4, total = 0;
+while (n &gt; 1) {
+    for (int k = 0; k &lt; 2; k++) {
+        int small = 0;
+        for (int i = 1; i &lt; n - k; i++) {
+            if (counts[i] &lt; counts[small]) {
+                small = i;
+            }
+        }
+        int t = counts[small];
+        counts[small] = counts[n - 1 - k];
+        counts[n - 1 - k] = t;
+    }
+    counts[n - 2] += counts[n - 1];
+    total += counts[n - 2];
+    n -= 1;
+}
+printf(&quot;%d\n&quot;, total);</pre><ol class="cr-try-opts"><li>12</li><li>23</li><li>24</li><li>30</li></ol></div><div class="cr-try"><p class="cr-try-q"><span class="cr-try-kind">程式測試與除錯</span><span>3. 這一頁那則訊息的五種符號出現 7、4、2、1、1 次，霍夫曼編碼編完應該是 29 個位元，下面這段程式卻印出 53。要怎麼改？</span></p><p class="cr-sub">C</p><pre class="cr-pre">int counts[] = {7, 4, 2, 1, 1};
+int n = 5, total = 0;
+while (n &gt; 1) {
+    for (int k = 0; k &lt; 2; k++) {
+        int pick = 0;
+        for (int i = 1; i &lt; n - k; i++) {
+            if (counts[i] &gt; counts[pick]) {
+                pick = i;
+            }
+        }
+        int t = counts[pick];
+        counts[pick] = counts[n - 1 - k];
+        counts[n - 1 - k] = t;
+    }
+    counts[n - 2] += counts[n - 1];
+    total += counts[n - 2];
+    n -= 1;
+}
+printf(&quot;%d\n&quot;, total);</pre><ol class="cr-try-opts"><li>先把 counts 照小到大排好，再跑同一段程式</li><li>把 total += counts[n - 2] 改成 total += counts[n - 1]</li><li>把 counts[i] &gt; counts[pick] 改成 counts[i] &lt; counts[pick]</li><li>把 while 的條件 n &gt; 1 改成 n &gt; 2</li></ol></div></section>
+<section class="cr-sec"><h4>總結</h4><p class="cr-hook">沒有少：常出現的符號換成了比較短的代碼，解壓縮的時候照同一張表換回來，所以一個字不差。那則 15 個字的訊息從 45 個位元變成 29 個。zip 用的招數不只這一個，這是其中之一。下次看到一份資料裡有些東西特別常出現，就可以想：常用的給短的。</p></section>
+<section class="cr-sec"><h4>課外補充</h4><p>zip 用的 DEFLATE 分兩步：先找出重複出現的片段，換成「往回幾個字、抄幾個字」（LZ77）；剩下的符號再用霍夫曼編碼。開場那份報告少掉的一半，兩步都有功勞。</p></section></article></div></div></div>
+</main>
+<footer class="seo-foot"><nav aria-label="IT24hr 的其他內容"><a href="../../index.html">玩 IT24hr</a><a href="../../se.html">認識軟體工程</a><a href="../../csie/index.html">CSIE 課程</a><a href="../../handbook.html">新人手冊</a><a href="../../atlas.html">IT 圖鑑</a><a href="../../team.html">開發團隊</a></nav></footer>
+<script src="../../vendor/rough.js"></script>
+<script src="../../icons.js"></script>
+<script src="../../verdict.js"></script>
+<script src="../../classroom.js"></script>
+<script src="../../classroom/algorithms/backtracking.js"></script>
+<script src="../../classroom/algorithms/binary_answer.js"></script>
+<script src="../../classroom/algorithms/divide_conquer.js"></script>
+<script src="../../classroom/algorithms/dp.js"></script>
+<script src="../../classroom/algorithms/greedy.js"></script>
+<script src="../../classroom/algorithms/huffman.js"></script>
+<script src="../../classroom/algorithms/integral_image.js"></script>
+<script src="../../classroom/algorithms/inversions.js"></script>
+<script src="../../classroom/algorithms/knapsack.js"></script>
+<script src="../../classroom/algorithms/n_queens.js"></script>
+<script src="../../classroom/algorithms/prefix_sum.js"></script>
+<script src="../../classroom/algorithms/sliding_window.js"></script>
+<script src="../../classroom/algorithms/two_pointers.js"></script>
+<script src="../../classroom-view.js"></script>
+<script src="../../csie.js"></script>
+</body>
+</html>

@@ -1,0 +1,191 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Integral Image　積分影像｜演算法｜CSIE 課程｜IT24hr</title>
+<meta name="description" content="積分影像（Integral Image）：相機對準人，臉上馬上跳出一個對焦框。早期的做法，是在畫面上檢查幾萬個大大小小的方框，比較每個框裡哪一塊亮、哪一塊暗，看像不像一張臉。每個框都把裡面的像素一格一格加起來，來得及嗎？">
+<link rel="canonical" href="https://tsun-u.github.io/it24hr/csie/algorithms/integral_image.html">
+<meta property="og:type" content="article">
+<meta property="og:site_name" content="IT24hr">
+<meta property="og:locale" content="zh_TW">
+<meta property="og:url" content="https://tsun-u.github.io/it24hr/csie/algorithms/integral_image.html">
+<meta property="og:title" content="Integral Image　積分影像｜演算法｜CSIE 課程｜IT24hr">
+<meta property="og:description" content="積分影像（Integral Image）：相機對準人，臉上馬上跳出一個對焦框。早期的做法，是在畫面上檢查幾萬個大大小小的方框，比較每個框裡哪一塊亮、哪一塊暗，看像不像一張臉。每個框都把裡面的像素一格一格加起來，來得及嗎？">
+<meta property="og:image" content="https://tsun-u.github.io/it24hr/assets/og-image.jpg">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta name="twitter:card" content="summary_large_image">
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"Article","headline":"Integral Image 積分影像","description":"積分影像（Integral Image）：相機對準人，臉上馬上跳出一個對焦框。早期的做法，是在畫面上檢查幾萬個大大小小的方框，比較每個框裡哪一塊亮、哪一塊暗，看像不像一張臉。每個框都把裡面的像素一格一格加起來，來得及嗎？","inLanguage":"zh-Hant-TW","author":[{"@type":"Person","name":"Tsun-u"},{"@type":"Person","name":"ATone"}],"image":"https://tsun-u.github.io/it24hr/assets/og-image.jpg","isPartOf":{"@type":"Course","name":"演算法","url":"https://tsun-u.github.io/it24hr/csie/algorithms/index.html"},"url":"https://tsun-u.github.io/it24hr/csie/algorithms/integral_image.html"}</script>
+<link rel="icon" href="../../assets/favicon.svg" type="image/svg+xml">
+<link rel="icon" href="../../assets/favicon-32.png" sizes="32x32" type="image/png">
+<link rel="apple-touch-icon" href="../../assets/apple-touch-icon.png">
+<link rel="stylesheet" href="../../styles.css">
+</head>
+<body class="csie-body">
+<header class="csie-head">
+  <a class="csie-logo" href="../../index.html">IT24hr</a>
+  <h1>CSIE 課程</h1>
+  <a class="btn csie-play" href="../../index.html">開始玩</a>
+</header>
+<main id="csie" class="csie-main">
+<a class="csie-back" href="index.html">‹ 演算法</a>
+<h2 class="csie-course-title">演算法</h2>
+<div class="csie-room"><div class="cr-main"><nav class="cr-nav"><p class="cr-group">基礎篇</p><a class="cr-item" href="prefix_sum.html"><span class="mono">Prefix Sum</span><small>前綴和</small></a><a class="cr-item" href="two_pointers.html"><span class="mono">Two Pointers</span><small>雙指標</small></a><a class="cr-item" href="binary_answer.html"><span class="mono">Binary Search on Answer</span><small>二分搜尋答案</small></a><a class="cr-item" href="backtracking.html"><span class="mono">Backtracking</span><small>回溯</small></a><a class="cr-item" href="divide_conquer.html"><span class="mono">Divide and Conquer</span><small>分治法</small></a><a class="cr-item" href="greedy.html"><span class="mono">Greedy</span><small>貪婪法</small></a><a class="cr-item" href="dp.html"><span class="mono">Dynamic Programming</span><small>動態規劃</small></a><p class="cr-group">經典應用</p><a class="cr-item on" href="integral_image.html"><span class="mono">Integral Image</span><small>積分影像</small></a><a class="cr-item" href="sliding_window.html"><span class="mono">Sliding Window</span><small>滑動視窗</small></a><a class="cr-item" href="n_queens.html"><span class="mono">N-Queens</span><small>八皇后</small></a><a class="cr-item" href="inversions.html"><span class="mono">Counting Inversions</span><small>逆序數對</small></a><a class="cr-item" href="huffman.html"><span class="mono">Huffman Coding</span><small>霍夫曼編碼</small></a><a class="cr-item" href="knapsack.html"><span class="mono">0/1 Knapsack</span><small>背包問題</small></a></nav><div class="cr-body"><article class="cr-page"><h3 class="cr-title">Integral Image　積分影像</h3>
+<section class="cr-sec"><h4>生活應用</h4><p class="cr-hook">相機對準人，臉上馬上跳出一個對焦框。早期的做法，是在畫面上檢查幾萬個大大小小的方框，比較每個框裡哪一塊亮、哪一塊暗，看像不像一張臉。每個框都把裡面的像素一格一格加起來，來得及嗎？</p></section>
+<section class="cr-sec"><h4>複習</h4><p>前綴和把一排數字「從頭加到這裡」先存好，任何一段都是兩個數相減。 <a class="cr-link cr-see" href="prefix_sum.html" target="_blank" rel="noopener">→ 前綴和</a></p><p>照片是一格一格的二維陣列，一個 100 × 100 的框有一萬個像素，幾萬個框就是幾億次加法。 <a class="cr-link cr-see" href="../programming/arrays.html" target="_blank" rel="noopener">→ 陣列與串列</a></p><blockquote class="cr-quote">每一格存「從左上角到這一格」整塊的總和，任何一塊長方形，用四個角的數字就算得出來。</blockquote></section>
+<section class="cr-sec"><h4>核心觀念</h4><p>積分影像（integral image）就是二維的前綴和，也叫 summed-area table：total[i][j] 存原圖左上角到第 i 列第 j 行這一整塊的總和。 <a class="cr-link cr-see" href="prefix_sum.html" target="_blank" rel="noopener">→ 前綴和</a></p><p>建表：total[i][j] = 這一格的值 + total[i − 1][j] + total[i][j − 1] − total[i − 1][j − 1]。上面那一塊加左邊那一塊，左上角重疊的地方被加了兩次，要扣掉一次。從左上往右下，每一格只算一次。</p><p>問一塊（第 r1 到 r2 列、第 c1 到 c2 行）：total[r2][c2] − total[r1 − 1][c2] − total[r2][c1 − 1] + total[r1 − 1][c1 − 1]。右下角那一大塊，減掉上面、減掉左邊，左上角被減了兩次，加回來一次。</p><p>表比原圖多開一列、一行，第 0 列和第 0 行全部放 0。這樣貼著邊的那幾塊不用另外處理，跟一維前綴和最前面多放一個 0 是同一招。</p><p>這張表 1984 年就出現在電腦繪圖的論文裡（Franklin Crow）；2001 年 Paul Viola 和 Michael Jones 拿它做即時的人臉偵測，叫它 integral image，名字才傳開。</p></section>
+<section class="cr-sec"><h4>什麼時候會用到</h4><ul><li>修圖的模糊和馬賽克：每個像素換成周圍一塊的平均。框開得再大，每個像素都只要四個數。</li><li>報表：一張「每家分店 × 每一天」的營業額表，問某幾家店在某幾天的總和。</li><li>遊戲地圖：框一塊區域，問裡面有多少資源。</li><li>APCS 實作題：二維陣列裡要問很多次某一塊長方形的總和。</li></ul></section>
+<section class="cr-sec"><h4>常見誤解</h4><div class="cr-traps"><div class="cr-trap"><p class="cr-trap-line wrong"><span class="cr-sr">誤解：</span><span>問一塊的總和，右下角減左上角兩個數就好</span></p><p class="cr-trap-line right"><span class="cr-sr">正解：</span><span>要四個數。只減左上角那一格，上面一整條和左邊一整條都還留在裡面。</span></p></div><div class="cr-trap"><p class="cr-trap-line wrong"><span class="cr-sr">誤解：</span><span>建表的時候，加上面那格和左邊那格就好</span></p><p class="cr-trap-line right"><span class="cr-sr">正解：</span><span>上面那塊和左邊那塊在左上角重疊，那一塊被加了兩次，要扣掉 total[i − 1][j − 1]（試試看第二題）。</span></p></div><div class="cr-trap"><p class="cr-trap-line wrong"><span class="cr-sr">誤解：</span><span>上面要減的是 total[r1][c2]</span></p><p class="cr-trap-line right"><span class="cr-sr">正解：</span><span>是 total[r1 − 1][c2]。要的那一塊包含第 r1 列，該扣掉的是它上面的列。差一格，整列就不見了。</span></p></div><div class="cr-trap"><p class="cr-trap-line wrong"><span class="cr-sr">誤解：</span><span>原圖改了一格，表也只要改那一格</span></p><p class="cr-trap-line right"><span class="cr-sr">正解：</span><span>那一格右下方的每一格都把它算在裡面，全部要重算。資料會一直改的話，這張表不合適。</span></p></div></div></section>
+<section class="cr-sec"><h4>實作</h4><div class="cr-code"><p class="cr-sub">C</p><pre class="cr-pre">#include &lt;stdio.h&gt;
+
+#define ROWS 4
+#define COLS 5
+
+// 建累計表：total[i][j] 是原圖左上角到第 i 列第 j 行（從 1 數）這一塊的總和，第 0 列和第 0 行都是 0
+void build_total(int img[ROWS][COLS], int total[ROWS + 1][COLS + 1]) {
+    for (int i = 0; i &lt;= ROWS; i++) {
+        for (int j = 0; j &lt;= COLS; j++) {
+            total[i][j] = 0;
+        }
+    }
+    for (int i = 1; i &lt;= ROWS; i++) {
+        for (int j = 1; j &lt;= COLS; j++) {
+            // 這一格 + 上面那塊 + 左邊那塊 - 重疊的左上角
+            total[i][j] = img[i - 1][j - 1] + total[i - 1][j] + total[i][j - 1] - total[i - 1][j - 1];
+        }
+    }
+}
+
+// 第 r1 到 r2 列、第 c1 到 c2 行（從 1 數）這一塊的總和
+int region_sum(int total[ROWS + 1][COLS + 1], int r1, int c1, int r2, int c2) {
+    return total[r2][c2] - total[r1 - 1][c2] - total[r2][c1 - 1] + total[r1 - 1][c1 - 1];
+}
+
+int main(void) {
+    int img[ROWS][COLS] = {{3, 1, 4, 1, 5}, {2, 6, 0, 3, 2}, {1, 4, 2, 7, 1}, {5, 0, 3, 2, 4}};
+    int total[ROWS + 1][COLS + 1];
+    build_total(img, total);
+    printf(&quot;%d %d\n&quot;, region_sum(total, 2, 2, 3, 4), region_sum(total, 1, 1, 2, 3));
+    return 0;
+}</pre><p class="cr-sub">C++</p><pre class="cr-pre">#include &lt;iostream&gt;
+#include &lt;vector&gt;
+
+// 建累計表：total[i][j] 是原圖左上角到第 i 列第 j 行（從 1 數）這一塊的總和，第 0 列和第 0 行都是 0
+std::vector&lt;std::vector&lt;int&gt;&gt; build_total(const std::vector&lt;std::vector&lt;int&gt;&gt;&amp; img) {
+    int rows = img.size(), cols = img[0].size();
+    std::vector&lt;std::vector&lt;int&gt;&gt; total(rows + 1, std::vector&lt;int&gt;(cols + 1, 0));
+    for (int i = 1; i &lt;= rows; i++) {
+        for (int j = 1; j &lt;= cols; j++) {
+            // 這一格 + 上面那塊 + 左邊那塊 - 重疊的左上角
+            total[i][j] = img[i - 1][j - 1] + total[i - 1][j] + total[i][j - 1] - total[i - 1][j - 1];
+        }
+    }
+    return total;
+}
+
+// 第 r1 到 r2 列、第 c1 到 c2 行（從 1 數）這一塊的總和
+int region_sum(const std::vector&lt;std::vector&lt;int&gt;&gt;&amp; total, int r1, int c1, int r2, int c2) {
+    return total[r2][c2] - total[r1 - 1][c2] - total[r2][c1 - 1] + total[r1 - 1][c1 - 1];
+}
+
+int main() {
+    std::vector&lt;std::vector&lt;int&gt;&gt; img = {{3, 1, 4, 1, 5}, {2, 6, 0, 3, 2}, {1, 4, 2, 7, 1}, {5, 0, 3, 2, 4}};
+    std::vector&lt;std::vector&lt;int&gt;&gt; total = build_total(img);
+    std::cout &lt;&lt; region_sum(total, 2, 2, 3, 4) &lt;&lt; &quot; &quot; &lt;&lt; region_sum(total, 1, 1, 2, 3) &lt;&lt; &quot;\n&quot;;
+    return 0;
+}</pre><p class="cr-sub">Java</p><pre class="cr-pre">public class Main {
+    // 建累計表：total[i][j] 是原圖左上角到第 i 列第 j 行（從 1 數）這一塊的總和，第 0 列和第 0 行都是 0
+    static int[][] buildTotal(int[][] img) {
+        int rows = img.length, cols = img[0].length;
+        int[][] total = new int[rows + 1][cols + 1];
+        for (int i = 1; i &lt;= rows; i++) {
+            for (int j = 1; j &lt;= cols; j++) {
+                // 這一格 + 上面那塊 + 左邊那塊 - 重疊的左上角
+                total[i][j] = img[i - 1][j - 1] + total[i - 1][j] + total[i][j - 1] - total[i - 1][j - 1];
+            }
+        }
+        return total;
+    }
+
+    // 第 r1 到 r2 列、第 c1 到 c2 行（從 1 數）這一塊的總和
+    static int regionSum(int[][] total, int r1, int c1, int r2, int c2) {
+        return total[r2][c2] - total[r1 - 1][c2] - total[r2][c1 - 1] + total[r1 - 1][c1 - 1];
+    }
+
+    public static void main(String[] args) {
+        int[][] img = {{3, 1, 4, 1, 5}, {2, 6, 0, 3, 2}, {1, 4, 2, 7, 1}, {5, 0, 3, 2, 4}};
+        int[][] total = buildTotal(img);
+        System.out.println(regionSum(total, 2, 2, 3, 4) + &quot; &quot; + regionSum(total, 1, 1, 2, 3));
+    }
+}</pre><p class="cr-sub">Python</p><pre class="cr-pre">def build_total(img):   # total[i][j] 是原圖左上角到第 i 列第 j 行（從 1 數）這一塊的總和，第 0 列和第 0 行都是 0
+    rows, cols = len(img), len(img[0])
+    total = [[0] * (cols + 1) for _ in range(rows + 1)]
+    for i in range(1, rows + 1):
+        for j in range(1, cols + 1):
+            # 這一格 + 上面那塊 + 左邊那塊 - 重疊的左上角
+            total[i][j] = img[i - 1][j - 1] + total[i - 1][j] + total[i][j - 1] - total[i - 1][j - 1]
+    return total
+
+
+def region_sum(total, r1, c1, r2, c2):   # 第 r1 到 r2 列、第 c1 到 c2 行（從 1 數）這一塊的總和
+    return total[r2][c2] - total[r1 - 1][c2] - total[r2][c1 - 1] + total[r1 - 1][c1 - 1]
+
+
+img = [[3, 1, 4, 1, 5], [2, 6, 0, 3, 2], [1, 4, 2, 7, 1], [5, 0, 3, 2, 4]]
+total = build_total(img)
+print(region_sum(total, 2, 2, 3, 4), region_sum(total, 1, 1, 2, 3))</pre><p class="cr-out mono">輸出：22 16</p></div></section>
+<section class="cr-sec"><h4>跑幾步</h4><table class="cr-big-o"><tr><td>一格一格加：一塊 h × w 格</td><td class="mono">h × w 次加法，O(h × w)</td></tr><tr><td>建表：每格一次</td><td class="mono">O(列 × 行)，只做一次</td></tr><tr><td>之後每問一塊：4 個數</td><td class="mono">O(1)</td></tr></table><p>100 × 100 的框一格一格加是一萬次，查表是 4 次。Big-O 的意思和怎麼算，在資料結構的附錄。 <a class="cr-link cr-see" href="../ds/complexity.html" target="_blank" rel="noopener">→ 時間複雜度</a></p></section>
+<section class="cr-sec"><h4>試試看</h4><div class="cr-try"><p class="cr-try-q"><span class="cr-try-kind">程式運行追蹤</span><span>1. 一張 3 × 3 的小圖是 1 到 9 照順序排（第一列 1、2、3），total 是照這一頁的方法建好的累計表。下面這段程式印出什麼？</span></p><p class="cr-sub">C</p><pre class="cr-pre">int total[4][4] = {{0, 0, 0, 0}, {0, 1, 3, 6}, {0, 5, 12, 21}, {0, 12, 27, 45}};
+int r1 = 2, c1 = 2, r2 = 3, c2 = 3;
+printf(&quot;%d\n&quot;, total[r2][c2] - total[r1 - 1][c2] - total[r2][c1 - 1] + total[r1 - 1][c1 - 1]);</pre><ol class="cr-try-opts"><li>44</li><li>27</li><li>28</li><li>9</li></ol></div><div class="cr-try"><p class="cr-try-q"><span class="cr-try-kind">程式測試與除錯</span><span>2. 一張 2 × 2 的小圖，四格是 1、2、3、4，全部加起來是 10。下面這段程式建好累計表，印出右下角那一格，卻印出 11。要怎麼改？</span></p><p class="cr-sub">C</p><pre class="cr-pre">int img[2][2] = {{1, 2}, {3, 4}};
+int total[3][3] = {{0, 0, 0}, {0, 0, 0}, {0, 0, 0}};
+for (int i = 1; i &lt; 3; i++) {
+    for (int j = 1; j &lt; 3; j++) {
+        total[i][j] = img[i - 1][j - 1] + total[i - 1][j] + total[i][j - 1];
+    }
+}
+printf(&quot;%d\n&quot;, total[2][2]);</pre><ol class="cr-try-opts"><li>算 total[i][j] 那一行，最後再加上 total[i - 1][j - 1]</li><li>算 total[i][j] 那一行，最後再減掉 total[i - 1][j - 1]</li><li>把 total[i - 1][j] 拿掉，只加左邊那一格</li><li>把 total[i - 1][j] 換成 total[i - 1][j - 1]</li></ol></div><div class="cr-try"><p class="cr-try-q"><span class="cr-try-kind">程式效能分析</span><span>3. 一張 1000 × 1000 的圖，要問 1000 次 100 × 100 的框。下面這段程式數兩種做法各做幾次加減法：slow 是每個框一格一格加，fast 是先建累計表（每格 3 次加減）、再每個框查一次（3 次加減）。它印出什麼？</span></p><p class="cr-sub">C</p><pre class="cr-pre">int n = 1000, q = 1000, h = 100, w = 100;
+int slow = 0;
+for (int k = 0; k &lt; q; k++) {
+    for (int i = 0; i &lt; h; i++) {
+        for (int j = 0; j &lt; w; j++) {
+            slow += 1;
+        }
+    }
+}
+int fast = 0;
+for (int i = 1; i &lt;= n; i++) {
+    for (int j = 1; j &lt;= n; j++) {
+        fast += 3;
+    }
+}
+for (int k = 0; k &lt; q; k++) {
+    fast += 3;
+}
+printf(&quot;%d %d\n&quot;, slow, fast);</pre><ol class="cr-try-opts"><li>10000000 3000</li><li>100000 3003000</li><li>10000000 1001000</li><li>10000000 3003000</li></ol></div></section>
+<section class="cr-sec"><h4>總結</h4><p class="cr-hook">來得及：先花一趟把每一格「左上角到這裡」的總和算好，之後每個框不管多大，都是四個數加加減減。下次碰到格子資料要一直問某一塊的總和，像地圖上框一區的人口，你就知道：先做一張從左上角累計的表。</p></section>
+<section class="cr-sec"><h4>課外補充</h4><p>找總和最大的長方形：先固定上下兩列，中間每一行的總和用累計表一次拿到，問題就變成一維的「最大連續和」。</p></section></article></div></div></div>
+</main>
+<footer class="seo-foot"><nav aria-label="IT24hr 的其他內容"><a href="../../index.html">玩 IT24hr</a><a href="../../se.html">認識軟體工程</a><a href="../../csie/index.html">CSIE 課程</a><a href="../../handbook.html">新人手冊</a><a href="../../atlas.html">IT 圖鑑</a><a href="../../team.html">開發團隊</a></nav></footer>
+<script src="../../vendor/rough.js"></script>
+<script src="../../icons.js"></script>
+<script src="../../verdict.js"></script>
+<script src="../../classroom.js"></script>
+<script src="../../classroom/algorithms/backtracking.js"></script>
+<script src="../../classroom/algorithms/binary_answer.js"></script>
+<script src="../../classroom/algorithms/divide_conquer.js"></script>
+<script src="../../classroom/algorithms/dp.js"></script>
+<script src="../../classroom/algorithms/greedy.js"></script>
+<script src="../../classroom/algorithms/huffman.js"></script>
+<script src="../../classroom/algorithms/integral_image.js"></script>
+<script src="../../classroom/algorithms/inversions.js"></script>
+<script src="../../classroom/algorithms/knapsack.js"></script>
+<script src="../../classroom/algorithms/n_queens.js"></script>
+<script src="../../classroom/algorithms/prefix_sum.js"></script>
+<script src="../../classroom/algorithms/sliding_window.js"></script>
+<script src="../../classroom/algorithms/two_pointers.js"></script>
+<script src="../../classroom-view.js"></script>
+<script src="../../csie.js"></script>
+</body>
+</html>

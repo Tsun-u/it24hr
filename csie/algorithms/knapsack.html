@@ -1,0 +1,189 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>0/1 Knapsack　背包問題｜演算法｜CSIE 課程｜IT24hr</title>
+<meta name="description" content="背包問題（0/1 Knapsack）：出國玩回來，行李還剩 7 公斤的額度。免稅店裡有五樣東西你都想買，重量不一樣，想要的程度也不一樣。要先拿最想要的、最輕的，還是每公斤最划算的？">
+<link rel="canonical" href="https://tsun-u.github.io/it24hr/csie/algorithms/knapsack.html">
+<meta property="og:type" content="article">
+<meta property="og:site_name" content="IT24hr">
+<meta property="og:locale" content="zh_TW">
+<meta property="og:url" content="https://tsun-u.github.io/it24hr/csie/algorithms/knapsack.html">
+<meta property="og:title" content="0/1 Knapsack　背包問題｜演算法｜CSIE 課程｜IT24hr">
+<meta property="og:description" content="背包問題（0/1 Knapsack）：出國玩回來，行李還剩 7 公斤的額度。免稅店裡有五樣東西你都想買，重量不一樣，想要的程度也不一樣。要先拿最想要的、最輕的，還是每公斤最划算的？">
+<meta property="og:image" content="https://tsun-u.github.io/it24hr/assets/og-image.jpg">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta name="twitter:card" content="summary_large_image">
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"Article","headline":"0/1 Knapsack 背包問題","description":"背包問題（0/1 Knapsack）：出國玩回來，行李還剩 7 公斤的額度。免稅店裡有五樣東西你都想買，重量不一樣，想要的程度也不一樣。要先拿最想要的、最輕的，還是每公斤最划算的？","inLanguage":"zh-Hant-TW","author":[{"@type":"Person","name":"Tsun-u"},{"@type":"Person","name":"ATone"}],"image":"https://tsun-u.github.io/it24hr/assets/og-image.jpg","isPartOf":{"@type":"Course","name":"演算法","url":"https://tsun-u.github.io/it24hr/csie/algorithms/index.html"},"url":"https://tsun-u.github.io/it24hr/csie/algorithms/knapsack.html"}</script>
+<link rel="icon" href="../../assets/favicon.svg" type="image/svg+xml">
+<link rel="icon" href="../../assets/favicon-32.png" sizes="32x32" type="image/png">
+<link rel="apple-touch-icon" href="../../assets/apple-touch-icon.png">
+<link rel="stylesheet" href="../../styles.css">
+</head>
+<body class="csie-body">
+<header class="csie-head">
+  <a class="csie-logo" href="../../index.html">IT24hr</a>
+  <h1>CSIE 課程</h1>
+  <a class="btn csie-play" href="../../index.html">開始玩</a>
+</header>
+<main id="csie" class="csie-main">
+<a class="csie-back" href="index.html">‹ 演算法</a>
+<h2 class="csie-course-title">演算法</h2>
+<div class="csie-room"><div class="cr-main"><nav class="cr-nav"><p class="cr-group">基礎篇</p><a class="cr-item" href="prefix_sum.html"><span class="mono">Prefix Sum</span><small>前綴和</small></a><a class="cr-item" href="two_pointers.html"><span class="mono">Two Pointers</span><small>雙指標</small></a><a class="cr-item" href="binary_answer.html"><span class="mono">Binary Search on Answer</span><small>二分搜尋答案</small></a><a class="cr-item" href="backtracking.html"><span class="mono">Backtracking</span><small>回溯</small></a><a class="cr-item" href="divide_conquer.html"><span class="mono">Divide and Conquer</span><small>分治法</small></a><a class="cr-item" href="greedy.html"><span class="mono">Greedy</span><small>貪婪法</small></a><a class="cr-item" href="dp.html"><span class="mono">Dynamic Programming</span><small>動態規劃</small></a><p class="cr-group">經典應用</p><a class="cr-item" href="integral_image.html"><span class="mono">Integral Image</span><small>積分影像</small></a><a class="cr-item" href="sliding_window.html"><span class="mono">Sliding Window</span><small>滑動視窗</small></a><a class="cr-item" href="n_queens.html"><span class="mono">N-Queens</span><small>八皇后</small></a><a class="cr-item" href="inversions.html"><span class="mono">Counting Inversions</span><small>逆序數對</small></a><a class="cr-item" href="huffman.html"><span class="mono">Huffman Coding</span><small>霍夫曼編碼</small></a><a class="cr-item on" href="knapsack.html"><span class="mono">0/1 Knapsack</span><small>背包問題</small></a></nav><div class="cr-body"><article class="cr-page"><h3 class="cr-title">0/1 Knapsack　背包問題</h3>
+<section class="cr-sec"><h4>生活應用</h4><p class="cr-hook">出國玩回來，行李還剩 7 公斤的額度。免稅店裡有五樣東西你都想買，重量不一樣，想要的程度也不一樣。要先拿最想要的、最輕的，還是每公斤最划算的？</p></section>
+<section class="cr-sec"><h4>複習</h4><p>五樣東西 5、4、3、2、1 公斤，想要的程度是 10、7、6、2、1 分。先拿最想要的，拿到 12 分；先拿最輕的，9 分；先拿每公斤最划算的（5 公斤和 3 公斤那兩樣一樣划算，先拿比較想要的 5 公斤），12 分。可是 4 公斤和 3 公斤那兩樣一起拿有 13 分，三種挑法都沒挑到。 <a class="cr-link cr-see" href="greedy.html" target="_blank" rel="noopener">→ 貪婪法</a></p><p>回溯每樣選或不選全部試過一定對，可是 30 樣就超過十億種。 <a class="cr-link cr-see" href="backtracking.html" target="_blank" rel="noopener">→ 回溯</a></p><blockquote class="cr-quote">一樣一樣考慮：這樣東西帶或不帶，兩邊各自最多幾分，挑大的那個記進表裡。</blockquote></section>
+<section class="cr-sec"><h4>核心觀念</h4><p>0/1 背包問題（0/1 knapsack problem）：有 n 樣東西，各有重量和價值，背包有重量上限；每樣只能拿或不拿，不能切開、不能拿兩次，要讓拿到的總價值最大。</p><p>表的每一格是一個小問題的答案：best[i][w] 是「只考慮前 i 樣東西、額度是 w 公斤」時最多幾分。 <a class="cr-link cr-see" href="dp.html" target="_blank" rel="noopener">→ 動態規劃</a></p><p>每一格只有兩個選擇。不帶第 i 樣：答案跟只有前 i − 1 樣一樣，是 best[i − 1][w]。帶第 i 樣（額度要裝得下它）：先扣掉它的重量，剩下的額度讓前 i − 1 樣去裝，再加上它的分數，是 best[i − 1][w − 它的重量] + 它的分數。兩個取大的。</p><p>第 0 列是一樣都還沒考慮，全部是 0。一列一列往下填，答案在最右下角。</p><p>每一列只看上一列，所以可以只留一列。這時候 w 要從大的填到小的：從小的開始填，後面的格子會用到這一輪剛改過的格子，等於同一樣東西拿了兩次。</p></section>
+<section class="cr-sec"><h4>什麼時候會用到</h4><ul><li>行李限重、搬家時一台貨車裝哪些東西。</li><li>預算有限，挑哪幾個計畫做：每個計畫要花多少、效益多少，總花費不能超過預算。</li><li>「湊不湊得出某個金額」「用最少的硬幣找零」是它的親戚，一樣是一樣一樣考慮、把每個金額的答案記在表上。 <a class="cr-link cr-see" href="dp.html" target="_blank" rel="noopener">→ 動態規劃</a></li><li>APCS 實作題：每樣只能拿一次的 0/1 背包，和每樣可以拿很多次的無限背包。</li></ul></section>
+<section class="cr-sec"><h4>常見誤解</h4><div class="cr-traps"><div class="cr-trap"><p class="cr-trap-line wrong"><span class="cr-sr">誤解：</span><span>先拿每公斤最划算的，就會最多分</span></p><p class="cr-trap-line right"><span class="cr-sr">正解：</span><span>東西不能切，照這樣拿可能留下塞不滿的額度。開場那五樣，每公斤最划算的是 5 公斤和 3 公斤那兩樣，拿了 5 公斤的就裝不下 3 公斤的，最後只有 12 分；4 公斤加 3 公斤才是 13 分。 <a class="cr-link cr-see" href="greedy.html" target="_blank" rel="noopener">→ 貪婪法</a></span></p></div><div class="cr-trap"><p class="cr-trap-line wrong"><span class="cr-sr">誤解：</span><span>只留一列的寫法，w 從小到大填也一樣</span></p><p class="cr-trap-line right"><span class="cr-sr">正解：</span><span>會把同一樣東西拿很多次，算出來的是「每樣可以拿很多次」的答案。每樣只能拿一次，w 要從大到小（試試看第二題）。</span></p></div><div class="cr-trap"><p class="cr-trap-line wrong"><span class="cr-sr">誤解：</span><span>右下角只有分數，查不出拿了哪幾樣</span></p><p class="cr-trap-line right"><span class="cr-sr">正解：</span><span>從右下角往回看：這一格跟正上方一樣，就是沒拿這一樣，往上一列；不一樣就是拿了，往上一列、再往左挪它的重量。</span></p></div><div class="cr-trap"><p class="cr-trap-line wrong"><span class="cr-sr">誤解：</span><span>東西不多的話，表一定填得完</span></p><p class="cr-trap-line right"><span class="cr-sr">正解：</span><span>表有幾格還要看額度多大：n 樣東西、額度 W，大約要填 n × W 格。額度是十億就填不完；這時候東西如果只有二十幾樣，反而用回溯。 <a class="cr-link cr-see" href="backtracking.html" target="_blank" rel="noopener">→ 回溯</a></span></p></div></div></section>
+<section class="cr-sec"><h4>實作</h4><div class="cr-code"><p class="cr-sub">C</p><pre class="cr-pre">#include &lt;stdio.h&gt;
+
+// 每樣東西只能拿一次，額度 limit 公斤，回傳最多幾分；best[i][w]：只考慮前 i 樣、額度 w 公斤時最多幾分
+int max_value(const int weight[], const int value[], int n, int limit) {
+    int best[n + 1][limit + 1];
+    for (int w = 0; w &lt;= limit; w++) best[0][w] = 0;   // 第 0 列：一樣都還沒考慮，全部是 0
+    for (int i = 1; i &lt;= n; i++) {
+        for (int w = 0; w &lt;= limit; w++) {
+            best[i][w] = best[i - 1][w];               // 不帶第 i 樣
+            if (w &gt;= weight[i - 1]) {                  // 裝得下才能帶（第 i 樣放在陣列的第 i - 1 格）
+                int take = best[i - 1][w - weight[i - 1]] + value[i - 1];
+                if (take &gt; best[i][w]) best[i][w] = take;
+            }
+        }
+    }
+    return best[n][limit];
+}
+
+int main(void) {
+    int weight[] = {5, 4, 3, 2, 1};
+    int value[] = {10, 7, 6, 2, 1};
+    printf(&quot;%d %d\n&quot;, max_value(weight, value, 5, 7), max_value(weight, value, 5, 10));
+    return 0;
+}</pre><p class="cr-sub">C++</p><pre class="cr-pre">#include &lt;iostream&gt;
+#include &lt;vector&gt;
+
+// 每樣東西只能拿一次，額度 limit 公斤，回傳最多幾分；best[i][w]：只考慮前 i 樣、額度 w 公斤時最多幾分
+int max_value(const std::vector&lt;int&gt;&amp; weight, const std::vector&lt;int&gt;&amp; value, int limit) {
+    int n = weight.size();
+    std::vector&lt;std::vector&lt;int&gt;&gt; best(n + 1, std::vector&lt;int&gt;(limit + 1, 0));   // 第 0 列：一樣都還沒考慮，全部是 0
+    for (int i = 1; i &lt;= n; i++) {
+        for (int w = 0; w &lt;= limit; w++) {
+            best[i][w] = best[i - 1][w];               // 不帶第 i 樣
+            if (w &gt;= weight[i - 1]) {                  // 裝得下才能帶（第 i 樣放在陣列的第 i - 1 格）
+                int take = best[i - 1][w - weight[i - 1]] + value[i - 1];
+                if (take &gt; best[i][w]) best[i][w] = take;
+            }
+        }
+    }
+    return best[n][limit];
+}
+
+int main() {
+    std::vector&lt;int&gt; weight = {5, 4, 3, 2, 1};
+    std::vector&lt;int&gt; value = {10, 7, 6, 2, 1};
+    std::cout &lt;&lt; max_value(weight, value, 7) &lt;&lt; &quot; &quot; &lt;&lt; max_value(weight, value, 10) &lt;&lt; &quot;\n&quot;;
+    return 0;
+}</pre><p class="cr-sub">Java</p><pre class="cr-pre">public class Main {
+    // 每樣東西只能拿一次，額度 limit 公斤，回傳最多幾分；best[i][w]：只考慮前 i 樣、額度 w 公斤時最多幾分
+    static int maxValue(int[] weight, int[] value, int limit) {
+        int n = weight.length;
+        int[][] best = new int[n + 1][limit + 1];      // 第 0 列：一樣都還沒考慮，全部是 0
+        for (int i = 1; i &lt;= n; i++) {
+            for (int w = 0; w &lt;= limit; w++) {
+                best[i][w] = best[i - 1][w];           // 不帶第 i 樣
+                if (w &gt;= weight[i - 1]) {              // 裝得下才能帶（第 i 樣放在陣列的第 i - 1 格）
+                    int take = best[i - 1][w - weight[i - 1]] + value[i - 1];
+                    if (take &gt; best[i][w]) best[i][w] = take;
+                }
+            }
+        }
+        return best[n][limit];
+    }
+
+    public static void main(String[] args) {
+        int[] weight = {5, 4, 3, 2, 1};
+        int[] value = {10, 7, 6, 2, 1};
+        System.out.println(maxValue(weight, value, 7) + &quot; &quot; + maxValue(weight, value, 10));
+    }
+}</pre><p class="cr-sub">Python</p><pre class="cr-pre">def max_value(weight, value, limit):   # 每樣東西只能拿一次，額度 limit 公斤，回傳最多幾分
+    n = len(weight)
+    best = [[0] * (limit + 1) for _ in range(n + 1)]   # best[i][w]：只考慮前 i 樣、額度 w 公斤時最多幾分；第 0 列全部是 0
+    for i in range(1, n + 1):
+        for w in range(limit + 1):
+            best[i][w] = best[i - 1][w]                # 不帶第 i 樣
+            if w &gt;= weight[i - 1]:                     # 裝得下才能帶（第 i 樣放在串列的第 i - 1 格）
+                take = best[i - 1][w - weight[i - 1]] + value[i - 1]
+                if take &gt; best[i][w]:
+                    best[i][w] = take
+    return best[n][limit]
+
+
+weight = [5, 4, 3, 2, 1]
+value = [10, 7, 6, 2, 1]
+print(max_value(weight, value, 7), max_value(weight, value, 10))</pre><p class="cr-out mono">輸出：13 18</p></div></section>
+<section class="cr-sec"><h4>跑幾步</h4><table class="cr-big-o"><tr><td>回溯每樣選或不選</td><td class="mono">O(2ⁿ)</td></tr><tr><td>填表</td><td class="mono">n × (W + 1) 格，每格看兩格，O(n × W)</td></tr><tr><td>只留一列</td><td class="mono">時間一樣，空間從 n × W 變成 W</td></tr></table><p>開場是 5 × 8 = 40 格對 32 種挑法，看不出差別；30 樣東西、額度 100 公斤是三千格對十億種。Big-O 的意思和怎麼算，在資料結構的附錄。 <a class="cr-link cr-see" href="../ds/complexity.html" target="_blank" rel="noopener">→ 時間複雜度</a></p></section>
+<section class="cr-sec"><h4>試試看</h4><div class="cr-try"><p class="cr-try-q"><span class="cr-try-kind">程式運行追蹤</span><span>1. 三樣東西重 2、3、4 公斤，分數是 4、5、6 分，每樣只能拿一次，額度 7 公斤。下面這段程式印出什麼？</span></p><p class="cr-sub">C</p><pre class="cr-pre">int weight[] = {2, 3, 4};
+int value[] = {4, 5, 6};
+int best[] = {0, 0, 0, 0, 0, 0, 0, 0};
+for (int i = 0; i &lt; 3; i++) {
+    for (int w = 7; w &gt;= weight[i]; w--) {
+        int take = best[w - weight[i]] + value[i];
+        if (take &gt; best[w]) {
+            best[w] = take;
+        }
+    }
+}
+printf(&quot;%d\n&quot;, best[7]);</pre><ol class="cr-try-opts"><li>9</li><li>11</li><li>13</li><li>15</li></ol></div><div class="cr-try"><p class="cr-try-q"><span class="cr-try-kind">程式測試與除錯</span><span>2. 三樣東西重 1、3、4 公斤，分數是 2、5、7 分，每樣只能拿一次，額度 5 公斤。最多應該是 9 分（1 公斤和 4 公斤那兩樣），這段程式卻印出 10。要怎麼改？</span></p><p class="cr-sub">C</p><pre class="cr-pre">int weight[] = {1, 3, 4};
+int value[] = {2, 5, 7};
+int best[] = {0, 0, 0, 0, 0, 0};
+for (int i = 0; i &lt; 3; i++) {
+    for (int w = weight[i]; w &lt;= 5; w++) {
+        int take = best[w - weight[i]] + value[i];
+        if (take &gt; best[w]) {
+            best[w] = take;
+        }
+    }
+}
+printf(&quot;%d\n&quot;, best[5]);</pre><ol class="cr-try-opts"><li>把 take &gt; best[w] 改成 take &gt;= best[w]</li><li>把 w 改成從 5 往下跑到 weight[i]，從大的填到小的</li><li>把 i 改成從 2 往下跑到 0，三樣東西倒過來考慮</li><li>把 take 改成 best[w] + value[i]</li></ol></div><div class="cr-try"><p class="cr-try-q"><span class="cr-try-kind">程式效能分析</span><span>3. 下面這段程式用二維的表算 6 樣東西、額度 9 公斤的背包，每填一格 cells 就加 1。它印出多少？</span></p><p class="cr-sub">C</p><pre class="cr-pre">int weight[] = {3, 1, 4, 2, 5, 2};
+int value[] = {4, 1, 6, 2, 7, 3};
+int best[7][10] = {0};
+int cells = 0;
+for (int i = 1; i &lt;= 6; i++) {
+    for (int w = 0; w &lt;= 9; w++) {
+        best[i][w] = best[i - 1][w];
+        if (w &gt;= weight[i - 1]) {
+            int take = best[i - 1][w - weight[i - 1]] + value[i - 1];
+            if (take &gt; best[i][w]) {
+                best[i][w] = take;
+            }
+        }
+        cells += 1;
+    }
+}
+printf(&quot;%d\n&quot;, cells);</pre><ol class="cr-try-opts"><li>54</li><li>60</li><li>64</li><li>70</li></ol></div></section>
+<section class="cr-sec"><h4>總結</h4><p class="cr-hook">三種直覺都差一點：最好的是 4 公斤和 3 公斤那兩樣，13 分。不用把 32 種挑法全部試過，一張 40 格的表填完就知道。下次碰到「每樣東西只能拿一次、總量有上限、要拿到最多」，你就知道：這是背包問題，照動態規劃填表。</p></section>
+<section class="cr-sec"><h4>課外補充</h4><p>每樣可以拿很多次的無限背包：一樣的表，只留一列的寫法把 w 改成從小到大填，剛好就是它。同一個「錯誤」在另一題是正解。</p></section></article></div></div></div>
+</main>
+<footer class="seo-foot"><nav aria-label="IT24hr 的其他內容"><a href="../../index.html">玩 IT24hr</a><a href="../../se.html">認識軟體工程</a><a href="../../csie/index.html">CSIE 課程</a><a href="../../handbook.html">新人手冊</a><a href="../../atlas.html">IT 圖鑑</a><a href="../../team.html">開發團隊</a></nav></footer>
+<script src="../../vendor/rough.js"></script>
+<script src="../../icons.js"></script>
+<script src="../../verdict.js"></script>
+<script src="../../classroom.js"></script>
+<script src="../../classroom/algorithms/backtracking.js"></script>
+<script src="../../classroom/algorithms/binary_answer.js"></script>
+<script src="../../classroom/algorithms/divide_conquer.js"></script>
+<script src="../../classroom/algorithms/dp.js"></script>
+<script src="../../classroom/algorithms/greedy.js"></script>
+<script src="../../classroom/algorithms/huffman.js"></script>
+<script src="../../classroom/algorithms/integral_image.js"></script>
+<script src="../../classroom/algorithms/inversions.js"></script>
+<script src="../../classroom/algorithms/knapsack.js"></script>
+<script src="../../classroom/algorithms/n_queens.js"></script>
+<script src="../../classroom/algorithms/prefix_sum.js"></script>
+<script src="../../classroom/algorithms/sliding_window.js"></script>
+<script src="../../classroom/algorithms/two_pointers.js"></script>
+<script src="../../classroom-view.js"></script>
+<script src="../../csie.js"></script>
+</body>
+</html>

@@ -1,0 +1,248 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Counting Inversions　逆序數對｜演算法｜CSIE 課程｜IT24hr</title>
+<meta name="description" content="逆序數對（Counting Inversions）：一套 8 集的漫畫在書架上被放成 3、1、4、8、2、6、5、7。每次只能把相鄰的兩本對調，最少要調幾次，才能排回第 1 集到第 8 集？">
+<link rel="canonical" href="https://tsun-u.github.io/it24hr/csie/algorithms/inversions.html">
+<meta property="og:type" content="article">
+<meta property="og:site_name" content="IT24hr">
+<meta property="og:locale" content="zh_TW">
+<meta property="og:url" content="https://tsun-u.github.io/it24hr/csie/algorithms/inversions.html">
+<meta property="og:title" content="Counting Inversions　逆序數對｜演算法｜CSIE 課程｜IT24hr">
+<meta property="og:description" content="逆序數對（Counting Inversions）：一套 8 集的漫畫在書架上被放成 3、1、4、8、2、6、5、7。每次只能把相鄰的兩本對調，最少要調幾次，才能排回第 1 集到第 8 集？">
+<meta property="og:image" content="https://tsun-u.github.io/it24hr/assets/og-image.jpg">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta name="twitter:card" content="summary_large_image">
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"Article","headline":"Counting Inversions 逆序數對","description":"逆序數對（Counting Inversions）：一套 8 集的漫畫在書架上被放成 3、1、4、8、2、6、5、7。每次只能把相鄰的兩本對調，最少要調幾次，才能排回第 1 集到第 8 集？","inLanguage":"zh-Hant-TW","author":[{"@type":"Person","name":"Tsun-u"},{"@type":"Person","name":"ATone"}],"image":"https://tsun-u.github.io/it24hr/assets/og-image.jpg","isPartOf":{"@type":"Course","name":"演算法","url":"https://tsun-u.github.io/it24hr/csie/algorithms/index.html"},"url":"https://tsun-u.github.io/it24hr/csie/algorithms/inversions.html"}</script>
+<link rel="icon" href="../../assets/favicon.svg" type="image/svg+xml">
+<link rel="icon" href="../../assets/favicon-32.png" sizes="32x32" type="image/png">
+<link rel="apple-touch-icon" href="../../assets/apple-touch-icon.png">
+<link rel="stylesheet" href="../../styles.css">
+</head>
+<body class="csie-body">
+<header class="csie-head">
+  <a class="csie-logo" href="../../index.html">IT24hr</a>
+  <h1>CSIE 課程</h1>
+  <a class="btn csie-play" href="../../index.html">開始玩</a>
+</header>
+<main id="csie" class="csie-main">
+<a class="csie-back" href="index.html">‹ 演算法</a>
+<h2 class="csie-course-title">演算法</h2>
+<div class="csie-room"><div class="cr-main"><nav class="cr-nav"><p class="cr-group">基礎篇</p><a class="cr-item" href="prefix_sum.html"><span class="mono">Prefix Sum</span><small>前綴和</small></a><a class="cr-item" href="two_pointers.html"><span class="mono">Two Pointers</span><small>雙指標</small></a><a class="cr-item" href="binary_answer.html"><span class="mono">Binary Search on Answer</span><small>二分搜尋答案</small></a><a class="cr-item" href="backtracking.html"><span class="mono">Backtracking</span><small>回溯</small></a><a class="cr-item" href="divide_conquer.html"><span class="mono">Divide and Conquer</span><small>分治法</small></a><a class="cr-item" href="greedy.html"><span class="mono">Greedy</span><small>貪婪法</small></a><a class="cr-item" href="dp.html"><span class="mono">Dynamic Programming</span><small>動態規劃</small></a><p class="cr-group">經典應用</p><a class="cr-item" href="integral_image.html"><span class="mono">Integral Image</span><small>積分影像</small></a><a class="cr-item" href="sliding_window.html"><span class="mono">Sliding Window</span><small>滑動視窗</small></a><a class="cr-item" href="n_queens.html"><span class="mono">N-Queens</span><small>八皇后</small></a><a class="cr-item on" href="inversions.html"><span class="mono">Counting Inversions</span><small>逆序數對</small></a><a class="cr-item" href="huffman.html"><span class="mono">Huffman Coding</span><small>霍夫曼編碼</small></a><a class="cr-item" href="knapsack.html"><span class="mono">0/1 Knapsack</span><small>背包問題</small></a></nav><div class="cr-body"><article class="cr-page"><h3 class="cr-title">Counting Inversions　逆序數對</h3>
+<section class="cr-sec"><h4>生活應用</h4><p class="cr-hook">一套 8 集的漫畫在書架上被放成 3、1、4、8、2、6、5、7。每次只能把相鄰的兩本對調，最少要調幾次，才能排回第 1 集到第 8 集？</p></section>
+<section class="cr-sec"><h4>複習</h4><p>要調的次數，剛好等於「集數大的排在集數小的前面」有幾對，這種一對叫逆序數對（inversion）。用兩層迴圈一對一對看，8 本有 28 對；十萬筆資料就是將近 50 億對。 <a class="cr-link cr-see" href="../programming/loops.html" target="_blank" rel="noopener">→ 迴圈</a></p><p>分治法那頁的課外補充寫過遞迴版的合併排序。 <a class="cr-link cr-see" href="divide_conquer.html" target="_blank" rel="noopener">→ 分治法</a></p><blockquote class="cr-quote">左半、右半各自排好之後，右半的數每搶先一次，就一次跨過左半還沒拿的全部。</blockquote></section>
+<section class="cr-sec"><h4>核心觀念</h4><p>逆序數對（inversion）：一排數字裡，前面的比後面的大，這樣的一對。排好的有 0 對；完全倒過來的，每一對都是，有 n(n − 1) / 2 對。</p><p>為什麼相鄰對調的次數等於逆序數對：對調一對相鄰、而且順序反了的書，逆序數對剛好少 1，別的書之間誰前誰後都沒變。所以至少要調這麼多次；每次都找一對相鄰又反了的來調，也剛好這麼多次。</p><p>用分治法數：切成左右兩半之後，每一對只有三種：兩本都在左半、兩本都在右半、一本在左一本在右。前兩種交給遞迴，第三種在合併的時候數。 <a class="cr-link cr-see" href="divide_conquer.html" target="_blank" rel="noopener">→ 分治法</a></p><p>合併的時候怎麼數：左右兩半各自排好了。右半現在這一本比左半現在這一本小，就先拿右半的；左半還沒拿的每一本都比它大（因為排好了），這幾本跟它都是逆序，一次加上「左半還剩幾本」。</p><p>兩半各自排好，不會把答案弄亂：排的是半邊裡面的順序，一左一右的每一對，誰在左、誰在右沒有變。</p></section>
+<section class="cr-sec"><h4>什麼時候會用到</h4><ul><li>比兩份排行榜差多少：把朋友的排名照你的順序重新編號，逆序數對越多，兩個人的口味差越多。統計學叫它 Kendall tau 距離。</li><li>氣泡排序要交換幾次，就是逆序數對有幾對。 <a class="cr-link cr-see" href="../ds/sorting.html" target="_blank" rel="noopener">→ 排序</a></li><li>衡量一份資料「有多亂」：0 對是已經排好，n(n − 1) / 2 對是完全倒過來。</li><li>APCS 實作題：資料到十萬筆，兩層迴圈會超過時間，要用合併排序邊排邊數。</li></ul></section>
+<section class="cr-sec"><h4>常見誤解</h4><div class="cr-traps"><div class="cr-trap"><p class="cr-trap-line wrong"><span class="cr-sr">誤解：</span><span>兩個一樣大的數也算一對</span></p><p class="cr-trap-line right"><span class="cr-sr">正解：</span><span>不算，要前面的比後面的大才算。合併時兩邊一樣大要先拿左半的（比較寫 &lt;=），不然一樣大的會被算進去。</span></p></div><div class="cr-trap"><p class="cr-trap-line wrong"><span class="cr-sr">誤解：</span><span>合併時，拿左半的那一刻加上右半剩下的</span></p><p class="cr-trap-line right"><span class="cr-sr">正解：</span><span>是拿右半的那一刻，加上左半還沒拿的個數（試試看第二題）。</span></p></div><div class="cr-trap"><p class="cr-trap-line wrong"><span class="cr-sr">誤解：</span><span>對數用 int 裝得下</span></p><p class="cr-trap-line right"><span class="cr-sr">正解：</span><span>十萬筆最多有將近 50 億對，超過 int 的上限。C、C++ 用 long long，Java 用 long。</span></p></div><div class="cr-trap"><p class="cr-trap-line wrong"><span class="cr-sr">誤解：</span><span>數完之後陣列還是原來的樣子</span></p><p class="cr-trap-line right"><span class="cr-sr">正解：</span><span>邊數邊排，數完陣列已經排好了。原本的順序還要用的話，先複製一份。</span></p></div></div></section>
+<section class="cr-sec"><h4>實作</h4><div class="cr-code"><p class="cr-sub">C</p><pre class="cr-pre">#include &lt;stdio.h&gt;
+
+// 數 data[left..right] 裡有幾對逆序數對，順便把這一段排好
+long long count_inversions(int data[], int left, int right) {
+    if (left &gt;= right) {                     // 只剩一個數：湊不成一對
+        return 0;
+    }
+    int mid = (left + right) / 2;
+    long long count = count_inversions(data, left, mid);   // 兩個都在左半的
+    count += count_inversions(data, mid + 1, right);       // 兩個都在右半的
+    int merged[right - left + 1];            // 一個在左、一個在右的：合併的時候數
+    int i = left, j = mid + 1, k = 0;
+    while (i &lt;= mid &amp;&amp; j &lt;= right) {
+        if (data[i] &lt;= data[j]) {            // 一樣大先拿左半的，一樣大的才不會被算進去
+            merged[k++] = data[i++];
+        } else {
+            count += mid - i + 1;            // 先拿右半的：左半還沒拿的每一個都比它大
+            merged[k++] = data[j++];
+        }
+    }
+    while (i &lt;= mid) {                       // 左半還有剩：整段接上去
+        merged[k++] = data[i++];
+    }
+    while (j &lt;= right) {                     // 右半還有剩：整段接上去
+        merged[k++] = data[j++];
+    }
+    for (int t = 0; t &lt; k; t++) {            // 把合好的結果放回原本的位置
+        data[left + t] = merged[t];
+    }
+    return count;
+}
+
+int main(void) {
+    int shelf[] = {3, 1, 4, 8, 2, 6, 5, 7};
+    int backwards[] = {8, 7, 6, 5, 4, 3, 2, 1};
+    long long first = count_inversions(shelf, 0, 7);
+    long long second = count_inversions(backwards, 0, 7);
+    printf(&quot;%lld %lld\n&quot;, first, second);
+    return 0;
+}</pre><p class="cr-sub">C++</p><pre class="cr-pre">#include &lt;iostream&gt;
+#include &lt;vector&gt;
+
+// 數 data[left..right] 裡有幾對逆序數對，順便把這一段排好
+long long count_inversions(std::vector&lt;int&gt;&amp; data, int left, int right) {
+    if (left &gt;= right) {                     // 只剩一個數：湊不成一對
+        return 0;
+    }
+    int mid = (left + right) / 2;
+    long long count = count_inversions(data, left, mid);   // 兩個都在左半的
+    count += count_inversions(data, mid + 1, right);       // 兩個都在右半的
+    std::vector&lt;int&gt; merged;                 // 一個在左、一個在右的：合併的時候數
+    int i = left, j = mid + 1;
+    while (i &lt;= mid &amp;&amp; j &lt;= right) {
+        if (data[i] &lt;= data[j]) {            // 一樣大先拿左半的，一樣大的才不會被算進去
+            merged.push_back(data[i++]);
+        } else {
+            count += mid - i + 1;            // 先拿右半的：左半還沒拿的每一個都比它大
+            merged.push_back(data[j++]);
+        }
+    }
+    while (i &lt;= mid) {                       // 左半還有剩：整段接上去
+        merged.push_back(data[i++]);
+    }
+    while (j &lt;= right) {                     // 右半還有剩：整段接上去
+        merged.push_back(data[j++]);
+    }
+    for (int t = 0; t &lt; (int)merged.size(); t++) {   // 把合好的結果放回原本的位置
+        data[left + t] = merged[t];
+    }
+    return count;
+}
+
+int main() {
+    std::vector&lt;int&gt; shelf = {3, 1, 4, 8, 2, 6, 5, 7};
+    std::vector&lt;int&gt; backwards = {8, 7, 6, 5, 4, 3, 2, 1};
+    long long first = count_inversions(shelf, 0, 7);
+    long long second = count_inversions(backwards, 0, 7);
+    std::cout &lt;&lt; first &lt;&lt; &quot; &quot; &lt;&lt; second &lt;&lt; &quot;\n&quot;;
+    return 0;
+}</pre><p class="cr-sub">Java</p><pre class="cr-pre">public class Main {
+    // 數 data[left..right] 裡有幾對逆序數對，順便把這一段排好
+    static long countInversions(int[] data, int left, int right) {
+        if (left &gt;= right) {                     // 只剩一個數：湊不成一對
+            return 0;
+        }
+        int mid = (left + right) / 2;
+        long count = countInversions(data, left, mid);    // 兩個都在左半的
+        count += countInversions(data, mid + 1, right);   // 兩個都在右半的
+        int[] merged = new int[right - left + 1];   // 一個在左、一個在右的：合併的時候數
+        int i = left, j = mid + 1, k = 0;
+        while (i &lt;= mid &amp;&amp; j &lt;= right) {
+            if (data[i] &lt;= data[j]) {            // 一樣大先拿左半的，一樣大的才不會被算進去
+                merged[k++] = data[i++];
+            } else {
+                count += mid - i + 1;            // 先拿右半的：左半還沒拿的每一個都比它大
+                merged[k++] = data[j++];
+            }
+        }
+        while (i &lt;= mid) {                       // 左半還有剩：整段接上去
+            merged[k++] = data[i++];
+        }
+        while (j &lt;= right) {                     // 右半還有剩：整段接上去
+            merged[k++] = data[j++];
+        }
+        for (int t = 0; t &lt; k; t++) {            // 把合好的結果放回原本的位置
+            data[left + t] = merged[t];
+        }
+        return count;
+    }
+
+    public static void main(String[] args) {
+        int[] shelf = {3, 1, 4, 8, 2, 6, 5, 7};
+        int[] backwards = {8, 7, 6, 5, 4, 3, 2, 1};
+        long first = countInversions(shelf, 0, 7);
+        long second = countInversions(backwards, 0, 7);
+        System.out.println(first + &quot; &quot; + second);
+    }
+}</pre><p class="cr-sub">Python</p><pre class="cr-pre">def count_inversions(data, left, right):    # 數 data[left..right] 裡有幾對逆序數對，順便把這一段排好
+    if left &gt;= right:                       # 只剩一個數：湊不成一對
+        return 0
+    mid = (left + right) // 2
+    count = count_inversions(data, left, mid)         # 兩個都在左半的
+    count += count_inversions(data, mid + 1, right)   # 兩個都在右半的
+    merged = []                             # 一個在左、一個在右的：合併的時候數
+    i, j = left, mid + 1
+    while i &lt;= mid and j &lt;= right:
+        if data[i] &lt;= data[j]:              # 一樣大先拿左半的，一樣大的才不會被算進去
+            merged.append(data[i])
+            i += 1
+        else:
+            count += mid - i + 1            # 先拿右半的：左半還沒拿的每一個都比它大
+            merged.append(data[j])
+            j += 1
+    while i &lt;= mid:                         # 左半還有剩：整段接上去
+        merged.append(data[i])
+        i += 1
+    while j &lt;= right:                       # 右半還有剩：整段接上去
+        merged.append(data[j])
+        j += 1
+    for t in range(len(merged)):            # 把合好的結果放回原本的位置
+        data[left + t] = merged[t]
+    return count
+
+
+shelf = [3, 1, 4, 8, 2, 6, 5, 7]
+backwards = [8, 7, 6, 5, 4, 3, 2, 1]
+first = count_inversions(shelf, 0, 7)
+second = count_inversions(backwards, 0, 7)
+print(first, second)</pre><p class="cr-out mono">輸出：8 28</p></div></section>
+<section class="cr-sec"><h4>跑幾步</h4><table class="cr-big-o"><tr><td>兩層迴圈一對一對看</td><td class="mono">n(n − 1) / 2 對，O(n²)</td></tr><tr><td>合併排序邊排邊數</td><td class="mono">O(n log n)</td></tr></table><p>十萬筆是將近 50 億對，對上大約 170 萬步。Big-O 的意思和怎麼算，在資料結構的附錄。 <a class="cr-link cr-see" href="../ds/complexity.html" target="_blank" rel="noopener">→ 時間複雜度</a></p></section>
+<section class="cr-sec"><h4>試試看</h4><div class="cr-try"><p class="cr-try-q"><span class="cr-try-kind">程式運行追蹤</span><span>1. 左半 3、6、7、9 和右半 1、4、5、8 都排好了，合併的時候順便數逆序數對。下面這段程式印出什麼？</span></p><p class="cr-sub">C</p><pre class="cr-pre">int left[] = {3, 6, 7, 9};
+int right[] = {1, 4, 5, 8};
+int i = 0, j = 0, count = 0;
+while (i &lt; 4 &amp;&amp; j &lt; 4) {
+    if (left[i] &lt;= right[j]) {
+        i += 1;
+    } else {
+        count += 4 - i;
+        j += 1;
+    }
+}
+printf(&quot;%d\n&quot;, count);</pre><ol class="cr-try-opts"><li>4</li><li>5</li><li>7</li><li>11</li></ol></div><div class="cr-try"><p class="cr-try-q"><span class="cr-try-kind">程式測試與除錯</span><span>2. 左半 2、5、8 和右半 1、4、6 合併，應該數到 6 對，這段程式卻印出 3。要怎麼改？</span></p><p class="cr-sub">C</p><pre class="cr-pre">int left[] = {2, 5, 8};
+int right[] = {1, 4, 6};
+int i = 0, j = 0, count = 0;
+while (i &lt; 3 &amp;&amp; j &lt; 3) {
+    if (left[i] &lt;= right[j]) {
+        count += 3 - j;
+        i += 1;
+    } else {
+        j += 1;
+    }
+}
+printf(&quot;%d\n&quot;, count);</pre><ol class="cr-try-opts"><li>把 &lt;= 改成 &lt;</li><li>把 count += 3 - j 移到 else 那一邊，改成 count += 3 - i</li><li>把 count += 3 - j 改成 count += 3 - i，位置不動</li><li>把 count += 3 - j 移到 else 那一邊，改成 count += 1</li></ol></div><div class="cr-try"><p class="cr-try-q"><span class="cr-try-kind">解析計算邏輯</span><span>3. 這次兩半裡有一樣大的數：左半 2、5、5，右半 2、5、7，真正的逆序數對只有 2 對。這段程式的比較寫成了 &lt;，它印出多少？</span></p><p class="cr-sub">C</p><pre class="cr-pre">int left[] = {2, 5, 5};
+int right[] = {2, 5, 7};
+int i = 0, j = 0, count = 0;
+while (i &lt; 3 &amp;&amp; j &lt; 3) {
+    if (left[i] &lt; right[j]) {
+        i += 1;
+    } else {
+        count += 3 - i;
+        j += 1;
+    }
+}
+printf(&quot;%d\n&quot;, count);</pre><ol class="cr-try-opts"><li>2</li><li>3</li><li>5</li><li>9</li></ol></div></section>
+<section class="cr-sec"><h4>總結</h4><p class="cr-hook">最少要調 8 次。不用真的去調，也不用 28 對一對一對看：切兩半各自數，合併的時候右半每拿一個，就把左半剩下的個數一次加上去。下次碰到「數有幾對順序反了」，像比兩份排行榜差多少，你就知道：邊排序邊數，一次數一整批。</p></section>
+<section class="cr-sec"><h4>課外補充</h4><p>換一個角度也數得出來：從左到右一個一個看，問「前面有幾個比我大」。這個問法用樹狀陣列（Fenwick tree）也能做到 O(n log n)，那是進階的資料結構，這裡只提名字。</p></section></article></div></div></div>
+</main>
+<footer class="seo-foot"><nav aria-label="IT24hr 的其他內容"><a href="../../index.html">玩 IT24hr</a><a href="../../se.html">認識軟體工程</a><a href="../../csie/index.html">CSIE 課程</a><a href="../../handbook.html">新人手冊</a><a href="../../atlas.html">IT 圖鑑</a><a href="../../team.html">開發團隊</a></nav></footer>
+<script src="../../vendor/rough.js"></script>
+<script src="../../icons.js"></script>
+<script src="../../verdict.js"></script>
+<script src="../../classroom.js"></script>
+<script src="../../classroom/algorithms/backtracking.js"></script>
+<script src="../../classroom/algorithms/binary_answer.js"></script>
+<script src="../../classroom/algorithms/divide_conquer.js"></script>
+<script src="../../classroom/algorithms/dp.js"></script>
+<script src="../../classroom/algorithms/greedy.js"></script>
+<script src="../../classroom/algorithms/huffman.js"></script>
+<script src="../../classroom/algorithms/integral_image.js"></script>
+<script src="../../classroom/algorithms/inversions.js"></script>
+<script src="../../classroom/algorithms/knapsack.js"></script>
+<script src="../../classroom/algorithms/n_queens.js"></script>
+<script src="../../classroom/algorithms/prefix_sum.js"></script>
+<script src="../../classroom/algorithms/sliding_window.js"></script>
+<script src="../../classroom/algorithms/two_pointers.js"></script>
+<script src="../../classroom-view.js"></script>
+<script src="../../csie.js"></script>
+</body>
+</html>

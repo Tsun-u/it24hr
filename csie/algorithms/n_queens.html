@@ -1,0 +1,250 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>N-Queens　八皇后｜演算法｜CSIE 課程｜IT24hr</title>
+<meta name="description" content="八皇后（N-Queens）：西洋棋的皇后可以橫著、直著、斜著走，走幾格都行。8 × 8 的棋盤上要放 8 個皇后，誰也吃不到誰。放得下嗎？">
+<link rel="canonical" href="https://tsun-u.github.io/it24hr/csie/algorithms/n_queens.html">
+<meta property="og:type" content="article">
+<meta property="og:site_name" content="IT24hr">
+<meta property="og:locale" content="zh_TW">
+<meta property="og:url" content="https://tsun-u.github.io/it24hr/csie/algorithms/n_queens.html">
+<meta property="og:title" content="N-Queens　八皇后｜演算法｜CSIE 課程｜IT24hr">
+<meta property="og:description" content="八皇后（N-Queens）：西洋棋的皇后可以橫著、直著、斜著走，走幾格都行。8 × 8 的棋盤上要放 8 個皇后，誰也吃不到誰。放得下嗎？">
+<meta property="og:image" content="https://tsun-u.github.io/it24hr/assets/og-image.jpg">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta name="twitter:card" content="summary_large_image">
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"Article","headline":"N-Queens 八皇后","description":"八皇后（N-Queens）：西洋棋的皇后可以橫著、直著、斜著走，走幾格都行。8 × 8 的棋盤上要放 8 個皇后，誰也吃不到誰。放得下嗎？","inLanguage":"zh-Hant-TW","author":[{"@type":"Person","name":"Tsun-u"},{"@type":"Person","name":"ATone"}],"image":"https://tsun-u.github.io/it24hr/assets/og-image.jpg","isPartOf":{"@type":"Course","name":"演算法","url":"https://tsun-u.github.io/it24hr/csie/algorithms/index.html"},"url":"https://tsun-u.github.io/it24hr/csie/algorithms/n_queens.html"}</script>
+<link rel="icon" href="../../assets/favicon.svg" type="image/svg+xml">
+<link rel="icon" href="../../assets/favicon-32.png" sizes="32x32" type="image/png">
+<link rel="apple-touch-icon" href="../../assets/apple-touch-icon.png">
+<link rel="stylesheet" href="../../styles.css">
+</head>
+<body class="csie-body">
+<header class="csie-head">
+  <a class="csie-logo" href="../../index.html">IT24hr</a>
+  <h1>CSIE 課程</h1>
+  <a class="btn csie-play" href="../../index.html">開始玩</a>
+</header>
+<main id="csie" class="csie-main">
+<a class="csie-back" href="index.html">‹ 演算法</a>
+<h2 class="csie-course-title">演算法</h2>
+<div class="csie-room"><div class="cr-main"><nav class="cr-nav"><p class="cr-group">基礎篇</p><a class="cr-item" href="prefix_sum.html"><span class="mono">Prefix Sum</span><small>前綴和</small></a><a class="cr-item" href="two_pointers.html"><span class="mono">Two Pointers</span><small>雙指標</small></a><a class="cr-item" href="binary_answer.html"><span class="mono">Binary Search on Answer</span><small>二分搜尋答案</small></a><a class="cr-item" href="backtracking.html"><span class="mono">Backtracking</span><small>回溯</small></a><a class="cr-item" href="divide_conquer.html"><span class="mono">Divide and Conquer</span><small>分治法</small></a><a class="cr-item" href="greedy.html"><span class="mono">Greedy</span><small>貪婪法</small></a><a class="cr-item" href="dp.html"><span class="mono">Dynamic Programming</span><small>動態規劃</small></a><p class="cr-group">經典應用</p><a class="cr-item" href="integral_image.html"><span class="mono">Integral Image</span><small>積分影像</small></a><a class="cr-item" href="sliding_window.html"><span class="mono">Sliding Window</span><small>滑動視窗</small></a><a class="cr-item on" href="n_queens.html"><span class="mono">N-Queens</span><small>八皇后</small></a><a class="cr-item" href="inversions.html"><span class="mono">Counting Inversions</span><small>逆序數對</small></a><a class="cr-item" href="huffman.html"><span class="mono">Huffman Coding</span><small>霍夫曼編碼</small></a><a class="cr-item" href="knapsack.html"><span class="mono">0/1 Knapsack</span><small>背包問題</small></a></nav><div class="cr-body"><article class="cr-page"><h3 class="cr-title">N-Queens　八皇后</h3>
+<section class="cr-sec"><h4>生活應用</h4><p class="cr-hook">西洋棋的皇后可以橫著、直著、斜著走，走幾格都行。8 × 8 的棋盤上要放 8 個皇后，誰也吃不到誰。放得下嗎？</p></section>
+<section class="cr-sec"><h4>複習</h4><p>回溯是走一步檢查一步，不行就退回上一步。64 格裡挑 8 格有 44 億種挑法，全部列出來再檢查，等不到答案。 <a class="cr-link cr-see" href="backtracking.html" target="_blank" rel="noopener">→ 回溯</a></p><p>先注意到一件事：同一列放兩個一定互吃，所以每一列剛好放一個。</p><blockquote class="cr-quote">一列放一個，放下去就檢查會不會被前面的皇后吃到；整列都沒地方放，就回上一列，把那個皇后往右挪。</blockquote></section>
+<section class="cr-sec"><h4>核心觀念</h4><p>八皇后問題（eight queens puzzle）是西洋棋手 Max Bezzel 在 1848 年出的謎題。把棋盤換成 n × n、放 n 個皇后，叫 n 皇后問題。</p><p>一列只放一個，所以用一個陣列就記得下整個棋盤：cols[r] 是第 r 列的皇后放在第幾行（列和行都跟陣列一樣從 0 開始數）。「同一列」從此不用檢查。</p><p>檢查新皇后（第 row 列、第 col 行）會不會被前面第 k 列的皇后吃到：同一行，cols[k] 等於 col；同一條斜線，兩格之間列差幾格、行就差幾格。兩種都沒有，才安全。</p><p>放法：place(row) 把第 row 列從最左邊試到最右邊，安全就放下、呼叫 place(row + 1)；回來之後換下一格。row 等於 n，代表每一列都放好了，算一種。 <a class="cr-link cr-see" href="backtracking.html" target="_blank" rel="noopener">→ 回溯</a></p><p>檢查可以更快：多用三個陣列，記每一行、每一條左斜線、每一條右斜線有沒有皇后，一格只要看三個記號。同一條右斜線上 row − col 都一樣，同一條左斜線上 row + col 都一樣。</p></section>
+<section class="cr-sec"><h4>什麼時候會用到</h4><ul><li>數獨：每一格填 1 到 9，同一列、同一行、同一個九宮格不能重複。跟放皇后一樣，一格一格填，撞到了就退回去改。</li><li>排課表、排考場：同一位老師同一個時段不能有兩堂課，同一間教室不能同時有兩場考試。</li><li>地圖著色：相鄰的縣市要用不同的顏色，最少要幾種顏色。</li><li>APCS 實作題和競賽：把棋盤換成 n × n、放 n 個皇后（n 皇后問題），是回溯的標準練習題。</li></ul></section>
+<section class="cr-sec"><h4>常見誤解</h4><div class="cr-traps"><div class="cr-trap"><p class="cr-trap-line wrong"><span class="cr-sr">誤解：</span><span>要知道斜線上有沒有皇后，得沿著斜線一格一格找</span></p><p class="cr-trap-line right"><span class="cr-sr">正解：</span><span>不用。兩格在同一條斜線上，列差幾格、行就差幾格，一個減法就知道。</span></p></div><div class="cr-trap"><p class="cr-trap-line wrong"><span class="cr-sr">誤解：</span><span>找到一組放法，這題就做完了</span></p><p class="cr-trap-line right"><span class="cr-sr">正解：</span><span>八皇后有 92 種放法。其中很多是同一種轉個方向、翻個面，這樣算重複的話剩 12 種。</span></p></div><div class="cr-trap"><p class="cr-trap-line wrong"><span class="cr-sr">誤解：</span><span>棋盤多大都放得下</span></p><p class="cr-trap-line right"><span class="cr-sr">正解：</span><span>2 × 2 和 3 × 3 放不下：2 × 2 的任兩格都互吃，3 × 3 最多放 2 個。1 × 1 和 4 × 4 以上才有解。</span></p></div><div class="cr-trap"><p class="cr-trap-line wrong"><span class="cr-sr">誤解：</span><span>遞迴回來之後，不用把皇后拿走</span></p><p class="cr-trap-line right"><span class="cr-sr">正解：</span><span>只用 cols 的寫法，下一格會直接蓋掉 cols[row]，不用拿。用「這一行、這條斜線有沒有皇后」三個記號陣列的寫法，回來就要把記號改回去。 <a class="cr-link cr-see" href="backtracking.html" target="_blank" rel="noopener">→ 回溯</a></span></p></div></div></section>
+<section class="cr-sec"><h4>實作</h4><div class="cr-code"><p class="cr-sub">C</p><pre class="cr-pre">#include &lt;stdio.h&gt;
+
+#define MAX_N 12
+
+// 第 row 列、第 col 行會不會被前面的皇后吃到；cols[k] 是第 k 列的皇后放在第幾行
+int is_safe(const int cols[], int row, int col) {
+    for (int k = 0; k &lt; row; k++) {
+        int diff = cols[k] - col;
+        if (diff == 0 || diff == row - k || diff == k - row) {   // 同一行，或同一條斜線
+            return 0;
+        }
+    }
+    return 1;
+}
+
+// 第 0 到 row - 1 列放好了，回傳剩下的列有幾種放法
+int place(int cols[], int row, int n) {
+    if (row == n) {
+        return 1;                   // 每一列都放好了，算一種
+    }
+    int ways = 0;
+    for (int col = 0; col &lt; n; col++) {
+        if (is_safe(cols, row, col)) {
+            cols[row] = col;        // 放下去；換下一格的時候會直接蓋掉，不用拿走
+            ways += place(cols, row + 1, n);
+        }
+    }
+    return ways;
+}
+
+// n × n 的棋盤放 n 個皇后有幾種放法（n 最大到 MAX_N）
+int count_queens(int n) {
+    int cols[MAX_N] = {0};
+    return place(cols, 0, n);
+}
+
+int main(void) {
+    printf(&quot;%d %d\n&quot;, count_queens(6), count_queens(8));
+    return 0;
+}</pre><p class="cr-sub">C++</p><pre class="cr-pre">#include &lt;iostream&gt;
+#include &lt;vector&gt;
+
+// 第 row 列、第 col 行會不會被前面的皇后吃到；cols[k] 是第 k 列的皇后放在第幾行
+bool is_safe(const std::vector&lt;int&gt;&amp; cols, int row, int col) {
+    for (int k = 0; k &lt; row; k++) {
+        int diff = cols[k] - col;
+        if (diff == 0 || diff == row - k || diff == k - row) {   // 同一行，或同一條斜線
+            return false;
+        }
+    }
+    return true;
+}
+
+// 第 0 到 row - 1 列放好了，回傳剩下的列有幾種放法
+int place(std::vector&lt;int&gt;&amp; cols, int row, int n) {
+    if (row == n) {
+        return 1;                   // 每一列都放好了，算一種
+    }
+    int ways = 0;
+    for (int col = 0; col &lt; n; col++) {
+        if (is_safe(cols, row, col)) {
+            cols[row] = col;        // 放下去；換下一格的時候會直接蓋掉，不用拿走
+            ways += place(cols, row + 1, n);
+        }
+    }
+    return ways;
+}
+
+// n × n 的棋盤放 n 個皇后有幾種放法
+int count_queens(int n) {
+    std::vector&lt;int&gt; cols(n, 0);
+    return place(cols, 0, n);
+}
+
+int main() {
+    std::cout &lt;&lt; count_queens(6) &lt;&lt; &quot; &quot; &lt;&lt; count_queens(8) &lt;&lt; &quot;\n&quot;;
+    return 0;
+}</pre><p class="cr-sub">Java</p><pre class="cr-pre">public class Main {
+    // 第 row 列、第 col 行會不會被前面的皇后吃到；cols[k] 是第 k 列的皇后放在第幾行
+    static boolean isSafe(int[] cols, int row, int col) {
+        for (int k = 0; k &lt; row; k++) {
+            int diff = cols[k] - col;
+            if (diff == 0 || diff == row - k || diff == k - row) {   // 同一行，或同一條斜線
+                return false;
+            }
+        }
+        return true;
+    }
+
+    // 第 0 到 row - 1 列放好了，回傳剩下的列有幾種放法
+    static int place(int[] cols, int row, int n) {
+        if (row == n) {
+            return 1;                   // 每一列都放好了，算一種
+        }
+        int ways = 0;
+        for (int col = 0; col &lt; n; col++) {
+            if (isSafe(cols, row, col)) {
+                cols[row] = col;        // 放下去；換下一格的時候會直接蓋掉，不用拿走
+                ways += place(cols, row + 1, n);
+            }
+        }
+        return ways;
+    }
+
+    // n × n 的棋盤放 n 個皇后有幾種放法
+    static int countQueens(int n) {
+        return place(new int[n], 0, n);
+    }
+
+    public static void main(String[] args) {
+        System.out.println(countQueens(6) + &quot; &quot; + countQueens(8));
+    }
+}</pre><p class="cr-sub">Python</p><pre class="cr-pre">def is_safe(cols, row, col):    # 第 row 列、第 col 行會不會被前面的皇后吃到；cols[k] 是第 k 列的皇后放在第幾行
+    for k in range(row):
+        diff = cols[k] - col
+        if diff == 0 or diff == row - k or diff == k - row:   # 同一行，或同一條斜線
+            return False
+    return True
+
+
+def place(cols, row, n):        # 第 0 到 row - 1 列放好了，回傳剩下的列有幾種放法
+    if row == n:
+        return 1                # 每一列都放好了，算一種
+    ways = 0
+    for col in range(n):
+        if is_safe(cols, row, col):
+            cols[row] = col     # 放下去；換下一格的時候會直接蓋掉，不用拿走
+            ways += place(cols, row + 1, n)
+    return ways
+
+
+def count_queens(n):            # n × n 的棋盤放 n 個皇后有幾種放法
+    return place([0] * n, 0, n)
+
+
+print(count_queens(6), count_queens(8))</pre><p class="cr-out mono">輸出：4 92</p></div></section>
+<section class="cr-sec"><h4>跑幾步</h4><table class="cr-big-o"><tr><td>64 格挑 8 格再檢查</td><td class="mono">4426165368 種</td></tr><tr><td>一列放一個、不檢查</td><td class="mono">8 的 8 次方 = 16777216 種</td></tr><tr><td>回溯</td><td class="mono">數完 92 種一共放 2056 次皇后；找到第一組只放 113 次</td></tr></table><p>回溯最壞還是跟 n! 一樣快地變大，n 到十幾就很久了。Big-O 的意思和怎麼算，在資料結構的附錄。 <a class="cr-link cr-see" href="../ds/complexity.html" target="_blank" rel="noopener">→ 時間複雜度</a></p></section>
+<section class="cr-sec"><h4>試試看</h4><div class="cr-try"><p class="cr-try-q"><span class="cr-try-kind">程式運行追蹤</span><span>1. 6 × 6 的棋盤，前三列的皇后放在第 0、2、4 行。下面這段程式數第 3 列有幾格可以放，它印出什麼？</span></p><p class="cr-sub">C</p><pre class="cr-pre">int cols[] = {0, 2, 4};
+int row = 3, count = 0;
+for (int col = 0; col &lt; 6; col++) {
+    int safe = 1;
+    for (int k = 0; k &lt; row; k++) {
+        int diff = cols[k] - col;
+        if (diff == 0 || diff == row - k || diff == k - row) {
+            safe = 0;
+        }
+    }
+    count += safe;
+}
+printf(&quot;%d\n&quot;, count);</pre><ol class="cr-try-opts"><li>1</li><li>2</li><li>3</li><li>6</li></ol></div><div class="cr-try"><p class="cr-try-q"><span class="cr-try-kind">程式測試與除錯</span><span>2. 4 × 4 的棋盤放 4 個皇后應該有 2 種放法，下面這段程式（n 是 4，從 place(0) 開始，最後印出 count）卻印出 24。要怎麼改？</span></p><p class="cr-sub">C</p><pre class="cr-pre">void place(int row) {
+    if (row == n) {
+        count += 1;
+        return;
+    }
+    for (int col = 0; col &lt; n; col++) {
+        int safe = 1;
+        for (int k = 0; k &lt; row; k++) {
+            int diff = cols[k] - col;
+            if (diff == 0) {
+                safe = 0;
+            }
+        }
+        if (safe == 1) {
+            cols[row] = col;
+            place(row + 1);
+        }
+    }
+}</pre><ol class="cr-try-opts"><li>條件多加一種：diff 等於 0，或 diff 等於 row - k</li><li>條件多加兩種：diff 等於 0，或 diff 等於 row - k，或 diff 等於 k - row</li><li>把 diff 等於 0 改成 diff 不等於 0</li><li>把條件換成：diff 等於 row - k，或 diff 等於 k - row</li></ol></div><div class="cr-try"><p class="cr-try-q"><span class="cr-try-kind">程式效能分析</span><span>3. 下面這段程式把 4 × 4 的棋盤放 4 個皇后的放法全部數完（n 是 4，從 place(0) 開始），每放下一個皇后 placed 就加 1。最後 placed 是多少？</span></p><p class="cr-sub">C</p><pre class="cr-pre">void place(int row) {
+    if (row == n) {
+        return;
+    }
+    for (int col = 0; col &lt; n; col++) {
+        int safe = 1;
+        for (int k = 0; k &lt; row; k++) {
+            int diff = cols[k] - col;
+            if (diff == 0 || diff == row - k || diff == k - row) {
+                safe = 0;
+            }
+        }
+        if (safe == 1) {
+            cols[row] = col;
+            placed += 1;
+            place(row + 1);
+        }
+    }
+}</pre><ol class="cr-try-opts"><li>2</li><li>8</li><li>16</li><li>340</li></ol></div></section>
+<section class="cr-sec"><h4>總結</h4><p class="cr-hook">放得下，而且有 92 種放法。不用試 44 億種：一列一列放，放下去會被吃就換一格，前後只放了 2056 次皇后就全部數完。下次碰到限制很多的擺放問題，像填數獨、排課表，你就知道：一格一格放，放不下就退回去挪前一個。</p></section>
+<section class="cr-sec"><h4>課外補充</h4><p>核心觀念最後提到的三個記號陣列，寫起來是這樣：一個陣列記每一行有沒有皇后，一個記每一條左斜線（編號 row + col），一個記每一條右斜線（編號 row − col + n − 1）。放下去的時候把這一格的三個記號設成 1，遞迴回來再把三個改回 0；檢查一格只要看三個記號是不是都是 0，不用跑迴圈，是 O(1)。右斜線的編號要加 n − 1，因為 row − col 可能是負的，不能直接當陣列的編號：Python 會從陣列的尾巴倒著數，C 和 C++ 會讀到陣列外面，Java 會丟出例外。n × n 的棋盤兩種斜線各有 2n − 1 條，這兩個陣列要開這麼大。</p></section></article></div></div></div>
+</main>
+<footer class="seo-foot"><nav aria-label="IT24hr 的其他內容"><a href="../../index.html">玩 IT24hr</a><a href="../../se.html">認識軟體工程</a><a href="../../csie/index.html">CSIE 課程</a><a href="../../handbook.html">新人手冊</a><a href="../../atlas.html">IT 圖鑑</a><a href="../../team.html">開發團隊</a></nav></footer>
+<script src="../../vendor/rough.js"></script>
+<script src="../../icons.js"></script>
+<script src="../../verdict.js"></script>
+<script src="../../classroom.js"></script>
+<script src="../../classroom/algorithms/backtracking.js"></script>
+<script src="../../classroom/algorithms/binary_answer.js"></script>
+<script src="../../classroom/algorithms/divide_conquer.js"></script>
+<script src="../../classroom/algorithms/dp.js"></script>
+<script src="../../classroom/algorithms/greedy.js"></script>
+<script src="../../classroom/algorithms/huffman.js"></script>
+<script src="../../classroom/algorithms/integral_image.js"></script>
+<script src="../../classroom/algorithms/inversions.js"></script>
+<script src="../../classroom/algorithms/knapsack.js"></script>
+<script src="../../classroom/algorithms/n_queens.js"></script>
+<script src="../../classroom/algorithms/prefix_sum.js"></script>
+<script src="../../classroom/algorithms/sliding_window.js"></script>
+<script src="../../classroom/algorithms/two_pointers.js"></script>
+<script src="../../classroom-view.js"></script>
+<script src="../../csie.js"></script>
+</body>
+</html>

@@ -66,6 +66,15 @@
       { id: 'greedy', name: 'Greedy', zh: '貪婪法' },
       { id: 'dp', name: 'Dynamic Programming', zh: '動態規劃' },
     ] },
+    // 經典應用：一題一頁，每頁連回用到的方法頁
+    { group: '經典應用', items: [
+      { id: 'integral_image', name: 'Integral Image', zh: '積分影像' },
+      { id: 'sliding_window', name: 'Sliding Window', zh: '滑動視窗' },
+      { id: 'n_queens', name: 'N-Queens', zh: '八皇后' },
+      { id: 'inversions', name: 'Counting Inversions', zh: '逆序數對' },
+      { id: 'huffman', name: 'Huffman Coding', zh: '霍夫曼編碼' },
+      { id: 'knapsack', name: '0/1 Knapsack', zh: '背包問題' },
+    ] },
   ] };
   // 結算卡印章（verdict.js 的 kind）→ 資料結構小教室哪一頁
   const STAMP_PAGE = { stack: 'stack', queue: 'queue', deque: 'deque', tree: 'tree', mixed: 'linked_list', null: 'null' };
