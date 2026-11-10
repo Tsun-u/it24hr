@@ -126,7 +126,149 @@ printf(&quot;%d\n&quot;, calls(16));</pre><ol class="cr-try-opts"><li>6</li><li>
 
 printf(&quot;%d\n&quot;, power(2, 5));</pre><ol class="cr-try-opts"><li>把終止條件改成 n == 1 時回傳 1</li><li>把 return half * half 改成 return half * half * a</li><li>n 是奇數時，改成回傳 half * half * a</li><li>把終止條件回傳的 1 改成 a</li></ol></div></section>
 <section class="cr-sec"><h4>總結</h4><p class="cr-hook">不用乘 29 次：2 的 30 次方是兩個「2 的 15 次方」相乘，15 次方再切，一路切到 0 次方，總共只乘 9 次，答案是 1073741824。0.1 公釐的紙對折 30 次，厚度超過 100 公里。下次碰到一個大問題，可以先想：能不能切成一半大的同樣問題，解完再合起來？每切一次就少一半，再大的問題也切不了幾次。</p></section>
-<section class="cr-sec"><h4>課外補充</h4><p>逆序數對：一排數字裡，有幾對是大的排在小的前面。兩層迴圈要 O(n²)；照合併排序切兩半，左半、右半各自數完，合併的時候每從右半拿一個數，左半還沒拿的那些都比它大，一次加上去，O(n log n)。 <a class="cr-link cr-see" href="../ds/sorting.html" target="_blank" rel="noopener">→ 排序</a></p></section></article></div></div></div>
+<section class="cr-sec"><h4>課外補充</h4><p>合併排序的遞迴寫法是分治法最典型的樣子，三步都看得到。分：從中間切成左右兩半。治：兩半各自用同樣的方法排好，切到只剩一個數就不用排了。合：兩半都排好之後，各從開頭比，每次拿比較小的那個。跟快速冪不一樣的地方是左右兩半內容不同，兩個都要做，再花 n 步合起來。資料結構的排序頁是由下往上做（寬度 1、2、4 兩兩合併），這裡由上往下切，合併的做法一樣，可以開著那一頁對照。 <a class="cr-link cr-see" href="../ds/sorting.html" target="_blank" rel="noopener">→ 排序</a></p><div class="cr-code"><p class="cr-sub">C</p><pre class="cr-pre">#include &lt;stdio.h&gt;
+
+// 把 data[left..right] 排好
+void merge_sort(int data[], int left, int right) {
+    if (left &gt;= right) {                     // 只剩一個數：已經排好了
+        return;
+    }
+    int mid = (left + right) / 2;            // 分：從中間切成兩半
+    merge_sort(data, left, mid);             // 治：左半排好
+    merge_sort(data, mid + 1, right);        // 治：右半排好
+    int merged[right - left + 1];            // 合：每次拿兩半開頭比較小的那個
+    int i = left, j = mid + 1, k = 0;
+    while (i &lt;= mid &amp;&amp; j &lt;= right) {
+        if (data[i] &lt;= data[j]) {
+            merged[k++] = data[i++];
+        } else {
+            merged[k++] = data[j++];
+        }
+    }
+    while (i &lt;= mid) {                       // 左半還有剩：整段接上去
+        merged[k++] = data[i++];
+    }
+    while (j &lt;= right) {                     // 右半還有剩：整段接上去
+        merged[k++] = data[j++];
+    }
+    for (int t = 0; t &lt; k; t++) {            // 把合好的結果放回原本的位置
+        data[left + t] = merged[t];
+    }
+}
+
+int main(void) {
+    int data[] = {38, 27, 43, 3, 9, 82, 10};
+    merge_sort(data, 0, 6);
+    for (int i = 0; i &lt; 7; i++) {
+        printf(i == 0 ? &quot;%d&quot; : &quot; %d&quot;, data[i]);
+    }
+    printf(&quot;\n&quot;);
+    return 0;
+}</pre><p class="cr-sub">C++</p><pre class="cr-pre">#include &lt;iostream&gt;
+#include &lt;vector&gt;
+
+// 把 data[left..right] 排好
+void merge_sort(std::vector&lt;int&gt;&amp; data, int left, int right) {
+    if (left &gt;= right) {                     // 只剩一個數：已經排好了
+        return;
+    }
+    int mid = (left + right) / 2;            // 分：從中間切成兩半
+    merge_sort(data, left, mid);             // 治：左半排好
+    merge_sort(data, mid + 1, right);        // 治：右半排好
+    std::vector&lt;int&gt; merged;                 // 合：每次拿兩半開頭比較小的那個
+    int i = left, j = mid + 1;
+    while (i &lt;= mid &amp;&amp; j &lt;= right) {
+        if (data[i] &lt;= data[j]) {
+            merged.push_back(data[i++]);
+        } else {
+            merged.push_back(data[j++]);
+        }
+    }
+    while (i &lt;= mid) {                       // 左半還有剩：整段接上去
+        merged.push_back(data[i++]);
+    }
+    while (j &lt;= right) {                     // 右半還有剩：整段接上去
+        merged.push_back(data[j++]);
+    }
+    for (int t = 0; t &lt; (int)merged.size(); t++) {   // 把合好的結果放回原本的位置
+        data[left + t] = merged[t];
+    }
+}
+
+int main() {
+    std::vector&lt;int&gt; data = {38, 27, 43, 3, 9, 82, 10};
+    merge_sort(data, 0, data.size() - 1);
+    for (int i = 0; i &lt; (int)data.size(); i++) {
+        std::cout &lt;&lt; (i == 0 ? &quot;&quot; : &quot; &quot;) &lt;&lt; data[i];
+    }
+    std::cout &lt;&lt; &quot;\n&quot;;
+    return 0;
+}</pre><p class="cr-sub">Java</p><pre class="cr-pre">public class Main {
+    // 把 data[left..right] 排好
+    static void mergeSort(int[] data, int left, int right) {
+        if (left &gt;= right) {                     // 只剩一個數：已經排好了
+            return;
+        }
+        int mid = (left + right) / 2;            // 分：從中間切成兩半
+        mergeSort(data, left, mid);              // 治：左半排好
+        mergeSort(data, mid + 1, right);         // 治：右半排好
+        int[] merged = new int[right - left + 1];   // 合：每次拿兩半開頭比較小的那個
+        int i = left, j = mid + 1, k = 0;
+        while (i &lt;= mid &amp;&amp; j &lt;= right) {
+            if (data[i] &lt;= data[j]) {
+                merged[k++] = data[i++];
+            } else {
+                merged[k++] = data[j++];
+            }
+        }
+        while (i &lt;= mid) {                       // 左半還有剩：整段接上去
+            merged[k++] = data[i++];
+        }
+        while (j &lt;= right) {                     // 右半還有剩：整段接上去
+            merged[k++] = data[j++];
+        }
+        for (int t = 0; t &lt; k; t++) {            // 把合好的結果放回原本的位置
+            data[left + t] = merged[t];
+        }
+    }
+
+    public static void main(String[] args) {
+        int[] data = {38, 27, 43, 3, 9, 82, 10};
+        mergeSort(data, 0, data.length - 1);
+        StringBuilder line = new StringBuilder();
+        for (int i = 0; i &lt; data.length; i++) {
+            line.append(i == 0 ? &quot;&quot; : &quot; &quot;).append(data[i]);
+        }
+        System.out.println(line);
+    }
+}</pre><p class="cr-sub">Python</p><pre class="cr-pre">def merge_sort(data, left, right):          # 把 data[left..right] 排好
+    if left &gt;= right:                       # 只剩一個數：已經排好了
+        return
+    mid = (left + right) // 2               # 分：從中間切成兩半
+    merge_sort(data, left, mid)             # 治：左半排好
+    merge_sort(data, mid + 1, right)        # 治：右半排好
+    merged = []                             # 合：每次拿兩半開頭比較小的那個
+    i, j = left, mid + 1
+    while i &lt;= mid and j &lt;= right:
+        if data[i] &lt;= data[j]:
+            merged.append(data[i])
+            i += 1
+        else:
+            merged.append(data[j])
+            j += 1
+    while i &lt;= mid:                         # 左半還有剩：整段接上去
+        merged.append(data[i])
+        i += 1
+    while j &lt;= right:                       # 右半還有剩：整段接上去
+        merged.append(data[j])
+        j += 1
+    for t in range(len(merged)):            # 把合好的結果放回原本的位置
+        data[left + t] = merged[t]
+
+
+data = [38, 27, 43, 3, 9, 82, 10]
+merge_sort(data, 0, len(data) - 1)
+print(*data)</pre><p class="cr-out mono">輸出：3 9 10 27 38 43 82</p></div><p>逆序數對：一排數字裡，有幾對是大的排在小的前面。兩層迴圈要 O(n²)；照合併排序切兩半，左半、右半各自數完，合併的時候每從右半拿一個數，左半還沒拿的那些都比它大，一次加上去，O(n log n)。 <a class="cr-link cr-see" href="../ds/sorting.html" target="_blank" rel="noopener">→ 排序</a></p></section></article></div></div></div>
 </main>
 <footer class="seo-foot"><nav aria-label="IT24hr 的其他內容"><a href="../../index.html">玩 IT24hr</a><a href="../../se.html">認識軟體工程</a><a href="../../csie/index.html">CSIE 課程</a><a href="../../handbook.html">新人手冊</a><a href="../../atlas.html">IT 圖鑑</a></nav></footer>
 <script src="../../vendor/rough.js"></script>
