@@ -160,7 +160,7 @@ printf(&quot;%s %d\n&quot;, cls[0].name, cls[0].score);</pre><ol class="cr-try-o
 <section class="cr-sec"><h4>總結</h4><p class="cr-hook">把姓名、學號、電話、成績包成一個 Student，全班就是一個 Student 的陣列：排序時整筆一起搬，5 號同學的電話不會再跑到 12 號那裡。下次碰到幾個值總是一起出現，你就知道：替它們做一個自己的資料型態，讓它們待在一起。</p></section>
 <section class="cr-sec"><h4>課外補充</h4><p>C 的 typedef：寫成 typedef struct { char name[10]; int score; } Student; 之後，宣告就能省掉 struct，直接寫 Student a;，跟 C++ 一樣。</p><p>C++ 的 struct 也能放函式，跟 class 幾乎一樣，差別只在沒寫 public、private 的時候：struct 的成員預設是 public，class 預設是 private。</p><p>Python 的 @dataclass(order=True) 會照欄位的順序幫你寫好比大小，Student 的串列就能直接 sorted(cls)：先比 name，name 一樣再比 score。想照成績排，寫 sorted(cls, key=lambda s: s.score) 比較清楚。</p></section></article></div></div></div>
 </main>
-<footer class="seo-foot"><nav aria-label="IT24hr 的其他內容"><a href="../../index.html">玩 IT24hr</a><a href="../../se.html">認識軟體工程</a><a href="../../csie/index.html">CSIE 課程</a><a href="../../handbook.html">新人手冊</a><a href="../../atlas.html">IT 圖鑑</a></nav></footer>
+<footer class="seo-foot"><nav aria-label="IT24hr 的其他內容"><a href="../../index.html">玩 IT24hr</a><a href="../../se.html">認識軟體工程</a><a href="../../csie/index.html">CSIE 課程</a><a href="../../handbook.html">新人手冊</a><a href="../../atlas.html">IT 圖鑑</a><a href="../../team.html">開發團隊</a></nav></footer>
 <script src="../../vendor/rough.js"></script>
 <script src="../../icons.js"></script>
 <script src="../../verdict.js"></script>

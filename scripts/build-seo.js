@@ -1,6 +1,6 @@
 // scripts/build-seo.js — 產生給搜尋引擎讀的靜態頁：每頁一個真網址、內文預先寫進 HTML（JS 載入後再換成互動版）
 // 用法：node scripts/build-seo.js（寫檔）／node scripts/build-seo.js --check（只比對，跟 repo 裡的不一樣就列出來、exit 1）
-// 產生：se.html（認識軟體工程）、handbook.html（新人手冊）、atlas.html（IT 圖鑑）、CSIE 課程各頁（classroom-static.js 提供）、sitemap.xml
+// 產生：se.html（認識軟體工程）、handbook.html（新人手冊）、atlas.html（IT 圖鑑）、team.html（開發團隊）、CSIE 課程各頁（classroom-static.js 提供）、sitemap.xml
 const fs = require('fs');
 const path = require('path');
 
@@ -32,6 +32,7 @@ function blocks(list = []) {
       case 'field': return `<p><strong>${inline(b.label)}</strong>：${inline(b.text)}</p>`;
       case 'code': return `<pre><code>${esc(b.text)}</code></pre>`;
       case 'list': return `<ul>${b.items.map(i => `<li>${inline(i)}</li>`).join('')}</ul>`;
+      case 'steps': return `<ol>${b.items.map(i => `<li>${inline(i)}</li>`).join('')}</ol>`;
       case 'table': return `<table><thead><tr>${b.head.map(c => `<th>${inline(c)}</th>`).join('')}</tr></thead>`
         + `<tbody>${b.rows.map(r => `<tr>${r.map(c => `<td>${inline(c)}</td>`).join('')}</tr>`).join('')}</tbody></table>`;
       default: throw new Error(`不認得的區塊：${b.t}`);
@@ -68,7 +69,7 @@ function head({ file, title, description, type = 'website', jsonld }) {
 }
 
 // 每頁底部互相連結（搜尋引擎靠站內連結找頁面）
-const FOOT_LINKS = [['index.html', '玩 IT24hr'], ['se.html', '認識軟體工程'], ['csie/index.html', 'CSIE 課程'], ['handbook.html', '新人手冊'], ['atlas.html', 'IT 圖鑑']];
+const FOOT_LINKS = [['index.html', '玩 IT24hr'], ['se.html', '認識軟體工程'], ['csie/index.html', 'CSIE 課程'], ['handbook.html', '新人手冊'], ['atlas.html', 'IT 圖鑑'], ['team.html', '開發團隊']];
 
 // 整頁：頂端列（回首頁、頁名、開始玩）、預先寫好的內文、頁面要載的 JS
 function page({ file, heading, main, mainId, mainClass = 'csie-main', scripts = [], ...meta }) {
@@ -156,6 +157,22 @@ function atlasPage() {
   };
 }
 
+// ── 開發團隊：誰做的、怎麼做的 ──
+function teamPage() {
+  const T = require(path.join(root, 'team-content.js'));
+  const main = [
+    blocks(T.intro),
+    ...T.sections.map(s => `<section id="${s.id}">\n<h2>${inline(s.title)}</h2>\n${blocks(s.blocks)}\n</section>`),
+  ].join('\n');
+  return {
+    file: 'team.html', heading: '開發團隊', mainClass: 'csie-main se-page', main,
+    title: '開發團隊：一個人類和 AI 怎麼一起做遊戲｜IT24hr', type: 'article',
+    description: 'IT24hr 是人類和 AI 一起開發的。人類這邊講開發流程，AI 這邊講它會忘記、會自己補設定，以及我們怎麼處理；最後是給想試試看的人的四個建議。',
+    jsonld: { '@type': 'Article', headline: '開發團隊：一個人類和 AI 怎麼一起做遊戲', inLanguage: 'zh-Hant-TW', dateModified: T.updated, author: AUTHORS, image: OG_IMAGE,
+      isPartOf: { '@type': 'WebSite', name: 'IT24hr', url: SITE } },
+  };
+}
+
 // ── CSIE 課程：classroom-static.js 提供 [{ path, title, description, html, heading?, scripts?, jsonld? }]，還沒有就先不產 ──
 function classroomPages() {
   const file = path.join(root, 'classroom-static.js');
@@ -171,7 +188,7 @@ function classroomPages() {
 const HAND_WRITTEN = ['index.html'];
 
 function build() {
-  const pages = [sePage(), handbookPage(), atlasPage(), ...classroomPages()];
+  const pages = [sePage(), handbookPage(), atlasPage(), teamPage(), ...classroomPages()];
   const out = new Map(pages.map(p => [p.file, page(p)]));
   const urls = [...HAND_WRITTEN, ...pages.map(p => p.file)].map(f => SITE + (f === 'index.html' ? '' : f));
   out.set('sitemap.xml', `<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n${urls.map(u => `  <url><loc>${u}</loc></url>`).join('\n')}\n</urlset>\n`);

@@ -75,6 +75,7 @@
           <p class="credit side-foot">
             <a class="foot-link" href="${C.REPO_URL}" target="_blank" rel="noopener" title="在 GitHub 查看原始碼">${Icons.html('github', 'ico-sm')}GitHub</a>
             <a class="foot-link" href="${C.DONATE_URL}" target="_blank" rel="noopener">${Icons.html('heart', 'ico-sm')}Donate</a>
+            <a class="foot-link" href="team.html" target="_blank" rel="noopener">${Icons.html('users', 'ico-sm')}開發團隊</a>
           </p>
         </aside>
         </div>

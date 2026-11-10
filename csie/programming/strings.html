@@ -128,7 +128,7 @@ printf(&quot;%d\n&quot;, d);</pre><ol class="cr-try-opts"><li>把減掉的 7 改
 <section class="cr-sec"><h4>總結</h4><p class="cr-hook">長度用 len 看，第一個字是 name[0]；字母存的是數字，所以 'a' &lt;= first &lt;= 'z' 就能判斷是不是小寫字母。下次看到註冊頁面跳出「帳號格式不對」，你就知道：那是一支程式在數字串的長度、一個字一個字檢查。</p></section>
 <section class="cr-sec"><h4>課外補充</h4><p>中文一個字不是一個 byte：UTF-8 把一個中文字存成 3 個 byte，所以 C 的 strlen(&quot;你好&quot;) 是 6，不是 2。Python 的 len(&quot;你好&quot;) 和 Java 的 &quot;你好&quot;.length() 算的是字，都是 2。題目有中文輸入時，想清楚要數的是字還是 byte。</p><p>Python 沒有字元型態，所以用 ord(c) 把一個字變成數字、chr(97) 把數字變回字。C、C++、Java 的字元本來就是數字，直接運算就好；要印成數字就轉型 (int) c，要印成字就轉回 (char) 97。</p></section></article></div></div></div>
 </main>
-<footer class="seo-foot"><nav aria-label="IT24hr 的其他內容"><a href="../../index.html">玩 IT24hr</a><a href="../../se.html">認識軟體工程</a><a href="../../csie/index.html">CSIE 課程</a><a href="../../handbook.html">新人手冊</a><a href="../../atlas.html">IT 圖鑑</a></nav></footer>
+<footer class="seo-foot"><nav aria-label="IT24hr 的其他內容"><a href="../../index.html">玩 IT24hr</a><a href="../../se.html">認識軟體工程</a><a href="../../csie/index.html">CSIE 課程</a><a href="../../handbook.html">新人手冊</a><a href="../../atlas.html">IT 圖鑑</a><a href="../../team.html">開發團隊</a></nav></footer>
 <script src="../../vendor/rough.js"></script>
 <script src="../../icons.js"></script>
 <script src="../../verdict.js"></script>

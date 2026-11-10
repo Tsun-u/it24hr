@@ -207,7 +207,7 @@ printf(&quot;%d %d %d\n&quot;, n, arr[0], arr[1]);</pre><ol class="cr-try-opts">
 <section class="cr-sec"><h4>總結</h4><p class="cr-hook">整數這種值，交給函式時寄的是附件，函式怎麼改都不影響你；陣列、串列、物件寄的是連結，函式照著連結改，你這邊也看得到。C 想讓函式改到整數，就自己把地址寄過去（指標）；C++ 可以直接讓函式拿到本人（參考）。下次碰到函式改了東西外面卻沒變，或是不想變卻變了，你就知道：先問它拿到的是附件還是連結。</p></section>
 <section class="cr-sec"><h4>課外補充</h4><p>想把陣列交給函式改，又不想動到原本那一份：先複製一份再交出去。Python 寫 f(list(arr))、Java 寫 f(arr.clone())；C++ 的參數不寫 &amp;，vector 本來就會複製一份；C 的陣列沒有內建的複製，要自己用迴圈一格一格抄到另一個陣列。</p></section></article></div></div></div>
 </main>
-<footer class="seo-foot"><nav aria-label="IT24hr 的其他內容"><a href="../../index.html">玩 IT24hr</a><a href="../../se.html">認識軟體工程</a><a href="../../csie/index.html">CSIE 課程</a><a href="../../handbook.html">新人手冊</a><a href="../../atlas.html">IT 圖鑑</a></nav></footer>
+<footer class="seo-foot"><nav aria-label="IT24hr 的其他內容"><a href="../../index.html">玩 IT24hr</a><a href="../../se.html">認識軟體工程</a><a href="../../csie/index.html">CSIE 課程</a><a href="../../handbook.html">新人手冊</a><a href="../../atlas.html">IT 圖鑑</a><a href="../../team.html">開發團隊</a></nav></footer>
 <script src="../../vendor/rough.js"></script>
 <script src="../../icons.js"></script>
 <script src="../../verdict.js"></script>

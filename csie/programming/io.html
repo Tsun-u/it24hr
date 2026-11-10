@@ -144,7 +144,7 @@ for line in sys.stdin:           # 一次拿一行，讀到輸入結束就停
 print(total, count)</pre><p class="cr-tr-label">輸入</p><pre class="cr-tr-stdin">3 8 5
 10</pre><p class="cr-out mono">輸出：26 4</p></div><p>測資很大（幾十萬個數）時，光是讀輸入就會變慢：Python 用 sys.stdin.readline() 代替 input() 快很多（讀到的字串尾巴多一個換行，int() 會自己忽略）；C++ 在 main 的開頭加 std::ios::sync_with_stdio(false); 和 std::cin.tie(nullptr);，cin 會快很多；Java 的 Scanner 也偏慢，可以改用 BufferedReader 一次讀一整行再自己切。C 的 scanf 本來就夠快。</p></section></article></div></div></div>
 </main>
-<footer class="seo-foot"><nav aria-label="IT24hr 的其他內容"><a href="../../index.html">玩 IT24hr</a><a href="../../se.html">認識軟體工程</a><a href="../../csie/index.html">CSIE 課程</a><a href="../../handbook.html">新人手冊</a><a href="../../atlas.html">IT 圖鑑</a></nav></footer>
+<footer class="seo-foot"><nav aria-label="IT24hr 的其他內容"><a href="../../index.html">玩 IT24hr</a><a href="../../se.html">認識軟體工程</a><a href="../../csie/index.html">CSIE 課程</a><a href="../../handbook.html">新人手冊</a><a href="../../atlas.html">IT 圖鑑</a><a href="../../team.html">開發團隊</a></nav></footer>
 <script src="../../vendor/rough.js"></script>
 <script src="../../icons.js"></script>
 <script src="../../verdict.js"></script>

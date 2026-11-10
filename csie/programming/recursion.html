@@ -163,7 +163,7 @@ printf(&quot;%d\n&quot;, calls);</pre><ol class="cr-try-opts"><li>15</li><li>5</
 <section class="cr-sec"><h4>總結</h4><p class="cr-hook">notify(k) 做兩件事：通知 k 號，再 notify(k + 1)；k 是最後一號時不再往下打。下次碰到一件事可以拆成「做自己這份，剩下的交給下一個」，你就知道：這就是遞迴，記得寫停下來的條件。</p></section>
 <section class="cr-sec"><h4>課外補充</h4><p>記住算過的答案（記憶化，memoization）：開一個陣列 memo，算出 fib(k) 就記在 memo[k]，下次要用先查表，查得到就直接拿。每個 fib(k) 只真的算一次，fib(30) 從呼叫兩百多萬次變成 30 次左右，O(n)。</p><p>Python 預設最多疊大約 1000 層，超過就報 RecursionError。可以用 import sys 再寫 sys.setrecursionlimit(10000) 調高上限，可是層數太深，底下的程式還是會把堆疊用完、整個當掉；遞迴要疊很深的時候，改寫成迴圈比較穩。</p></section></article></div></div></div>
 </main>
-<footer class="seo-foot"><nav aria-label="IT24hr 的其他內容"><a href="../../index.html">玩 IT24hr</a><a href="../../se.html">認識軟體工程</a><a href="../../csie/index.html">CSIE 課程</a><a href="../../handbook.html">新人手冊</a><a href="../../atlas.html">IT 圖鑑</a></nav></footer>
+<footer class="seo-foot"><nav aria-label="IT24hr 的其他內容"><a href="../../index.html">玩 IT24hr</a><a href="../../se.html">認識軟體工程</a><a href="../../csie/index.html">CSIE 課程</a><a href="../../handbook.html">新人手冊</a><a href="../../atlas.html">IT 圖鑑</a><a href="../../team.html">開發團隊</a></nav></footer>
 <script src="../../vendor/rough.js"></script>
 <script src="../../icons.js"></script>
 <script src="../../verdict.js"></script>

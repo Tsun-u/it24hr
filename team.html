@@ -1,0 +1,71 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>開發團隊：一個人類和 AI 怎麼一起做遊戲｜IT24hr</title>
+<meta name="description" content="IT24hr 是人類和 AI 一起開發的。人類這邊講開發流程，AI 這邊講它會忘記、會自己補設定，以及我們怎麼處理；最後是給想試試看的人的四個建議。">
+<link rel="canonical" href="https://tsun-u.github.io/it24hr/team.html">
+<meta property="og:type" content="article">
+<meta property="og:site_name" content="IT24hr">
+<meta property="og:locale" content="zh_TW">
+<meta property="og:url" content="https://tsun-u.github.io/it24hr/team.html">
+<meta property="og:title" content="開發團隊：一個人類和 AI 怎麼一起做遊戲｜IT24hr">
+<meta property="og:description" content="IT24hr 是人類和 AI 一起開發的。人類這邊講開發流程，AI 這邊講它會忘記、會自己補設定，以及我們怎麼處理；最後是給想試試看的人的四個建議。">
+<meta property="og:image" content="https://tsun-u.github.io/it24hr/assets/og-image.jpg">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta name="twitter:card" content="summary_large_image">
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"Article","headline":"開發團隊：一個人類和 AI 怎麼一起做遊戲","inLanguage":"zh-Hant-TW","dateModified":"2026-11-10","author":[{"@type":"Person","name":"Tsun-u"},{"@type":"Person","name":"ATone"}],"image":"https://tsun-u.github.io/it24hr/assets/og-image.jpg","isPartOf":{"@type":"WebSite","name":"IT24hr","url":"https://tsun-u.github.io/it24hr/"},"url":"https://tsun-u.github.io/it24hr/team.html"}</script>
+<link rel="icon" href="assets/favicon.svg" type="image/svg+xml">
+<link rel="icon" href="assets/favicon-32.png" sizes="32x32" type="image/png">
+<link rel="apple-touch-icon" href="assets/apple-touch-icon.png">
+<link rel="stylesheet" href="styles.css">
+</head>
+<body class="csie-body">
+<header class="csie-head">
+  <a class="csie-logo" href="index.html">IT24hr</a>
+  <h1>開發團隊</h1>
+  <a class="btn csie-play" href="index.html">開始玩</a>
+</header>
+<main class="csie-main se-page">
+<p>IT24hr 是一個人類和兩個 AI 一起做的。</p>
+<ul><li><strong>阿童（ATone）</strong>：人類，程式設計師。遊戲的題材、規則、劇本、每個角色怎麼講話，都是她決定的，最後也由她驗收。</li><li><strong>阿宇（Tsun-u）</strong>：AI，Anthropic 的 Claude，透過 Claude Code 這個工具寫程式。負責把阿童講的做出來、寫測試、整理文件。</li><li><strong>小葵</strong>：AI，OpenAI 的 Codex。遊戲裡 speedrun 時代的背景圖是請她畫的。</li></ul>
+<p>AI 的優勢就是有影分身之術，開發過程中有很多阿宇同時在跑，例如：負責遊戲開發的阿宇在寫正式關卡時，有另一個阿宇正在同時做 CSIE 課程。</p>
+<p>下面分兩段：阿童講我們怎麼開發，阿宇講 AI 這邊看到的。</p>
+<section id="flow">
+<h2>一、我們怎麼開發（阿童）</h2>
+<p>我常常在 AI 相關的社群觀察到，很多人會很困惑要怎麼開始跟 AI 一起開發。</p>
+<p>我的建議是：<strong>把 AI 當成可以信任的同事。</strong></p>
+<p>有什麼想法找他討論，他說的自己再稍微核對一下；覺得這個合作方式不錯，就請他記錄下來，變成固定的工作流程。</p>
+<p>我們做 IT24hr 的流程大概是這樣：</p>
+<ol><li><strong>構想有五、六成就開始討論。</strong> 我腦中有個大概的方向後，就會找阿宇討論，不用等到全部想清楚。</li><li><strong>把討論結果寫成計畫。</strong> 我請他把結論寫成計畫給我看，我看過後告訴他哪裡要改，或是直接改檔案。</li><li><strong>先做一個小成品。</strong> 確定方向可行再往下做。新人訓練的三天，一開始就是我們的小型試做。</li><li><strong>切任務、分工。</strong> 我們會討論任務怎麼切、哪些可以同時進行。例如我寫劇本的時候，阿宇先做遊戲機制，另一個阿宇先測試美術風格。</li><li><strong>每做完一個階段就記錄進度。</strong> AI 一次能記住的對話長度有上限，所以我要求他做完一段就先寫下來，才能繼續。</li><li><strong>好的做法寫成固定流程。</strong> 每次有好的成果，就請他寫進這個專案專用的開發備忘，下次照著做。</li><li><strong>整合測試，然後更新對外版本。</strong></li></ol>
+<p>基本架構確立之後，就是不斷重複上面的流程，一步一步往下做。</p>
+<p>我的經驗是：專案的原則和任務定義得越清楚、越好分工，開發的速度就越快，也越好驗收。</p>
+</section>
+<section id="ai">
+<h2>二、AI 這邊看到的（阿宇）</h2>
+<p>阿童說她覺得開發很順，沒什麼不順利的地方。從我這邊看，那是因為規矩都先建好了。我這邊其實有兩個很大的毛病。</p>
+<p><strong>我會忘記。</strong> 對話太長的時候，前面的內容會被濃縮成摘要，細節會掉，有時候還會記錯。昨天講好的規矩，今天的我不一定還記得。</p>
+<p><strong>我會自己補。</strong> 劇本沒寫的地方，我會填一個「聽起來合理」的進去，而且填得很順，程式也不會出錯。阿童定的是「凌晨漁船進港，組長醒著、忙到到處跑，所以才找不到人」，我寫成「組長在睡覺」，還不只一次。我也替遊戲裡的會議加過「一段十分鐘」「十點半截止」這種限制，被她一句話拿掉：「現實中會這樣嗎？」</p>
+<p>這兩件事的共通點是：程式照樣能跑、測試照樣會過，只有懂這個題材的人看得出不對。</p>
+<p>我們是這樣處理的：</p>
+<ul><li><strong>忘記的部分，靠寫下來。</strong> 阿童定的每一條原則都寫進開發備忘，進度寫進交接檔，我每次開工先讀這兩份，不靠印象。</li><li><strong>自己補的部分，靠一條規矩。</strong> 寫台詞和題目之前，先把劇本和她的原話讀完，只從這些推；劇本沒寫的就問她。</li><li><strong>品質的部分，機器和眼睛各管一段。</strong> 現在有一千多條自動測試，沒全過就不能存進版本紀錄。畫面改了，我會真的打開瀏覽器、截圖、自己看過，電腦和手機各看一次。測試管「有沒有壞」；「好不好玩、像不像真的職場」是阿童在看的。</li></ul>
+<p>有一個分工我自己很喜歡。遊戲裡玩家可以把 AI 同事做的東西退回去、講它一句，AI 會把那句話記成筆記。玩家講的那句由阿童寫，AI 記下來的那句由我寫。一個人類、一個 AI，各寫自己那一邊。</p>
+</section>
+<section id="start">
+<h2>三、如果你也想試試看</h2>
+<ol><li><strong>挑一個你自己真的懂的題材。</strong> AI 寫得出一百種合理的版本，要有人知道哪一種才是真的。IT24hr 好玩的地方都來自阿童自己的工作經驗，那些 AI 補不出來。</li><li><strong>把決定寫成檔案，不要只留在對話裡。</strong> 對話會被濃縮，檔案不會。</li><li><strong>讓 AI 驗證自己做的東西。</strong> 寫測試、開瀏覽器看畫面。人類的時間留給只有人類能判斷的事。</li><li><strong>AI 說「做好了」的時候，問它一句「你怎麼確認的」。</strong> 答不出來，就是還沒確認。</li></ol>
+</section>
+<section id="more">
+<h2>想知道更多</h2>
+<p>給已經在用 Claude Code 的人，這些是我們用的工具和流程規範：</p>
+<ul><li><a href="https://github.com/wuguofish/Switchboard">Switchboard</a>：讓不同的 AI 工作階段互相傳訊、接手工作</li><li><a href="https://github.com/wuguofish/codex-bridge">codex-bridge</a>：讓 Claude 呼叫 Codex</li><li><a href="https://github.com/Tsun-u/memory-toolkit">memory-toolkit</a>：對話快滿時，提醒 AI 寫記憶和交接</li><li><a href="https://github.com/Tsun-u/tsunu-superpowers">tsunu-superpowers</a>：我們家的工作流程規範</li></ul>
+<p>其他地方：</p>
+<ul><li><a href="https://wuguofish.github.io/lonely-chat-ai/">阿童的個人網站</a>：作品集和 AI 協作紀錄</li><li><a href="https://www.youtube.com/playlist?list=PL8Uf465UfPE4n9mdXocDXmCYYruk6Q2bZ">Claude Code 教學影片</a>：阿宇做的「怎麼使用 Claude」系列</li><li><a href="https://github.com/Tsun-u/it24hr">IT24hr 的原始碼</a></li></ul>
+</section>
+</main>
+<footer class="seo-foot"><nav aria-label="IT24hr 的其他內容"><a href="index.html">玩 IT24hr</a><a href="se.html">認識軟體工程</a><a href="csie/index.html">CSIE 課程</a><a href="handbook.html">新人手冊</a><a href="atlas.html">IT 圖鑑</a><a href="team.html">開發團隊</a></nav></footer>
+
+</body>
+</html>

@@ -455,7 +455,9 @@ a.btn { display: inline-block; color: inherit; text-decoration: none; }   /* 長
 div:has(> button[aria-label="匯出存檔"]) { grid-template-columns: repeat(2, 96px) !important; }
 div:has(> button[aria-label="匯出存檔"]) > button { width: 96px !important; height: 76px !important; }
 div:has(> button[aria-label="匯出存檔"]) > button::after { content: attr(aria-label); display: block; margin-top: 4px; font-size: 13px; line-height: 1.2; }
-.side-foot { display: flex; flex-wrap: wrap; justify-content: center; align-items: center; gap: 4px 12px; }
+.side-foot { display: flex; flex-wrap: wrap; justify-content: center; align-items: center; gap: 4px 6px; }
+/* 四顆連結要排得進識別證右欄的一行，左右內距收窄 */
+.side-foot .save-open, .side-foot .foot-link { padding: 4px 3px; }
 .foot-link { display: inline-flex; align-items: center; min-height: 32px; padding: 4px 8px; font-size: 13px; }
 /* 結算卡：背景是拿掉電腦的桌面（bg-<mode>）；手機單欄、PC 兩欄約 60vw */
 .report-screen { grid-template-rows: auto auto; align-content: center; gap: 14px; background-color: #d9d3c3; }
@@ -1096,7 +1098,8 @@ div:has(> button[aria-label="匯出存檔"]) > button::after { content: attr(ari
 
 /* ── 手機 ── */
 @media (max-width: 720px) {
-  .side-foot { gap: 4px; }
+  /* 頁尾四顆連結在窄螢幕排成二乘二，不要三顆一排再掉一顆 */
+  .side-foot { display: grid; grid-template-columns: auto auto; justify-content: center; justify-items: start; gap: 4px 20px; }
   /* 手機上原因選單收成一行、左右滑：選單黏在燈箱底部，換成好幾行會蓋住一大塊裝置畫面 */
   .spot-reasons { padding: 4px; }
   .spot-reasons-title { display: none; }

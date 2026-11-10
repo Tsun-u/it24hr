@@ -134,7 +134,7 @@ printf(&quot;%d\n&quot;, ops);</pre><ol class="cr-try-opts"><li>365000</li><li>1
 <section class="cr-sec"><h4>總結</h4><p class="cr-hook">App 不用每次從頭加：它先存好每天「到今天為止」的累計步數，任何一段都是兩個數相減，一年問幾次都只要一次減法。下次碰到同一份資料要一直問某一段的總和，你就知道：先花一次把累計算好存起來，之後每一問都只剩一次減法。</p></section>
 <section class="cr-sec"><h4>課外補充</h4><p>二維前綴和：試算表、照片這種格子資料，pre[i][j] 存左上角到第 i 列第 j 行這一塊的總和。任何一塊長方形的總和，用四個數加加減減就算完：右下角那格，減掉上面那塊、減掉左邊那塊，再把左上角被扣了兩次的那塊加回來。用途裡的積分影像就是它。</p><p>差分陣列（difference array）：前綴和反過來用。要把一整段日子都加上同一個數（第 3 到第 5 天每天多 2 千步），不用一天一天改，只在第 3 天記 +2、第 6 天記 −2，最後對這些記號做一次前綴和，每一天該加多少就都出來了。適合「改很多次、最後才看結果」的題目。</p></section></article></div></div></div>
 </main>
-<footer class="seo-foot"><nav aria-label="IT24hr 的其他內容"><a href="../../index.html">玩 IT24hr</a><a href="../../se.html">認識軟體工程</a><a href="../../csie/index.html">CSIE 課程</a><a href="../../handbook.html">新人手冊</a><a href="../../atlas.html">IT 圖鑑</a></nav></footer>
+<footer class="seo-foot"><nav aria-label="IT24hr 的其他內容"><a href="../../index.html">玩 IT24hr</a><a href="../../se.html">認識軟體工程</a><a href="../../csie/index.html">CSIE 課程</a><a href="../../handbook.html">新人手冊</a><a href="../../atlas.html">IT 圖鑑</a><a href="../../team.html">開發團隊</a></nav></footer>
 <script src="../../vendor/rough.js"></script>
 <script src="../../icons.js"></script>
 <script src="../../verdict.js"></script>

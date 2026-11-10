@@ -199,7 +199,7 @@ printf(&quot;%d\n&quot;, steps);</pre><ol class="cr-try-opts"><li>1000000</li><l
 <section class="cr-sec"><h4>總結</h4><p class="cr-hook">每條最長 160 公分。不用從 1 公分試到 161 公分：猜中間的長度，剪得出 12 條就往長的猜，剪不出就往短的猜，750 公分的範圍猜 10 次就夠。下次碰到「最多可以多少」「最少要多少」的問題，可以先問自己兩件事：猜一個答案，檢查它行不行容不容易？是不是小的都行、大到某個地方之後都不行？兩個都是，就對答案二分。</p></section>
 <section class="cr-sec"><h4>課外補充</h4><p>答案是小數也可以二分。沒有 sqrt 的時候算 2 的平方根：lo = 0、hi = 2，每次猜 mid = (lo + hi) / 2，mid × mid 超過 2 就 hi = mid，不然 lo = mid。小數沒有「下一個數」，所以不用加 1、減 1；lo 和 hi 也很難剛好相等，所以不用 lo &lt; hi 當條件，改成固定猜 100 次，或猜到兩邊差距小於要的精確度就停。每猜一次範圍剩一半：猜 20 次，lo 和 hi 的差距不到 0.00001，兩邊都是 1.41421 開頭。 </p></section></article></div></div></div>
 </main>
-<footer class="seo-foot"><nav aria-label="IT24hr 的其他內容"><a href="../../index.html">玩 IT24hr</a><a href="../../se.html">認識軟體工程</a><a href="../../csie/index.html">CSIE 課程</a><a href="../../handbook.html">新人手冊</a><a href="../../atlas.html">IT 圖鑑</a></nav></footer>
+<footer class="seo-foot"><nav aria-label="IT24hr 的其他內容"><a href="../../index.html">玩 IT24hr</a><a href="../../se.html">認識軟體工程</a><a href="../../csie/index.html">CSIE 課程</a><a href="../../handbook.html">新人手冊</a><a href="../../atlas.html">IT 圖鑑</a><a href="../../team.html">開發團隊</a></nav></footer>
 <script src="../../vendor/rough.js"></script>
 <script src="../../icons.js"></script>
 <script src="../../verdict.js"></script>
