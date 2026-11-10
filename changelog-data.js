@@ -2,6 +2,11 @@
 (function (root) {
   const CHANGELOG = [
   {
+    "hash": "6d1fa1b",
+    "date": "2026-11-10",
+    "subject": "新增開發團隊頁，首頁與認識軟體工程各加一個入口"
+  },
+  {
     "hash": "42e72bd",
     "date": "2026-11-10",
     "subject": "分治法的課外補充加上遞迴版的合併排序"
