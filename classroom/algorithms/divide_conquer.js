@@ -713,7 +713,7 @@ print(*data)
           output: '3 9 10 27 38 43 82',
         },
       },
-      { text: '逆序數對：一排數字裡，有幾對是大的排在小的前面。兩層迴圈要 O(n²)；照合併排序切兩半，左半、右半各自數完，合併的時候每從右半拿一個數，左半還沒拿的那些都比它大，一次加上去，O(n log n)。', see: 'ds/sorting' },
+      { text: '逆序數對：一排數字裡，有幾對是大的排在小的前面。兩層迴圈要 O(n²)；照合併排序切兩半，左半、右半各自數完，合併的時候每從右半拿一個數，左半還沒拿的那些都比它大，一次加上去，O(n log n)。', see: ['inversions', 'ds/sorting'] },
     ],
   };
   if (typeof module !== 'undefined') module.exports = page; else root.Classroom.add('algorithms', 'divide_conquer', page);

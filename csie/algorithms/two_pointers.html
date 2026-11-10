@@ -169,7 +169,7 @@ while (left &lt; right) {
 }
 printf(&quot;%d\n&quot;, steps);</pre><ol class="cr-try-opts"><li>499500</li><li>999</li><li>1000000</li><li>500</li></ol></div></section>
 <section class="cr-sec"><h4>總結</h4><p class="cr-hook">不用試 1225 對：一根手指放最便宜、一根放最貴，加起來太多就把貴的換便宜一點，不夠就把便宜的換貴一點，每看一次就排除一整排，50 樣最多看 49 次就知道有沒有。下次碰到「排好序的資料裡找一對」，你就知道：兩頭各放一根手指往中間收，不用每一對都試。</p></section>
-<section class="cr-sec"><h4>課外補充</h4><p>滑動視窗（sliding window）：兩根手指往同一個方向走。例如每天的步數記在陣列裡，問「連續幾天加起來至少 2 萬步，最少要幾天」：右手指一天一天往右，把那天加進總和；總和夠了，就把左手指往右收，看能不能更短。每一天最多被加進來一次、減出去一次，所以也是 O(n)。能這樣收的前提是步數不會是負的，收掉一天總和一定變少。 <a class="cr-link cr-see" href="prefix_sum.html" target="_blank" rel="noopener">→ 前綴和</a></p></section></article></div></div></div>
+<section class="cr-sec"><h4>課外補充</h4><p>滑動視窗（sliding window）：兩根手指往同一個方向走。例如每天的步數記在陣列裡，問「連續幾天加起來至少 2 萬步，最少要幾天」：右手指一天一天往右，把那天加進總和；總和夠了，就把左手指往右收，看能不能更短。每一天最多被加進來一次、減出去一次，所以也是 O(n)。能這樣收的前提是步數不會是負的，收掉一天總和一定變少。 <a class="cr-link cr-see" href="sliding_window.html" target="_blank" rel="noopener">→ 滑動視窗</a><a class="cr-link cr-see" href="prefix_sum.html" target="_blank" rel="noopener">→ 前綴和</a></p></section></article></div></div></div>
 </main>
 <footer class="seo-foot"><nav aria-label="IT24hr 的其他內容"><a href="../../index.html">玩 IT24hr</a><a href="../../se.html">認識軟體工程</a><a href="../../csie/index.html">CSIE 課程</a><a href="../../handbook.html">新人手冊</a><a href="../../atlas.html">IT 圖鑑</a><a href="../../team.html">開發團隊</a></nav></footer>
 <script src="../../vendor/rough.js"></script>

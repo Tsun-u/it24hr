@@ -543,7 +543,7 @@ print(steps)`,
     ],
     // 課外補充：考試範圍外、知道了更順手的延伸
     extra: [
-      { text: '滑動視窗（sliding window）：兩根手指往同一個方向走。例如每天的步數記在陣列裡，問「連續幾天加起來至少 2 萬步，最少要幾天」：右手指一天一天往右，把那天加進總和；總和夠了，就把左手指往右收，看能不能更短。每一天最多被加進來一次、減出去一次，所以也是 O(n)。能這樣收的前提是步數不會是負的，收掉一天總和一定變少。', see: 'algorithms/prefix_sum' },
+      { text: '滑動視窗（sliding window）：兩根手指往同一個方向走。例如每天的步數記在陣列裡，問「連續幾天加起來至少 2 萬步，最少要幾天」：右手指一天一天往右，把那天加進總和；總和夠了，就把左手指往右收，看能不能更短。每一天最多被加進來一次、減出去一次，所以也是 O(n)。能這樣收的前提是步數不會是負的，收掉一天總和一定變少。', see: ['sliding_window', 'prefix_sum'] },
     ],
   };
   if (typeof module !== 'undefined') module.exports = page; else root.Classroom.add('algorithms', 'two_pointers', page);
